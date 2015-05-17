@@ -1,0 +1,369 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{82B962E5-3DE3-4933-8B0F-CDA03FAADCB2}</ProjectGuid>
+    <RootNamespace>fmtconv</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'" Label="Configuration">
+    <PlatformToolset>v120_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64'" Label="Configuration">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <LinkIncremental>false</LinkIncremental>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir>$(SolutionDir)$(Configuration)$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)$(Platform)\</IntDir>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;FMTCONV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <ShowProgress>NotSet</ShowProgress>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;FMTCONV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;FMTCONV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SDLCheck>true</SDLCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;FMTCONV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="fmtcl\BitBltConv.h" />
+    <ClInclude Include="fmtcl\ChromaPlacement.h" />
+    <ClInclude Include="fmtcl\ColorSpaceH265.h" />
+    <ClInclude Include="fmtcl\ContFirBlackman.h" />
+    <ClInclude Include="fmtcl\ContFirBlackmanMinLobe.h" />
+    <ClInclude Include="fmtcl\ContFirCubic.h" />
+    <ClInclude Include="fmtcl\ContFirFromDiscrete.h" />
+    <ClInclude Include="fmtcl\ContFirGauss.h" />
+    <ClInclude Include="fmtcl\ContFirInterface.h" />
+    <ClInclude Include="fmtcl\ContFirLanczos.h" />
+    <ClInclude Include="fmtcl\ContFirLinear.h" />
+    <ClInclude Include="fmtcl\ContFirRect.h" />
+    <ClInclude Include="fmtcl\ContFirSinc.h" />
+    <ClInclude Include="fmtcl\ContFirSnh.h" />
+    <ClInclude Include="fmtcl\ContFirSpline.h" />
+    <ClInclude Include="fmtcl\ContFirSpline16.h" />
+    <ClInclude Include="fmtcl\ContFirSpline36.h" />
+    <ClInclude Include="fmtcl\ContFirSpline64.h" />
+    <ClInclude Include="fmtcl\DiscreteFirCustom.h" />
+    <ClInclude Include="fmtcl\DiscreteFirInterface.h" />
+    <ClInclude Include="fmtcl\ErrDifBuf.h" />
+    <ClInclude Include="fmtcl\ErrDifBuf.hpp" />
+    <ClInclude Include="fmtcl\ErrDifBufFactory.h" />
+    <ClInclude Include="fmtcl\FilterResize.h" />
+    <ClInclude Include="fmtcl\KernelData.h" />
+    <ClInclude Include="fmtcl\Proxy.h" />
+    <ClInclude Include="fmtcl\Proxy.hpp" />
+    <ClInclude Include="fmtcl\ProxyRwAvx2.h" />
+    <ClInclude Include="fmtcl\ProxyRwAvx2.hpp" />
+    <ClInclude Include="fmtcl\ProxyRwCpp.h" />
+    <ClInclude Include="fmtcl\ProxyRwCpp.hpp" />
+    <ClInclude Include="fmtcl\ProxyRwSse2.h" />
+    <ClInclude Include="fmtcl\ProxyRwSse2.hpp" />
+    <ClInclude Include="fmtcl\ResampleSpecPlane.h" />
+    <ClInclude Include="fmtcl\ResizeData.h" />
+    <ClInclude Include="fmtcl\ResizeData.hpp" />
+    <ClInclude Include="fmtcl\ResizeDataFactory.h" />
+    <ClInclude Include="fmtcl\Scaler.h" />
+    <ClInclude Include="fmtcl\CoefArrInt.h" />
+    <ClInclude Include="fmtcl\CoefArrInt.hpp" />
+    <ClInclude Include="fmtcl\ScalerCopy.h" />
+    <ClInclude Include="fmtcl\SplFmt.h" />
+    <ClInclude Include="fmtcl\SplFmt.hpp" />
+    <ClInclude Include="fmtcl\TransCurve.h" />
+    <ClInclude Include="fmtc\ArrayAlign.h" />
+    <ClInclude Include="fmtc\ArrayAlign.hpp" />
+    <ClInclude Include="fmtc\Bitdepth.h" />
+    <ClInclude Include="fmtc\Convert.h" />
+    <ClInclude Include="fmtc\ConvStep.h" />
+    <ClInclude Include="fmtc\Matrix.h" />
+    <ClInclude Include="fmtc\Matrix2020CL.h" />
+    <ClInclude Include="fmtc\NativeToStack16.h" />
+    <ClInclude Include="fmtc\Resample.h" />
+    <ClInclude Include="fmtc\SplFmtUtl.h" />
+    <ClInclude Include="fmtc\SplFmtUtl.hpp" />
+    <ClInclude Include="fmtc\Stack16ToNative.h" />
+    <ClInclude Include="fmtc\Transfer.h" />
+    <ClInclude Include="fmtc\Transfer.hpp" />
+    <ClInclude Include="fmtc\version.h" />
+    <ClInclude Include="fstb\CpuId.h" />
+    <ClInclude Include="fstb\ToolsAvx2.h" />
+    <ClInclude Include="fstb\ToolsAvx2.hpp" />
+    <ClInclude Include="vsutl\CpuOpt.h" />
+    <ClInclude Include="vsutl\FilterBase.h" />
+    <ClInclude Include="vsutl\fnc.h" />
+    <ClInclude Include="vsutl\FrameRefSPtr.h" />
+    <ClInclude Include="vsutl\NodeRefSPtr.h" />
+    <ClInclude Include="vsutl\ObjRefSPtr.h" />
+    <ClInclude Include="vsutl\ObjRefSPtr.hpp" />
+    <ClInclude Include="vsutl\PlaneProcCbInterface.h" />
+    <ClInclude Include="vsutl\PlaneProcessor.h" />
+    <ClInclude Include="vsutl\PlaneProcMode.h" />
+    <ClInclude Include="vsutl\Redirect.h" />
+    <ClInclude Include="vsutl\Redirect.hpp" />
+    <ClInclude Include="conc\AioAdd.h" />
+    <ClInclude Include="conc\AioAdd.hpp" />
+    <ClInclude Include="conc\AioMax.h" />
+    <ClInclude Include="conc\AioMax.hpp" />
+    <ClInclude Include="conc\AioSub.h" />
+    <ClInclude Include="conc\AioSub.hpp" />
+    <ClInclude Include="conc\Array.h" />
+    <ClInclude Include="conc\Array.hpp" />
+    <ClInclude Include="conc\AtomicInt.h" />
+    <ClInclude Include="conc\AtomicInt.hpp" />
+    <ClInclude Include="conc\AtomicIntOp.h" />
+    <ClInclude Include="conc\AtomicIntOp.hpp" />
+    <ClInclude Include="conc\AtomicMem.h" />
+    <ClInclude Include="conc\AtomicMem.hpp" />
+    <ClInclude Include="conc\AtomicPtr.h" />
+    <ClInclude Include="conc\AtomicPtr.hpp" />
+    <ClInclude Include="conc\AtomicPtrIntPair.h" />
+    <ClInclude Include="conc\AtomicPtrIntPair.hpp" />
+    <ClInclude Include="conc\CellPool.h" />
+    <ClInclude Include="conc\CellPool.hpp" />
+    <ClInclude Include="conc\def.h" />
+    <ClInclude Include="conc\fnc.h" />
+    <ClInclude Include="conc\fnc.hpp" />
+    <ClInclude Include="conc\Interlocked.h" />
+    <ClInclude Include="conc\Interlocked.hpp" />
+    <ClInclude Include="conc\LockFreeCell.h" />
+    <ClInclude Include="conc\LockFreeQueue.h" />
+    <ClInclude Include="conc\LockFreeQueue.hpp" />
+    <ClInclude Include="conc\LockFreeStack.h" />
+    <ClInclude Include="conc\LockFreeStack.hpp" />
+    <ClInclude Include="conc\ObjFactoryDef.h" />
+    <ClInclude Include="conc\ObjFactoryDef.hpp" />
+    <ClInclude Include="conc\ObjFactoryInterface.h" />
+    <ClInclude Include="conc\ObjFactoryInterface.hpp" />
+    <ClInclude Include="conc\ObjPool.h" />
+    <ClInclude Include="conc\ObjPool.hpp" />
+    <ClInclude Include="ffft\def.h" />
+    <ClInclude Include="ffft\DynArray.h" />
+    <ClInclude Include="ffft\DynArray.hpp" />
+    <ClInclude Include="ffft\FFTReal.h" />
+    <ClInclude Include="ffft\FFTReal.hpp" />
+    <ClInclude Include="ffft\OscSinCos.h" />
+    <ClInclude Include="ffft\OscSinCos.hpp" />
+    <ClInclude Include="fstb\AllocAlign.h" />
+    <ClInclude Include="fstb\AllocAlign.hpp" />
+    <ClInclude Include="fstb\def.h" />
+    <ClInclude Include="fstb\fnc.h" />
+    <ClInclude Include="fstb\fnc.hpp" />
+    <ClInclude Include="fstb\ToolsSse2.h" />
+    <ClInclude Include="fstb\ToolsSse2.hpp" />
+    <ClInclude Include="avstp.h" />
+    <ClInclude Include="AvstpFinder.h" />
+    <ClInclude Include="AvstpWrapper.h" />
+    <ClInclude Include="VapourSynth.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fmtcl\BitBltConv.cpp" />
+    <ClCompile Include="fmtcl\BitBltConv_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="fmtcl\ChromaPlacement.cpp" />
+    <ClCompile Include="fmtcl\ContFirBlackman.cpp" />
+    <ClCompile Include="fmtcl\ContFirBlackmanMinLobe.cpp" />
+    <ClCompile Include="fmtcl\ContFirCubic.cpp" />
+    <ClCompile Include="fmtcl\ContFirFromDiscrete.cpp" />
+    <ClCompile Include="fmtcl\ContFirGauss.cpp" />
+    <ClCompile Include="fmtcl\ContFirInterface.cpp" />
+    <ClCompile Include="fmtcl\ContFirLanczos.cpp" />
+    <ClCompile Include="fmtcl\ContFirLinear.cpp" />
+    <ClCompile Include="fmtcl\ContFirRect.cpp" />
+    <ClCompile Include="fmtcl\ContFirSinc.cpp" />
+    <ClCompile Include="fmtcl\ContFirSnh.cpp" />
+    <ClCompile Include="fmtcl\ContFirSpline.cpp" />
+    <ClCompile Include="fmtcl\ContFirSpline16.cpp" />
+    <ClCompile Include="fmtcl\ContFirSpline36.cpp" />
+    <ClCompile Include="fmtcl\ContFirSpline64.cpp" />
+    <ClCompile Include="fmtcl\DiscreteFirCustom.cpp" />
+    <ClCompile Include="fmtcl\DiscreteFirInterface.cpp" />
+    <ClCompile Include="fmtcl\ErrDifBuf.cpp" />
+    <ClCompile Include="fmtcl\ErrDifBufFactory.cpp" />
+    <ClCompile Include="fmtcl\FilterResize.cpp" />
+    <ClCompile Include="fmtcl\KernelData.cpp" />
+    <ClCompile Include="fmtcl\ResampleSpecPlane.cpp" />
+    <ClCompile Include="fmtcl\ResizeData.cpp" />
+    <ClCompile Include="fmtcl\ResizeDataFactory.cpp" />
+    <ClCompile Include="fmtcl\Scaler.cpp">
+      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyAndSourceCode</AssemblerOutput>
+    </ClCompile>
+    <ClCompile Include="fmtcl\CoefArrInt.cpp" />
+    <ClCompile Include="fmtcl\Scaler_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="fmtc\Bitdepth.cpp" />
+    <ClCompile Include="fmtc\Convert.cpp" />
+    <ClCompile Include="fmtc\ConvStep.cpp" />
+    <ClCompile Include="fmtc\Matrix.cpp" />
+    <ClCompile Include="fmtc\Matrix2020CL.cpp" />
+    <ClCompile Include="fmtc\Matrix_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="fmtc\NativeToStack16.cpp" />
+    <ClCompile Include="fmtc\Resample.cpp" />
+    <ClCompile Include="fmtc\Stack16ToNative.cpp" />
+    <ClCompile Include="fmtc\Transfer.cpp">
+      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyAndSourceCode</AssemblerOutput>
+    </ClCompile>
+    <ClCompile Include="fmtc\Transfer_avx2.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="fstb\CpuId.cpp" />
+    <ClCompile Include="fstb\ToolsAvx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="fstb\ToolsSse2.cpp" />
+    <ClCompile Include="vsutl\CpuOpt.cpp" />
+    <ClCompile Include="vsutl\FilterBase.cpp" />
+    <ClCompile Include="vsutl\fnc.cpp" />
+    <ClCompile Include="vsutl\PlaneProcCbInterface.cpp" />
+    <ClCompile Include="vsutl\PlaneProcessor.cpp" />
+    <ClCompile Include="fstb\fnc.cpp">
+      <ObjectFileName>$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName>$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+    </ClCompile>
+    <ClCompile Include="AvstpFinder.cpp" />
+    <ClCompile Include="AvstpWrapper.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
