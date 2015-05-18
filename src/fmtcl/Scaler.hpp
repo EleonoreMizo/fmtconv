@@ -65,14 +65,14 @@ void	Scaler::ReadWrapperFlt <SRC, true>::read (typename SRC::PtrConst::Type ptr,
 
 template <class SRC, class S16R, bool PF>
 template <class VI>
-VI	Scaler::ReadWrapperInt <SRC, S16R, PF>::read (typename const SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int /*len*/)
+VI	Scaler::ReadWrapperInt <SRC, S16R, PF>::read (const typename SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int /*len*/)
 {
 	return (S16R::read (ptr, zero, sign_bit));
 }
 
 template <class SRC, class S16R>
 template <class VI>
-VI	Scaler::ReadWrapperInt <SRC, S16R, true>::read (typename const SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int len)
+VI	Scaler::ReadWrapperInt <SRC, S16R, true>::read (const typename SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int len)
 {
 	return (S16R::read_partial (ptr, zero, sign_bit, len));
 }

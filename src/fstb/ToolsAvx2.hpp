@@ -318,14 +318,22 @@ __m256	ToolsAvx2::load_ps_partial (const void *ptr, int len)
 	__m256         val;
 	if (len >= 4)
 	{
-		const __m128   src_0 = _mm_loadu_ps (reinterpret_cast <const float *> (ptr));
-		const __m128   src_1 = ToolsSse2::load_ps_partial (reinterpret_cast <const char *> (ptr) + sizeof (src_0), len - 4);
-		val = _mm256_set_m128 (src_1, src_0);
+		const __m128   src_0 =
+			_mm_loadu_ps (reinterpret_cast <const float *> (ptr));
+		const __m128   src_1 = ToolsSse2::load_ps_partial (
+			reinterpret_cast <const char *> (ptr) + sizeof (src_0),
+			len - 4
+		);
+		val = _mm256_insertf128_ps (
+			_mm256_castps128_ps256 (src_0), src_1, 1
+		);
 	}
 	else
 	{
 		const __m128   src_0 = ToolsSse2::load_ps_partial (ptr, len);
-		val = _mm256_set_m128 (_mm_setzero_ps (), src_0);
+		val = _mm256_insertf128_ps (
+			_mm256_castps128_ps256 (src_0), _mm_setzero_ps (), 1
+		);
 	}
 
 	return (val);
@@ -342,14 +350,22 @@ __m256i	ToolsAvx2::load_si256_partial (const void *ptr, int len)
 	__m256i        val;
 	if (len >= 16)
 	{
-		const __m128i  src_0 = _mm_loadu_si128 (reinterpret_cast <const __m128i *> (ptr));
-		const __m128i  src_1 = ToolsSse2::load_si128_partial (reinterpret_cast <const char *> (ptr) + sizeof (src_0), len - 16);
-		val = _mm256_set_m128i (src_1, src_0);
+		const __m128i  src_0 =
+			_mm_loadu_si128 (reinterpret_cast <const __m128i *> (ptr));
+		const __m128i  src_1 = ToolsSse2::load_si128_partial (
+			reinterpret_cast <const char *> (ptr) + sizeof (src_0),
+			len - 16
+		);
+		val = _mm256_insertf128_si256 (
+			_mm256_castsi128_si256 (src_0), src_1, 1
+		);
 	}
 	else
 	{
 		const __m128i  src_0 = ToolsSse2::load_si128_partial (ptr, len);
-		val = _mm256_set_m128i (_mm_setzero_si128 (), src_0);
+		val = _mm256_insertf128_si256 (
+			_mm256_castsi128_si256 (src_0), _mm_setzero_si128 (), 1
+		);
 	}
 
 	return (val);
@@ -368,11 +384,15 @@ void	ToolsAvx2::store_ps_partial (void *ptr, __m256 val, int len)
 	{
 		_mm_storeu_ps (reinterpret_cast <float *> (ptr), val_0);
 		const __m128   val_1 = _mm256_extractf128_ps (val, 1);
-		ToolsSse2::store_ps_partial (reinterpret_cast <char *> (ptr) + sizeof (val_0), val_1, len - 4);
+		ToolsSse2::store_ps_partial (
+			reinterpret_cast <char *> (ptr) + sizeof (val_0), val_1, len - 4
+		);
 	}
 	else
 	{
-		ToolsSse2::store_ps_partial (reinterpret_cast <char *> (ptr)                 , val_0, len    );
+		ToolsSse2::store_ps_partial (
+			reinterpret_cast <char *> (ptr)                 , val_0, len
+		);
 	}
 }
 
@@ -389,7 +409,9 @@ void	ToolsAvx2::store_si256_partial (void *ptr, __m256i val, int len)
 	{
 		_mm_storeu_si128 (reinterpret_cast <__m128i *> (ptr), val_0);
 		const __m128i  val_1 = _mm256_extractf128_si256 (val, 1);
-		ToolsSse2::store_si128_partial (reinterpret_cast <char *> (ptr) + sizeof (val_0), val_1, len - 16);
+		ToolsSse2::store_si128_partial (
+			reinterpret_cast <char *> (ptr) + sizeof (val_0), val_1, len - 16
+		);
 	}
 	else
 	{

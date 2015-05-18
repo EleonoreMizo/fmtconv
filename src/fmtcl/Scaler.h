@@ -203,7 +203,7 @@ private:
 	public:
 		template <class VI>
 		static fstb_FORCEINLINE VI
-		               read (typename const SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int /*len*/);
+		               read (const typename SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int /*len*/);
 	};
 	template <class SRC, class S16R>
 	class ReadWrapperInt <SRC, S16R, true>
@@ -211,7 +211,7 @@ private:
 	public:
 		template <class VI>
 		static fstb_FORCEINLINE VI
-		               read (typename const SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int len);
+		               read (const typename SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int len);
 	};
 
 #endif   // fstb_ARCHI_X86
