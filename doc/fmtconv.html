@@ -59,7 +59,7 @@ It does:</p>
 <ul>
 <li>Resizing.</li>
 <li>Bitdepth conversion with dithering.</li>
-<li>Colorspace conversion.</li>
+<li>Colorspace conversion (matrix and transfer characteristics).</li>
 </ul>
 
 <p>It supports:</p>
@@ -184,8 +184,13 @@ Just load <code>fmtconv.sln</code> and run the compiler.</p>
 <p>You can also import all the <code>*.cpp</code>, <code>*.h</code> and
 <code>*.hpp</code> files located in the <code>src</code> directory and its
 subfolders.
-Enable the AVX or AVX2 instruction sets for the <code>*.cpp</code> files
-containing <code>avx</code> in their name.</p>
+Add <code>.</code> (the <code>src</code> directory) as include path.
+Use the <code>v120_xp</code> toolset for the 32-bit version.
+Enable the AVX2 instruction sets for the <code>*.cpp</code> files
+containing <code>avx2</code> in their name.
+For the other files, enable the SS2 instruction set.
+Enable optimizations maximizing speed and “any suitable” functions for
+inlining.</p>
 
 <h4>GCC</h4>
 
@@ -200,9 +205,10 @@ fstb/*.cpp
 vsutl/*.cpp</pre>
 
 <p>Add <code>AvstpFinder.cpp</code> on Windows.
-Use the following options:</p>
+Use the following options (on a single line):</p>
 
-<pre class="src">-std=c++11 -O3 -shared -msse2 -DNDEBUG -I.</pre>
+<pre class="src">-std=c++11 -shared -fabi-version=6 -msse2 -O3 -DNDEBUG -I.
+-Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow </pre>
 
 <p>You’ll need to replace <code>-msse2</code> with <code>-mavx2</code> for all
 the <code>*.cpp</code> files containing <code>avx</code> in their name.</p>
@@ -214,9 +220,15 @@ your object files.</p>
 <p>People have reported that the <code>-fPIC</code> and
 <code>-march nocona</code> options were sometimes needed.</p>
 
+<p>To compile a debug version, replace <code>-O3 -DNDEBUG</code> with
+<code>-g</code>.</p>
+
 <p>With MinGW, it seems you will need a specific MinGW-64 build supporting
 C++11 threading (not tested here yet, please report if you find something
 useful).</p>
+
+<p>On Linux and similar GNU-based systems, the <code>build</code> directory
+contains autotools settings.</p>
 
 <h2><a id="description"></a>III) Filters description</h2>
 
@@ -1248,11 +1260,13 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
-<p><b>r13, 2015.xx.xx</b></p>
+<p><b>r13, 2015.05.18</b></p>
 <ul>
 	<li><code>matrix</code>: optimized the SSE2 and AVX2 paths for integer data.</li>
 	<li>Added <var>cpuopt</var> to some functions, to manually limit the instruction set optimizations.</li>
-	<li>Fixed a buffer overrun bug in the SSE2 and AVX2 code of <code>bitdepth</code> and <code>resample</code>.</li>
+	<li>Added build files for the unix-like systems, thanks to jackoneill.</li>
+	<li>Fixed a buffer overflow bug in the SSE2 and AVX2 code of <code>bitdepth</code> and <code>resample</code>, thanks to jackoneill for reporting it.</li>
+	<li>Removed the <code>int16tofloat</code> and <code>floattoint16</code> temporary functions.</li>
 </ul>
 
 <p><b>r12, 2015.05.08</b></p>
