@@ -186,7 +186,9 @@ int64_t	Interlocked::cas (int64_t volatile &dest, int64_t excg, int64_t comp)
 
 #elif defined (_WIN32) || defined (WIN32) || defined (__WIN32__) || defined (__CYGWIN__) || defined (__CYGWIN32__)
 
-	int64_t        old;
+	// Set to zero just to make the compiler stop complaining about
+	// uninitialized variables.
+	int64_t        old = 0;
 	
 	asm volatile (
 	"	lea				 %[comp], %%esi			\n"

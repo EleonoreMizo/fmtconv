@@ -224,8 +224,14 @@ Throws: Nothing
 template <class T>
 void	ObjPool <T>::cleanup ()
 {
-	const int      count_free = delete_obj_stack  (_stack_free, false);
-	const int      count_all  = delete_obj_stack  (_stack_all,  true);
+#if ! defined (NDEBUG)
+	const int      count_free =
+#endif
+		delete_obj_stack  (_stack_free, false);
+#if ! defined (NDEBUG)
+	const int      count_all  =
+#endif
+		delete_obj_stack  (_stack_all,  true);
 
 	// False would mean that some cells are still out, in use.
 	assert (count_free == count_all);

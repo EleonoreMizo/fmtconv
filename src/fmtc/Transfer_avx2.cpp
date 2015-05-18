@@ -110,7 +110,7 @@ void	Transfer::MapperLog::find_index (const FloatIntMix val_arr [8], __m256i &in
 	static const int      exp_bias  = 127;
 	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
 	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
+//	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
 	static const int      frac_size = mant_size - LOGLUT_RES_L2;
 	static const uint32_t frac_mask = (1 << frac_size) - 1;
 
@@ -205,11 +205,12 @@ void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 			__m256             lerp;
 			M::find_index (s_ptr + x, index._vect, lerp);
 #if 1	// Looks as fast as _mm256_set_ps
+			// G++ complains about sizeof() as argument
 			__m256             val = _mm256_i32gather_ps (
-				&_lut.use <float> (0), index._vect, sizeof (float)
+				&_lut.use <float> (0), index._vect, 4  // 4 == sizeof (float)
 			);
 			const __m256       va2 = _mm256_i32gather_ps (
-				&_lut.use <float> (1), index._vect, sizeof (float)
+				&_lut.use <float> (1), index._vect, 4  // 4 == sizeof (float)
 			);
 #else
 			__m256             val = _mm256_set_ps (

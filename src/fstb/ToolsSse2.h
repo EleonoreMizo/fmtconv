@@ -115,7 +115,9 @@ public:
 	               abs_dif_epi16 (const __m128i &a, const __m128i &b);
 
 	fstb_TYPEDEF_ALIGN (16, uint8_t , VectI08 [16]);
+	fstb_TYPEDEF_ALIGN (16, uint16_t, VectI16 [ 8]);
 	fstb_TYPEDEF_ALIGN (16, uint32_t, VectI32 [ 4]);
+	fstb_TYPEDEF_ALIGN (16, uint64_t, VectI64 [ 2]);
 	fstb_TYPEDEF_ALIGN (16, float   , VectF32 [ 4]);
 
 	static const VectI32

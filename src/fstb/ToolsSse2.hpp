@@ -353,31 +353,34 @@ void	ToolsSse2::store_si128_partial (void *ptr, __m128i val, int len)
 	assert (len >= 0);
 	assert (len < 16);
 
-	VectI08        tmp;
-	_mm_store_si128 (reinterpret_cast <__m128i *> (tmp), val);
+	union
+	{
+		VectI08        v08;
+		VectI16        v16;
+		VectI32        v32;
+		VectI64        v64;
+		__m128i        m;
+	}              tmp;
+	_mm_store_si128 (&tmp.m, val);
 
-	int            ofs = 0;
-	if ((len & 8) != 0)
+	if ((len & 1) != 0)
 	{
-		*reinterpret_cast <uint64_t *> (ptr) = *reinterpret_cast <const uint64_t *> (tmp);
-		ptr = reinterpret_cast <uint64_t *> (ptr) + 1;
-		ofs += 8;
-	}
-	if ((len & 4) != 0)
-	{
-		*reinterpret_cast <uint32_t *> (ptr) = *reinterpret_cast <const uint32_t *> (tmp + ofs);
-		ptr = reinterpret_cast <uint32_t *> (ptr) + 1;
-		ofs += 4;
-	}
-	if ((len & 2) != 0)
-	{
-		*reinterpret_cast <uint16_t *> (ptr) = *reinterpret_cast <const uint16_t *> (tmp + ofs);
-		ptr = reinterpret_cast <uint16_t *> (ptr) + 1;
-		ofs += 2;
+		*(reinterpret_cast <uint8_t  *> (ptr) + len - 1) = tmp.v08 [len - 1];
+		len >>= 1;
 	}
 	if ((len & 1) != 0)
 	{
-		*reinterpret_cast <uint8_t *> (ptr) = tmp [ofs];
+		*(reinterpret_cast <uint16_t *> (ptr) + len - 1) = tmp.v16 [len - 1];
+		len >>= 1;
+	}
+	if ((len & 1) != 0)
+	{
+		*(reinterpret_cast <uint32_t *> (ptr) + len - 1) = tmp.v32 [len - 1];
+		len >>= 1;
+	}
+	if (len != 0)
+	{
+		* reinterpret_cast <uint64_t *> (ptr)            = tmp.v64 [0      ];
 	}
 }
 
@@ -388,8 +391,6 @@ void	ToolsSse2::store_epi64_partial (void *ptr, __m128i val, int len)
 	assert (ptr != 0);
 	assert (len >= 0);
 	assert (len < 8);
-
-	int            ofs = 0;
 
 #if (fstb_WORD_SIZE == 64)
 
@@ -413,24 +414,28 @@ void	ToolsSse2::store_epi64_partial (void *ptr, __m128i val, int len)
 
 #else
 
-	VectI08        tmp;
-	_mm_store_si128 (reinterpret_cast <__m128i *> (tmp), val);
+	union
+	{
+		VectI08        v08;
+		VectI16        v16;
+		VectI32        v32;
+		__m128i        m;
+	}              tmp;
+	_mm_store_si128 (&tmp.m, val);
 
-	if ((len & 4) != 0)
+	if ((len & 1) != 0)
 	{
-		*reinterpret_cast <uint32_t *> (ptr) = *reinterpret_cast <const uint32_t *> (tmp);
-		ptr = reinterpret_cast <uint32_t *> (ptr) + 1;
-		ofs += 4;
-	}
-	if ((len & 2) != 0)
-	{
-		*reinterpret_cast <uint16_t *> (ptr) = *reinterpret_cast <const uint16_t *> (tmp + ofs);
-		ptr = reinterpret_cast <uint16_t *> (ptr) + 1;
-		ofs += 2;
+		*(reinterpret_cast <uint8_t  *> (ptr) + len - 1) = tmp.v08 [len - 1];
+		len >>= 1;
 	}
 	if ((len & 1) != 0)
 	{
-		*reinterpret_cast <uint8_t *> (ptr) = tmp [ofs];
+		*(reinterpret_cast <uint16_t *> (ptr) + len - 1) = tmp.v16 [len - 1];
+		len >>= 1;
+	}
+	if (len != 0)
+	{
+		*(reinterpret_cast <uint32_t *> (ptr) + len - 1) = tmp.v32 [len - 1];
 	}
 
 #endif

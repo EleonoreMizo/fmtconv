@@ -69,10 +69,10 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 ,	_full_range_dst_flag (get_arg_int (in, out, "fulld", 1) != 0)
 ,	_curve_s (fmtcl::TransCurve_UNDEF)
 ,	_curve_d (fmtcl::TransCurve_UNDEF)
-,	_plane_processor (vsapi, *this, "transfer", true)
-,	_lut ()
-,	_process_plane_ptr (0)
 ,	_loglut_flag (false)
+,	_plane_processor (vsapi, *this, "transfer", true)
+,	_process_plane_ptr (0)
+,	_lut ()
 {
 	assert (&in != 0);
 	assert (&out != 0);
@@ -789,7 +789,7 @@ void	Transfer::MapperLog::find_index (const FloatIntMix val_arr [4], __m128i &in
 	static const int      exp_bias  = 127;
 	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
 	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
+//	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
 	static const int      frac_size = mant_size - LOGLUT_RES_L2;
 	static const uint32_t frac_mask = (1 << frac_size) - 1;
 
