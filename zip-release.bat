@@ -7,10 +7,11 @@
 
 @mkdir "reltmp"
 @mkdir "reltmp\src"
+@mkdir "reltmp\build"
 @mkdir "reltmp\win32"
 @mkdir "reltmp\win64"
 @xcopy /I "doc"                          "reltmp\doc"
-@xcopy /I "build"                        "reltmp\build"
+@xcopy /I "build\unix"                   "reltmp\build\unix"
 @xcopy /I "src\conc"                     "reltmp\src\conc"
 @xcopy /I "src\ffft"                     "reltmp\src\ffft"
 @xcopy /I "src\fmtc"                     "reltmp\src\fmtc"
