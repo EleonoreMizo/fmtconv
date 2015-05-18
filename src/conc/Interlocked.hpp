@@ -73,6 +73,8 @@ int32_t	Interlocked::swap (int32_t volatile &dest, int32_t excg)
 	}
 	while (cas (dest, excg, old) != old);
 
+	return (old);
+
 #endif
 }
 
