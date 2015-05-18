@@ -394,141 +394,6 @@ void	Scaler::process_plane_flt_cpp (typename DST::Ptr::Type dst_ptr, typename SR
 
 
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
-// DST and SRC are ProxyRwSse2 classes
-// Stride offsets in pixels
-// Source pointer may be unaligned.
-template <class DST, class SRC>
-void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
-{
-	assert (DST::Ptr::check_ptr (dst_ptr, DST::ALIGN_W));
-	assert (SRC::PtrConst::check_ptr (src_ptr, SRC::ALIGN_R));
-	// When the destination is a buffer:
-	// mod4 is enough to guarantee alignment, but since we process pairs of
-	// vectors and write_partial() is not different from write() with float
-	// data (overwriting all the 32 bytes), we must take extra-care not to
-	// overflow from the output buffer.
-	// When the destination is not a buffer (output frame data), data may be
-	// unaligned anyway. (TO DO: check the algorithm and make sure this
-	// constraint is actual).
-	assert ((dst_stride & 7) == 0);	
-	assert ((src_stride & 3) == 0);
-	assert (width > 0);
-	assert (y_dst_beg >= 0);
-	assert (y_dst_beg < y_dst_end);
-	assert (y_dst_end <= _dst_height);
-
-	const __m128i  zero     = _mm_setzero_si128 ();
-	const __m128i  mask_lsb = _mm_set1_epi16 (0x00FF);
-	const __m128i  sign_bit = _mm_set1_epi16 (-0x8000);
-	const __m128   offset   = _mm_set1_ps (float (DST::OFFSET));
-	const __m128   add_cst  = _mm_set1_ps (float (_add_cst_flt));
-
-	const int      w8 = width & -8;
-	const int      w7 = width - w8;
-
-	for (int y = y_dst_beg; y < y_dst_end; ++y)
-	{
-		const KernelInfo& kernel_info   = _kernel_info_arr [y];
-		const int         kernel_size   = kernel_info._kernel_size;
-		const float *     coef_base_ptr = &_coef_flt_arr [kernel_info._coef_index];
-		const int         ofs_y         = kernel_info._start_line;
-
-		typename SRC::PtrConst::Type  col_src_ptr = src_ptr;
-		SRC::PtrConst::jump (col_src_ptr, src_stride * ofs_y);
-		typename DST::Ptr::Type       col_dst_ptr = dst_ptr;
-
-		typedef ScalerCopy <DST, 0, SRC, 0> ScCopy;
-
-		if (ScCopy::can_copy (kernel_info._copy_flt_flag))
-		{
-			ScCopy::copy (col_dst_ptr, col_src_ptr, width);
-		}
-
-		else
-		{
-			__m128         sum0;
-			__m128         sum1;
-
-			for (int x = 0; x < w8; x += 8)
-			{
-				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
-
-				process_vect_flt_sse <SRC, false> (
-					sum0, sum1, kernel_size, coef_base_ptr,
-					pix_ptr, zero, src_stride, add_cst, 0
-				);
-				DST::write_flt (
-					col_dst_ptr, sum0, sum1, mask_lsb, sign_bit, offset
-				);
-
-				DST::Ptr::jump (col_dst_ptr, 8);
-				SRC::PtrConst::jump (col_src_ptr, 8);
-			}
-
-			if (w7 > 0)
-			{
-				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
-
-				process_vect_flt_sse <SRC, true> (
-					sum0, sum1, kernel_size, coef_base_ptr,
-					pix_ptr, zero, src_stride, add_cst, w7
-				);
-				DST::write_flt_partial (
-					col_dst_ptr, sum0, sum1, mask_lsb, sign_bit, offset, w7
-				);
-			}
-		}
-
-		DST::Ptr::jump (dst_ptr, dst_stride);
-	}
-}
-
-
-
-template <class SRC, bool PF>
-void	Scaler::process_vect_flt_sse (__m128 &sum0, __m128 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128 &add_cst, int len)
-{
-	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
-	// and save the add in the write proxy.
-	sum0 = add_cst;
-	sum1 = add_cst;
-
-	for (int k = 0; k < kernel_size; ++k)
-	{
-		__m128         coef = _mm_load_ss (coef_base_ptr + k);
-		coef = _mm_shuffle_ps (coef, coef, 0);
-		__m128         src0;
-		__m128         src1;
-		ReadWrapperFltSse <SRC, PF>::read (pix_ptr, src0, src1, zero, len);
-		const __m128   val0 = _mm_mul_ps (src0, coef);
-		const __m128   val1 = _mm_mul_ps (src1, coef);
-		sum0 = _mm_add_ps (sum0, val0);
-		sum1 = _mm_add_ps (sum1, val1);
-
-		SRC::PtrConst::jump (pix_ptr, src_stride);
-	}
-}
-
-template <class SRC, bool PF>
-void	Scaler::ReadWrapperFltSse <SRC, PF>::read (typename SRC::PtrConst::Type ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int /*len*/)
-{
-	SRC::read_flt (ptr, src0, src1, zero);
-}
-
-template <class SRC>
-void	Scaler::ReadWrapperFltSse <SRC, true>::read (typename SRC::PtrConst::Type ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len)
-{
-	SRC::read_flt_partial (ptr, src0, src1, zero, len);
-}
-
-
-
-#endif
-
-
-
 template <class DST, int DB, class SRC, int SB>
 void	Scaler::process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
 {
@@ -606,6 +471,125 @@ void	Scaler::process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SR
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 
+
+
+// DST and SRC are ProxyRwSse2 classes
+// Stride offsets in pixels
+// Source pointer may be unaligned.
+template <class DST, class SRC>
+void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
+{
+	assert (DST::Ptr::check_ptr (dst_ptr, DST::ALIGN_W));
+	assert (SRC::PtrConst::check_ptr (src_ptr, SRC::ALIGN_R));
+	// When the destination is a buffer:
+	// mod4 is enough to guarantee alignment, but since we process pairs of
+	// vectors and write_partial() is not different from write() with float
+	// data (overwriting all the 32 bytes), we must take extra-care not to
+	// overflow from the output buffer.
+	// When the destination is not a buffer (output frame data), data may be
+	// unaligned anyway. (TO DO: check the algorithm and make sure this
+	// constraint is actual).
+	assert ((dst_stride & 7) == 0);	
+	assert ((src_stride & 3) == 0);
+	assert (width > 0);
+	assert (y_dst_beg >= 0);
+	assert (y_dst_beg < y_dst_end);
+	assert (y_dst_end <= _dst_height);
+
+	const __m128i  zero     = _mm_setzero_si128 ();
+	const __m128i  mask_lsb = _mm_set1_epi16 (0x00FF);
+	const __m128i  sign_bit = _mm_set1_epi16 (-0x8000);
+	const __m128   offset   = _mm_set1_ps (float (DST::OFFSET));
+	const __m128   add_cst  = _mm_set1_ps (float (_add_cst_flt));
+
+	const int      w8 = width & -8;
+	const int      w7 = width - w8;
+
+	for (int y = y_dst_beg; y < y_dst_end; ++y)
+	{
+		const KernelInfo& kernel_info   = _kernel_info_arr [y];
+		const int         kernel_size   = kernel_info._kernel_size;
+		const float *     coef_base_ptr = &_coef_flt_arr [kernel_info._coef_index];
+		const int         ofs_y         = kernel_info._start_line;
+
+		typename SRC::PtrConst::Type  col_src_ptr = src_ptr;
+		SRC::PtrConst::jump (col_src_ptr, src_stride * ofs_y);
+		typename DST::Ptr::Type       col_dst_ptr = dst_ptr;
+
+		typedef ScalerCopy <DST, 0, SRC, 0> ScCopy;
+
+		if (ScCopy::can_copy (kernel_info._copy_flt_flag))
+		{
+			ScCopy::copy (col_dst_ptr, col_src_ptr, width);
+		}
+
+		else
+		{
+			__m128         sum0;
+			__m128         sum1;
+
+			for (int x = 0; x < w8; x += 8)
+			{
+				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
+
+				process_vect_flt_sse2 <SRC, false> (
+					sum0, sum1, kernel_size, coef_base_ptr,
+					pix_ptr, zero, src_stride, add_cst, 0
+				);
+				DST::write_flt (
+					col_dst_ptr, sum0, sum1, mask_lsb, sign_bit, offset
+				);
+
+				DST::Ptr::jump (col_dst_ptr, 8);
+				SRC::PtrConst::jump (col_src_ptr, 8);
+			}
+
+			if (w7 > 0)
+			{
+				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
+
+				process_vect_flt_sse2 <SRC, true> (
+					sum0, sum1, kernel_size, coef_base_ptr,
+					pix_ptr, zero, src_stride, add_cst, w7
+				);
+				DST::write_flt_partial (
+					col_dst_ptr, sum0, sum1, mask_lsb, sign_bit, offset, w7
+				);
+			}
+		}
+
+		DST::Ptr::jump (dst_ptr, dst_stride);
+	}
+}
+
+
+
+template <class SRC, bool PF>
+void	Scaler::process_vect_flt_sse2 (__m128 &sum0, __m128 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128 &add_cst, int len)
+{
+	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
+	// and save the add in the write proxy.
+	sum0 = add_cst;
+	sum1 = add_cst;
+
+	for (int k = 0; k < kernel_size; ++k)
+	{
+		__m128         coef = _mm_load_ss (coef_base_ptr + k);
+		coef = _mm_shuffle_ps (coef, coef, 0);
+		__m128         src0;
+		__m128         src1;
+		ReadWrapperFlt <SRC, PF>::read (pix_ptr, src0, src1, zero, len);
+		const __m128   val0 = _mm_mul_ps (src0, coef);
+		const __m128   val1 = _mm_mul_ps (src1, coef);
+		sum0 = _mm_add_ps (sum0, val0);
+		sum1 = _mm_add_ps (sum1, val1);
+
+		SRC::PtrConst::jump (pix_ptr, src_stride);
+	}
+}
+
+
+
 template <class DST, int DB, class SRC, int SB>
 void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
 {
@@ -676,9 +660,11 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				const __m128i  val = process_vect_int_sse2 <DST, DB, SRC, SB> (
+				const __m128i  val = process_vect_int_sse2 <
+					DST, DB, SRC, SB, false
+				> (
 					add_cst, kernel_size, coef_base_ptr,
-					pix_ptr, zero, src_stride, sign_bit
+					pix_ptr, zero, src_stride, sign_bit, 0
 				);
 
 				DstS16W::write_clip (
@@ -698,7 +684,9 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				const __m128i  val = process_vect_int_sse2_partial <DST, DB, SRC, SB> (
+				const __m128i  val = process_vect_int_sse2 <
+					DST, DB, SRC, SB, true
+				> (
 					add_cst, kernel_size, coef_base_ptr,
 					pix_ptr, zero, src_stride, sign_bit, w7
 				);
@@ -721,8 +709,8 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 
 
 
-template <class DST, int DB, class SRC, int SB>
-__m128i	Scaler::process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit)
+template <class DST, int DB, class SRC, int SB, bool PF>
+__m128i	Scaler::process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len)
 {
 	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
 
@@ -735,7 +723,9 @@ __m128i	Scaler::process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, 
 	for (int k = 0; k < kernel_size; ++k)
 	{
 		__m128i        coef = _mm_load_si128 (coef_base_ptr + k);
-		__m128i        src = SrcS16R::read (pix_ptr, zero, sign_bit);
+		__m128i        src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
+			pix_ptr, zero, sign_bit, len
+		);
 		if (DB > SB)
 		{
 			src = _mm_slli_epi16 (src, DB - SB);
@@ -769,7 +759,9 @@ __m128i	Scaler::process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, 
 	for (int k = 0; k < kernel_size; ++k)
 	{
 		const __m128i  coef = _mm_load_si128 (coef_base_ptr + k);
-		const __m128i  src = SrcS16R::read (pix_ptr, zero, sign_bit);
+		const __m128i  src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
+			pix_ptr, zero, sign_bit, len
+		);
 		fstb::ToolsSse2::mac_s16_s16_s32 (sum0, sum1, src, coef);
 
 		SRC::PtrConst::jump (pix_ptr, src_stride);
@@ -785,71 +777,9 @@ __m128i	Scaler::process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, 
 	return (val);
 }
 
-template <class DST, int DB, class SRC, int SB>
-__m128i	Scaler::process_vect_int_sse2_partial (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len)
-{
-	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
 
-#if defined (fmtcl_Scaler_SSE2_16BITS)
 
-	static_assert ((DB >= SB), "Output bitdepth must be greater or equal to input.");
-
-	__m128i        val = add_cst;
-
-	for (int k = 0; k < kernel_size; ++k)
-	{
-		__m128i        coef = _mm_load_si128 (coef_base_ptr + k);
-		__m128i        src  = SrcS16R::read_partial (pix_ptr, zero, sign_bit, len);
-		if (DB > SB)
-		{
-			src = _mm_slli_epi16 (src, DB - SB);
-			if (DB == 16)
-			{
-				src = _mm_xor_si128 (src, sign_bit);
-			}
-		}
-		const __m128i  mul = _mm_mulhi_epi16 (src, coef);
-		val = _mm_adds_epi16 (val, mul);
-
-		SRC::PtrConst::jump (pix_ptr, src_stride);
-	}
-
-	if (SHIFT_INT == 14)
-	{
-		val = _mm_adds_epi16 (val, val);
-		val = _mm_adds_epi16 (val, val);
-	}
-	else
-	{
-		// Beware: the shift does not saturate, the result may overflow.
-		val = _mm_slli_epi16 (val, 16 - SHIFT_INT);
-	}
-
-#else    // fmtcl_Scaler_SSE2_16BITS
-
-	__m128i        sum0 = add_cst;
-	__m128i        sum1 = add_cst;
-
-	for (int k = 0; k < kernel_size; ++k)
-	{
-		const __m128i  coef = _mm_load_si128 (coef_base_ptr + k);
-		const __m128i  src  = SrcS16R::read_partial (pix_ptr, zero, sign_bit, len);
-		fstb::ToolsSse2::mac_s16_s16_s32 (sum0, sum1, src, coef);
-
-		SRC::PtrConst::jump (pix_ptr, src_stride);
-	}
-
-	sum0 = _mm_srai_epi32 (sum0, SHIFT_INT + SB - DB);
-	sum1 = _mm_srai_epi32 (sum1, SHIFT_INT + SB - DB);
-
-	const __m128i  val = _mm_packs_epi32 (sum0, sum1);
-
-#endif   // fmtcl_Scaler_SSE2_16BITS
-
-	return (val);
-}
-
-#endif
+#endif   // fstb_ARCHI_X86
 
 
 

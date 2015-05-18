@@ -134,7 +134,7 @@ void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				process_vect_flt_avx <SRC, false> (
+				process_vect_flt_avx2 <SRC, false> (
 					sum0, sum1, kernel_size, coef_base_ptr,
 					pix_ptr, zero, src_stride, add_cst, 0
 				);
@@ -150,7 +150,7 @@ void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				process_vect_flt_avx <SRC, true> (
+				process_vect_flt_avx2 <SRC, true> (
 					sum0, sum1, kernel_size, coef_base_ptr,
 					pix_ptr, zero, src_stride, add_cst, w15
 				);
@@ -169,7 +169,7 @@ void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 
 
 template <class SRC, bool PF>
-void	Scaler::process_vect_flt_avx (__m256 &sum0, __m256 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256 &add_cst, int len)
+void	Scaler::process_vect_flt_avx2 (__m256 &sum0, __m256 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256 &add_cst, int len)
 {
 	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
 	// and save the add in the write proxy.
@@ -181,7 +181,7 @@ void	Scaler::process_vect_flt_avx (__m256 &sum0, __m256 &sum1, int kernel_size, 
 		__m256         coef = _mm256_set1_ps (coef_base_ptr [k]);
 		__m256         src0;
 		__m256         src1;
-		ReadWrapperFltAvx <SRC, PF>::read (pix_ptr, src0, src1, zero, len);
+		ReadWrapperFlt <SRC, PF>::read (pix_ptr, src0, src1, zero, len);
 		const __m256   val0 = _mm256_mul_ps (src0, coef);
 		const __m256   val1 = _mm256_mul_ps (src1, coef);
 		sum0 = _mm256_add_ps (sum0, val0);
@@ -189,18 +189,6 @@ void	Scaler::process_vect_flt_avx (__m256 &sum0, __m256 &sum1, int kernel_size, 
 
 		SRC::PtrConst::jump (pix_ptr, src_stride);
 	}
-}
-
-template <class SRC, bool PF>
-void	Scaler::ReadWrapperFltAvx <SRC, PF>::read (typename SRC::PtrConst::Type ptr, __m256 &src0, __m256 &src1, const __m256i &zero, int /*len*/)
-{
-	SRC::read_flt (ptr, src0, src1, zero);
-}
-
-template <class SRC>
-void	Scaler::ReadWrapperFltAvx <SRC, true>::read (typename SRC::PtrConst::Type ptr, __m256 &src0, __m256 &src1, const __m256i &zero, int len)
-{
-	SRC::read_flt_partial (ptr, src0, src1, zero, len);
 }
 
 
@@ -264,9 +252,11 @@ void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				const __m256i  val = process_vect_int_avx2 <DST, DB, SRC, SB> (
+				const __m256i  val = process_vect_int_avx2 <
+					DST, DB, SRC, SB, false
+				> (
 					add_cst, kernel_size, coef_base_ptr,
-					pix_ptr, zero, src_stride, sign_bit
+					pix_ptr, zero, src_stride, sign_bit, 0
 				);
 
 				DstS16W::write_clip (
@@ -286,7 +276,9 @@ void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				const __m256i  val = process_vect_int_avx2_partial <DST, DB, SRC, SB> (
+				const __m256i  val = process_vect_int_avx2 <
+					DST, DB, SRC, SB, true
+				> (
 					add_cst, kernel_size, coef_base_ptr,
 					pix_ptr, zero, src_stride, sign_bit, w15
 				);
@@ -309,8 +301,8 @@ void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 
 
 
-template <class DST, int DB, class SRC, int SB>
-__m256i	Scaler::process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit)
+template <class DST, int DB, class SRC, int SB, bool PF>
+__m256i	Scaler::process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len)
 {
 	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
 
@@ -320,33 +312,9 @@ __m256i	Scaler::process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, 
 	for (int k = 0; k < kernel_size; ++k)
 	{
 		const __m256i  coef = _mm256_load_si256 (coef_base_ptr + k);
-		const __m256i  src  = SrcS16R::read (pix_ptr, zero, sign_bit);
-
-		fstb::ToolsAvx2::mac_s16_s16_s32 (sum0, sum1, src, coef);
-
-		SRC::PtrConst::jump (pix_ptr, src_stride);
-	}
-
-	sum0 = _mm256_srai_epi32 (sum0, SHIFT_INT + SB - DB);
-	sum1 = _mm256_srai_epi32 (sum1, SHIFT_INT + SB - DB);
-
-	const __m256i  val = _mm256_packs_epi32 (sum0, sum1);
-
-	return (val);
-}
-
-template <class DST, int DB, class SRC, int SB>
-__m256i	Scaler::process_vect_int_avx2_partial (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len)
-{
-	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
-
-	__m256i        sum0 = add_cst;
-	__m256i        sum1 = add_cst;
-
-	for (int k = 0; k < kernel_size; ++k)
-	{
-		const __m256i  coef = _mm256_load_si256 (coef_base_ptr + k);
-		const __m256i  src  = SrcS16R::read_partial (pix_ptr, zero, sign_bit, len);
+		const __m256i  src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
+			pix_ptr, zero, sign_bit, len
+		);
 
 		fstb::ToolsAvx2::mac_s16_s16_s32 (sum0, sum1, src, coef);
 

@@ -179,76 +179,80 @@ private:
 	};
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
+
+	template <class SRC, bool PF>
+	class ReadWrapperFlt
+	{
+	public:
+		template <class VI, class VF>
+		static fstb_FORCEINLINE void
+		               read (typename SRC::PtrConst::Type ptr, VF &src0, VF &src1, const VI &zero, int /*len*/);
+	};
+	template <class SRC>
+	class ReadWrapperFlt <SRC, true>
+	{
+	public:
+		template <class VI, class VF>
+		static fstb_FORCEINLINE void
+		               read (typename SRC::PtrConst::Type ptr, VF &src0, VF &src1, const VI &zero, int len);
+	};
+
+	template <class SRC, class S16R, bool PF>
+	class ReadWrapperInt
+	{
+	public:
+		template <class VI>
+		static fstb_FORCEINLINE VI
+		               read (typename const SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int /*len*/);
+	};
+	template <class SRC, class S16R>
+	class ReadWrapperInt <SRC, S16R, true>
+	{
+	public:
+		template <class VI>
+		static fstb_FORCEINLINE VI
+		               read (typename const SRC::PtrConst::Type &ptr, const VI &zero, const VI &sign_bit, int len);
+	};
+
+#endif   // fstb_ARCHI_X86
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
 	void           setup_avx2 ();
 #endif
 
 	template <class DST, class SRC>
 	void           process_plane_flt_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	template <class DST, class SRC>
-	void           process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
-	template <class SRC, bool PF>
-	static fstb_FORCEINLINE void
-	               process_vect_flt_sse (__m128 &sum0, __m128 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128 &add_cst, int len);
-	template <class SRC, bool PF>
-	class ReadWrapperFltSse
-	{
-	public:
-		static fstb_FORCEINLINE void
-		               read (typename SRC::PtrConst::Type ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int /*len*/);
-	};
-	template <class SRC>
-	class ReadWrapperFltSse <SRC, true>
-	{
-	public:
-		static fstb_FORCEINLINE void
-		               read (typename SRC::PtrConst::Type ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
-	};
-#endif
-
 	template <class DST, int DB, class SRC, int SB>
 	void           process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
+
+	template <class DST, class SRC>
+	void           process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	template <class SRC, bool PF>
+	static fstb_FORCEINLINE void
+	               process_vect_flt_sse2 (__m128 &sum0, __m128 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128 &add_cst, int len);
+
 	template <class DST, int DB, class SRC, int SB>
 	void           process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
-	template <class DST, int DB, class SRC, int SB>
+	template <class DST, int DB, class SRC, int SB, bool PF>
 	static fstb_FORCEINLINE __m128i
-						process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit);
-	template <class DST, int DB, class SRC, int SB>
-	static fstb_FORCEINLINE __m128i
-						process_vect_int_sse2_partial (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len);
+						process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len);
 
 	template <class DST, class SRC>
 	void           process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
 	template <class SRC, bool PF>
 	static fstb_FORCEINLINE void
-	               process_vect_flt_avx (__m256 &sum0, __m256 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256 &add_cst, int len);
-	template <class SRC, bool PF>
-	class ReadWrapperFltAvx
-	{
-	public:
-		static fstb_FORCEINLINE void
-		               read (typename SRC::PtrConst::Type ptr, __m256 &src0, __m256 &src1, const __m256i &zero, int /*len*/);
-	};
-	template <class SRC>
-	class ReadWrapperFltAvx <SRC, true>
-	{
-	public:
-		static fstb_FORCEINLINE void
-		               read (typename SRC::PtrConst::Type ptr, __m256 &src0, __m256 &src1, const __m256i &zero, int len);
-	};
+	               process_vect_flt_avx2 (__m256 &sum0, __m256 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256 &add_cst, int len);
 
 	template <class DST, int DB, class SRC, int SB>
 	void           process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
-	template <class DST, int DB, class SRC, int SB>
+	template <class DST, int DB, class SRC, int SB, bool PF>
 	static fstb_FORCEINLINE __m256i
-						process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit);
-	template <class DST, int DB, class SRC, int SB>
-	static fstb_FORCEINLINE __m256i
-						process_vect_int_avx2_partial (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len);
-#endif
+						process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len);
+
+#endif   // fstb_ARCHI_X86
 
 	void           build_scale_data ();
 	void           push_back_int_coef (double coef);
@@ -310,7 +314,7 @@ private:
 
 
 
-//#include "fmtcl/Scaler.hpp"
+#include "fmtcl/Scaler.hpp"
 
 
 

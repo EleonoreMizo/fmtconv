@@ -197,6 +197,7 @@
     <ClInclude Include="fmtcl\Scaler.h" />
     <ClInclude Include="fmtcl\CoefArrInt.h" />
     <ClInclude Include="fmtcl\CoefArrInt.hpp" />
+    <ClInclude Include="fmtcl\Scaler.hpp" />
     <ClInclude Include="fmtcl\ScalerCopy.h" />
     <ClInclude Include="fmtcl\SplFmt.h" />
     <ClInclude Include="fmtcl\SplFmt.hpp" />

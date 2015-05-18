@@ -144,6 +144,7 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/ResizeDataFactory.h \
                         ../../src/fmtcl/Scaler.cpp \
                         ../../src/fmtcl/Scaler.h \
+                        ../../src/fmtcl/Scaler.hpp \
                         ../../src/fmtcl/ScalerCopy.h \
                         ../../src/fmtcl/SplFmt.h \
                         ../../src/fmtcl/SplFmt.hpp \
