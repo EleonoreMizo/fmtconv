@@ -113,27 +113,27 @@ const ::VSFrameRef *	NativeToStack16::get_frame (int n, int activation_reason, v
 		);
 		const ::VSFrameRef & src = *src_sptr;
 
-		const int         w  =  _vsapi.getFrameWidth (&src, 0);
-		const int         h  =  _vsapi.getFrameHeight (&src, 0);
+		const int      w = _vsapi.getFrameWidth (&src, 0);
+		const int      h = _vsapi.getFrameHeight (&src, 0);
 
 		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h << 1, &src, &core);
 
 		const int      nbr_planes = _vi_out.format->numPlanes;
 		for (int plane_index = 0; plane_index < nbr_planes; ++plane_index)
 		{
-			const int      w  = _vsapi.getFrameWidth (&src, plane_index);
-			const int      h  = _vsapi.getFrameHeight (&src, plane_index);
+			const int      pw = _vsapi.getFrameWidth (&src, plane_index);
+			const int      ph = _vsapi.getFrameHeight (&src, plane_index);
 
 			const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
 			const int      stride_src   = _vsapi.getStride (&src, plane_index);
 			uint8_t *      data_dst_ptr = _vsapi.getWritePtr (dst_ptr, plane_index);
 			const int      stride_dst   = _vsapi.getStride (dst_ptr, plane_index);
 
-			const int      lsb_offset = stride_dst * h;
+			const int      lsb_offset = stride_dst * ph;
 
-			for (int y = 0; y < h; ++y)
+			for (int y = 0; y < ph; ++y)
 			{
-				for (int x = 0; x < w; ++x)
+				for (int x = 0; x < pw; ++x)
 				{
 					const int      val =
 						reinterpret_cast <const uint16_t *> (data_src_ptr) [x];

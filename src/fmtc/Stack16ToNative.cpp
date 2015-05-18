@@ -120,8 +120,8 @@ const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, v
 		);
 		const ::VSFrameRef & src = *src_sptr;
 
-		const int         w  =  _vsapi.getFrameWidth (&src, 0);
-		const int         h  =  _vsapi.getFrameHeight (&src, 0);
+		const int      w = _vsapi.getFrameWidth (&src, 0);
+		const int      h = _vsapi.getFrameHeight (&src, 0);
 
 		const int      two_chroma_rows = 2 << _vi_in.format->subSamplingH;
 		if ((h & (two_chroma_rows - 1)) != 0)
@@ -139,9 +139,9 @@ const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, v
 			const int      nbr_planes = _vi_out.format->numPlanes;
 			for (int plane_index = 0; plane_index < nbr_planes; ++plane_index)
 			{
-				const int      w  = _vsapi.getFrameWidth (&src, plane_index);
-				const int      h  = _vsapi.getFrameHeight (&src, plane_index);
-				const int      hh = h >> 1;
+				const int      pw = _vsapi.getFrameWidth (&src, plane_index);
+				const int      ph = _vsapi.getFrameHeight (&src, plane_index);
+				const int      hh = ph >> 1;
 
 				const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
 				const int      stride_src   = _vsapi.getStride (&src, plane_index);
@@ -152,7 +152,7 @@ const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, v
 
 				for (int y = 0; y < hh; ++y)
 				{
-					for (int x = 0; x < w; ++x)
+					for (int x = 0; x < pw; ++x)
 					{
 						const int      msb = data_src_ptr [x             ];
 						const int      lsb = data_src_ptr [x + lsb_offset];

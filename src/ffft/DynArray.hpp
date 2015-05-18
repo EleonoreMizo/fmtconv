@@ -51,15 +51,15 @@ DynArray <T>::DynArray ()
 
 
 template <class T>
-DynArray <T>::DynArray (long size)
+DynArray <T>::DynArray (long sz)
 :	_data_ptr (0)
 ,	_len (0)
 {
-	assert (size >= 0);
-	if (size > 0)
+	assert (sz >= 0);
+	if (sz > 0)
 	{
-		_data_ptr = new DataType [size];
-		_len = size;
+		_data_ptr = new DataType [sz];
+		_len = sz;
 	}
 }
 
@@ -84,16 +84,16 @@ long	DynArray <T>::size () const
 
 
 template <class T>
-void	DynArray <T>::resize (long size)
+void	DynArray <T>::resize (long sz)
 {
-	assert (size >= 0);
-	if (size > 0)
+	assert (sz >= 0);
+	if (sz > 0)
 	{
 		DataType *		old_data_ptr = _data_ptr;
-		DataType *		tmp_data_ptr = new DataType [size];
+		DataType *		tmp_data_ptr = new DataType [sz];
 
 		_data_ptr = tmp_data_ptr;
-		_len = size;
+		_len = sz;
 
 		delete [] old_data_ptr;
 	}

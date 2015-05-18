@@ -45,11 +45,11 @@ public:
 	typedef	T	DataType;
 
 						DynArray ();
-	explicit			DynArray (long size);
+	explicit			DynArray (long sz);
 						~DynArray ();
 
 	inline long		size () const;
-	inline void		resize (long size);
+	inline void		resize (long sz);
 
 	inline const DataType &
 						operator [] (long pos) const;
