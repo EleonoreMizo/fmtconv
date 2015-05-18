@@ -340,10 +340,10 @@ __m256i	ToolsAvx2::load_si256_partial (const void *ptr, int len)
 	assert (len < 32);
 
 	__m256i        val;
-	if (len >= 4)
+	if (len >= 16)
 	{
 		const __m128i  src_0 = _mm_loadu_si128 (reinterpret_cast <const __m128i *> (ptr));
-		const __m128i  src_1 = ToolsSse2::load_si128_partial (reinterpret_cast <const char *> (ptr) + sizeof (src_0), len - 4);
+		const __m128i  src_1 = ToolsSse2::load_si128_partial (reinterpret_cast <const char *> (ptr) + sizeof (src_0), len - 16);
 		val = _mm256_set_m128i (src_1, src_0);
 	}
 	else
