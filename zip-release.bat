@@ -25,6 +25,7 @@
 @copy     "src\*.vcxproj.filters"        "reltmp\src"
 @copy     "src\ReleaseWin32\fmtconv.dll" "reltmp\win32"
 @copy     "src\Releasex64\fmtconv.dll"   "reltmp\win64"
+@copy     "*.md"                         "reltmp"
 
 @cd reltmp
 @echo fmtconv - Format conversion tools for Vapoursynth. | "C:\Program Files (x86)\Infozip\zip.exe" -r -o -9 -z "..\releases\fmtconv-rnew.zip" "*.*"
