@@ -1,4 +1,4 @@
-AC_INIT([fmtconv], [r11], [http://forum.doom9.org/showthread.php?t=166504], [fmtconv], [http://forum.doom9.org/showthread.php?t=166504])
+AC_INIT([fmtconv], [r14], [http://forum.doom9.org/showthread.php?t=166504], [fmtconv], [http://forum.doom9.org/showthread.php?t=166504])
 
 : ${CXXFLAGS=""}
 

@@ -240,10 +240,10 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		{
 			for (int x = 0; x < NBR_PLANES + 1; ++x)
 			{
-				_mat_main [y] [x] = (x == y && x < NBR_PLANES) ? 1 : 0;
+				_mat_main [y] [x] = (x == y) ? 1 : 0;
 
-				if (   x < fmt_src.numPlanes
-				    && y < fmt_dst.numPlanes)
+				if (   (x < fmt_src.numPlanes || x == NBR_PLANES)
+				    &&  y < fmt_dst.numPlanes)
 				{
 					int            err = 0;
 					const int      index = y * (fmt_src.numPlanes + 1) + x;
@@ -256,7 +256,6 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 				}
 			}
 		}
-
 
 		mat_init_flag = true;
 	}
@@ -1268,7 +1267,7 @@ void	Matrix::prepare_coef_flt (const ::VSFormat &fmt_dst, const ::VSFormat &fmt_
 		{ 1, 0, 0, 0 },
 		{ 0, 1, 0, 0 },
 		{ 0, 0, 1, 0 },
-		{ 0, 0, 0, 0 }
+		{ 0, 0, 0, 1 }
 	};
 
 	::VSFormat     fmt_dst2 = fmt_dst;
@@ -1524,11 +1523,11 @@ Y =                  R * Kr        + G * Kg        + B * Kb
 U = (B-Y)/(1-Kb) = - R * Kr/(1-Kb) - G * Kg/(1-Kb) + B
 V = (R-Y)/(1-Kr) =   R             - G * Kg/(1-Kr) - B * Kb/(1-Kr)
 
-R, G, B, Y range : [0 ; 1]
-U, V range : [-0.5 ; 0.5]
-
 The given equations work for R, G, B in range [0 ; 1] and U and V in range
 [-1 ; 1]. Scaling must be applied to match the required range for U and V.
+
+R, G, B, Y range : [0 ; 1]
+U, V range : [-0.5 ; 0.5]
 */
 
 void	Matrix::make_mat_yuv (Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag)
@@ -1574,7 +1573,7 @@ R, G, B, Y range : [0 ; 1]
 Cg, Co range : [-0.5 ; 0.5]
 
 Note: this implementation is not exactly the same as specified because the
-standard specifies specific steps to apply the RGB to YCgCo matrix, leading
+standard specifies specific steps to apply the RGB-to-YCgCo matrix, leading
 to different roundings.
 */
 
