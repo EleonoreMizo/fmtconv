@@ -400,6 +400,9 @@
     <ClInclude Include="fmtcl\Scaler.hpp">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="vsutl\FuncRefSPtr.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">

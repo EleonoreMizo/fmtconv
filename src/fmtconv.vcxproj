@@ -224,6 +224,7 @@
     <ClInclude Include="vsutl\FilterBase.h" />
     <ClInclude Include="vsutl\fnc.h" />
     <ClInclude Include="vsutl\FrameRefSPtr.h" />
+    <ClInclude Include="vsutl\FuncRefSPtr.h" />
     <ClInclude Include="vsutl\NodeRefSPtr.h" />
     <ClInclude Include="vsutl\ObjRefSPtr.h" />
     <ClInclude Include="vsutl\ObjRefSPtr.hpp" />
