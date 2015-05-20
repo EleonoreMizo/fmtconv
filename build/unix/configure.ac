@@ -40,7 +40,15 @@ AS_CASE(
 AS_IF(
       [test "x$X86" = "xtrue"],
       [
-       AC_SUBST([MFLAGS], ["-mfpmath=sse -msse2"])
+       MFLAGS="-mfpmath=sse -msse2"
+
+       AS_IF(
+             [test "x$BITS" = "x64"],
+             [
+              MFLAGS="$MFLAGS -mcx16"
+             ]
+       )
+       AC_SUBST([MFLAGS])
       ]
 )
 
