@@ -15,7 +15,7 @@
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r13</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r14</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
 <tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a></td></tr>
@@ -183,14 +183,15 @@ Just load <code>fmtconv.sln</code> and run the compiler.</p>
 
 <p>You can also import all the <code>*.cpp</code>, <code>*.h</code> and
 <code>*.hpp</code> files located in the <code>src</code> directory and its
-subfolders.
-Add <code>.</code> (the <code>src</code> directory) as include path.
-Use the <code>v120_xp</code> toolset for the 32-bit version.
-Enable the AVX2 instruction sets for the <code>*.cpp</code> files
-containing <code>avx2</code> in their name.
-For the other files, enable the SS2 instruction set.
-Enable optimizations maximizing speed and “any suitable” functions for
-inlining.</p>
+subfolders. Then:
+
+<ul>
+<li>Add <code>.</code> (the <code>src</code> directory) as include path.</li>
+<li>Use the <code>v120_xp</code> toolset for the 32-bit version.</li>
+<li>For the whole project, enable the SS2 instruction set.</li>
+<li>Enable the AVX2 instruction set for the <code>*.cpp</code> files containing <code>avx2</code> in their name.</li>
+<li>Enable optimizations maximizing speed and “any suitable” functions for inlining.</li>
+</ul>
 
 <h4>GCC</h4>
 
@@ -207,18 +208,26 @@ vsutl/*.cpp</pre>
 <p>Add <code>AvstpFinder.cpp</code> on Windows.
 Use the following options (on a single line):</p>
 
-<pre class="src">-std=c++11 -shared -fabi-version=6 -msse2 -O3 -DNDEBUG -I.
--Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow </pre>
+<pre class="src">-std=c++11 -shared -fabi-version=6 -msse2 -mcx16 -O3 -DNDEBUG -I.
+-Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow</pre>
 
 <p>You’ll need to replace <code>-msse2</code> with <code>-mavx2</code> for all
-the <code>*.cpp</code> files containing <code>avx</code> in their name.</p>
+the <code>*.cpp</code> files containing <code>avx2</code> in their name.</p>
 
 <p>Be careful, some files located in different directories have the same name.
 To avoid conflicts and missing symbols, keep the source directory structure for
 your object files.</p>
 
-<p>People have reported that the <code>-fPIC</code> and
-<code>-march nocona</code> options were sometimes needed.</p>
+<p>People have reported that the <code>-fPIC</code> option was sometimes
+needed.</p>
+
+<p>The <code>-mcx16</code> option is only need for 64-bit builds.
+This means that they won’t work on
+<a href="http://en.wikipedia.org/wiki/X86-64#Older_implementations">early AMD64
+CPUs</a> and
+<a href="http://www.pcworld.com/article/2058683/new-windows-8-1-requirements-strand-some-users-on-windows-8.html">allegedly</a>
+on a few Intel-based motherboards where the CMPXCHG16B instruction doesn’t work
+for some reason.</p>
 
 <p>To compile a debug version, replace <code>-O3 -DNDEBUG</code> with
 <code>-g</code>.</p>
@@ -553,8 +562,79 @@ This means luma and R’G’B’ signals range from 0 to 1, and chroma signals f
 Coefficients are listed by rows.
 Each row is terminated with a fourth coefficient, the additive constant
 (still in floating-point range).
-This means the matrix is actually 4&times;3 and the input column-vector
-has a 1 appended to its end.</p>
+This means the matrix is actually 4&times;3 and during the multiplication,
+the input column-vector has an implicit 1 appended to its end.
+For example, with an R’G’B’ input:</p>
+
+<center><table>
+<tr>
+<td class="n" style="vertical-align:middle;"><table class="m">
+	<tr><td class="m7"></td>
+		<td class="m">Y</td>
+	<td class="m9"></td></tr>
+	<tr><td class="m4"></td>
+		<td class="m">Cb</td>
+	<td class="m6"></td></tr>
+	<tr><td class="m1"></td>
+		<td class="m">Cr</td>
+	<td class="m3"></td></tr>
+</table></td>
+<td class="m" style="vertical-align:middle;">=</td>
+<td class="n" style="vertical-align:middle;"><table class="m">
+	<tr><td class="m7"></td>
+		<td class="m">c<sub>0</sub></td>
+		<td class="m">c<sub>1</sub></td>
+		<td class="m">c<sub>2</sub></td>
+		<td class="m">c<sub>3</sub></td>
+	<td class="m9"></td></tr>
+	<tr><td class="m4"></td>
+		<td class="m">c<sub>4</sub></td>
+		<td class="m">c<sub>5</sub></td>
+		<td class="m">c<sub>6</sub></td>
+		<td class="m">c<sub>7</sub></td>
+	<td class="m6"></td></tr>
+	<tr><td class="m1"></td>
+		<td class="m">c<sub>8</sub></td>
+		<td class="m">c<sub>9</sub></td>
+		<td class="m">c<sub>10</sub></td>
+		<td class="m">c<sub>11</sub></td>
+	<td class="m3"></td></tr>
+</table></td>
+<td class="m" style="vertical-align:middle;">&times;</td>
+<td class="n" style="vertical-align:middle;"><table class="m">
+	<tr><td class="m7"></td>
+		<td class="m">R</td>
+	<td class="m9"></td></tr>
+	<tr><td class="m4"></td>
+		<td class="m">G</td>
+	<td class="m6"></td></tr>
+	<tr><td class="m4"></td>
+		<td class="m">B</td>
+	<td class="m6"></td></tr>
+	<tr><td class="m1"></td>
+		<td class="m">1</td>
+	<td class="m3"></td></tr>
+</table></td>
+<td class="n" style="vertical-align:middle;"><table class="m">
+	<tr><td class="m" rowspan="3" style="padding-left:2em;"></td>
+		<td class="m">Y</td>
+		<td class="m">=</td>
+		<td class="m" style="text-align:left">R&nbsp;&times;&nbsp;c<sub>0</sub>&nbsp;+&nbsp;G&nbsp;&times;&nbsp;c<sub>1</sub>&nbsp;+&nbsp;B&nbsp;&times;&nbsp;c<sub>2</sub>&nbsp;+&nbsp;c<sub>3</sub>&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="m">Cb</td>
+		<td class="m">=</td>
+		<td class="m" style="text-align:left">R&nbsp;&times;&nbsp;c<sub>4</sub>&nbsp;+&nbsp;G&nbsp;&times;&nbsp;c<sub>5</sub>&nbsp;+&nbsp;B&nbsp;&times;&nbsp;c<sub>6</sub>&nbsp;+&nbsp;c<sub>7</sub>&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="m">Cr</td>
+		<td class="m">=</td>
+		<td class="m" style="text-align:left">R&nbsp;&times;&nbsp;c<sub>8</sub>&nbsp;+&nbsp;G&nbsp;&times;&nbsp;c<sub>9</sub>&nbsp;+&nbsp;B&nbsp;&times;&nbsp;c<sub>10</sub>&nbsp;+&nbsp;c<sub>11</sub>&nbsp;</td>
+	</tr>
+</table></td>
+</tr>
+</table></center>
+
 
 <p class="var">csp</p>
 <p>The destination format, as Vapoursynth constant.
@@ -1260,39 +1340,44 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
+<p><b>r14, 20xx.xx.xx</b></p>
+<ul>
+<li></li>
+</ul>
+
 <p><b>r13, 2015.05.18</b></p>
 <ul>
-	<li><code>matrix</code>: optimized the SSE2 and AVX2 paths for integer data.</li>
-	<li>Added <var>cpuopt</var> to some functions, to manually limit the instruction set optimizations.</li>
-	<li>Added build files for the unix-like systems, thanks to jackoneill.</li>
-	<li>Fixed a buffer overflow bug in the SSE2 and AVX2 code of <code>bitdepth</code> and <code>resample</code>, thanks to jackoneill for reporting it.</li>
-	<li>Removed the <code>int16tofloat</code> and <code>floattoint16</code> temporary functions.</li>
+<li><code>matrix</code>: optimized the SSE2 and AVX2 paths for integer data.</li>
+<li>Added <var>cpuopt</var> to some functions, to manually limit the instruction set optimizations.</li>
+<li>Added build files for the unix-like systems, thanks to jackoneill.</li>
+<li>Fixed a buffer overflow bug in the SSE2 and AVX2 code of <code>bitdepth</code> and <code>resample</code>, thanks to jackoneill for reporting it.</li>
+<li>Removed the <code>int16tofloat</code> and <code>floattoint16</code> temporary functions.</li>
 </ul>
 
 <p><b>r12, 2015.05.08</b></p>
 <ul>
-	<li><code>resample</code>: fixed a crash in the AVX2 code path, thanks to HolyWu for spotting it.</li>
+<li><code>resample</code>: fixed a crash in the AVX2 code path, thanks to HolyWu for spotting it.</li>
 </ul>
 
 <p><b>r11, 2015.05.07</b></p>
 <ul>
-	<li><code>transfer</code>: fixed a bug in the SSE2 code path.</li>
+<li><code>transfer</code>: fixed a bug in the SSE2 code path.</li>
 </ul>
 
 <p><b>r10, 2015.05.06</b></p>
 <ul>
-	<li>fmtconv is compatible with the older Vapoursynth versions again until API 3.2 is out.</li>
-	<li>Source code: fixed compilation problems.</li>
+<li>fmtconv is compatible with the older Vapoursynth versions again until API 3.2 is out.</li>
+<li>Source code: fixed compilation problems.</li>
 </ul>
 
 <p><b>r9, 2015.05.06</b></p>
 <ul>
-	<li>Added the <code>transfer</code> function.</li>
-	<li><code>resample</code>: Most kernel-related parameters are now arrays, allowing to specify different values for each plane.</li>
-	<li><code>resample</code>: Allows horizontal and vertical values for <var>taps</var> and <var>invkstap</var>.</li>
-	<li><code>resample</code>: AVX2 optimizations.</li>
-	<li><code>matrix</code>: Tries to deduce the target colorspace from simple matrix settings, sets the new <code>_Matrix</code> frame property, AVX2 optimizations.</li>
-	<li><code>bitdepth</code>: SSE2 optimizations for the “fast” algorithm.</li>
+<li>Added the <code>transfer</code> function.</li>
+<li><code>resample</code>: Most kernel-related parameters are now arrays, allowing to specify different values for each plane.</li>
+<li><code>resample</code>: Allows horizontal and vertical values for <var>taps</var> and <var>invkstap</var>.</li>
+<li><code>resample</code>: AVX2 optimizations.</li>
+<li><code>matrix</code>: Tries to deduce the target colorspace from simple matrix settings, sets the new <code>_Matrix</code> frame property, AVX2 optimizations.</li>
+<li><code>bitdepth</code>: SSE2 optimizations for the “fast” algorithm.</li>
 </ul>
 
 <p><b>r8, 2013.11.30</b></p>
@@ -1302,9 +1387,9 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <p><b>r7, 2013.11.27</b></p>
 <ul>
-	<li>64-bit windows version.</li>
-	<li><code>resample</code>: A few optimizations for special cases.</li>
-	<li><code>resample</code>: fixed the coefficients used in integer resizing, whose sum was sometimes off by a few units.</li>
+<li>64-bit windows version.</li>
+<li><code>resample</code>: A few optimizations for special cases.</li>
+<li><code>resample</code>: fixed the coefficients used in integer resizing, whose sum was sometimes off by a few units.</li>
 </ul>
 
 <p><b>r6, 2013.08.24</b></p>
@@ -1314,53 +1399,53 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <p><b>r5, 2013.08.18</b></p>
 <ul>
-	<li>Added 12-bit support for all the functions.</li>
-	<li>Added <code>matrix2020cl</code> to convert between linear RGB and Y’Cb’Cr’ colorspaces using the BT.2020 constant luminance matrix.</li>
-	<li><code>matrix</code>: Added the BT.2020 matrix, non constant luminance mode only.</li>
-	<li><code>matrix</code>: Added single-plane output with the <var>singleout</var> parameter.</li>
-	<li><code>resample</code>: allows x:y:z form for specifying the colorspace subsampling <var>css</var>.</li>
-	<li><code>resample</code>: added SSE2 integer calculations for slight speed improvement. Activated by default, use <var>flt=1</var> to compute everything in float (previous operating mode).</li>
+<li>Added 12-bit support for all the functions.</li>
+<li>Added <code>matrix2020cl</code> to convert between linear RGB and Y’Cb’Cr’ colorspaces using the BT.2020 constant luminance matrix.</li>
+<li><code>matrix</code>: Added the BT.2020 matrix, non constant luminance mode only.</li>
+<li><code>matrix</code>: Added single-plane output with the <var>singleout</var> parameter.</li>
+<li><code>resample</code>: allows x:y:z form for specifying the colorspace subsampling <var>css</var>.</li>
+<li><code>resample</code>: added SSE2 integer calculations for slight speed improvement. Activated by default, use <var>flt=1</var> to compute everything in float (previous operating mode).</li>
 </ul>
 
 <p><b>r4, 2012.12.09</b></p>
 <ul>
-	<li>Added a documentation.</li>
-	<li>Filters now write some frame properties when known.</li>
-	<li>Fixed the code so it can be compiled on Linux. Thanks to Jackoneill/Nodame for testing.</li>
-	<li><code>bitdepth</code>: no need to specify any bitdepth or colorspace (for simple range conversions).</li>
-	<li><code>matrix</code>: Added SSE2 implementation for integer processing.</li>
-	<li><code>matrix</code>: Allows the destination bitdepth to be higher than the input (added the <var>bits</var> parameter).</li>
-	<li><code>matrix</code>: <var>col_fam</var> completes <var>csp</var> instead of replacing it.</li>
-	<li><code>resample</code>: Added <var>interlacedd</var> to specify if output is interlaced (allows simple bobbing).</li>
-	<li><code>resample</code>: Added <var>tff</var> and <var>tffd</var> to specify field parity.</li>
-	<li><code>resample</code>: Added <var>scale</var>, <var>scaleh</var> and <var>scalev</var> for easier magnification.</li>
-	<li><code>resample</code>: Added a two-digit mode to <var>css</var>.</li>
-	<li><code>resample</code>: Fixed a typo preventing to select 4:1:1 chroma subsampling.</li>
-	<li>Added <code>nativetostack16</code>.</li>
+<li>Added a documentation.</li>
+<li>Filters now write some frame properties when known.</li>
+<li>Fixed the code so it can be compiled on Linux. Thanks to Jackoneill/Nodame for testing.</li>
+<li><code>bitdepth</code>: no need to specify any bitdepth or colorspace (for simple range conversions).</li>
+<li><code>matrix</code>: Added SSE2 implementation for integer processing.</li>
+<li><code>matrix</code>: Allows the destination bitdepth to be higher than the input (added the <var>bits</var> parameter).</li>
+<li><code>matrix</code>: <var>col_fam</var> completes <var>csp</var> instead of replacing it.</li>
+<li><code>resample</code>: Added <var>interlacedd</var> to specify if output is interlaced (allows simple bobbing).</li>
+<li><code>resample</code>: Added <var>tff</var> and <var>tffd</var> to specify field parity.</li>
+<li><code>resample</code>: Added <var>scale</var>, <var>scaleh</var> and <var>scalev</var> for easier magnification.</li>
+<li><code>resample</code>: Added a two-digit mode to <var>css</var>.</li>
+<li><code>resample</code>: Fixed a typo preventing to select 4:1:1 chroma subsampling.</li>
+<li>Added <code>nativetostack16</code>.</li>
 </ul>
 
 <p><b>r3, 2012.11.23</b></p>
 <ul>
-	<li><code>bitdepth</code>: changed the <var>bitdepth</var> parameter to <var>bits</var>.</li>
-	<li><code>bitdepth</code>: added SSE2 optimizations for upconversions.</li>
-	<li><code>resample</code>: added interlaced resizing (<var>interlaced</var> parameter).</li>
-	<li><code>resample</code>: now sets <code>_ColorRange</code> and <code>_ChromaLocation</code> properties when known.</li>
-	<li><code>resample</code>: fixed the <var>planes</var> parameter previously interpreted as 0 (black or green screen).</li>
+<li><code>bitdepth</code>: changed the <var>bitdepth</var> parameter to <var>bits</var>.</li>
+<li><code>bitdepth</code>: added SSE2 optimizations for upconversions.</li>
+<li><code>resample</code>: added interlaced resizing (<var>interlaced</var> parameter).</li>
+<li><code>resample</code>: now sets <code>_ColorRange</code> and <code>_ChromaLocation</code> properties when known.</li>
+<li><code>resample</code>: fixed the <var>planes</var> parameter previously interpreted as 0 (black or green screen).</li>
 </ul>
 
 <p><b>r2, 2012.11.18</b></p>
 <ul>
-	<li><code>bitdepth</code>: implemented fast dither mode (but not in SSE2 yet).</li>
-	<li><code>bitdepth</code>: optimized float-to-integer path.</li>
-	<li><code>bitdepth</code>: faster dithering when <var>ampo = 1</var> and <var>ampn = 0</var>.</li>
-	<li><code>matrix</code>: enabled the SSE path for float operations.</li>
-	<li><code>resample</code>: optimized paths involving float input or output.</li>
-	<li><code>resample</code>: fixed white/magenta screen with 8-bit input and float output.</li>
+<li><code>bitdepth</code>: implemented fast dither mode (but not in SSE2 yet).</li>
+<li><code>bitdepth</code>: optimized float-to-integer path.</li>
+<li><code>bitdepth</code>: faster dithering when <var>ampo = 1</var> and <var>ampn = 0</var>.</li>
+<li><code>matrix</code>: enabled the SSE path for float operations.</li>
+<li><code>resample</code>: optimized paths involving float input or output.</li>
+<li><code>resample</code>: fixed white/magenta screen with 8-bit input and float output.</li>
 </ul>
 
 <p><b>r1, 2012.11.16</b></p>
 <ul>
-	<li>Initial release.</li>
+<li>Initial release.</li>
 </ul>
 
 
