@@ -59,8 +59,8 @@ class Resample
 
 public:
 
-	explicit			Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi);
-	virtual			~Resample () {}
+	explicit       Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi);
+	virtual        ~Resample () {}
 
 	// vsutl::FilterBase
 	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
@@ -68,7 +68,7 @@ public:
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core);
 
 	static fmtcl::ChromaPlacement
-						conv_str_to_chroma_placement (const vsutl::FilterBase &flt, std::string cplace);
+	               conv_str_to_chroma_placement (const vsutl::FilterBase &flt, std::string cplace);
 	static void    conv_str_to_chroma_subspl (const vsutl::FilterBase &flt, int &ssh, int &ssv, std::string css);
 
 
@@ -222,11 +222,11 @@ private:
 
 private:
 
-						Resample ();
-						Resample (const Resample &other);
-	Resample &		operator = (const Resample &other);
-	bool				operator == (const Resample &other) const;
-	bool				operator != (const Resample &other) const;
+	               Resample ();
+	               Resample (const Resample &other);
+	Resample &     operator = (const Resample &other);
+	bool           operator == (const Resample &other) const;
+	bool           operator != (const Resample &other) const;
 
 };	// class Resample
 

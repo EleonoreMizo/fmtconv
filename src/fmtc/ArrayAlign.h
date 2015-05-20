@@ -53,7 +53,7 @@ public:
 
 	typedef	T	Element;
 
-   enum {         NBR_ELT   = LEN };
+	enum {         NBR_ELT   = LEN };
 	enum {         ALIGNMENT = AL  };
 
 	               ArrayAlign ();

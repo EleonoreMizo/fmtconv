@@ -98,8 +98,7 @@ private:
 private:
 
 	               CoefArrInt (const CoefArrInt &other);
-	CoefArrInt &
-	               operator = (const CoefArrInt &other);
+	CoefArrInt &   operator = (const CoefArrInt &other);
 	bool           operator == (const CoefArrInt &other) const;
 	bool           operator != (const CoefArrInt &other) const;
 

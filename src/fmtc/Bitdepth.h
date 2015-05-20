@@ -191,17 +191,17 @@ private:
 	static inline void
 	               diffuse_floydsteinberg_flt (float err, float &e1, float &e3, float &e5, float &e7);
 	static inline void
-						diffuse_filterlite_int (int err, int &e1, int &e2);
+	               diffuse_filterlite_int (int err, int &e1, int &e2);
 	static inline void
-						diffuse_filterlite_flt (float err, float &e1, float &e2);
+	               diffuse_filterlite_flt (float err, float &e1, float &e2);
 	static inline void
-						diffuse_stucki_int (int err, int &e1, int &e2, int &e4, int &e8);
+	               diffuse_stucki_int (int err, int &e1, int &e2, int &e4, int &e8);
 	static inline void
-						diffuse_stucki_flt (float err, float &e1, float &e2, float &e4, float &e8);
+	               diffuse_stucki_flt (float err, float &e1, float &e2, float &e4, float &e8);
 	static inline void
-						diffuse_atkinson_int (int err, int &e1);
+	               diffuse_atkinson_int (int err, int &e1);
 	static inline void
-						diffuse_atkinson_flt (float err, float &e1);
+	               diffuse_atkinson_flt (float err, float &e1);
 	template <int DIF_BITS>
 	static inline void
 	               diffuse_ostromoukhov_int (int err, int &e1, int &e2, int &e3, int val);
@@ -236,8 +236,8 @@ private:
 	int            _ampe_i;          // [0 ; 2047], 1.0 = 256
 	float          _ampe_f;
 	float          _ampn_f;
-	bool				_errdif_flag;	   // Indicates a dithering method using error diffusion.
-	PatDataArray	_dither_pat_arr;	// Contains levels for ordered dithering
+	bool           _errdif_flag;     // Indicates a dithering method using error diffusion.
+	PatDataArray   _dither_pat_arr;  // Contains levels for ordered dithering
 
 	conc::ObjPool <fmtcl::ErrDifBuf>
 						_buf_pool;

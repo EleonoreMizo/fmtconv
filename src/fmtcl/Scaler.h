@@ -238,7 +238,7 @@ private:
 	void           process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
 	template <class DST, int DB, class SRC, int SB, bool PF>
 	static fstb_FORCEINLINE __m128i
-						process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len);
+	               process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len);
 
 	template <class DST, class SRC>
 	void           process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
@@ -250,7 +250,7 @@ private:
 	void           process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
 	template <class DST, int DB, class SRC, int SB, bool PF>
 	static fstb_FORCEINLINE __m256i
-						process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len);
+	               process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len);
 
 #endif   // fstb_ARCHI_X86
 

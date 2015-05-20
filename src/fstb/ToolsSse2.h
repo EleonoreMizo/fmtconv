@@ -83,7 +83,7 @@ public:
 	static fstb_FORCEINLINE __m128i
 	               load_epi64_partial (const void *ptr, int len);
 	static fstb_FORCEINLINE void
-		            store_ps_partial (void *ptr, __m128 val, int len);
+	               store_ps_partial (void *ptr, __m128 val, int len);
 	static fstb_FORCEINLINE void
 		            store_si128_partial (void *ptr, __m128i val, int len);
 	static fstb_FORCEINLINE void

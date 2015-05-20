@@ -56,13 +56,13 @@ public:
 	enum {         ALIGN_W = 16 };
 	enum {         OFFSET  = 0  };
 	static fstb_FORCEINLINE void
-						read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
+	               read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
 	static fstb_FORCEINLINE void
-						read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
+	               read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
 	static fstb_FORCEINLINE void
-						write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
+	               write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
 	static fstb_FORCEINLINE void
-						write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
+	               write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
 };
 
 template <>
@@ -75,17 +75,17 @@ public:
 	enum {         ALIGN_W =  1 };
 	enum {         OFFSET  = -32768 };
 	static fstb_FORCEINLINE void
-						read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
+	               read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
 	static fstb_FORCEINLINE void
-						read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
+	               read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
 	static fstb_FORCEINLINE __m128i
 	               read_i16 (const PtrConst::Type &ptr, const __m128i &zero);
 	static fstb_FORCEINLINE __m128i
 	               read_i16_partial (const PtrConst::Type &ptr, const __m128i &zero, int len);
 	static fstb_FORCEINLINE void
-						write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
+	               write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
 	static fstb_FORCEINLINE void
-						write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
+	               write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
 	static fstb_FORCEINLINE void
 	               write_i16 (const Ptr::Type &ptr, const __m128i &src, const __m128i &mask_lsb);
 	static fstb_FORCEINLINE void
@@ -119,17 +119,17 @@ public:
 	enum {         ALIGN_W =  2 };
 	enum {         OFFSET  = -32768 };
 	static fstb_FORCEINLINE void
-						read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
+	               read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
 	static fstb_FORCEINLINE void
-						read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
+	               read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
 	static fstb_FORCEINLINE __m128i
 	               read_i16 (const PtrConst::Type &ptr, const __m128i &/*zero*/);
 	static fstb_FORCEINLINE __m128i
 	               read_i16_partial (const PtrConst::Type &ptr, const __m128i &/*zero*/, int len);
 	static fstb_FORCEINLINE void
-						write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
+	               write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
 	static fstb_FORCEINLINE void
-						write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
+	               write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
 	static fstb_FORCEINLINE void
 	               write_i16 (const Ptr::Type &ptr, const __m128i &src, const __m128i &/*mask_lsb*/);
 	static fstb_FORCEINLINE void
@@ -166,17 +166,17 @@ public:
 	enum {         ALIGN_W =  1 };
 	enum {         OFFSET  = -32768 };
 	static fstb_FORCEINLINE void
-						read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
+	               read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
 	static fstb_FORCEINLINE void
-						read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
+	               read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
 	static fstb_FORCEINLINE __m128i
 	               read_i16 (const PtrConst::Type &ptr, const __m128i &/*zero*/);
 	static fstb_FORCEINLINE __m128i
 	               read_i16_partial (const PtrConst::Type &ptr, const __m128i &/*zero*/, int len);
 	static fstb_FORCEINLINE void
-						write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
+	               write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
 	static fstb_FORCEINLINE void
-						write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
+	               write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
 	static fstb_FORCEINLINE void
 	               write_i16 (const Ptr::Type &ptr, const __m128i &src, const __m128i &mask_lsb);
 	static fstb_FORCEINLINE void

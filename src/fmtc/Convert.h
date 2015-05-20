@@ -54,8 +54,8 @@ class Convert
 
 public:
 
-	explicit			Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi);
-	virtual			~Convert () {}
+	explicit       Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi);
+	virtual        ~Convert () {}
 
 	// vsutl::FilterBase
 	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);

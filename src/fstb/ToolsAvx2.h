@@ -85,7 +85,7 @@ public:
 	static fstb_FORCEINLINE __m256i
 	               load_si256_partial (const void *ptr, int len);
 	static fstb_FORCEINLINE void
-		            store_ps_partial (void *ptr, __m256 val, int len);
+	               store_ps_partial (void *ptr, __m256 val, int len);
 	static fstb_FORCEINLINE void
 	               store_si256_partial (void *ptr, __m256i val, int len);
 

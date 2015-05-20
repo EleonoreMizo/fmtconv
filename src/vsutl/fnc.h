@@ -39,16 +39,16 @@ namespace vsutl
 
 
 
-bool  is_constant_format (const ::VSVideoInfo &vi);
-bool	has_chroma (const ::VSFormat &fmt);
-bool	is_chroma_plane (const ::VSFormat &fmt, int plane_index);
-bool	is_full_range_default (const ::VSFormat &fmt);
-double	compute_pix_scale (const ::VSFormat &fmt, int plane_index, bool full_flag);
-double	get_pix_min (const ::VSFormat &fmt, int plane_index, bool full_flag);
-void	compute_fmt_mac_cst (double &gain, double &add_cst, const ::VSFormat &fmt_dst, bool full_dst_flag, const ::VSFormat &fmt_src, bool full_src_flag, int plane_index);
-int	compute_plane_width (const ::VSFormat &fmt, int plane_index, int base_w);
-int	compute_plane_height (const ::VSFormat &fmt, int plane_index, int base_h);
-int	conv_str_to_chroma_subspl (int &ssh, int &ssv, std::string css);
+bool     is_constant_format (const ::VSVideoInfo &vi);
+bool     has_chroma (const ::VSFormat &fmt);
+bool     is_chroma_plane (const ::VSFormat &fmt, int plane_index);
+bool     is_full_range_default (const ::VSFormat &fmt);
+double   compute_pix_scale (const ::VSFormat &fmt, int plane_index, bool full_flag);
+double   get_pix_min (const ::VSFormat &fmt, int plane_index, bool full_flag);
+void     compute_fmt_mac_cst (double &gain, double &add_cst, const ::VSFormat &fmt_dst, bool full_dst_flag, const ::VSFormat &fmt_src, bool full_src_flag, int plane_index);
+int      compute_plane_width (const ::VSFormat &fmt, int plane_index, int base_w);
+int      compute_plane_height (const ::VSFormat &fmt, int plane_index, int base_h);
+int      conv_str_to_chroma_subspl (int &ssh, int &ssv, std::string css);
 
 
 

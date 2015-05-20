@@ -764,7 +764,7 @@ void	BitBltConv::bitblt_ixx_to_x16_sse2 (typename DST::Ptr::Type dst_ptr, int ds
 	src_stride /= sizeof (typename SRC::PtrConst::DataType);
 	dst_stride /= sizeof (typename DST::Ptr::DataType);
 
-	const __m128i	zero     = _mm_setzero_si128 ();
+	const __m128i  zero     = _mm_setzero_si128 ();
 	const __m128i  val_ma   = _mm_set1_epi16 ((DBD < 16) ? (1 << DBD) - 1 : 0);
 	const __m128i  mask_lsb = _mm_set1_epi16 (0x00FF);
 

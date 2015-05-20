@@ -288,7 +288,7 @@ void	BitBltConv::bitblt_flt_to_int_avx2 (typename DST::Ptr::Type dst_ptr, int ds
 
 	const __m256i  mask_lsb = _mm256_set1_epi16 (0x00FF);
 	const __m256i  sign_bit = _mm256_set1_epi16 (-0x8000);
-	const __m256i	zero     = _mm256_setzero_si256 ();
+	const __m256i  zero     = _mm256_setzero_si256 ();
 	const __m256   offset   = _mm256_set1_ps (-32768);
 
 	const int      w16 = w & -16;
@@ -355,7 +355,7 @@ void	BitBltConv::bitblt_ixx_to_x16_avx2 (typename DST::Ptr::Type dst_ptr, int ds
 	src_stride /= sizeof (typename SRC::PtrConst::DataType);
 	dst_stride /= sizeof (typename DST::Ptr::DataType);
 
-	const __m256i	zero     = _mm256_setzero_si256 ();
+	const __m256i  zero     = _mm256_setzero_si256 ();
 	const __m256i  val_ma   = _mm256_set1_epi16 ((DBD < 16) ? (1 << DBD) - 1 : 0);
 	const __m256i  mask_lsb = _mm256_set1_epi16 (0x00FF);
 

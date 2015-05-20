@@ -27,8 +27,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include	"vsutl/ObjRefSPtr.h"
-#include	"VapourSynth.h"
+#include "vsutl/ObjRefSPtr.h"
+#include "VapourSynth.h"
 
 
 

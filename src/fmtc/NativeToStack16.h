@@ -45,7 +45,7 @@ class NativeToStack16
 
 public:
 
-	explicit			NativeToStack16 (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi);
+	explicit       NativeToStack16 (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi);
 	virtual        ~NativeToStack16 () {}
 
 	// vsutl::FilterBase
