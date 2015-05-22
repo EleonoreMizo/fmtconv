@@ -337,9 +337,8 @@ void	Scaler::process_plane_flt_cpp (typename DST::Ptr::Type dst_ptr, typename SR
 	assert (y_dst_beg >= 0);
 	assert (y_dst_beg < y_dst_end);
 	assert (y_dst_end <= _dst_height);
-
-	dst_stride /= sizeof (typename DST::Ptr::DataType);
-	src_stride /= sizeof (typename SRC::PtrConst::DataType);
+	assert (width <= dst_stride);
+	assert (width <= src_stride);
 
 	const float    add_cst = float (_add_cst_flt);
 
@@ -404,9 +403,8 @@ void	Scaler::process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SR
 	assert (y_dst_beg >= 0);
 	assert (y_dst_beg < y_dst_end);
 	assert (y_dst_end <= _dst_height);
-
-	dst_stride /= sizeof (typename DST::Ptr::DataType);
-	src_stride /= sizeof (typename SRC::PtrConst::DataType);
+	assert (width <= dst_stride);
+	assert (width <= src_stride);
 
 	// Rounding constant for the final shift
 	const int      r_cst    = 1 << (SHIFT_INT + SB - DB - 1);
@@ -495,6 +493,8 @@ void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 	assert (y_dst_beg >= 0);
 	assert (y_dst_beg < y_dst_end);
 	assert (y_dst_end <= _dst_height);
+	assert (width <= dst_stride);
+	assert (width <= src_stride);
 
 	const __m128i  zero     = _mm_setzero_si128 ();
 	const __m128i  mask_lsb = _mm_set1_epi16 (0x00FF);
@@ -601,6 +601,8 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 	assert (y_dst_beg >= 0);
 	assert (y_dst_beg < y_dst_end);
 	assert (y_dst_end <= _dst_height);
+	assert (width <= dst_stride);
+	assert (width <= src_stride);
 
 	// Rounding constant for the final shift
 	const int      r_cst    = 1 << (SHIFT_INT + SB - DB - 1);
