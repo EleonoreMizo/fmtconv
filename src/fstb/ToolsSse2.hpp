@@ -366,18 +366,18 @@ void	ToolsSse2::store_si128_partial (void *ptr, __m128i val, int len)
 	if ((len & 1) != 0)
 	{
 		*(reinterpret_cast <uint8_t  *> (ptr) + len - 1) = tmp.v08 [len - 1];
-		len >>= 1;
 	}
+	len >>= 1;
 	if ((len & 1) != 0)
 	{
 		*(reinterpret_cast <uint16_t *> (ptr) + len - 1) = tmp.v16 [len - 1];
-		len >>= 1;
 	}
+	len >>= 1;
 	if ((len & 1) != 0)
 	{
 		*(reinterpret_cast <uint32_t *> (ptr) + len - 1) = tmp.v32 [len - 1];
-		len >>= 1;
 	}
+	len >>= 1;
 	if (len != 0)
 	{
 		* reinterpret_cast <uint64_t *> (ptr)            = tmp.v64 [0      ];
@@ -426,13 +426,13 @@ void	ToolsSse2::store_epi64_partial (void *ptr, __m128i val, int len)
 	if ((len & 1) != 0)
 	{
 		*(reinterpret_cast <uint8_t  *> (ptr) + len - 1) = tmp.v08 [len - 1];
-		len >>= 1;
 	}
+	len >>= 1;
 	if ((len & 1) != 0)
 	{
 		*(reinterpret_cast <uint16_t *> (ptr) + len - 1) = tmp.v16 [len - 1];
-		len >>= 1;
 	}
+	len >>= 1;
 	if (len != 0)
 	{
 		*(reinterpret_cast <uint32_t *> (ptr) + len - 1) = tmp.v32 [len - 1];
