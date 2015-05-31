@@ -54,9 +54,9 @@ public:
                   operator [] (long pos);
 
 	static inline long
-						size ();
+	               size ();
 	static inline long
-						length ();
+	               length ();
 
 
 
@@ -70,7 +70,7 @@ protected:
 
 private:
 
-	Element			_data [LENGTH];
+	Element        _data [LENGTH];
 
 
 
@@ -78,8 +78,8 @@ private:
 
 private:
 
-	bool				operator == (const Array <T, LENGTH> &other) const;
-	bool				operator != (const Array <T, LENGTH> &other) const;
+	bool           operator == (const Array <T, LENGTH> &other) const;
+	bool           operator != (const Array <T, LENGTH> &other) const;
 
 };	// class Array
 
