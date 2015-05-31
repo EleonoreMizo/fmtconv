@@ -403,6 +403,18 @@
     <ClInclude Include="vsutl\FuncRefSPtr.h">
       <Filter>vsutl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\MatrixProc.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\Mat4.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\Mat4.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\MatrixProc_macro.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">
@@ -555,8 +567,14 @@
     <ClCompile Include="vsutl\CpuOpt.cpp">
       <Filter>vsutl</Filter>
     </ClCompile>
-    <ClCompile Include="fmtc\Matrix_avx2.cpp">
-      <Filter>fmtc</Filter>
+    <ClCompile Include="fmtcl\MatrixProc.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\MatrixProc_avx2.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\MatrixProc_avx.cpp">
+      <Filter>fmtcl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

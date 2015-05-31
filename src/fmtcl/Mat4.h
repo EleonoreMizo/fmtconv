@@ -1,0 +1,122 @@
+/*****************************************************************************
+
+        Mat4.h
+        Author: Laurent de Soras, 2015
+
+--- Legal stuff ---
+
+This program is free software. It comes without any warranty, to
+the extent permitted by applicable law. You can redistribute it
+and/or modify it under the terms of the Do What The Fuck You Want
+To Public License, Version 2, as published by Sam Hocevar. See
+http://sam.zoy.org/wtfpl/COPYING for more details.
+
+*Tab=3***********************************************************************/
+
+
+
+#pragma once
+#if ! defined (fmtcl_Mat4_HEADER_INCLUDED)
+#define	fmtcl_Mat4_HEADER_INCLUDED
+
+#if defined (_MSC_VER)
+	#pragma warning (4 : 4250)
+#endif
+
+
+
+/*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+#include "conc/Array.h"
+
+
+
+namespace fmtcl
+{
+
+
+
+class Mat4
+{
+
+/*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+public:
+
+	enum {         VECT_SIZE = 4 };
+
+	enum Preset
+	{
+		Preset_SOLID = 0,
+		Preset_DIAGONAL,
+
+		Preset_NBR_ELT
+	};
+
+	typedef conc::Array <double, VECT_SIZE> Row4;
+
+	inline         Mat4 ();
+	inline explicit
+	               Mat4 (double filler, Preset preset = Preset_SOLID);
+	inline         Mat4 (const double content [4] [4]);
+	inline         Mat4 (const Mat4 &other);
+	virtual        ~Mat4 () {}
+	inline Mat4 &  operator = (const Mat4 &other);
+
+	inline bool    operator == (const Mat4 &other) const;
+	inline bool    operator != (const Mat4 &other) const;
+
+	inline Mat4 &  operator += (const Mat4 &other);
+	inline Mat4 &  operator -= (const Mat4 &other);
+	inline Mat4 &  operator *= (const Mat4 &other);
+
+	inline const Row4 &
+                  operator [] (long pos) const;
+	inline Row4 &  operator [] (long pos);
+
+
+
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+protected:
+
+
+
+/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+private:
+
+	typedef conc::Array <Row4, VECT_SIZE> MatArr;
+
+	MatArr         _data;
+
+
+
+/*\\\ FORBIDDEN MEMBER FUNCTIONS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+private:
+
+
+};	// class Mat4
+
+
+
+inline Mat4	operator + (const Mat4 &lhs, const Mat4 &rhs);
+inline Mat4	operator - (const Mat4 &lhs, const Mat4 &rhs);
+inline Mat4	operator * (const Mat4 &lhs, const Mat4 &rhs);
+
+
+
+}	// namespace fmtcl
+
+
+
+#include "fmtcl/Mat4.hpp"
+
+
+
+#endif	// fmtcl_Mat4_HEADER_INCLUDED
+
+
+
+/*\\\ EOF \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/

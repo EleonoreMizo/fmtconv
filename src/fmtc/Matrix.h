@@ -30,6 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 #include "fmtcl/CoefArrInt.h"
 #include "fmtcl/ColorSpaceH265.h"
+#include "fmtcl/MatrixProc.h"
 #include "fstb/AllocAlign.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
@@ -39,11 +40,17 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 	#include <emmintrin.h>
 #endif
 
+#include <memory>
 #include <vector>
 
 #include <cstdint>
 
 
+
+namespace fmtcl
+{
+	class Mat4;
+}
 
 namespace fmtc
 {
@@ -95,49 +102,22 @@ private:
 		Dir_NBR_ELT
 	};
 
-	typedef double Mat4 [NBR_PLANES+1] [NBR_PLANES+1];
-
 	const ::VSFormat *
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src, int &plane_out, bool &force_col_fam_flag) const;
 
-	void           config_avx2_matrix_n ();
-
-	template <typename DT, int DB, typename ST, int SB>
-	void           apply_matrix_3_cpp_int (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-	template <typename DT, int DB, typename ST, int SB>
-	void           apply_matrix_1_cpp_int (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	template <class DST, int DB, class SRC, int SB, int NP>
-	void           apply_matrix_n_sse2_int (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-	template <class DST, int DB, class SRC, int SB, int NP>
-	void           apply_matrix_n_avx2_int (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-#endif
-
-	void           apply_matrix_3_cpp_flt (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-	void           apply_matrix_1_cpp_flt (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	void           apply_matrix_3_sse_flt (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-	void           apply_matrix_1_sse_flt (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-	void           apply_matrix_3_avx_flt (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-	void           apply_matrix_1_avx_flt (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-#endif
-
-	void           prepare_coef_int (const ::VSFormat &fmt_dst, const ::VSFormat &fmt_src, int nbr_expected_coef);
-	void           prepare_coef_flt (const ::VSFormat &fmt_dst, const ::VSFormat &fmt_src);
+	void           prepare_coef (const ::VSFormat &fmt_dst, const ::VSFormat &fmt_src);
 	void           override_fmt_with_csp (::VSFormat &fmt) const;
-	void           move_matrix_row ();
 
 	const ::VSFormat *
 	               find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, const ::VSFormat *fmt_dst_ptr, const ::VSFormat &fmt_src, ::VSCore &core);
-	void           make_mat_from_str (Mat4 &m, const std::string &mat, bool to_rgb_flag) const;
+	void           make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_rgb_flag) const;
 
-	static void    mul_mat (Mat4 &dst, const Mat4 &src);
-	static void    mul_mat (Mat4 &dst, const Mat4 &lhs, const Mat4 &rhs);
-	static void    copy_mat (Mat4 &dst, const Mat4 &src);
-	static void    make_mat_yuv (Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag);
-	static void    make_mat_ycgco (Mat4 &m, bool to_rgb_flag);
-	static void		make_mat_flt_int (Mat4 &m, bool to_flt_flag, const ::VSFormat &fmt, bool full_flag);
-	static void    complete_mat3 (Mat4 &m);
+	static fmtcl::SplFmt
+	               conv_to_splfmt (const ::VSFormat &fmt);
+	static void    make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag);
+	static void    make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag);
+	static void		make_mat_flt_int (fmtcl::Mat4 &m, bool to_flt_flag, const ::VSFormat &fmt, bool full_flag);
+	static void    complete_mat3 (fmtcl::Mat4 &m);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
@@ -154,28 +134,13 @@ private:
 	bool           _range_set_dst_flag;
 	bool           _full_range_src_flag;
 	bool           _full_range_dst_flag;
-	Mat4           _mat_main;       // Main matrix, float input, float output
+	fmtcl::Mat4    _mat_main;       // Main matrix, float input, float output
 	fmtcl::ColorSpaceH265
 	               _csp_out;
 	int            _plane_out;      // Plane index for single plane output (0-2), or a negative number if all planes are processed.
 
-	std::vector <float>
-	               _coef_flt_arr;
-
-	// Integer coefficients are all scaled with SHIFT_INT.
-	// The additive coefficient contains the rounding constant too.
-	std::vector <int>
-						_coef_int_arr;
-
-	// Same as integer, excepted:
-	// Additive coefficients are stored in 4 x 32-bit integers.
-	// They may also contain a bias compensating the sign bit flip when the
-	// output format is 16 bits.
-	fmtcl::CoefArrInt
-	               _coef_simd_arr;
-
-	void (ThisType::*
-	               _apply_matrix_ptr) (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
+	std::unique_ptr <fmtcl::MatrixProc>
+	               _proc_uptr;
 
 
 

@@ -39,6 +39,12 @@ namespace fmtcl
 
 
 template <class T>
+typename Proxy::Ptr1 <T>::Type	Proxy::Ptr1 <T>::make_ptr (const uint8_t *ptr, int /*stride_bytes*/, int /*h*/)
+{
+	return ((T *) ptr);
+}
+
+template <class T>
 void	Proxy::Ptr1 <T>::jump (Type &ptr, int stride)
 {
 	ptr += stride;
@@ -59,6 +65,15 @@ void	Proxy::Ptr1 <T>::copy (const Type &dst_ptr, const typename Ptr1 <const T>::
 }
 
 
+
+template <class T>
+typename Proxy::Ptr2 <T>::Type	Proxy::Ptr2 <T>::make_ptr (const uint8_t *ptr, int stride_bytes, int h)
+{
+	return (Type (
+		(T *) ptr,
+		(T *) (ptr + h * stride_bytes)
+	));
+}
 
 template <class T>
 Proxy::Ptr2 <T>::Type::Type (T *msb_ptr, T *lsb_ptr)

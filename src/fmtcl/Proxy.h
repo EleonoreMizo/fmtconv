@@ -3,6 +3,9 @@
         Proxy.h
         Author: Laurent de Soras, 2012
 
+		  Abstraction for pointers.
+		  Handles Stack16 format as a single pointer.
+
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to
@@ -44,14 +47,14 @@ class Proxy
 
 public:
 
-	// Pointer abstractions
-
 	template <class T>
 	class Ptr1
 	{
 	public:
 		typedef  T           DataType;
 		typedef  T *         Type;
+		static fstb_FORCEINLINE Type
+		               make_ptr (const uint8_t *ptr, int /*stride_bytes*/, int /*h*/);
 		static fstb_FORCEINLINE void
 		               jump (Type &ptr, int stride);
 		static fstb_FORCEINLINE bool
@@ -72,6 +75,8 @@ public:
 			T *            _msb_ptr;
 			T *            _lsb_ptr;
 		};
+		static fstb_FORCEINLINE Type
+		               make_ptr (const uint8_t *ptr, int stride_bytes, int h);
 		static fstb_FORCEINLINE void
 		               jump (Type &ptr, int stride);
 		static fstb_FORCEINLINE bool

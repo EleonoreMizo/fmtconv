@@ -189,7 +189,7 @@ subfolders. Then:
 <li>Add <code>.</code> (the <code>src</code> directory) as include path.</li>
 <li>Use the <code>v120_xp</code> toolset for the 32-bit version.</li>
 <li>For the whole project, enable the SS2 instruction set.</li>
-<li>Enable the AVX2 instruction set for the <code>*.cpp</code> files containing <code>avx2</code> in their name.</li>
+<li>Enable the AVX2 instruction set for the <code>*.cpp</code> files containing <code>avx2</code> in their name, and the AVX set for the <code>avx</code> files.</li>
 <li>Enable optimizations maximizing speed and “any suitable” functions for inlining.</li>
 </ul>
 
@@ -212,7 +212,8 @@ Use the following options (on a single line):</p>
 -Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow</pre>
 
 <p>You’ll need to replace <code>-msse2</code> with <code>-mavx2</code> for all
-the <code>*.cpp</code> files containing <code>avx2</code> in their name.</p>
+the <code>*.cpp</code> files containing <code>avx2</code> in their name.
+Same with <code>-mavx</code> and <code>avx</code> files.</p>
 
 <p>Be careful, some files located in different directories have the same name.
 To avoid conflicts and missing symbols, keep the source directory structure for
@@ -669,7 +670,7 @@ This is because in float, a neutral chroma (0%) is converted to the exact
 value of a medium gray (50%).
 In integer, the chroma output value is mapped 1&ndash;1 to the luma channel.
 However in TV-range, medium gray is not located exactly at the half of the
-range, it lies slightly below.</p>
+data range, it lies slightly below.</p>
 
 <p class="var">cpuopt</p>
 <p>Limits the CPU instruction set.
@@ -1340,10 +1341,15 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
+<p><b>r16, 2015.xx.xx</b></p>
+<ul>
+<li></li>
+</ul>
+
 <p><b>r15, 2015.05.22</b></p>
 <ul>
 <li><code>resample</code> and <code>bitdepth</code>: fixed a bug creating dark lines or weird patterns. Was introduced in r13 while trying to fix the buffer overflow problem. Thanks to feisty2 for spotting it.</li>
-<li><code>resample</code>: fixed the non-SIMD code path, causing crashes.
+<li><code>resample</code>: fixed the non-SIMD code path, causing crashes.</li>
 </ul>
 
 <p><b>r14, 2015.05.20</b></p>

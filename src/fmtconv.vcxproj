@@ -182,6 +182,10 @@
     <ClInclude Include="fmtcl\ErrDifBufFactory.h" />
     <ClInclude Include="fmtcl\FilterResize.h" />
     <ClInclude Include="fmtcl\KernelData.h" />
+    <ClInclude Include="fmtcl\Mat4.h" />
+    <ClInclude Include="fmtcl\Mat4.hpp" />
+    <ClInclude Include="fmtcl\MatrixProc.h" />
+    <ClInclude Include="fmtcl\MatrixProc_macro.h" />
     <ClInclude Include="fmtcl\Proxy.h" />
     <ClInclude Include="fmtcl\Proxy.hpp" />
     <ClInclude Include="fmtcl\ProxyRwAvx2.h" />
@@ -315,13 +319,17 @@
     <ClCompile Include="fmtcl\ErrDifBufFactory.cpp" />
     <ClCompile Include="fmtcl\FilterResize.cpp" />
     <ClCompile Include="fmtcl\KernelData.cpp" />
+    <ClCompile Include="fmtcl\MatrixProc.cpp" />
+    <ClCompile Include="fmtcl\MatrixProc_avx.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="fmtcl\MatrixProc_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="fmtcl\ResampleSpecPlane.cpp" />
     <ClCompile Include="fmtcl\ResizeData.cpp" />
     <ClCompile Include="fmtcl\ResizeDataFactory.cpp" />
-    <ClCompile Include="fmtcl\Scaler.cpp">
-      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AssemblyAndSourceCode</AssemblerOutput>
-      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyAndSourceCode</AssemblerOutput>
-    </ClCompile>
+    <ClCompile Include="fmtcl\Scaler.cpp" />
     <ClCompile Include="fmtcl\CoefArrInt.cpp" />
     <ClCompile Include="fmtcl\Scaler_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
@@ -331,21 +339,12 @@
     <ClCompile Include="fmtc\ConvStep.cpp" />
     <ClCompile Include="fmtc\Matrix.cpp" />
     <ClCompile Include="fmtc\Matrix2020CL.cpp" />
-    <ClCompile Include="fmtc\Matrix_avx2.cpp">
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-    </ClCompile>
     <ClCompile Include="fmtc\NativeToStack16.cpp" />
     <ClCompile Include="fmtc\Resample.cpp" />
     <ClCompile Include="fmtc\Stack16ToNative.cpp" />
-    <ClCompile Include="fmtc\Transfer.cpp">
-      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AssemblyAndSourceCode</AssemblerOutput>
-      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AssemblyAndSourceCode</AssemblerOutput>
-    </ClCompile>
+    <ClCompile Include="fmtc\Transfer.cpp" />
     <ClCompile Include="fmtc\Transfer_avx2.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <ClCompile Include="fstb\CpuId.cpp" />
     <ClCompile Include="fstb\ToolsAvx2.cpp">
