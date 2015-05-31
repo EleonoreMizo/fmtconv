@@ -242,6 +242,8 @@ void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 		src_ptr += stride_src;
 		dst_ptr += stride_dst;
 	}
+
+	_mm256_zeroupper ();	// Back to SSE state
 }
 
 
