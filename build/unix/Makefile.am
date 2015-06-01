@@ -133,7 +133,6 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/Mat4.hpp \
                         ../../src/fmtcl/MatrixProc.cpp \
                         ../../src/fmtcl/MatrixProc.h \
-                        ../../src/fmtcl/MatrixProc_avx.cpp \
                         ../../src/fmtcl/MatrixProc_macro.h \
                         ../../src/fmtcl/Proxy.h \
                         ../../src/fmtcl/Proxy.hpp \
@@ -188,14 +187,13 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
 libfmtconv_la_LDFLAGS = -no-undefined -avoid-version $(PLUGINLDFLAGS)
 
 
-noinst_LTLIBRARIES = libavx.la
+noinst_LTLIBRARIES = libavx.la libavx2.la
+
 
 libavx_la_SOURCES = ../../src/fmtcl/MatrixProc_avx.cpp
 
 libavx_la_CXXFLAGS = $(AM_CXXFLAGS) -mavx
 
-
-noinst_LTLIBRARIES = libavx2.la
 
 libavx2_la_SOURCES = ../../src/fmtcl/BitBltConv_avx2.cpp \
                      ../../src/fmtcl/MatrixProc_avx2.cpp \
