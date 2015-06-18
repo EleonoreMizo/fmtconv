@@ -102,7 +102,9 @@ void	BitBltConv::bitblt (SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t 
 	assert (h > 0);
 
 	// Simple copy (same format)
-	if (src_fmt == dst_fmt && src_res == dst_res)
+	if (   src_fmt == dst_fmt
+	    && src_res == dst_res
+	    && is_si_neutral (scale_info_ptr))
 	{
 		bitblt_same_fmt (
 			dst_fmt,
@@ -281,10 +283,7 @@ void	BitBltConv::bitblt_flt_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t 
 		reinterpret_cast <uint16_t *> (dst_ptr)
 	);
 
-	const bool     scale_flag =
-		(   scale_info_ptr != 0
-		 && (   scale_info_ptr->_gain    != 1
-		     || scale_info_ptr->_add_cst != 0));
+	const bool     scale_flag = ! is_si_neutral (scale_info_ptr);
 
 #define	fmtcl_BitBltConv_CASE(SCF, SSE2F, TYPEF, TYPEP, DFMT, DPTR) \
 	case	(SCF << 5) + (SSE2F << 4) + SplFmt_##DFMT: \
@@ -813,6 +812,15 @@ void	BitBltConv::bitblt_ixx_to_x16_sse2 (typename DST::Ptr::Type dst_ptr, int ds
 }
 
 #endif
+
+
+
+bool	BitBltConv::is_si_neutral (const ScaleInfo *scale_info_ptr)
+{
+	return (       scale_info_ptr           == 0
+	        || (   scale_info_ptr->_gain    == 1
+	            && scale_info_ptr->_add_cst == 0));
+}
 
 
 

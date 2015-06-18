@@ -114,6 +114,8 @@ private:
 	static void    bitblt_ixx_to_x16_avx2 (typename DST::Ptr::Type dst_ptr, int dst_stride, typename SRC::PtrConst::Type src_ptr, int src_stride, int w, int h);
 #endif
 
+	static bool    is_si_neutral (const ScaleInfo *scale_info_ptr);
+
 	bool           _sse2_flag;
 	bool           _avx2_flag;
 
