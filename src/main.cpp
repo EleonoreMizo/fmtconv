@@ -560,6 +560,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"fulls:int:opt;"
 		"fulld:int:opt;"
 		"cpuopt:int:opt;"
+		"blacklvl:float:opt;"
 		, &vsutl::Redirect <fmtc::Transfer>::create, 0, plugin_ptr
 	);
 

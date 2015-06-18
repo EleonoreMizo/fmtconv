@@ -83,6 +83,9 @@ This does not mean it is slow or unoptimized, but fmtconv is clearly not on par 
 core = vs.get_core ()
 core.std.LoadPlugin (path=r'C:\path\fmtconv.dll')</pre>
 
+<p>Of course you can avoid the <code>LoadPlugin</code> command by copying the
+plug-in file to the autoloading directory.
+Check the Vapoursynth manual for more information.</p>
 
 <h3><a id="examples"></a>Examples</h3>
 
@@ -383,6 +386,7 @@ and remains the same every frame.</p>
 
 <h3><a id="convert"></a>convert</h3>
 
+<div style="width: 0; height: 0; visibility:hidden; display:none; overflow:hidden;">
 <pre class="proto">fmtc.convert (
 	# Input
 	clip       : clip        ;
@@ -463,6 +467,7 @@ and remains the same every frame.</p>
 
 	cpuopt     : int    : opt; (-1)
 )</pre>
+</div>
 
 <p>Multi-purpose conversion function.</p>
 
@@ -1024,7 +1029,7 @@ in Masktools 2.</p>
 <table>
 <tr><td><b>&minus;65535</b><br />to <b>&plus;0.5</b></td><td>All the pixels of the plane will be set to &minus;x (the opposite of the specified value). The range depends on the output data type. Remember, in floating-point YUV, the chroma planes range from &minus;0.5 to &plus;0.5.</td></tr>
 <tr><td><b>1</b></td><td>The plane will not be processed. This means that the content of the output plane is pure garbage.</td></tr>
-<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Areas out of the input picture are left unprocessed.</td></tr>
+<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Areas out of the input picture are left unprocessed. Range (full or TV) conversions are ignored.</td></tr>
 <tr><td><b>3</b></td><td>The plane will be processed.</td></tr>
 </table>
 
@@ -1198,6 +1203,7 @@ If it’s not the case, floating point operations are silently used as fallback.
 	fulls      : int    : opt; (True)
 	fulld      : int    : opt; (True)
 	cpuopt     : int    : opt; (-1)
+	blacklvl   : float  : opt; (0)
 )</pre>
 
 <p>Applies electro-optical and opto-electrical transfer characteristics to the
@@ -1302,6 +1308,16 @@ This value has no meaning for float data.</p>
 1: limit to SSE2,
 10: limit to AVX2.</p>
 
+<p class="var">blacklvl</p>
+<p>Black level value (linear range) for the electro-optical transfer function.
+It shifts and stretches the transfer curve in order to make the black value in
+gamma-encoded range match the specified level in linear range.
+Raising the black level is equivalent to increasing the brightness setting
+combined with a slight contrast reduction not to alter the white.
+The parameter should be &ge; 0.
+There is no specific unit, it’s just a value from the target linear range,
+generally in 0–1.</p>
+
 
 
 <h3><a id="stack16tonative"></a>stack16tonative, nativetostack16</h3>
@@ -1343,7 +1359,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <p><b>r16, 2015.xx.xx</b></p>
 <ul>
-<li></li>
+<li><code>transfer</code>: added the <var>blacklvl</var> parameter.</li>
 </ul>
 
 <p><b>r15, 2015.05.22</b></p>
@@ -1395,6 +1411,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <p><b>r8, 2013.11.30</b></p>
 <ul>
 	<li><code>resample</code>: Fixed bugs introduced in r7.</li>
+	<li>Fixed a range conversion issue in “plane copy” modes with source and destination formats are the same.</li>
 </ul>
 
 <p><b>r7, 2013.11.27</b></p>

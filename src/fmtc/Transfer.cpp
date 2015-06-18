@@ -65,6 +65,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 ,	_transd (get_arg_str (in, out, "transd", ""))
 ,	_contrast (get_arg_flt (in, out, "cont", 1))
 ,	_gcor (get_arg_flt (in, out, "gcor", 1))
+,	_lvl_black (get_arg_flt (in, out, "blacklvl", 0))
 ,	_full_range_src_flag (get_arg_int (in, out, "fulls", 1) != 0)
 ,	_full_range_dst_flag (get_arg_int (in, out, "fulld", 1) != 0)
 ,	_curve_s (fmtcl::TransCurve_UNDEF)
@@ -298,6 +299,22 @@ Transfer::TransOpContrast::TransOpContrast (double cont)
 double	Transfer::TransOpContrast::operator () (double x) const
 {
 	return (x * _cont);
+}
+
+
+
+Transfer::TransOpAffine::TransOpAffine (double a, double b)
+:	_a (a)
+,	_b (b)
+{
+	assert (a != 0);
+}
+
+
+
+double	Transfer::TransOpAffine::operator () (double x) const
+{
+	return (x * _a + _b);
 }
 
 
@@ -605,23 +622,39 @@ Transfer::TransOpLogC::TransOpLogC (bool inv_flag, bool v2_flag)
 
 
 
+const double		Transfer::TransOpLogC::_noise_margin = -8.0 / 65536;
+
 // 1 is log peak white.
 double	Transfer::TransOpLogC::operator () (double x) const
 {
-	static const double  noise_margin = -8.0 / 65536;
-	double         y = x;
-	if (_inv_flag)
-	{
-		x = std::min (x, 1.0);
-		y = (x > _cut_i) ? (pow (10, (x - _d) / _c) - _b) / _a : (x - _f) / _e;
-		y = std::max (y, noise_margin);
-	}
-	else
-	{
-		x = std::max (x, noise_margin);
-		y = (x > _cut  ) ? _c * log10 (_a * x + _b) + _d : _e * x + _f;
-		y = std::min (y, 1.0);
-	}
+	return ((_inv_flag) ? compute_inverse (x) : compute_direct (x));
+}
+
+double	Transfer::TransOpLogC::get_max () const
+{
+	return (compute_inverse (1.0));
+}
+
+double	Transfer::TransOpLogC::compute_direct (double x) const
+{
+	x = std::max (x, _noise_margin);
+	double         y =
+		  (x > _cut  )
+		? _c * log10 (_a * x + _b) + _d
+		: _e * x + _f;
+	y = std::min (y, 1.0);
+
+	return (y);
+}
+
+double	Transfer::TransOpLogC::compute_inverse (double x) const
+{
+	x = std::min (x, 1.0);
+	double         y =
+		  (x > _cut_i)
+		? (pow (10, (x - _d) / _c) - _b) / _a
+		: (x - _f) / _e;
+	y = std::max (y, _noise_margin);
 
 	return (y);
 }
@@ -974,6 +1007,7 @@ void	Transfer::init_table ()
 	OpSPtr         op_s = conv_curve_to_op (_curve_s, true );
 	OpSPtr         op_d = conv_curve_to_op (_curve_d, false);
 
+	// Linear or log LUT?
 	_loglut_flag = false;
 	if (   _vi_in.format->sampleType == ::stFloat
 	    && _curve_s == fmtcl::TransCurve_LINEAR)
@@ -1006,17 +1040,62 @@ void	Transfer::init_table ()
 		}
 	}
 
+	// Black level
+	const double   lw = op_s->get_max ();
+	if (_lvl_black > 0 && _lvl_black < lw)
+	{
+		/*
+		Black level (brightness) and contrast settings as defined
+		in ITU-R BT.1886:
+			L = a' * fi (V + b')
+
+		With:
+			fi = EOTF (gamma to linear)
+			L  = Lb for V = 0
+			L  = Lw for V = Vmax
+
+		For power functions, could be rewritten as:
+			L = fi (a * V + b)
+
+		Substitution:
+			Lb = fi (           b)
+			Lw = fi (a * Vmax + b)
+
+		Then, given:
+			f = OETF (linear to gamma)
+
+		We get:
+			f (Lb) = b
+			f (Lw) = a * Vmax + b
+
+			b =           f (Lb)
+			a = (f (Lw) - f (Lb)) / Vmax
+		*/
+		OpSPtr         oetf = conv_curve_to_op (_curve_s, false);
+		const double   lwg  = (*oetf) (lw        );
+		const double   lbg  = (*oetf) (_lvl_black);
+		const double   vmax =  lwg;
+		const double   a    = (lwg - lbg) / vmax;
+		const double   b    =        lbg;
+		OpSPtr         op_a (new TransOpAffine (a, b));
+		op_s = OpSPtr (new TransOpCompose (op_a, op_s));
+	}
+
+	// Gamma correction
 	if (_gcor != 1)
 	{
 		OpSPtr         op_g (new TransOpPow (true, _gcor, 1, 1e6));
 		op_d = OpSPtr (new TransOpCompose (op_g, op_d));
 	}
+
+	// Contrast
 	if (_contrast != 1)
 	{
 		OpSPtr         op_c (new TransOpContrast (_contrast));
 		op_d = OpSPtr (new TransOpCompose (op_c, op_d));
 	}
 
+	// LUTify
 	OpSPtr         op_f (new TransOpCompose (op_s, op_d));
 	generate_lut (*op_f);
 }
@@ -1449,7 +1528,7 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 		ptr = OpSPtr (new TransOpLogTrunc (inv_flag, 0.4, sqrt (10) / 1000));
 		break;
 	case fmtcl::TransCurve_61966_2_4:
-		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5, -999, 999));
+		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5, -1e9, 1e9));
 		break;
 	case fmtcl::TransCurve_1361:
 		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5, -0.25, 1.33, 4));

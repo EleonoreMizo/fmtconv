@@ -134,6 +134,7 @@ private:
 	public:
 		virtual        ~TransOpInterface () {}
 		virtual double operator () (double x) const = 0;
+		virtual double get_max () const { return (1e9); }  // Linear
 	};
 
 	typedef  std::shared_ptr <Transfer::TransOpInterface> OpSPtr;
@@ -166,6 +167,17 @@ private:
 		double         _cont;
 	};
 
+	class TransOpAffine
+	:	public TransOpInterface
+	{
+	public:
+		explicit       TransOpAffine (double a, double b);
+		virtual double operator () (double x) const;
+	private:
+		double         _a;
+		double         _b;
+	};
+
 	class TransOpLinPow
 	:	public TransOpInterface
 	{
@@ -175,6 +187,7 @@ private:
 		//                  L <= -beta / scneg: V = - (alpha * pow (-L * scneg, p1) - (alpha - 1)) / scneg
 		explicit       TransOpLinPow (bool inv_flag, double alpha, double beta, double p1, double slope, double lb = 0, double ub = 1, double scneg = 1, double p2 = 1);
 		virtual double operator () (double x) const;
+		virtual double get_max () const { return (_ub); }
 	private:
 		const bool     _inv_flag;
 		const double   _alpha;
@@ -201,6 +214,7 @@ private:
 	public:
 		explicit       TransOpLogTrunc (bool inv_flag, double alpha, double beta);
 		virtual double operator () (double x) const;
+		virtual double get_max () const { return (1.0); }
 	private:
 		const bool     _inv_flag;
 		const double   _alpha;
@@ -213,6 +227,7 @@ private:
 	public:
 		explicit       TransOpPow (bool inv_flag, double p_i, double alpha = 1, double val_max = 1);
 		virtual double operator () (double x) const;
+		virtual double get_max () const { return (_val_max); }
 	private:
 		const bool     _inv_flag;
 		const double   _p_i;
@@ -227,6 +242,7 @@ private:
 	public:
 		explicit       TransOp2084 (bool inv_flag);
 		virtual double operator () (double x) const;
+		virtual double get_max () const { return (1.0); }
 	private:
 		const bool     _inv_flag;
 	};
@@ -237,6 +253,7 @@ private:
 	public:
 		explicit       TransOpFilmStream (bool inv_flag);
 		virtual double operator () (double x) const;
+		virtual double get_max () const { return (1.0); }
 	private:
 		const bool     _inv_flag;
 	};
@@ -247,6 +264,7 @@ private:
 	public:
 		explicit       TransOpSLog (bool inv_flag);
 		virtual double operator () (double x) const;
+		virtual double get_max () const { return (10.0); }
 	private:
 		const bool     _inv_flag;
 	};
@@ -257,7 +275,10 @@ private:
 	public:
 		explicit       TransOpLogC (bool inv_flag, bool v2_flag);
 		virtual double operator () (double x) const;
+		virtual double get_max () const;
 	private:
+		double         compute_direct (double x) const;
+		double         compute_inverse (double x) const;
 		const bool     _inv_flag;
 		const bool     _v2_flag;
 		double         _cut;
@@ -268,6 +289,8 @@ private:
 		double         _e;
 		double         _f;
 		double         _cut_i;
+		static const double
+		               _noise_margin;
 	};
 
 	class TransOpCanonLog
@@ -276,6 +299,7 @@ private:
 	public:
 		explicit       TransOpCanonLog (bool inv_flag);
 		virtual double operator () (double x) const;
+		virtual double get_max () const { return (8.00903); }
 	private:
 		const bool     _inv_flag;
 	};
@@ -377,6 +401,7 @@ private:
 	std::string    _transd;
 	double         _contrast;
 	double         _gcor;
+	double         _lvl_black;
 	bool           _full_range_src_flag;
 	bool           _full_range_dst_flag;
 	fmtcl::TransCurve
