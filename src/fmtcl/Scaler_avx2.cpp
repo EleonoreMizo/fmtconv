@@ -27,6 +27,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtcl/ContFirInterface.h"
 #include "fmtcl/ProxyRwAvx2.h"
+#include "fmtcl/ReadWrapperFlt.h"
+#include "fmtcl/ReadWrapperInt.h"
 #include "fmtcl/Scaler.h"
 #include "fmtcl/ScalerCopy.h"
 #include "fstb/fnc.h"
@@ -72,6 +74,31 @@ void  Scaler::setup_avx2 ()
 
 #undef fmtcl_Scaler_INIT_F_AVX2
 #undef fmtcl_Scaler_INIT_I_AVX2
+
+
+
+template <class SRC, bool PF>
+static fstb_FORCEINLINE void	Scaler_process_vect_flt_avx2 (__m256 &sum0, __m256 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256 &add_cst, int len)
+{
+	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
+	// and save the add in the write proxy.
+	sum0 = add_cst;
+	sum1 = add_cst;
+
+	for (int k = 0; k < kernel_size; ++k)
+	{
+		__m256         coef = _mm256_set1_ps (coef_base_ptr [k]);
+		__m256         src0;
+		__m256         src1;
+		ReadWrapperFlt <SRC, PF>::read (pix_ptr, src0, src1, zero, len);
+		const __m256   val0 = _mm256_mul_ps (src0, coef);
+		const __m256   val1 = _mm256_mul_ps (src1, coef);
+		sum0 = _mm256_add_ps (sum0, val0);
+		sum1 = _mm256_add_ps (sum1, val1);
+
+		SRC::PtrConst::jump (pix_ptr, src_stride);
+	}
+}
 
 
 
@@ -136,7 +163,7 @@ void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				process_vect_flt_avx2 <SRC, false> (
+				Scaler_process_vect_flt_avx2 <SRC, false> (
 					sum0, sum1, kernel_size, coef_base_ptr,
 					pix_ptr, zero, src_stride, add_cst, 0
 				);
@@ -152,7 +179,7 @@ void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				process_vect_flt_avx2 <SRC, true> (
+				Scaler_process_vect_flt_avx2 <SRC, true> (
 					sum0, sum1, kernel_size, coef_base_ptr,
 					pix_ptr, zero, src_stride, add_cst, w15
 				);
@@ -170,27 +197,32 @@ void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 
 
 
-template <class SRC, bool PF>
-void	Scaler::process_vect_flt_avx2 (__m256 &sum0, __m256 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256 &add_cst, int len)
+template <class DST, int DB, class SRC, int SB, bool PF>
+static fstb_FORCEINLINE __m256i	Scaler_process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len)
 {
-	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
-	// and save the add in the write proxy.
-	sum0 = add_cst;
-	sum1 = add_cst;
+	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
+
+	__m256i        sum0 = add_cst;
+	__m256i        sum1 = add_cst;
 
 	for (int k = 0; k < kernel_size; ++k)
 	{
-		__m256         coef = _mm256_set1_ps (coef_base_ptr [k]);
-		__m256         src0;
-		__m256         src1;
-		ReadWrapperFlt <SRC, PF>::read (pix_ptr, src0, src1, zero, len);
-		const __m256   val0 = _mm256_mul_ps (src0, coef);
-		const __m256   val1 = _mm256_mul_ps (src1, coef);
-		sum0 = _mm256_add_ps (sum0, val0);
-		sum1 = _mm256_add_ps (sum1, val1);
+		const __m256i  coef = _mm256_load_si256 (coef_base_ptr + k);
+		const __m256i  src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
+			pix_ptr, zero, sign_bit, len
+		);
+
+		fstb::ToolsAvx2::mac_s16_s16_s32 (sum0, sum1, src, coef);
 
 		SRC::PtrConst::jump (pix_ptr, src_stride);
 	}
+
+	sum0 = _mm256_srai_epi32 (sum0, Scaler::SHIFT_INT + SB - DB);
+	sum1 = _mm256_srai_epi32 (sum1, Scaler::SHIFT_INT + SB - DB);
+
+	const __m256i  val = _mm256_packs_epi32 (sum0, sum1);
+
+	return (val);
 }
 
 
@@ -256,7 +288,7 @@ void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				const __m256i  val = process_vect_int_avx2 <
+				const __m256i  val = Scaler_process_vect_int_avx2 <
 					DST, DB, SRC, SB, false
 				> (
 					add_cst, kernel_size, coef_base_ptr,
@@ -280,7 +312,7 @@ void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				const __m256i  val = process_vect_int_avx2 <
+				const __m256i  val = Scaler_process_vect_int_avx2 <
 					DST, DB, SRC, SB, true
 				> (
 					add_cst, kernel_size, coef_base_ptr,
@@ -301,36 +333,6 @@ void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 
 		DST::Ptr::jump (dst_ptr, dst_stride);
 	}
-}
-
-
-
-template <class DST, int DB, class SRC, int SB, bool PF>
-__m256i	Scaler::process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len)
-{
-	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
-
-	__m256i        sum0 = add_cst;
-	__m256i        sum1 = add_cst;
-
-	for (int k = 0; k < kernel_size; ++k)
-	{
-		const __m256i  coef = _mm256_load_si256 (coef_base_ptr + k);
-		const __m256i  src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
-			pix_ptr, zero, sign_bit, len
-		);
-
-		fstb::ToolsAvx2::mac_s16_s16_s32 (sum0, sum1, src, coef);
-
-		SRC::PtrConst::jump (pix_ptr, src_stride);
-	}
-
-	sum0 = _mm256_srai_epi32 (sum0, SHIFT_INT + SB - DB);
-	sum1 = _mm256_srai_epi32 (sum1, SHIFT_INT + SB - DB);
-
-	const __m256i  val = _mm256_packs_epi32 (sum0, sum1);
-
-	return (val);
 }
 
 

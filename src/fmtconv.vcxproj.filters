@@ -385,9 +385,6 @@
     <ClInclude Include="fmtcl\TransCurve.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
-    <ClInclude Include="fmtc\Transfer.hpp">
-      <Filter>fmtc</Filter>
-    </ClInclude>
     <ClInclude Include="vsutl\CpuOpt.h">
       <Filter>vsutl</Filter>
     </ClInclude>
@@ -395,9 +392,6 @@
       <Filter>fmtcl</Filter>
     </ClInclude>
     <ClInclude Include="fmtcl\ProxyRwSse2.hpp">
-      <Filter>fmtcl</Filter>
-    </ClInclude>
-    <ClInclude Include="fmtcl\Scaler.hpp">
       <Filter>fmtcl</Filter>
     </ClInclude>
     <ClInclude Include="vsutl\FuncRefSPtr.h">
@@ -413,6 +407,69 @@
       <Filter>fmtcl</Filter>
     </ClInclude>
     <ClInclude Include="fmtcl\MatrixProc_macro.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\ReadWrapperFlt.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\ReadWrapperFlt.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\ReadWrapperInt.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\ReadWrapperInt.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\ArrayMultiType.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\ArrayMultiType.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpInterface.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpBypass.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpCompose.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpCompose.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpContrast.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpContrast.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpAffine.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpLinPow.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpLogTrunc.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpPow.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOp2084.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpFilmStream.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpSLog.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpLogC.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpCanonLog.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
   </ItemGroup>
@@ -574,6 +631,36 @@
       <Filter>fmtcl</Filter>
     </ClCompile>
     <ClCompile Include="fmtcl\MatrixProc_avx.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\ArrayMultiType.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpAffine.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpLinPow.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpLogTrunc.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpPow.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOp2084.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpFilmStream.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpSLog.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpLogC.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpCanonLog.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
   </ItemGroup>

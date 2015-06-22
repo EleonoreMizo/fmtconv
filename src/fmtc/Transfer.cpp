@@ -30,6 +30,18 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 
 #include "fmtc/Transfer.h"
+#include "fmtcl/TransOp2084.h"
+#include "fmtcl/TransOpAffine.h"
+#include "fmtcl/TransOpBypass.h"
+#include "fmtcl/TransOpCanonLog.h"
+#include "fmtcl/TransOpCompose.h"
+#include "fmtcl/TransOpContrast.h"
+#include "fmtcl/TransOpFilmStream.h"
+#include "fmtcl/TransOpLinPow.h"
+#include "fmtcl/TransOpLogC.h"
+#include "fmtcl/TransOpLogTrunc.h"
+#include "fmtcl/TransOpPow.h"
+#include "fmtcl/TransOpSLog.h"
 #include "fstb/fnc.h"
 #include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
@@ -47,6 +59,156 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 namespace fmtc
 {
+
+
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+
+
+
+template <class M>
+class Transfer_FindIndexSse2
+{
+public:
+	enum {         LINLUT_RES_L2  = Transfer::LINLUT_RES_L2 };
+	enum {         LINLUT_MIN_F   = Transfer::LINLUT_MIN_F  };
+	enum {         LINLUT_MAX_F   = Transfer::LINLUT_MAX_F  };
+	enum {         LINLUT_SIZE_F  = Transfer::LINLUT_SIZE_F };
+
+	enum {         LOGLUT_MIN_L2  = Transfer::LOGLUT_MIN_L2 };
+	enum {         LOGLUT_MAX_L2  = Transfer::LOGLUT_MAX_L2 };
+	enum {         LOGLUT_RES_L2  = Transfer::LOGLUT_RES_L2 };
+	enum {         LOGLUT_HSIZE   = Transfer::LOGLUT_HSIZE  };
+	enum {         LOGLUT_SIZE    = Transfer::LOGLUT_SIZE   };
+
+	static inline void
+		            find_index (const Transfer::FloatIntMix val_arr [4], __m128i &index, __m128 &frac);
+};
+
+
+
+template <>
+void	Transfer_FindIndexSse2 <Transfer::MapperLin>::find_index (const Transfer::FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
+{
+	assert (val_arr != 0);
+	assert (&index != 0);
+	assert (&frac != 0);
+	
+	const int      offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
+	const __m128   scale     = _mm_set1_ps (1 << LINLUT_RES_L2);
+	const __m128i  offset_ps = _mm_set1_epi32 (offset);
+	const __m128   val_min   = _mm_set1_ps (0                 - offset);
+	const __m128   val_max   = _mm_set1_ps (LINLUT_SIZE_F - 2 - offset);
+
+	const __m128   v         =
+		_mm_load_ps (reinterpret_cast <const float *> (val_arr));
+	__m128         val_scl   = _mm_mul_ps (v, scale);
+	val_scl = _mm_min_ps (val_scl, val_max);
+	val_scl = _mm_max_ps (val_scl, val_min);
+	const __m128i  index_raw = _mm_cvtps_epi32 (val_scl);
+	index     = _mm_add_epi32 (index_raw, offset_ps);
+	frac      = _mm_sub_ps (val_scl, _mm_cvtepi32_ps (index_raw));
+}
+
+
+
+template <>
+void	Transfer_FindIndexSse2 <Transfer::MapperLog>::find_index (const Transfer::FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
+{
+	assert (val_arr != 0);
+	assert (&index != 0);
+	assert (&frac != 0);
+
+	// Constants
+	static const int      mant_size = 23;
+	static const int      exp_bias  = 127;
+	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
+	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
+//	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
+	static const int      frac_size = mant_size - LOGLUT_RES_L2;
+	static const uint32_t frac_mask = (1 << frac_size) - 1;
+
+	const __m128   zero_f     = _mm_setzero_ps ();
+	const __m128   one_f      = _mm_set1_ps (1);
+	const __m128   frac_mul   = _mm_set1_ps (1.0f / (1 << frac_size));
+	const __m128   mul_eps    = _mm_set1_ps (1.0f / val_min);
+	const __m128   mask_abs_f = _mm_load_ps (
+		reinterpret_cast <const float *> (fstb::ToolsSse2::_mask_abs)
+	);
+
+	const __m128i  zero_i          = _mm_setzero_si128 ();
+	const __m128i  mask_abs_epi32  = _mm_set1_epi32 (0x7FFFFFFF);
+	const __m128i  one_epi32       = _mm_set1_epi32 (1);
+	const __m128i  base_epi32      = _mm_set1_epi32 (int (base));
+	const __m128i  frac_mask_epi32 = _mm_set1_epi32 (frac_mask);
+	const __m128i  val_min_epi32   =
+		_mm_set1_epi32 ((LOGLUT_MIN_L2 + exp_bias) << mant_size);
+	const __m128i  val_max_epi32   =
+		_mm_set1_epi32 ((LOGLUT_MAX_L2 + exp_bias) << mant_size);
+	const __m128i  index_max_epi32 =
+		_mm_set1_epi32 ((LOGLUT_MAX_L2 - LOGLUT_MIN_L2) << LOGLUT_RES_L2);
+	const __m128i  hsize_epi32     = _mm_set1_epi32 (LOGLUT_HSIZE);
+	const __m128i  mirror_epi32    = _mm_set1_epi32 (LOGLUT_HSIZE - 1);
+
+	// It really starts here
+	const __m128   val_f = _mm_load_ps (reinterpret_cast <const float *> (val_arr));
+	const __m128   val_a = _mm_and_ps (val_f, mask_abs_f);
+	const __m128i  val_i = _mm_load_si128 (reinterpret_cast <const __m128i *> (val_arr));
+	const __m128i  val_u = _mm_and_si128 (val_i, mask_abs_epi32);
+
+	// Standard path
+	__m128i        index_std = _mm_sub_epi32 (val_u, base_epi32);
+	index_std = _mm_srli_epi32 (index_std, frac_size);
+	index_std = _mm_add_epi32 (index_std, one_epi32);
+	__m128i        frac_stdi = _mm_and_si128 (val_u, frac_mask_epi32);
+	__m128         frac_std  = _mm_cvtepi32_ps (frac_stdi);
+	frac_std  = _mm_mul_ps (frac_std, frac_mul);
+
+	// Epsilon path
+	__m128         frac_eps  = _mm_max_ps (val_a, zero_f);
+	frac_eps = _mm_mul_ps (frac_eps, mul_eps);
+
+	// Range cases
+	const __m128i  eps_flag_i = _mm_cmpgt_epi32 (val_min_epi32, val_u);
+	const __m128i  std_flag_i = _mm_cmpgt_epi32 (val_max_epi32, val_u);
+	const __m128   eps_flag_f = _mm_castsi128_ps (eps_flag_i);
+	const __m128   std_flag_f = _mm_castsi128_ps (std_flag_i);
+	__m128i        index_tmp  =
+		fstb::ToolsSse2::select (std_flag_i, index_std, index_max_epi32);
+	__m128         frac_tmp   =
+		fstb::ToolsSse2::select (std_flag_f, frac_std, one_f);
+	index_tmp = fstb::ToolsSse2::select (eps_flag_i, zero_i, index_tmp);
+	frac_tmp  = fstb::ToolsSse2::select (eps_flag_f, frac_eps, frac_tmp);
+
+	// Sign cases
+	const __m128i  neg_flag_i = _mm_srai_epi32 (val_i, 31);
+	const __m128   neg_flag_f = _mm_castsi128_ps (neg_flag_i);
+	const __m128i  index_neg  = _mm_sub_epi32 (mirror_epi32, index_tmp);
+	const __m128i  index_pos  = _mm_add_epi32 (hsize_epi32, index_tmp);
+	const __m128   frac_neg   = _mm_sub_ps (one_f, frac_tmp);
+	index = fstb::ToolsSse2::select (neg_flag_i, index_neg, index_pos);
+	frac  = fstb::ToolsSse2::select (neg_flag_f, frac_neg, frac_tmp);
+}
+
+
+
+template <class T>
+static fstb_FORCEINLINE void	Transfer_store_sse2 (T *dst_ptr, __m128 val)
+{
+	_mm_store_si128 (
+		reinterpret_cast <__m128i *> (dst_ptr),
+		_mm_cvtps_epi32 (val)
+	);
+}
+
+static fstb_FORCEINLINE void	Transfer_store_sse2 (float *dst_ptr, __m128 val)
+{
+	_mm_store_ps (dst_ptr, val);
+}
+
+
+
+#endif   // fstb_ARCHI_X86
 
 
 
@@ -202,503 +364,13 @@ const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-int	Transfer::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
-{
-	assert (src_node1_sptr.get () != 0);
-
-	int            ret_val = 0;
-
-	const vsutl::PlaneProcMode proc_mode =
-		_plane_processor.get_mode (plane_index);
-
-	if (proc_mode == vsutl::PlaneProcMode_PROCESS)
-	{
-		vsutl::FrameRefSPtr	src_sptr (
-			_vsapi.getFrameFilter (n, src_node1_sptr.get (), &frame_ctx),
-			_vsapi
-		);
-		const ::VSFrameRef & src = *src_sptr;
-
-		const int      w = _vsapi.getFrameWidth (&src, plane_index);
-		const int      h = _vsapi.getFrameHeight (&src, plane_index);
-
-		const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-		const int      stride_src   = _vsapi.getStride (&src, plane_index);
-		uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
-		const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
-
-		assert (_process_plane_ptr != 0);
-		(this->*_process_plane_ptr) (
-			data_dst_ptr, data_src_ptr, stride_dst, stride_src, w, h
-		);
-	}
-
-	return (ret_val);
-}
-
-
-
-/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-Transfer::MultiTypeArray::MultiTypeArray ()
-:	_arr ()
-,	_length (0)
-,	_data_len (0)
-{
-	// Nothing
-}
-
-
-
-void	Transfer::MultiTypeArray::resize (size_t length)
-{
-	const size_t   old_len = _length;
-	_length = length;
-	if (_length != old_len)
-	{
-		_arr.resize (_length * _data_len);
-	}
-}
-
-
-
-Transfer::TransOpCompose::TransOpCompose (OpSPtr op_1_sptr, OpSPtr op_2_sptr)
-:	_op_1_sptr (op_1_sptr)
-,	_op_2_sptr (op_2_sptr)
-{
-	assert (op_1_sptr.get () != 0);
-	assert (op_2_sptr.get () != 0);
-}
-
-
-
-double	Transfer::TransOpCompose::operator () (double x) const
-{
-	x = (*_op_1_sptr) (x);
-	x = (*_op_2_sptr) (x);
-
-	return (x);
-}
-
-
-
-Transfer::TransOpContrast::TransOpContrast (double cont)
-:	_cont (cont)
-{
-	// Nothing
-}
-
-
-
-double	Transfer::TransOpContrast::operator () (double x) const
-{
-	return (x * _cont);
-}
-
-
-
-Transfer::TransOpAffine::TransOpAffine (double a, double b)
-:	_a (a)
-,	_b (b)
-{
-	assert (a != 0);
-}
-
-
-
-double	Transfer::TransOpAffine::operator () (double x) const
-{
-	return (x * _a + _b);
-}
-
-
-
-Transfer::TransOpLinPow::TransOpLinPow (bool inv_flag, double alpha, double beta, double p1, double slope, double lb, double ub, double scneg, double p2)
-:	_inv_flag (inv_flag)
-,	_alpha (alpha)
-,	_beta (beta)
-,	_p1 (p1)
-,	_slope (slope)
-,	_lb (lb)
-,	_ub (ub)
-,	_scneg (scneg)
-,	_p2 (p2)
-{
-	_alpha_m1 = _alpha - 1;
-	_beta_n   =       -_beta / _scneg;
-	_beta_i   =  pow ( _beta   * _slope, _p2);
-	_beta_in  = -pow (-_beta_n * _slope, _p2);
-	_ub_i     = _alpha * pow (_ub, _p1) - (_alpha - 1);
-	if (_lb < _beta_n)
-	{
-		_lb_i = -(_alpha * pow (-_lb * _scneg, _p1) - _alpha_m1) / _scneg;
-	}
-	else
-	{
-		_lb_i = -pow (-_lb * _slope, _p2);
-	}
-	_p1_i = 1 / p1;
-	_p2_i = 1 / p2;
-}
-
-
-
-double	Transfer::TransOpLinPow::operator () (double x) const
-{
-	double         y = x;
-
-	if (_inv_flag)
-	{
-		x = fstb::limit (x, _lb_i, _ub_i);
-		if (x >= _beta_i)
-		{
-			y =  pow (( x          + _alpha_m1) / _alpha, _p1_i);
-		}
-		else if (x <= _beta_in)
-		{
-			y = -pow ((-x * _scneg + _alpha_m1) / _alpha, _p1_i) / _scneg;
-		}
-		else
-		{
-			if (_p2 == 1)
-			{
-				y =        x         / _slope;
-			}
-			else if (x < 0)
-			{
-				y = -pow (-x, _p2_i) / _slope;
-			}
-			else
-			{
-				y =  pow ( x, _p2_i) / _slope;
-			}
-		}
-	}
-
-	else
-	{
-		x = fstb::limit (x, _lb, _ub);
-		if (x >= _beta)
-		{
-			y =   _alpha * pow ( x         , _p1) - _alpha_m1;
-		}
-		else if (x <= _beta_n)
-		{
-			y = -(_alpha * pow (-x * _scneg, _p1) - _alpha_m1) / _scneg;
-		}
-		else
-		{
-			if (_p2 == 1)
-			{
-				y =        x * _slope;
-			}
-			else if (x < 0)
-			{
-				y = -pow (-x * _slope, _p2);
-			}
-			else
-			{
-				y =  pow ( x * _slope, _p2);
-			}
-		}
-	}
-
-	return (y);
-}
-
-
-
-Transfer::TransOpLogTrunc::TransOpLogTrunc (bool inv_flag, double alpha, double beta)
-:	_inv_flag (inv_flag)
-,	_alpha (alpha)
-,	_beta (beta)
-{
-	// Nothing
-}
-
-
-
-double	Transfer::TransOpLogTrunc::operator () (double x) const
-{
-	x = fstb::limit (x, 0.0, 1.0);
-	double         y = x;
-
-	if (_inv_flag)
-	{
-		y = pow (10, (x - 1) / _alpha);
-	}
-	else
-	{
-		if (x >= _beta)
-		{
-			y = 1 + _alpha * log10 (x);
-		}
-		else
-		{
-			y = 0;
-		}
-	}
-
-	return (y);
-}
-
-
-
-Transfer::TransOpPow::TransOpPow (bool inv_flag, double p_i, double alpha, double val_max)
-:	_inv_flag (inv_flag)
-,	_p_i (p_i)
-,	_alpha (alpha)
-,	_p (1 / p_i)
-,	_val_max (val_max)
-{
-	// Nothing
-}
-
-
-
-double	Transfer::TransOpPow::operator () (double x) const
-{
-	x = std::max (x, 0.0);
-	double         y = x;
-
-	if (_inv_flag)
-	{
-		y = pow (x / _alpha, _p_i);
-		y = std::min (y, _val_max);
-	}
-	else
-	{
-		x = std::min (x, _val_max);
-		y = _alpha * pow (x, _p);
-	}
-
-	return (y);
-}
-
-
-
-Transfer::TransOp2084::TransOp2084 (bool inv_flag)
-:	_inv_flag (inv_flag)
-{
-	// Nothing
-}
-
-
-
-// Linear values are absolute. 1 is 10000 cd/m2.
-double	Transfer::TransOp2084::operator () (double x) const
-{
-	x = fstb::limit (x, 0.0, 1.0);
-	double         y = x;
-
-	static const double  c1 =   1.0  * 3424 / 4096;
-	static const double  c2 =  32.0  * 2413 / 4096;
-	static const double  c3 =  32.0  * 2392 / 4096;
-	static const double  m  = 128.0  * 2523 / 4096;
-	static const double  n  =   0.25 * 2610 / 4096;
-
-	if (_inv_flag)
-	{
-		// Inverse formula from:
-		// Scott Miller, Mahdi Nezamabadi, Scott Daly
-		// Perceptual Signal Coding for More Efficient Usage of Bit Codes, p. 5
-		// Presentation for 2012 SMPTE Annual Technical Conference & Exhibition
-		const double   xp = pow (x, 1 / m);
-		const double   r  = (xp - c1) / (c2 - c3 * xp);
-		if (r < 0)
-		{
-			y = 0;
-		}
-		else
-		{
-			y = pow (r, 1 / n);
-		}
-	}
-	else
-	{
-		const double   xp = pow (x, n);
-		y = pow ((c1 + c2 * xp) / (1 + c3 * xp), m);
-	}
-
-	return (y);
-}
-
-
-
-Transfer::TransOpFilmStream::TransOpFilmStream (bool inv_flag)
-:	_inv_flag (inv_flag)
-{
-	// Nothing
-}
-
-
-
-// Linear 1 is the sensor clipping level (3840 on a linear 12-bit scale).
-double	Transfer::TransOpFilmStream::operator () (double x) const
-{
-	static const double  sc10    = 1024;
-	static const double  bl12    = 64;
-	static const double  wl12    = 3840;
-	static const double  mi10    =    3 / sc10;
-	static const double  ma10    = 1020 / sc10;
-	static const double  sp      = 500;
-	static const double  sl      = 0.02714;
-
-	double         y = x;
-	if (_inv_flag)
-	{
-		x = fstb::limit (x, mi10, ma10);
-		const double   sensor = pow (10, x * (sc10 / sp)) / sl;
-		y = (sensor - bl12) / (wl12 - bl12);
-	}
-	else
-	{
-		const double   sensor = bl12 + x * (wl12 - bl12);
-		if (sensor <= 37)
-		{
-			y = 0;
-		}
-		else
-		{
-			y = (sp / sc10) * log10 (sl * sensor);
-			y = fstb::limit (y, mi10, ma10);
-		}
-	}
-
-	return (y);
-}
-
-
-
-Transfer::TransOpSLog::TransOpSLog (bool inv_flag)
-:	_inv_flag (inv_flag)
-{
-	// Nothing
-}
-
-
-
-// 1 lin is reference white, peak white at 10 lin.
-double	Transfer::TransOpSLog::operator () (double x) const
-{
-	static const double  a = 0.037584;
-	static const double  b = 0.432699;
-	static const double  c = 0.616596 + 0.03;
-
-	double         y = x;
-	if (_inv_flag)
-	{
-		y = pow (10, (y - c) / b) - a;
-	}
-	else
-	{
-		y = b * log10 (std::max (x, 0.0) + a) + c;
-	}
-
-	return (y);
-}
-
-
-
-Transfer::TransOpLogC::TransOpLogC (bool inv_flag, bool v2_flag)
-:	_inv_flag (inv_flag)
-,	_v2_flag (v2_flag)
-,	_cut (v2_flag ? 0.000000 : 0.010591)
-,	_a (  v2_flag ? 5.061087 : 5.555556)
-,	_b (  v2_flag ? 0.089004 : 0.052272)
-,	_c (  v2_flag ? 0.247189 : 0.247190)
-,	_d (  v2_flag ? 0.391007 : 0.385537)
-,	_e (  v2_flag ? 4.950469 : 5.367655)
-,	_f (  v2_flag ? 0.131313 : 0.092809)
-{
-	_cut_i = _e * _cut + _f;
-}
-
-
-
-const double		Transfer::TransOpLogC::_noise_margin = -8.0 / 65536;
-
-// 1 is log peak white.
-double	Transfer::TransOpLogC::operator () (double x) const
-{
-	return ((_inv_flag) ? compute_inverse (x) : compute_direct (x));
-}
-
-double	Transfer::TransOpLogC::get_max () const
-{
-	return (compute_inverse (1.0));
-}
-
-double	Transfer::TransOpLogC::compute_direct (double x) const
-{
-	x = std::max (x, _noise_margin);
-	double         y =
-		  (x > _cut  )
-		? _c * log10 (_a * x + _b) + _d
-		: _e * x + _f;
-	y = std::min (y, 1.0);
-
-	return (y);
-}
-
-double	Transfer::TransOpLogC::compute_inverse (double x) const
-{
-	x = std::min (x, 1.0);
-	double         y =
-		  (x > _cut_i)
-		? (pow (10, (x - _d) / _c) - _b) / _a
-		: (x - _f) / _e;
-	y = std::max (y, _noise_margin);
-
-	return (y);
-}
-
-
-
-Transfer::TransOpCanonLog::TransOpCanonLog (bool inv_flag)
-:	_inv_flag (inv_flag)
-{
-	// Nothing
-}
-
-
-
-// 1.08676 is log peak white, at 8.00903 in linear scale.
-double	Transfer::TransOpCanonLog::operator () (double x) const
-{
-	static const double  a = 10.1596;
-	static const double  b = 0.529136;
-	static const double  c = 0.0730597;
-
-	double         y = x;
-	if (_inv_flag)
-	{
-		y = (pow (10, (y - c) / b) - 1) / a;
-	}
-	else
-	{
-		y = b * log10 (std::max (x, -0.0452664) * a + 1) + c;
-	}
-
-	return (y);
-}
-
-
-
 Transfer::MapperLin::MapperLin (int lut_size, double range_beg, double range_lst)
 :	_lut_size (lut_size)
 ,	_range_beg (range_beg)
-,	_range_lst (range_lst)
 ,	_step ((range_lst - range_beg) / (lut_size - 1))
 {
 	assert (lut_size >= 2);
-	assert (_range_beg < _range_lst);
+	assert (range_beg < range_lst);
 }
 
 
@@ -715,34 +387,6 @@ void	Transfer::MapperLin::find_index (const FloatIntMix &val, int &index, float 
 	index = fstb::limit (index_raw + offset, 0, LINLUT_SIZE_F - 2);
 	frac  = val_scl - float (index_raw);
 }
-
-
-
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
-void	Transfer::MapperLin::find_index (const FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
-{
-	assert (val_arr != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
-	
-	const int      offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
-	const __m128   scale     = _mm_set1_ps (1 << LINLUT_RES_L2);
-	const __m128i  offset_ps = _mm_set1_epi32 (offset);
-	const __m128   val_min   = _mm_set1_ps (0                 - offset);
-	const __m128   val_max   = _mm_set1_ps (LINLUT_SIZE_F - 2 - offset);
-
-	const __m128   v         =
-		_mm_load_ps (reinterpret_cast <const float *> (val_arr));
-	__m128         val_scl   = _mm_mul_ps (v, scale);
-	val_scl = _mm_min_ps (val_scl, val_max);
-	val_scl = _mm_max_ps (val_scl, val_min);
-	const __m128i  index_raw = _mm_cvtps_epi32 (val_scl);
-	index     = _mm_add_epi32 (index_raw, offset_ps);
-	frac      = _mm_sub_ps (val_scl, _mm_cvtepi32_ps (index_raw));
-}
-
-#endif
 
 
 
@@ -809,89 +453,6 @@ void	Transfer::MapperLog::find_index (const FloatIntMix &val, int &index, float 
 
 
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
-void	Transfer::MapperLog::find_index (const FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
-{
-	assert (val_arr != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
-
-	// Constants
-	static const int      mant_size = 23;
-	static const int      exp_bias  = 127;
-	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
-	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-//	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
-	static const int      frac_size = mant_size - LOGLUT_RES_L2;
-	static const uint32_t frac_mask = (1 << frac_size) - 1;
-
-	const __m128   zero_f     = _mm_setzero_ps ();
-	const __m128   one_f      = _mm_set1_ps (1);
-	const __m128   frac_mul   = _mm_set1_ps (1.0f / (1 << frac_size));
-	const __m128   mul_eps    = _mm_set1_ps (1.0f / val_min);
-	const __m128   mask_abs_f = _mm_load_ps (
-		reinterpret_cast <const float *> (fstb::ToolsSse2::_mask_abs)
-	);
-
-	const __m128i  zero_i          = _mm_setzero_si128 ();
-	const __m128i  mask_abs_epi32  = _mm_set1_epi32 (0x7FFFFFFF);
-	const __m128i  one_epi32       = _mm_set1_epi32 (1);
-	const __m128i  base_epi32      = _mm_set1_epi32 (int (base));
-	const __m128i  frac_mask_epi32 = _mm_set1_epi32 (frac_mask);
-	const __m128i  val_min_epi32   =
-		_mm_set1_epi32 ((LOGLUT_MIN_L2 + exp_bias) << mant_size);
-	const __m128i  val_max_epi32   =
-		_mm_set1_epi32 ((LOGLUT_MAX_L2 + exp_bias) << mant_size);
-	const __m128i  index_max_epi32 =
-		_mm_set1_epi32 ((LOGLUT_MAX_L2 - LOGLUT_MIN_L2) << LOGLUT_RES_L2);
-	const __m128i  hsize_epi32     = _mm_set1_epi32 (LOGLUT_HSIZE);
-	const __m128i  mirror_epi32    = _mm_set1_epi32 (LOGLUT_HSIZE - 1);
-
-	// It really starts here
-	const __m128   val_f = _mm_load_ps (reinterpret_cast <const float *> (val_arr));
-	const __m128   val_a = _mm_and_ps (val_f, mask_abs_f);
-	const __m128i  val_i = _mm_load_si128 (reinterpret_cast <const __m128i *> (val_arr));
-	const __m128i  val_u = _mm_and_si128 (val_i, mask_abs_epi32);
-
-	// Standard path
-	__m128i        index_std = _mm_sub_epi32 (val_u, base_epi32);
-	index_std = _mm_srli_epi32 (index_std, frac_size);
-	index_std = _mm_add_epi32 (index_std, one_epi32);
-	__m128i        frac_stdi = _mm_and_si128 (val_u, frac_mask_epi32);
-	__m128         frac_std  = _mm_cvtepi32_ps (frac_stdi);
-	frac_std  = _mm_mul_ps (frac_std, frac_mul);
-
-	// Epsilon path
-	__m128         frac_eps  = _mm_max_ps (val_a, zero_f);
-	frac_eps = _mm_mul_ps (frac_eps, mul_eps);
-
-	// Range cases
-	const __m128i  eps_flag_i = _mm_cmpgt_epi32 (val_min_epi32, val_u);
-	const __m128i  std_flag_i = _mm_cmpgt_epi32 (val_max_epi32, val_u);
-	const __m128   eps_flag_f = _mm_castsi128_ps (eps_flag_i);
-	const __m128   std_flag_f = _mm_castsi128_ps (std_flag_i);
-	__m128i        index_tmp  =
-		fstb::ToolsSse2::select (std_flag_i, index_std, index_max_epi32);
-	__m128         frac_tmp   =
-		fstb::ToolsSse2::select (std_flag_f, frac_std, one_f);
-	index_tmp = fstb::ToolsSse2::select (eps_flag_i, zero_i, index_tmp);
-	frac_tmp  = fstb::ToolsSse2::select (eps_flag_f, frac_eps, frac_tmp);
-
-	// Sign cases
-	const __m128i  neg_flag_i = _mm_srai_epi32 (val_i, 31);
-	const __m128   neg_flag_f = _mm_castsi128_ps (neg_flag_i);
-	const __m128i  index_neg  = _mm_sub_epi32 (mirror_epi32, index_tmp);
-	const __m128i  index_pos  = _mm_add_epi32 (hsize_epi32, index_tmp);
-	const __m128   frac_neg   = _mm_sub_ps (one_f, frac_tmp);
-	index = fstb::ToolsSse2::select (neg_flag_i, index_neg, index_pos);
-	frac  = fstb::ToolsSse2::select (neg_flag_f, frac_neg, frac_tmp);
-}
-
-#endif
-
-
-
 double	Transfer::MapperLog::find_val (int index) const
 {
 	assert (index >= 0);
@@ -919,6 +480,50 @@ double	Transfer::MapperLog::find_val (int index) const
 
 	return (val);
 }
+
+
+
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+int	Transfer::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
+{
+	assert (src_node1_sptr.get () != 0);
+
+	int            ret_val = 0;
+
+	const vsutl::PlaneProcMode proc_mode =
+		_plane_processor.get_mode (plane_index);
+
+	if (proc_mode == vsutl::PlaneProcMode_PROCESS)
+	{
+		vsutl::FrameRefSPtr	src_sptr (
+			_vsapi.getFrameFilter (n, src_node1_sptr.get (), &frame_ctx),
+			_vsapi
+		);
+		const ::VSFrameRef & src = *src_sptr;
+
+		const int      w = _vsapi.getFrameWidth (&src, plane_index);
+		const int      h = _vsapi.getFrameHeight (&src, plane_index);
+
+		const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
+		const int      stride_src   = _vsapi.getStride (&src, plane_index);
+		uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
+		const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
+
+		assert (_process_plane_ptr != 0);
+		(this->*_process_plane_ptr) (
+			data_dst_ptr, data_src_ptr, stride_dst, stride_src, w, h
+		);
+	}
+
+	return (ret_val);
+}
+
+
+
+/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 
@@ -1077,26 +682,26 @@ void	Transfer::init_table ()
 		const double   vmax =  lwg;
 		const double   a    = (lwg - lbg) / vmax;
 		const double   b    =        lbg;
-		OpSPtr         op_a (new TransOpAffine (a, b));
-		op_s = OpSPtr (new TransOpCompose (op_a, op_s));
+		OpSPtr         op_a (new fmtcl::TransOpAffine (a, b));
+		op_s = OpSPtr (new fmtcl::TransOpCompose (op_a, op_s));
 	}
 
 	// Gamma correction
 	if (_gcor != 1)
 	{
-		OpSPtr         op_g (new TransOpPow (true, _gcor, 1, 1e6));
-		op_d = OpSPtr (new TransOpCompose (op_g, op_d));
+		OpSPtr         op_g (new fmtcl::TransOpPow (true, _gcor, 1, 1e6));
+		op_d = OpSPtr (new fmtcl::TransOpCompose (op_g, op_d));
 	}
 
 	// Contrast
 	if (_contrast != 1)
 	{
-		OpSPtr         op_c (new TransOpContrast (_contrast));
-		op_d = OpSPtr (new TransOpCompose (op_c, op_d));
+		OpSPtr         op_c (new fmtcl::TransOpContrast (_contrast));
+		op_d = OpSPtr (new fmtcl::TransOpCompose (op_c, op_d));
 	}
 
 	// LUTify
-	OpSPtr         op_f (new TransOpCompose (op_s, op_d));
+	OpSPtr         op_f (new fmtcl::TransOpCompose (op_s, op_d));
 	generate_lut (*op_f);
 }
 
@@ -1135,27 +740,45 @@ void	Transfer::init_proc_fnc ()
 	case (0*3+2)*4+2:	_process_plane_ptr = &ThisType::process_plane_int_any_cpp  <uint16_t, uint8_t            >; break;
 	case (0*3+2)*4+3:	_process_plane_ptr = &ThisType::process_plane_int_any_cpp  <uint8_t , uint8_t            >; break;
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	case (1*3+0)*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <          float   , MapperLog>; break;
-	case (1*3+0)*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <          float   , MapperLin>; break;
-	case (1*3+1)*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <          uint16_t, MapperLog>; break;
-	case (1*3+1)*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <          uint16_t, MapperLin>; break;
-	case (1*3+2)*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <          uint8_t , MapperLog>; break;
-	case (1*3+2)*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <          uint8_t , MapperLin>; break;
-#endif
-
 	default:
 		assert (false);
 		break;
 	}
 #if (fstb_ARCHI == fstb_ARCHI_X86)
+	init_proc_fnc_sse2 (selector);
 	init_proc_fnc_avx2 (selector);
 #endif
 }
 
 
 
-void	Transfer::generate_lut (const TransOpInterface &curve)
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+
+void	Transfer::init_proc_fnc_sse2 (int selector)
+{
+	if (_sse2_flag && _vi_in.format->sampleType == ::stFloat)
+	{
+		switch (selector)
+		{
+		case 0*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <float   , MapperLog>; break;
+		case 0*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <float   , MapperLin>; break;
+		case 1*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <uint16_t, MapperLog>; break;
+		case 1*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <uint16_t, MapperLin>; break;
+		case 2*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <uint8_t , MapperLog>; break;
+		case 2*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <uint8_t , MapperLin>; break;
+
+		default:
+			// Nothing
+			break;
+		}
+	}
+}
+
+#endif   // fstb_ARCHI_X86
+
+
+
+void	Transfer::generate_lut (const fmtcl::TransOpInterface &curve)
 {
 	assert (&curve != 0);
 
@@ -1234,7 +857,7 @@ void	Transfer::generate_lut (const TransOpInterface &curve)
 
 // T = LUT data type (int or float)
 template <class T>
-void	Transfer::generate_lut_int (const TransOpInterface &curve, int lut_size, double range_beg, double range_lst, double mul, double add)
+void	Transfer::generate_lut_int (const fmtcl::TransOpInterface &curve, int lut_size, double range_beg, double range_lst, double mul, double add)
 {
 	assert (_vi_out.format->sampleType == ::stInteger);
 	assert (&curve != 0);
@@ -1255,7 +878,7 @@ void	Transfer::generate_lut_int (const TransOpInterface &curve, int lut_size, do
 
 // T = float
 template <class T, class M>
-void	Transfer::generate_lut_flt (const TransOpInterface &curve, const M &mapper)
+void	Transfer::generate_lut_flt (const fmtcl::TransOpInterface &curve, const M &mapper)
 {
 	assert (&curve != 0);
 	assert (&mapper != 0);
@@ -1364,7 +987,7 @@ void	Transfer::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_
 				uint32_t           _scal [4];
 			}                  index;
 			__m128             lerp;
-			M::find_index (s_ptr + x, index._vect, lerp);
+			Transfer_FindIndexSse2 <M>::find_index (s_ptr + x, index._vect, lerp);
 			__m128             val = _mm_set_ps (
 				_lut.use <float> (index._scal [3]    ),
 				_lut.use <float> (index._scal [2]    ),
@@ -1379,7 +1002,7 @@ void	Transfer::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_
 			);
 			const __m128       dif = _mm_sub_ps (va2, val);
 			val = _mm_add_ps (val, _mm_mul_ps (dif, lerp));
-			Convert <TD>::store_sse2 (&d_ptr [x], val);
+			Transfer_store_sse2 (&d_ptr [x], val);
 		}
 
 		src_ptr += stride_src;
@@ -1510,44 +1133,44 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 	case fmtcl::TransCurve_709:
 	case fmtcl::TransCurve_601:
 	case fmtcl::TransCurve_2020_10:
-		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5));
+		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5));
 		break;
 	case fmtcl::TransCurve_470BG:
-		ptr = OpSPtr (new TransOpPow (inv_flag, 2.8));
+		ptr = OpSPtr (new fmtcl::TransOpPow (inv_flag, 2.8));
 		break;
 	case fmtcl::TransCurve_240:
-		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.1115, 0.0228, 0.45, 4.0));
+		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.1115, 0.0228, 0.45, 4.0));
 		break;
 	case fmtcl::TransCurve_LINEAR:
-		ptr = OpSPtr (new TransOpBypass);
+		ptr = OpSPtr (new fmtcl::TransOpBypass);
 		break;
 	case fmtcl::TransCurve_LOG100:
-		ptr = OpSPtr (new TransOpLogTrunc (inv_flag, 0.5, 0.01));
+		ptr = OpSPtr (new fmtcl::TransOpLogTrunc (inv_flag, 0.5, 0.01));
 		break;
 	case fmtcl::TransCurve_LOG316:
-		ptr = OpSPtr (new TransOpLogTrunc (inv_flag, 0.4, sqrt (10) / 1000));
+		ptr = OpSPtr (new fmtcl::TransOpLogTrunc (inv_flag, 0.4, sqrt (10) / 1000));
 		break;
 	case fmtcl::TransCurve_61966_2_4:
-		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5, -1e9, 1e9));
+		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5, -1e9, 1e9));
 		break;
 	case fmtcl::TransCurve_1361:
-		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5, -0.25, 1.33, 4));
+		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.099, 0.018, 0.45, 4.5, -0.25, 1.33, 4));
 		break;
 	case fmtcl::TransCurve_470M:	// Assumed display gamma 2.2, almost like sRGB.
 	case fmtcl::TransCurve_SRGB:
-		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.055, 0.04045 / 12.92, 1.0 / 2.4, 12.92));
+		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.055, 0.04045 / 12.92, 1.0 / 2.4, 12.92));
 		break;
 	case fmtcl::TransCurve_2020_12:
-		ptr = OpSPtr (new TransOpLinPow (inv_flag, 1.0993, 0.0181, 0.45, 4.5));
+		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.0993, 0.0181, 0.45, 4.5));
 		break;
 	case fmtcl::TransCurve_2084:
-		ptr = OpSPtr (new TransOp2084 (inv_flag));
+		ptr = OpSPtr (new fmtcl::TransOp2084 (inv_flag));
 		break;
 	case fmtcl::TransCurve_428:
-		ptr = OpSPtr (new TransOpPow (inv_flag, 2.6, 48.0 / 52.37));
+		ptr = OpSPtr (new fmtcl::TransOpPow (inv_flag, 2.6, 48.0 / 52.37));
 		break;
 	case fmtcl::TransCurve_1886:
-		ptr = OpSPtr (new TransOpPow (inv_flag, 2.4));
+		ptr = OpSPtr (new fmtcl::TransOpPow (inv_flag, 2.4));
 		break;
 	case fmtcl::TransCurve_1886A:
 		{
@@ -1555,25 +1178,25 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 			const double   p2    = 3.0;
 			const double   k0    = 0.35;
 			const double   slope = pow (k0, p1 - p2);
-			ptr = OpSPtr (new TransOpLinPow (
+			ptr = OpSPtr (new fmtcl::TransOpLinPow (
 				inv_flag, 1, k0 / slope, 1.0 / p1, slope, 0, 1, 1, 1.0 / p2
 			));
 		}
 		break;
 	case fmtcl::TransCurve_FILMSTREAM:
-		ptr = OpSPtr (new TransOpFilmStream (inv_flag));
+		ptr = OpSPtr (new fmtcl::TransOpFilmStream (inv_flag));
 		break;
 	case fmtcl::TransCurve_SLOG:
-		ptr = OpSPtr (new TransOpSLog (inv_flag));
+		ptr = OpSPtr (new fmtcl::TransOpSLog (inv_flag));
 		break;
 	case fmtcl::TransCurve_LOGC2:
-		ptr = OpSPtr (new TransOpLogC (inv_flag, true));
+		ptr = OpSPtr (new fmtcl::TransOpLogC (inv_flag, true));
 		break;
 	case fmtcl::TransCurve_LOGC3:
-		ptr = OpSPtr (new TransOpLogC (inv_flag, false));
+		ptr = OpSPtr (new fmtcl::TransOpLogC (inv_flag, false));
 		break;
 	case fmtcl::TransCurve_CANONLOG:
-		ptr = OpSPtr (new TransOpCanonLog (inv_flag));
+		ptr = OpSPtr (new fmtcl::TransOpCanonLog (inv_flag));
 		break;
 	default:
 		assert (false);
@@ -1582,7 +1205,7 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 
 	if (ptr.get () == 0)
 	{
-		ptr = OpSPtr (new TransOpBypass);
+		ptr = OpSPtr (new fmtcl::TransOpBypass);
 	}
 
 	return (ptr);
@@ -1601,26 +1224,6 @@ float	Transfer::Convert <float>::cast (float val)
 {
 	return (val);
 }
-
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
-template <class T>
-void	Transfer::Convert <T>::store_sse2 (T *dst_ptr, __m128 val)
-{
-	_mm_store_si128 (
-		reinterpret_cast <__m128i *> (dst_ptr),
-		_mm_cvtps_epi32 (val)
-	);
-}
-
-template <>
-void	Transfer::Convert <float>::store_sse2 (float *dst_ptr, __m128 val)
-{
-	_mm_store_ps (dst_ptr, val);
-}
-
-
-#endif
 
 
 

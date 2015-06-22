@@ -41,41 +41,29 @@ namespace fmtc
 
 
 
-/*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-void	Transfer::init_proc_fnc_avx2 (int selector)
+template <class M>
+class Transfer_FindIndexAvx2
 {
-	if (_avx2_flag)
-	{
-		switch (selector)
-		{
-		case 0*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <          float   , MapperLog>; break;
-		case 0*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <          float   , MapperLin>; break;
-		case 1*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <          uint16_t, MapperLog>; break;
-		case 1*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <          uint16_t, MapperLin>; break;
-		case 2*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <          uint8_t , MapperLog>; break;
-		case 2*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <          uint8_t , MapperLin>; break;
+public:
+	enum {         LINLUT_RES_L2  = Transfer::LINLUT_RES_L2 };
+	enum {         LINLUT_MIN_F   = Transfer::LINLUT_MIN_F  };
+	enum {         LINLUT_MAX_F   = Transfer::LINLUT_MAX_F  };
+	enum {         LINLUT_SIZE_F  = Transfer::LINLUT_SIZE_F };
 
-		default:
-			// Nothing
-			break;
-		}
-	}
-}
+	enum {         LOGLUT_MIN_L2  = Transfer::LOGLUT_MIN_L2 };
+	enum {         LOGLUT_MAX_L2  = Transfer::LOGLUT_MAX_L2 };
+	enum {         LOGLUT_RES_L2  = Transfer::LOGLUT_RES_L2 };
+	enum {         LOGLUT_HSIZE   = Transfer::LOGLUT_HSIZE  };
+	enum {         LOGLUT_SIZE    = Transfer::LOGLUT_SIZE   };
+
+	static inline void
+		            find_index (const Transfer::FloatIntMix val_arr [8], __m256i &index, __m256 &frac);
+};
 
 
 
-void	Transfer::MapperLin::find_index (const FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
+template <>
+void	Transfer_FindIndexAvx2 <Transfer::MapperLin>::find_index (const Transfer::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
 {
 	assert (val_arr != 0);
 	assert (&index != 0);
@@ -99,7 +87,8 @@ void	Transfer::MapperLin::find_index (const FloatIntMix val_arr [8], __m256i &in
 
 
 
-void	Transfer::MapperLog::find_index (const FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
+template <>
+void	Transfer_FindIndexAvx2 <Transfer::MapperLog>::find_index (const Transfer::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
 {
 	assert (val_arr != 0);
 	assert (&index != 0);
@@ -178,6 +167,56 @@ void	Transfer::MapperLog::find_index (const FloatIntMix val_arr [8], __m256i &in
 
 
 
+template <class T>
+static fstb_FORCEINLINE void	Transfer_store_avx2 (T *dst_ptr, __m256 val)
+{
+	_mm256_store_si256 (
+		reinterpret_cast <__m256i *> (dst_ptr),
+		_mm256_cvtps_epi32 (val)
+	);
+}
+
+static fstb_FORCEINLINE void	Transfer_store_avx2 (float *dst_ptr, __m256 val)
+{
+	_mm256_store_ps (dst_ptr, val);
+}
+
+
+
+/*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+void	Transfer::init_proc_fnc_avx2 (int selector)
+{
+	if (_avx2_flag)
+	{
+		switch (selector)
+		{
+		case 0*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <float   , MapperLog>; break;
+		case 0*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <float   , MapperLin>; break;
+		case 1*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <uint16_t, MapperLog>; break;
+		case 1*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <uint16_t, MapperLin>; break;
+		case 2*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <uint8_t , MapperLog>; break;
+		case 2*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_avx2 <uint8_t , MapperLin>; break;
+
+		default:
+			// Nothing
+			break;
+		}
+	}
+}
+
+
+
 template <class TD, class M>
 void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
 {
@@ -203,7 +242,7 @@ void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 				uint32_t           _scal [8];
 			}                  index;
 			__m256             lerp;
-			M::find_index (s_ptr + x, index._vect, lerp);
+			Transfer_FindIndexAvx2 <M>::find_index (s_ptr + x, index._vect, lerp);
 #if 1	// Looks as fast as _mm256_set_ps
 			// G++ complains about sizeof() as argument
 			__m256             val = _mm256_i32gather_ps (
@@ -236,7 +275,7 @@ void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 #endif
 			const __m256       dif = _mm256_sub_ps (va2, val);
 			val = _mm256_add_ps (val, _mm256_mul_ps (dif, lerp));
-			Convert <TD>::store_avx2 (&d_ptr [x], val);
+			Transfer_store_avx2 (&d_ptr [x], val);
 		}
 
 		src_ptr += stride_src;
@@ -244,23 +283,6 @@ void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 	}
 
 	_mm256_zeroupper ();	// Back to SSE state
-}
-
-
-
-template <class T>
-void	Transfer::Convert <T>::store_avx2 (T *dst_ptr, __m256 val)
-{
-	_mm256_store_si256 (
-		reinterpret_cast <__m256i *> (dst_ptr),
-		_mm256_cvtps_epi32 (val)
-	);
-}
-
-template <>
-void	Transfer::Convert <float>::store_avx2 (float *dst_ptr, __m256 val)
-{
-	_mm256_store_ps (dst_ptr, val);
 }
 
 

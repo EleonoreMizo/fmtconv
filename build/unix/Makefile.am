@@ -76,8 +76,10 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtc/Stack16ToNative.h \
                         ../../src/fmtc/Transfer.cpp \
                         ../../src/fmtc/Transfer.h \
-                        ../../src/fmtc/Transfer.hpp \
                         ../../src/fmtc/version.h \
+                        ../../src/fmtcl/ArrayMultiType.cpp \
+                        ../../src/fmtcl/ArrayMultiType.h \
+                        ../../src/fmtcl/ArrayMultiType.hpp \
                         ../../src/fmtcl/BitBltConv.cpp \
                         ../../src/fmtcl/BitBltConv.h \
                         ../../src/fmtcl/ChromaPlacement.cpp \
@@ -140,6 +142,10 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/ProxyRwCpp.hpp \
                         ../../src/fmtcl/ProxyRwSse2.h \
                         ../../src/fmtcl/ProxyRwSse2.hpp \
+                        ../../src/fmtcl/ReadWrapperFlt.h \
+                        ../../src/fmtcl/ReadWrapperFlt.hpp \
+                        ../../src/fmtcl/ReadWrapperInt.h \
+                        ../../src/fmtcl/ReadWrapperInt.hpp \
                         ../../src/fmtcl/ResampleSpecPlane.cpp \
                         ../../src/fmtcl/ResampleSpecPlane.h \
                         ../../src/fmtcl/ResizeData.cpp \
@@ -149,11 +155,34 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/ResizeDataFactory.h \
                         ../../src/fmtcl/Scaler.cpp \
                         ../../src/fmtcl/Scaler.h \
-                        ../../src/fmtcl/Scaler.hpp \
                         ../../src/fmtcl/ScalerCopy.h \
                         ../../src/fmtcl/SplFmt.h \
                         ../../src/fmtcl/SplFmt.hpp \
                         ../../src/fmtcl/TransCurve.h \
+                        ../../src/fmtcl/TransOp2084.cpp \
+                        ../../src/fmtcl/TransOp2084.h \
+                        ../../src/fmtcl/TransOpAffine.cpp \
+                        ../../src/fmtcl/TransOpAffine.h \
+                        ../../src/fmtcl/TransOpBypass.h \
+                        ../../src/fmtcl/TransOpCanonLog.cpp \
+                        ../../src/fmtcl/TransOpCanonLog.h \
+                        ../../src/fmtcl/TransOpCompose.h \
+                        ../../src/fmtcl/TransOpCompose.hpp \
+                        ../../src/fmtcl/TransOpContrast.h \
+                        ../../src/fmtcl/TransOpContrast.hpp \
+                        ../../src/fmtcl/TransOpFilmStream.cpp \
+                        ../../src/fmtcl/TransOpFilmStream.h \
+                        ../../src/fmtcl/TransOpInterface.h \
+                        ../../src/fmtcl/TransOpLinPow.cpp \
+                        ../../src/fmtcl/TransOpLinPow.h \
+                        ../../src/fmtcl/TransOpLogC.cpp \
+                        ../../src/fmtcl/TransOpLogC.h \
+                        ../../src/fmtcl/TransOpLogTrunc.cpp \
+                        ../../src/fmtcl/TransOpLogTrunc.h \
+                        ../../src/fmtcl/TransOpPow.cpp \
+                        ../../src/fmtcl/TransOpPow.h \
+                        ../../src/fmtcl/TransOpSLog.cpp \
+                        ../../src/fmtcl/TransOpSLog.h \
                         ../../src/fstb/AllocAlign.h \
                         ../../src/fstb/AllocAlign.hpp \
                         ../../src/fstb/CpuId.cpp \

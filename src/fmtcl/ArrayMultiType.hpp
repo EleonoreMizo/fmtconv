@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-        Transfer.hpp
+        ArrayMultiType.hpp
         Author: Laurent de Soras, 2015
 
 --- Legal stuff ---
@@ -15,8 +15,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-#if ! defined (fmtc_Transfer_CODEHEADER_INCLUDED)
-#define	fmtc_Transfer_CODEHEADER_INCLUDED
+#if ! defined (fmtcl_ArrayMultiType_CODEHEADER_INCLUDED)
+#define	fmtcl_ArrayMultiType_CODEHEADER_INCLUDED
 
 
 
@@ -26,7 +26,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-namespace fmtc
+namespace fmtcl
 {
 
 
@@ -35,16 +35,8 @@ namespace fmtc
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
 template <class T>
-void	Transfer::MultiTypeArray::set_type ()
+void	ArrayMultiType::set_type ()
 {
 	const int      old_len = _data_len;
 	_data_len = int (sizeof (T));
@@ -57,7 +49,7 @@ void	Transfer::MultiTypeArray::set_type ()
 
 
 template <class T>
-T &	Transfer::MultiTypeArray::use (int pos)
+T &	ArrayMultiType::use (int pos)
 {
 	assert (_data_len > 0);
 	assert (sizeof (T) == _data_len);
@@ -70,7 +62,7 @@ T &	Transfer::MultiTypeArray::use (int pos)
 
 
 template <class T>
-const T &	Transfer::MultiTypeArray::use (int pos) const
+const T &	ArrayMultiType::use (int pos) const
 {
 	assert (_data_len > 0);
 	assert (sizeof (T) == _data_len);
@@ -82,7 +74,7 @@ const T &	Transfer::MultiTypeArray::use (int pos) const
 
 
 
-size_t	Transfer::MultiTypeArray::get_size () const
+size_t	ArrayMultiType::get_size () const
 {
 	assert (_data_len >= 0);
 
@@ -91,11 +83,19 @@ size_t	Transfer::MultiTypeArray::get_size () const
 
 
 
-}	// namespace fmtc
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 
-#endif	// fmtc_Transfer_CODEHEADER_INCLUDED
+/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+}	// namespace fmtcl
+
+
+
+#endif	// fmtcl_ArrayMultiType_CODEHEADER_INCLUDED
 
 
 

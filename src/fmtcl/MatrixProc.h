@@ -32,10 +32,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/Mat4.h"
 #include "fmtcl/SplFmt.h"
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	#include <emmintrin.h>
-#endif
-
 #include <vector>
 
 #include <cstdint>

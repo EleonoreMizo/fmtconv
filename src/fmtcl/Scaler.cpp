@@ -35,8 +35,10 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/fnc.h"
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/ProxyRwSse2.h"
+	#include "fmtcl/ReadWrapperFlt.h"
+	#include "fmtcl/ReadWrapperInt.h"
 	#include "fstb/ToolsSse2.h"
-#endif
+#endif   // fstb_ARCHI_X86
 
 #include <algorithm>
 
@@ -471,6 +473,32 @@ void	Scaler::process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SR
 
 
 
+template <class SRC, bool PF>
+static fstb_FORCEINLINE void	Scaler_process_vect_flt_sse2 (__m128 &sum0, __m128 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128 &add_cst, int len)
+{
+	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
+	// and save the add in the write proxy.
+	sum0 = add_cst;
+	sum1 = add_cst;
+
+	for (int k = 0; k < kernel_size; ++k)
+	{
+		__m128         coef = _mm_load_ss (coef_base_ptr + k);
+		coef = _mm_shuffle_ps (coef, coef, 0);
+		__m128         src0;
+		__m128         src1;
+		ReadWrapperFlt <SRC, PF>::read (pix_ptr, src0, src1, zero, len);
+		const __m128   val0 = _mm_mul_ps (src0, coef);
+		const __m128   val1 = _mm_mul_ps (src1, coef);
+		sum0 = _mm_add_ps (sum0, val0);
+		sum1 = _mm_add_ps (sum1, val1);
+
+		SRC::PtrConst::jump (pix_ptr, src_stride);
+	}
+}
+
+
+
 // DST and SRC are ProxyRwSse2 classes
 // Stride offsets in pixels
 // Source pointer may be unaligned.
@@ -532,7 +560,7 @@ void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				process_vect_flt_sse2 <SRC, false> (
+				Scaler_process_vect_flt_sse2 <SRC, false> (
 					sum0, sum1, kernel_size, coef_base_ptr,
 					pix_ptr, zero, src_stride, add_cst, 0
 				);
@@ -548,7 +576,7 @@ void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				process_vect_flt_sse2 <SRC, true> (
+				Scaler_process_vect_flt_sse2 <SRC, true> (
 					sum0, sum1, kernel_size, coef_base_ptr,
 					pix_ptr, zero, src_stride, add_cst, w7
 				);
@@ -564,28 +592,72 @@ void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 
 
 
-template <class SRC, bool PF>
-void	Scaler::process_vect_flt_sse2 (__m128 &sum0, __m128 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128 &add_cst, int len)
+template <class DST, int DB, class SRC, int SB, bool PF>
+static fstb_FORCEINLINE __m128i	Scaler_process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len)
 {
-	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
-	// and save the add in the write proxy.
-	sum0 = add_cst;
-	sum1 = add_cst;
+	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
+
+#if defined (fmtcl_Scaler_SSE2_16BITS)
+
+	static_assert ((DB >= SB), "Output bitdepth must be greater or equal to input.");
+
+	__m128i        val = add_cst;
 
 	for (int k = 0; k < kernel_size; ++k)
 	{
-		__m128         coef = _mm_load_ss (coef_base_ptr + k);
-		coef = _mm_shuffle_ps (coef, coef, 0);
-		__m128         src0;
-		__m128         src1;
-		ReadWrapperFlt <SRC, PF>::read (pix_ptr, src0, src1, zero, len);
-		const __m128   val0 = _mm_mul_ps (src0, coef);
-		const __m128   val1 = _mm_mul_ps (src1, coef);
-		sum0 = _mm_add_ps (sum0, val0);
-		sum1 = _mm_add_ps (sum1, val1);
+		__m128i        coef = _mm_load_si128 (coef_base_ptr + k);
+		__m128i        src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
+			pix_ptr, zero, sign_bit, len
+		);
+		if (DB > SB)
+		{
+			src = _mm_slli_epi16 (src, DB - SB);
+			if (DB == 16)
+			{
+				src = _mm_xor_si128 (src, sign_bit);
+			}
+		}
+		const __m128i  mul = _mm_mulhi_epi16 (src, coef);
+		val = _mm_adds_epi16 (val, mul);
 
 		SRC::PtrConst::jump (pix_ptr, src_stride);
 	}
+
+	if (SHIFT_INT == 14)
+	{
+		val = _mm_adds_epi16 (val, val);
+		val = _mm_adds_epi16 (val, val);
+	}
+	else
+	{
+		// Beware: the shift does not saturate, the result may overflow.
+		val = _mm_slli_epi16 (val, 16 - Scaler::SHIFT_INT);
+	}
+
+#else    // fmtcl_Scaler_SSE2_16BITS
+
+	__m128i        sum0 = add_cst;
+	__m128i        sum1 = add_cst;
+
+	for (int k = 0; k < kernel_size; ++k)
+	{
+		const __m128i  coef = _mm_load_si128 (coef_base_ptr + k);
+		const __m128i  src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
+			pix_ptr, zero, sign_bit, len
+		);
+		fstb::ToolsSse2::mac_s16_s16_s32 (sum0, sum1, src, coef);
+
+		SRC::PtrConst::jump (pix_ptr, src_stride);
+	}
+
+	sum0 = _mm_srai_epi32 (sum0, Scaler::SHIFT_INT + SB - DB);
+	sum1 = _mm_srai_epi32 (sum1, Scaler::SHIFT_INT + SB - DB);
+
+	const __m128i  val = _mm_packs_epi32 (sum0, sum1);
+
+#endif   // fmtcl_Scaler_SSE2_16BITS
+
+	return (val);
 }
 
 
@@ -662,7 +734,7 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				const __m128i  val = process_vect_int_sse2 <
+				const __m128i  val = Scaler_process_vect_int_sse2 <
 					DST, DB, SRC, SB, false
 				> (
 					add_cst, kernel_size, coef_base_ptr,
@@ -686,7 +758,7 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 			{
 				typename SRC::PtrConst::Type  pix_ptr = col_src_ptr;
 
-				const __m128i  val = process_vect_int_sse2 <
+				const __m128i  val = Scaler_process_vect_int_sse2 <
 					DST, DB, SRC, SB, true
 				> (
 					add_cst, kernel_size, coef_base_ptr,
@@ -707,76 +779,6 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 
 		DST::Ptr::jump (dst_ptr, dst_stride);
 	}
-}
-
-
-
-template <class DST, int DB, class SRC, int SB, bool PF>
-__m128i	Scaler::process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len)
-{
-	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
-
-#if defined (fmtcl_Scaler_SSE2_16BITS)
-
-	static_assert ((DB >= SB), "Output bitdepth must be greater or equal to input.");
-
-	__m128i        val = add_cst;
-
-	for (int k = 0; k < kernel_size; ++k)
-	{
-		__m128i        coef = _mm_load_si128 (coef_base_ptr + k);
-		__m128i        src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
-			pix_ptr, zero, sign_bit, len
-		);
-		if (DB > SB)
-		{
-			src = _mm_slli_epi16 (src, DB - SB);
-			if (DB == 16)
-			{
-				src = _mm_xor_si128 (src, sign_bit);
-			}
-		}
-		const __m128i  mul = _mm_mulhi_epi16 (src, coef);
-		val = _mm_adds_epi16 (val, mul);
-
-		SRC::PtrConst::jump (pix_ptr, src_stride);
-	}
-
-	if (SHIFT_INT == 14)
-	{
-		val = _mm_adds_epi16 (val, val);
-		val = _mm_adds_epi16 (val, val);
-	}
-	else
-	{
-		// Beware: the shift does not saturate, the result may overflow.
-		val = _mm_slli_epi16 (val, 16 - SHIFT_INT);
-	}
-
-#else    // fmtcl_Scaler_SSE2_16BITS
-
-	__m128i        sum0 = add_cst;
-	__m128i        sum1 = add_cst;
-
-	for (int k = 0; k < kernel_size; ++k)
-	{
-		const __m128i  coef = _mm_load_si128 (coef_base_ptr + k);
-		const __m128i  src  = ReadWrapperInt <SRC, SrcS16R, PF>::read (
-			pix_ptr, zero, sign_bit, len
-		);
-		fstb::ToolsSse2::mac_s16_s16_s32 (sum0, sum1, src, coef);
-
-		SRC::PtrConst::jump (pix_ptr, src_stride);
-	}
-
-	sum0 = _mm_srai_epi32 (sum0, SHIFT_INT + SB - DB);
-	sum1 = _mm_srai_epi32 (sum1, SHIFT_INT + SB - DB);
-
-	const __m128i  val = _mm_packs_epi32 (sum0, sum1);
-
-#endif   // fmtcl_Scaler_SSE2_16BITS
-
-	return (val);
 }
 
 

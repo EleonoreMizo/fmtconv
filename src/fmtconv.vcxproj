@@ -157,6 +157,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="fmtcl\ArrayMultiType.h" />
+    <ClInclude Include="fmtcl\ArrayMultiType.hpp" />
     <ClInclude Include="fmtcl\BitBltConv.h" />
     <ClInclude Include="fmtcl\ChromaPlacement.h" />
     <ClInclude Include="fmtcl\ColorSpaceH265.h" />
@@ -194,6 +196,10 @@
     <ClInclude Include="fmtcl\ProxyRwCpp.hpp" />
     <ClInclude Include="fmtcl\ProxyRwSse2.h" />
     <ClInclude Include="fmtcl\ProxyRwSse2.hpp" />
+    <ClInclude Include="fmtcl\ReadWrapperFlt.h" />
+    <ClInclude Include="fmtcl\ReadWrapperFlt.hpp" />
+    <ClInclude Include="fmtcl\ReadWrapperInt.h" />
+    <ClInclude Include="fmtcl\ReadWrapperInt.hpp" />
     <ClInclude Include="fmtcl\ResampleSpecPlane.h" />
     <ClInclude Include="fmtcl\ResizeData.h" />
     <ClInclude Include="fmtcl\ResizeData.hpp" />
@@ -201,11 +207,25 @@
     <ClInclude Include="fmtcl\Scaler.h" />
     <ClInclude Include="fmtcl\CoefArrInt.h" />
     <ClInclude Include="fmtcl\CoefArrInt.hpp" />
-    <ClInclude Include="fmtcl\Scaler.hpp" />
     <ClInclude Include="fmtcl\ScalerCopy.h" />
     <ClInclude Include="fmtcl\SplFmt.h" />
     <ClInclude Include="fmtcl\SplFmt.hpp" />
     <ClInclude Include="fmtcl\TransCurve.h" />
+    <ClInclude Include="fmtcl\TransOp2084.h" />
+    <ClInclude Include="fmtcl\TransOpAffine.h" />
+    <ClInclude Include="fmtcl\TransOpBypass.h" />
+    <ClInclude Include="fmtcl\TransOpCanonLog.h" />
+    <ClInclude Include="fmtcl\TransOpCompose.h" />
+    <ClInclude Include="fmtcl\TransOpCompose.hpp" />
+    <ClInclude Include="fmtcl\TransOpContrast.h" />
+    <ClInclude Include="fmtcl\TransOpContrast.hpp" />
+    <ClInclude Include="fmtcl\TransOpFilmStream.h" />
+    <ClInclude Include="fmtcl\TransOpInterface.h" />
+    <ClInclude Include="fmtcl\TransOpLinPow.h" />
+    <ClInclude Include="fmtcl\TransOpLogC.h" />
+    <ClInclude Include="fmtcl\TransOpLogTrunc.h" />
+    <ClInclude Include="fmtcl\TransOpPow.h" />
+    <ClInclude Include="fmtcl\TransOpSLog.h" />
     <ClInclude Include="fmtc\ArrayAlign.h" />
     <ClInclude Include="fmtc\ArrayAlign.hpp" />
     <ClInclude Include="fmtc\Bitdepth.h" />
@@ -219,7 +239,6 @@
     <ClInclude Include="fmtc\SplFmtUtl.hpp" />
     <ClInclude Include="fmtc\Stack16ToNative.h" />
     <ClInclude Include="fmtc\Transfer.h" />
-    <ClInclude Include="fmtc\Transfer.hpp" />
     <ClInclude Include="fmtc\version.h" />
     <ClInclude Include="fstb\CpuId.h" />
     <ClInclude Include="fstb\ToolsAvx2.h" />
@@ -293,6 +312,7 @@
     <ClInclude Include="VapourSynth.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="fmtcl\ArrayMultiType.cpp" />
     <ClCompile Include="fmtcl\BitBltConv.cpp" />
     <ClCompile Include="fmtcl\BitBltConv_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
@@ -334,6 +354,15 @@
     <ClCompile Include="fmtcl\Scaler_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
+    <ClCompile Include="fmtcl\TransOp2084.cpp" />
+    <ClCompile Include="fmtcl\TransOpAffine.cpp" />
+    <ClCompile Include="fmtcl\TransOpCanonLog.cpp" />
+    <ClCompile Include="fmtcl\TransOpFilmStream.cpp" />
+    <ClCompile Include="fmtcl\TransOpLinPow.cpp" />
+    <ClCompile Include="fmtcl\TransOpLogC.cpp" />
+    <ClCompile Include="fmtcl\TransOpLogTrunc.cpp" />
+    <ClCompile Include="fmtcl\TransOpPow.cpp" />
+    <ClCompile Include="fmtcl\TransOpSLog.cpp" />
     <ClCompile Include="fmtc\Bitdepth.cpp" />
     <ClCompile Include="fmtc\Convert.cpp" />
     <ClCompile Include="fmtc\ConvStep.cpp" />
