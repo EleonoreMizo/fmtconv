@@ -80,12 +80,8 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_errdif_flag (false)
 ,	_dither_pat_arr ()
 ,	_buf_factory_uptr ()
-,	_process_seg_fast_int_int_ptr (0)
-,	_process_seg_fast_flt_int_ptr (0)
-,	_process_seg_ord_int_int_ptr (0)
-,	_process_seg_ord_flt_int_ptr (0)
-,	_process_seg_errdif_int_int_ptr (0)
-,	_process_seg_errdif_flt_int_ptr (0)
+,	_process_seg_int_int_ptr (0)
+,	_process_seg_flt_int_ptr (0)
 {
 	assert (&in != 0);
 	assert (&out != 0);
@@ -700,42 +696,62 @@ void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int ang
 
 #define fmtc_Bitdepth_SET_FNC_INT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
 	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_##NAMP##_int_int_ptr = \
+		_process_seg_int_int_ptr = \
 			&ThisType::process_seg_##NAMF##_int_int_cpp <false, DT, DP, ST, SP>; \
 		break; \
 	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_##NAMP##_int_int_ptr = \
+		_process_seg_int_int_ptr = \
 			&ThisType::process_seg_##NAMF##_int_int_cpp <true, DT, DP, ST, SP>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_FLT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
 	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_##NAMP##_flt_int_ptr = \
+		_process_seg_flt_int_ptr = \
 			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, DT, DP, ST>; \
 		break; \
 	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_##NAMP##_flt_int_ptr = \
+		_process_seg_flt_int_ptr = \
 			&ThisType::process_seg_##NAMF##_flt_int_cpp <true, DT, DP, ST>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_INT_SSE(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
 	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_##NAMP##_int_int_ptr = \
+		_process_seg_int_int_ptr = \
 			&ThisType::process_seg_##NAMF##_int_int_sse <false, DF, DP, SF, SP>; \
 		break; \
 	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_##NAMP##_int_int_ptr = \
+		_process_seg_int_int_ptr = \
 			&ThisType::process_seg_##NAMF##_int_int_sse <true, DF, DP, SF, SP>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_FLT_SSE(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
 	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_##NAMP##_flt_int_ptr = \
+		_process_seg_flt_int_ptr = \
 			&ThisType::process_seg_##NAMF##_flt_int_sse <false, DF, DP, SF>; \
 		break; \
 	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_##NAMP##_flt_int_ptr = \
+		_process_seg_flt_int_ptr = \
 			&ThisType::process_seg_##NAMF##_flt_int_sse <true, DF, DP, SF>; \
+		break;
+
+#define fmtc_Bitdepth_SET_FNC_ERRDIF_INT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_errdif_int_int_cpp <false, Diffuse##NAMF <DT, DP, ST, SP> >; \
+		break; \
+	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_errdif_int_int_cpp <true, Diffuse##NAMF <DT, DP, ST, SP> >; \
+		break;
+
+#define fmtc_Bitdepth_SET_FNC_ERRDIF_FLT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_errdif_flt_int_cpp <false, Diffuse##NAMF <DT, DP, ST, SP> >; \
+		break; \
+	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_errdif_flt_int_cpp <true, Diffuse##NAMF <DT, DP, ST, SP> >; \
 		break;
 
 
@@ -809,55 +825,55 @@ void	Bitdepth::init_fnc_errdiff ()
 	{
 	case	DMode_FILTERLITE:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT, errdif, filterlite, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, FilterLite, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT, errdif, filterlite, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FilterLite, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_STUCKI:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT, errdif, stucki, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Stucki, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT, errdif, stucki, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Stucki, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_ATKINSON:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT, errdif, atkinson, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Atkinson, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT, errdif, atkinson, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Atkinson, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_FLOYD:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT, errdif, floydsteinberg, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, FloydSteinberg, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT, errdif, floydsteinberg, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FloydSteinberg, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_OSTRO:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT, errdif, ostromoukhov, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Ostromoukhov, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT, errdif, filterlite, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FilterLite, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
@@ -865,6 +881,7 @@ void	Bitdepth::init_fnc_errdiff ()
 	default:
 		break;
 	}
+
 }
 
 
@@ -889,10 +906,20 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 	assert (w > 0);
 	assert (h > 0);
 
+	SegContext     ctx;
+	ctx._rnd_state      = rnd_state;
+	ctx._scale_info_ptr = &scale_info;
+
 	const bool     sc_flag =
 		(   src_fmt == fmtcl::SplFmt_FLOAT
 		 || scale_info._gain * ((uint64_t (1)) << (src_res - dst_res)) != 1
 		 || scale_info._add_cst != 0);
+
+	void (ThisType::* process_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const =
+		  (sc_flag)
+		? _process_seg_flt_int_ptr
+		: _process_seg_int_int_ptr;
+	assert (process_ptr != 0);
 
 	fmtcl::ErrDifBuf *   ed_buf_ptr = 0;
 	if (_errdif_flag)
@@ -905,73 +932,36 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 		ed_buf_ptr->clear ((sc_flag) ? sizeof (float) : sizeof (int16_t));
 	}
 
+	switch (_dmode)
+	{
+	case	DMode_BAYER:
+	case	DMode_ROUND:
+		ctx._pattern_ptr = &pattern;
+		break;
+
+	case	DMode_FAST:
+		// Nothing
+		break;
+
+	case	DMode_FILTERLITE:
+	case	DMode_STUCKI:
+	case	DMode_ATKINSON:
+	case	DMode_FLOYD:
+	case	DMode_OSTRO:
+		ctx._ed_buf_ptr = ed_buf_ptr;
+		break;
+
+	default:
+		assert (false);
+		throw_logic_err ("unexpected dithering algorithm");
+		break;
+	}
+
 	for (int y = 0; y < h; ++y)
 	{
-		const PatRow & pat = pattern [y & (PAT_WIDTH - 1)];
+		ctx._y = y;
 
-		switch (_dmode)
-		{
-		case	DMode_BAYER:
-		case	DMode_ROUND:
-			if (sc_flag)
-			{
-				assert (_process_seg_ord_flt_int_ptr != 0);
-				(this->*_process_seg_ord_flt_int_ptr) (
-					dst_ptr, src_ptr, w, pat, rnd_state, scale_info
-				);
-			}
-			else
-			{
-				assert (_process_seg_ord_int_int_ptr != 0);
-				(this->*_process_seg_ord_int_int_ptr) (
-					dst_ptr, src_ptr, w, pat, rnd_state
-				);
-			}
-			break;
-
-		case	DMode_FAST:
-			if (sc_flag)
-			{
-				assert (_process_seg_fast_flt_int_ptr != 0);
-				(this->*_process_seg_fast_flt_int_ptr) (
-					dst_ptr, src_ptr, w, scale_info
-				);
-			}
-			else
-			{
-				assert (_process_seg_fast_int_int_ptr != 0);
-				(this->*_process_seg_fast_int_int_ptr) (
-					dst_ptr, src_ptr, w
-				);
-			}
-			break;
-
-		case	DMode_FILTERLITE:
-		case	DMode_STUCKI:
-		case	DMode_ATKINSON:
-		case	DMode_FLOYD:
-		case	DMode_OSTRO:
-			if (sc_flag)
-			{
-				assert (_process_seg_errdif_flt_int_ptr != 0);
-				(this->*_process_seg_errdif_flt_int_ptr) (
-					dst_ptr, src_ptr, w, rnd_state, *ed_buf_ptr, y, scale_info
-				);
-			}
-			else
-			{
-				assert (_process_seg_errdif_int_int_ptr != 0);
-				(this->*_process_seg_errdif_int_int_ptr) (
-					dst_ptr, src_ptr, w, rnd_state, *ed_buf_ptr, y
-				);
-			}
-			break;
-
-		default:
-			assert (false);
-			throw_logic_err ("unexpected dithering algorithm");
-			break;
-		}
+		(this->*process_ptr) (dst_ptr, src_ptr, w, ctx);
 
 		src_ptr += src_stride;
 		dst_ptr += dst_stride;
@@ -987,7 +977,7 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 
 
 template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-void	Bitdepth::process_seg_fast_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w) const
+void	Bitdepth::process_seg_fast_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
@@ -1009,10 +999,39 @@ void	Bitdepth::process_seg_fast_int_int_cpp (uint8_t *dst_ptr, const uint8_t *sr
 
 
 
+template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+void	Bitdepth::process_seg_fast_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	assert (dst_ptr != 0);
+	assert (src_ptr != 0);
+	assert (w > 0);
+	assert (ctx._scale_info_ptr != 0);
+
+	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
+	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
+
+	const float    mul  = float (ctx._scale_info_ptr->_gain);
+	const float    add  = float (ctx._scale_info_ptr->_add_cst);
+	const int      vmax = (1 << DST_BITS) - 1;
+
+	for (int pos = 0; pos < w; ++pos)
+	{
+		float          s = float (src_n_ptr [pos]);
+		s = s * mul + add;
+		const int      quant = fstb::conv_int_fast (s);
+		const int      pix   = fstb::limit (quant, 0, vmax);
+		dst_n_ptr [pos] = static_cast <DST_TYPE> (pix);
+	}
+}
+
+
+
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 
+
+
 template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
-void	Bitdepth::process_seg_fast_int_int_sse (uint8_t *dst_ptr, const uint8_t *src_ptr, int w) const
+void	Bitdepth::process_seg_fast_int_int_sse (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
@@ -1036,54 +1055,23 @@ void	Bitdepth::process_seg_fast_int_int_sse (uint8_t *dst_ptr, const uint8_t *sr
 	}
 }
 
-#endif
 
-
-
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-void	Bitdepth::process_seg_fast_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, const fmtcl::BitBltConv::ScaleInfo &scale_info) const
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (w > 0);
-	assert (&scale_info != 0);
-
-	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
-	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
-
-	const float    mul  = float (scale_info._gain);
-	const float    add  = float (scale_info._add_cst);
-	const int      vmax = (1 << DST_BITS) - 1;
-
-	for (int pos = 0; pos < w; ++pos)
-	{
-		float          s = float (src_n_ptr [pos]);
-		s = s * mul + add;
-		const int      quant = fstb::conv_int_fast (s);
-		const int      pix   = fstb::limit (quant, 0, vmax);
-		dst_n_ptr [pos] = static_cast <DST_TYPE> (pix);
-	}
-}
-
-
-
-#if (fstb_ARCHI == fstb_ARCHI_X86)
 
 template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
-void	Bitdepth::process_seg_fast_flt_int_sse (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, const fmtcl::BitBltConv::ScaleInfo &scale_info) const
+void	Bitdepth::process_seg_fast_flt_int_sse (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&scale_info != 0);
+	assert (ctx._scale_info_ptr != 0);
 
 	typedef typename  fmtcl::ProxyRwSse2 <SRC_FMT>::PtrConst::Type  SrcPtr;
 	typedef typename  fmtcl::ProxyRwSse2 <DST_FMT>::Ptr::Type       DstPtr;
 	SrcPtr         src_n_ptr = reinterpret_cast <SrcPtr> (src_ptr);
 	DstPtr         dst_n_ptr = reinterpret_cast <DstPtr> (dst_ptr);
 
-	const __m128   mul      = _mm_set1_ps (float (scale_info._gain));
-	const __m128   add      = _mm_set1_ps (float (scale_info._add_cst));
+	const __m128   mul      = _mm_set1_ps (float (ctx._scale_info_ptr->_gain));
+	const __m128   add      = _mm_set1_ps (float (ctx._scale_info_ptr->_add_cst));
 	const __m128   vmax     = _mm_set1_ps (float ((1 << DST_BITS) - 1));
 	const __m128   zero_f   = _mm_setzero_ps ();
 	const __m128i  zero_i   = _mm_setzero_si128 ();
@@ -1108,21 +1096,26 @@ void	Bitdepth::process_seg_fast_flt_int_sse (uint8_t *dst_ptr, const uint8_t *sr
 	}
 }
 
+
+
 #endif
 
 
 
 template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, const PatRow &pattern, uint32_t &rnd_state) const
+void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&pattern != 0);
-	assert (&rnd_state != 0);
+	assert (&ctx != 0);
+	assert (&ctx._pattern_ptr != 0);
 
 	enum {         DIF_BITS = SRC_BITS - DST_BITS };
 	static_assert (DIF_BITS >= 1, "This function must reduce bidepth.");
+
+	const PatRow & pattern   = ctx.extract_pattern_row ();
+	uint32_t &     rnd_state = ctx._rnd_state;
 
 	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
 	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
@@ -1171,23 +1164,26 @@ void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 
 
 template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, const PatRow &pattern, uint32_t &rnd_state, const fmtcl::BitBltConv::ScaleInfo &scale_info) const
+void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&pattern != 0);
-	assert (&rnd_state != 0);
-	assert (&scale_info != 0);
+	assert (&ctx != 0);
+	assert (&ctx._pattern_ptr != 0);
+	assert (&ctx._scale_info_ptr != 0);
 
 	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
 	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
 
+	const PatRow & pattern   = ctx.extract_pattern_row ();
+	uint32_t &     rnd_state = ctx._rnd_state;
+
 	const int      ao = _ampo_i;				// s8
 	const int      an = _ampn_i;				// s8
 
-	const float    mul  = float (scale_info._gain);
-	const float    add  = float (scale_info._add_cst);
+	const float    mul  = float (ctx._scale_info_ptr->_gain);
+	const float    add  = float (ctx._scale_info_ptr->_add_cst);
 	const float    qt   = 1.0f / (1 << ((S_FLAG ? 0 : AMP_BITS) + 8));
 	const int      vmax = (1 << DST_BITS) - 1;
 
@@ -1227,324 +1223,46 @@ void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-void	Bitdepth::process_seg_floydsteinberg_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y) const
+template <bool S_FLAG, class ERRDIF>
+void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
+	assert (&ctx != 0);
+	assert (&ctx._ed_buf_ptr != 0);
+	assert (ctx._y >= 0);
+
+	typedef typename ERRDIF::SrcType SRC_TYPE;
+	typedef typename ERRDIF::DstType DST_TYPE;
+	enum { SRC_BITS = ERRDIF::SRC_BITS };
+	enum { DST_BITS = ERRDIF::DST_BITS };
+
+	uint32_t &           rnd_state =  ctx._rnd_state;
+	fmtcl::ErrDifBuf &   ed_buf    = *ctx._ed_buf_ptr;
 
 	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
 	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
 
 	const int      ae = _ampe_i;
 
-	int16_t *      err_ptr = ed_buf.get_buf <int16_t> (0);
-
-	int            e1;
-	int            e3;
-	int            e5;
-	int            e7;
-	int            err_nxt = ed_buf.use_mem <int16_t> (0);
-
-	// Forward
-	if ((y & 1) == 0)
+	// Makes e1 point on the default buffer line for single-line
+	// error diffusor because we use it in prepare_next_line()
+	int            e0 = 0;
+	int            e1 = 0;
+	if (ERRDIF::NBR_ERR_LINES == 2)
 	{
-		for (int x = 0; x < w; ++x)
-		{
-			int            err = err_nxt;
-
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
-			);
-			diffuse_floydsteinberg_int (err, e1, e3, e5, e7);
-
-			err_nxt = err_ptr [x + 1];
-			err_ptr [x - 1] += e3;
-			err_ptr [x    ] += e5;
-			err_ptr [x + 1]  = e1;
-			err_nxt         += e7;
-		}
+		e0 =      ctx._y & 1 ;
+		e1 = 1 - (ctx._y & 1);
 	}
+	int16_t *      err0_ptr = ed_buf.get_buf <int16_t> (e0);
+	int16_t *      err1_ptr = ed_buf.get_buf <int16_t> (e1);
 
-	// Backward
-	else
-	{
-		for (int x = w - 1; x >= 0; --x)
-		{
-			int            err = err_nxt;
-
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
-			);
-			diffuse_floydsteinberg_int (err, e1, e3, e5, e7);
-
-			err_nxt = err_ptr [x - 1];
-			err_ptr [x + 1] += e3;
-			err_ptr [x    ] += e5;
-			err_ptr [x - 1]  = e1;
-			err_nxt         += e7;
-		}
-	}
-
-	ed_buf.use_mem <int16_t> (0) = err_nxt;
-
-	if (! S_FLAG)
-	{
-		generate_rnd_eol (rnd_state);
-	}
-}
-
-
-
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-void	Bitdepth::process_seg_floydsteinberg_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y, const fmtcl::BitBltConv::ScaleInfo &scale_info) const
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
-	assert (&scale_info != 0);
-
-	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
-	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
-
-	const float    mul = float (scale_info._gain);
-	const float    add = float (scale_info._add_cst);
-	const float    ae  = float (_ampe_f);
-	const float    an  = float (_ampn_f);
-
-	float *        err_ptr = ed_buf.get_buf <float> (0);
-
-	float          e1;
-	float          e3;
-	float          e5;
-	float          e7;
-	float          err_nxt = ed_buf.use_mem <float> (0);
-
-	// Forward
-	if ((y & 1) == 0)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-			float          err = err_nxt;
-
-			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
-			);
-			diffuse_floydsteinberg_flt (err, e1, e3, e5, e7);
-
-			err_nxt = err_ptr [x + 1];
-			err_ptr [x - 1] += e3;
-			err_ptr [x    ] += e5;
-			err_ptr [x + 1]  = e1;
-			err_nxt         += e7;
-		}
-	}
-
-	// Backward
-	else
-	{
-		for (int x = w - 1; x >= 0; --x)
-		{
-			float          err = err_nxt;
-
-			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
-			);
-			diffuse_floydsteinberg_flt (err, e1, e3, e5, e7);
-
-			err_nxt = err_ptr [x - 1];
-			err_ptr [x + 1] += e3;
-			err_ptr [x    ] += e5;
-			err_ptr [x - 1]  = e1;
-			err_nxt         += e7;
-		}
-	}
-
-	ed_buf.use_mem <float> (0) = err_nxt;
-
-	if (! S_FLAG)
-	{
-		generate_rnd_eol (rnd_state);
-	}
-}
-
-
-
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-void	Bitdepth::process_seg_filterlite_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y) const
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
-
-	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
-	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
-
-	const int      ae = _ampe_i;
-
-	int16_t *      err_ptr = ed_buf.get_buf <int16_t> (0);
-
-	int            e1;
-	int            e2;
-	int            err_nxt = ed_buf.use_mem <int16_t> (0);
-
-	// Forward
-	if ((y & 1) == 0)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-			int            err = err_nxt;
-
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
-			);
-			diffuse_filterlite_int (err, e1, e2);
-
-			err_nxt = err_ptr [x + 1];
-			err_ptr [x - 1] += e1;
-			err_ptr [x    ]  = e1;
-			err_nxt         += e2;
-		}
-		err_ptr [w] = 0;
-	}
-
-	// Backward
-	else
-	{
-		for (int x = w - 1; x >= 0; --x)
-		{
-			int            err = err_nxt;
-
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
-			);
-			diffuse_filterlite_int (err, e1, e2);
-
-			err_nxt = err_ptr [x - 1];
-			err_ptr [x + 1] += e1;
-			err_ptr [x    ]  = e1;
-			err_nxt         += e2;
-		}
-		err_ptr [-1] = 0;
-	}
-
-	ed_buf.use_mem <int16_t> (0) = err_nxt;
-
-	if (! S_FLAG)
-	{
-		generate_rnd_eol (rnd_state);
-	}
-}
-
-
-
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-void	Bitdepth::process_seg_filterlite_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y, const fmtcl::BitBltConv::ScaleInfo &scale_info) const
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
-	assert (&scale_info != 0);
-
-	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
-	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
-
-	const float    mul = float (scale_info._gain);
-	const float    add = float (scale_info._add_cst);
-	const float    ae  = float (_ampe_f);
-	const float    an  = float (_ampn_f);
-
-	float *        err_ptr = ed_buf.get_buf <float> (0);
-
-	float          e1;
-	float          e2;
-	float          err_nxt = ed_buf.use_mem <float> (0);
-
-	// Forward
-	if ((y & 1) == 0)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-			float          err = err_nxt;
-
-			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
-			);
-			diffuse_filterlite_flt (err, e1, e2);
-
-			err_nxt = err_ptr [x + 1];
-			err_ptr [x - 1] += e1;
-			err_ptr [x    ]  = e1;
-			err_nxt         += e2;
-		}
-		err_ptr [w] = 0;
-	}
-
-	// Backward
-	else
-	{
-		for (int x = w - 1; x >= 0; --x)
-		{
-			float          err = err_nxt;
-
-			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
-			);
-			diffuse_filterlite_flt (err, e1, e2);
-
-			err_nxt = err_ptr [x - 1];
-			err_ptr [x + 1] += e1;
-			err_ptr [x    ]  = e1;
-			err_nxt         += e2;
-		}
-		err_ptr [-1] = 0;
-	}
-
-	ed_buf.use_mem <float> (0) = err_nxt;
-
-	if (! S_FLAG)
-	{
-		generate_rnd_eol (rnd_state);
-	}
-}
-
-
-
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-void	Bitdepth::process_seg_stucki_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y) const
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
-
-	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
-	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
-
-	const int      ae = _ampe_i;
-
-	int16_t *      err0_ptr = ed_buf.get_buf <int16_t> (     y & 1 );
-	int16_t *      err1_ptr = ed_buf.get_buf <int16_t> (1 - (y & 1));
-
-	int            e1;
-	int            e2;
-	int            e4;
-	int            e8;
 	int            err_nxt0 = ed_buf.use_mem <int16_t> (0);
 	int            err_nxt1 = ed_buf.use_mem <int16_t> (1);
 
 	// Forward
-	if ((y & 1) == 0)
+	if ((ctx._y & 1) == 0)
 	{
 		for (int x = 0; x < w; ++x)
 		{
@@ -1553,21 +1271,12 @@ void	Bitdepth::process_seg_stucki_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
 				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
 			);
-			diffuse_stucki_int (err, e1, e2, e4, e8);
-
-			err_nxt0 = err_nxt1 + e8;
-			err_nxt1 = err1_ptr [x + 2] + e4;
-			err0_ptr [x - 2] += e2;
-			err0_ptr [x - 1] += e4;
-			err0_ptr [x    ] += e8;
-			err0_ptr [x + 1] += e4;
-			err0_ptr [x + 2] += e2;
-			err1_ptr [x - 2] += e1;
-			err1_ptr [x - 1] += e2;
-			err1_ptr [x    ] += e4;
-			err1_ptr [x + 1] += e2;
-			err1_ptr [x + 2]  = e1;
+			ERRDIF::template diffuse <1> (
+				err, err_nxt0, err_nxt1,
+				err0_ptr + x, err1_ptr + x, src_n_ptr + x
+			);
 		}
+		ERRDIF::prepare_next_line (err1_ptr + w);
 	}
 
 	// Backward
@@ -1580,21 +1289,12 @@ void	Bitdepth::process_seg_stucki_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
 				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
 			);
-			diffuse_stucki_int (err, e1, e2, e4, e8);
-
-			err_nxt0 = err_nxt1 + e8;
-			err_nxt1 = err1_ptr [x - 2] + e4;
-			err0_ptr [x + 2] += e2;
-			err0_ptr [x + 1] += e4;
-			err0_ptr [x    ] += e8;
-			err0_ptr [x - 1] += e4;
-			err0_ptr [x - 2] += e2;
-			err1_ptr [x + 2] += e1;
-			err1_ptr [x + 1] += e2;
-			err1_ptr [x    ] += e4;
-			err1_ptr [x - 1] += e2;
-			err1_ptr [x - 2]  = e1;
+			ERRDIF::template diffuse <-1> (
+				err, err_nxt0, err_nxt1,
+				err0_ptr + x, err1_ptr + x, src_n_ptr + x
+			);
 		}
+		ERRDIF::prepare_next_line (err1_ptr - 1);
 	}
 
 	ed_buf.use_mem <int16_t> (0) = err_nxt0;
@@ -1608,36 +1308,50 @@ void	Bitdepth::process_seg_stucki_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-void	Bitdepth::process_seg_stucki_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y, const fmtcl::BitBltConv::ScaleInfo &scale_info) const
+template <bool S_FLAG, class ERRDIF>
+void	Bitdepth::process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
-	assert (&scale_info != 0);
+	assert (&ctx != 0);
+	assert (&ctx._ed_buf_ptr != 0);
+	assert (ctx._y >= 0);
+	assert (&ctx._scale_info_ptr != 0);
+
+	typedef typename ERRDIF::SrcType SRC_TYPE;
+	typedef typename ERRDIF::DstType DST_TYPE;
+	enum { SRC_BITS = ERRDIF::SRC_BITS };
+	enum { DST_BITS = ERRDIF::DST_BITS };
+
+	uint32_t &           rnd_state =  ctx._rnd_state;
+	fmtcl::ErrDifBuf &   ed_buf    = *ctx._ed_buf_ptr;
 
 	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
 	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
 
-	const float    mul = float (scale_info._gain);
-	const float    add = float (scale_info._add_cst);
+	const float    mul = float (ctx._scale_info_ptr->_gain);
+	const float    add = float (ctx._scale_info_ptr->_add_cst);
 	const float    ae  = float (_ampe_f);
 	const float    an  = float (_ampn_f);
 
-	float *        err0_ptr = ed_buf.get_buf <float> (     y & 1 );
-	float *        err1_ptr = ed_buf.get_buf <float> (1 - (y & 1));
+	// Makes e1 point on the default buffer line for single-line
+	// error diffusor because we use it in prepare_next_line()
+	int            e0 = 0;
+	int            e1 = 0;
+	if (ERRDIF::NBR_ERR_LINES == 2)
+	{
+		e0 =      ctx._y & 1 ;
+		e1 = 1 - (ctx._y & 1);
+	}
+	float *        err0_ptr = ed_buf.get_buf <float> (e0);
+	float *        err1_ptr = ed_buf.get_buf <float> (e1);
 
-	float          e1;
-	float          e2;
-	float          e4;
-	float          e8;
 	float          err_nxt0 = ed_buf.use_mem <float> (0);
 	float          err_nxt1 = ed_buf.use_mem <float> (1);
 
 	// Forward
-	if ((y & 1) == 0)
+	if ((ctx._y & 1) == 0)
 	{
 		for (int x = 0; x < w; ++x)
 		{
@@ -1646,21 +1360,12 @@ void	Bitdepth::process_seg_stucki_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
 				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
 			);
-			diffuse_stucki_flt (err, e1, e2, e4, e8);
-
-			err_nxt0 = err_nxt1 + e8;
-			err_nxt1 = err1_ptr [x + 2] + e4;
-			err0_ptr [x - 2] += e2;
-			err0_ptr [x - 1] += e4;
-			err0_ptr [x    ] += e8;
-			err0_ptr [x + 1] += e4;
-			err0_ptr [x + 2] += e2;
-			err1_ptr [x - 2] += e1;
-			err1_ptr [x - 1] += e2;
-			err1_ptr [x    ] += e4;
-			err1_ptr [x + 1] += e2;
-			err1_ptr [x + 2]  = e1;
+			ERRDIF::template diffuse <1> (
+				err, err_nxt0, err_nxt1,
+				err0_ptr + x, err1_ptr + x, src_n_ptr + x
+			);
 		}
+		ERRDIF::prepare_next_line (err1_ptr + w);
 	}
 
 	// Backward
@@ -1673,254 +1378,16 @@ void	Bitdepth::process_seg_stucki_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
 				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
 			);
-			diffuse_stucki_flt (err, e1, e2, e4, e8);
-
-			err_nxt0 = err_nxt1 + e8;
-			err_nxt1 = err1_ptr [x - 2] + e4;
-			err0_ptr [x + 2] += e2;
-			err0_ptr [x + 1] += e4;
-			err0_ptr [x    ] += e8;
-			err0_ptr [x - 1] += e4;
-			err0_ptr [x - 2] += e2;
-			err1_ptr [x + 2] += e1;
-			err1_ptr [x + 1] += e2;
-			err1_ptr [x    ] += e4;
-			err1_ptr [x - 1] += e2;
-			err1_ptr [x - 2]  = e1;
+			ERRDIF::template diffuse <-1> (
+				err, err_nxt0, err_nxt1,
+				err0_ptr + x, err1_ptr + x, src_n_ptr + x
+			);
 		}
+		ERRDIF::prepare_next_line (err1_ptr - 1);
 	}
 
 	ed_buf.use_mem <float> (0) = err_nxt0;
 	ed_buf.use_mem <float> (1) = err_nxt1;
-
-	if (! S_FLAG)
-	{
-		generate_rnd_eol (rnd_state);
-	}
-}
-
-
-
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-void	Bitdepth::process_seg_atkinson_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y) const
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
-
-	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
-	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
-
-	const int      ae = _ampe_i;
-
-	int16_t *      err0_ptr = ed_buf.get_buf <int16_t> (     y & 1 );
-	int16_t *      err1_ptr = ed_buf.get_buf <int16_t> (1 - (y & 1));
-
-	int            e1;
-	int            err_nxt0 = ed_buf.use_mem <int16_t> (0);
-	int            err_nxt1 = ed_buf.use_mem <int16_t> (1);
-
-	// Forward
-	if ((y & 1) == 0)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-			int            err = err_nxt0;
-
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
-			);
-			diffuse_atkinson_int (err, e1);
-
-			err_nxt0 = err_nxt1 + e1;
-			err_nxt1 = err1_ptr [x + 2] + e1;
-			err0_ptr [x - 1] += e1;
-			err0_ptr [x    ] += e1;
-			err0_ptr [x + 1] += e1;
-			err1_ptr [x    ]  = e1;
-		}
-		err1_ptr [w] = 0;
-	}
-
-	// Backward
-	else
-	{
-		for (int x = w - 1; x >= 0; --x)
-		{
-			int            err = err_nxt0;
-
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
-			);
-			diffuse_atkinson_int (err, e1);
-
-			err_nxt0 = err_nxt1 + e1;
-			err_nxt1 = err1_ptr [x - 2] + e1;
-			err0_ptr [x + 1] += e1;
-			err0_ptr [x    ] += e1;
-			err0_ptr [x - 1] += e1;
-			err1_ptr [x    ]  = e1;
-		}
-		err1_ptr [-1] = 0;
-	}
-
-	ed_buf.use_mem <int16_t> (0) = err_nxt0;
-	ed_buf.use_mem <int16_t> (1) = err_nxt1;
-
-	if (! S_FLAG)
-	{
-		generate_rnd_eol (rnd_state);
-	}
-}
-
-
-
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-void	Bitdepth::process_seg_atkinson_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y, const fmtcl::BitBltConv::ScaleInfo &scale_info) const
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
-	assert (&scale_info != 0);
-
-	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
-	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
-
-	const float    mul = float (scale_info._gain);
-	const float    add = float (scale_info._add_cst);
-	const float    ae  = float (_ampe_f);
-	const float    an  = float (_ampn_f);
-
-	float *        err0_ptr = ed_buf.get_buf <float> (     y & 1 );
-	float *        err1_ptr = ed_buf.get_buf <float> (1 - (y & 1));
-
-	float          e1;
-	float          err_nxt0 = ed_buf.use_mem <float> (0);
-	float          err_nxt1 = ed_buf.use_mem <float> (1);
-
-	// Forward
-	if ((y & 1) == 0)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-			float          err = err_nxt0;
-
-			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
-			);
-			diffuse_atkinson_flt (err, e1);
-
-			err_nxt0 = err_nxt1 + e1;
-			err_nxt1 = err1_ptr [x + 2] + e1;
-			err0_ptr [x - 1] += e1;
-			err0_ptr [x    ] += e1;
-			err0_ptr [x + 1] += e1;
-			err1_ptr [x    ]  = e1;
-		}
-		err1_ptr [w] = 0;
-	}
-
-	// Backward
-	else
-	{
-		for (int x = w - 1; x >= 0; --x)
-		{
-			float          err = err_nxt0;
-
-			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
-			);
-			diffuse_atkinson_flt (err, e1);
-
-			err_nxt0 = err_nxt1 + e1;
-			err_nxt1 = err1_ptr [x - 2] + e1;
-			err0_ptr [x + 1] += e1;
-			err0_ptr [x    ] += e1;
-			err0_ptr [x - 1] += e1;
-			err1_ptr [x    ]  = e1;
-		}
-		err1_ptr [-1] = 0;
-	}
-
-	ed_buf.use_mem <float> (0) = err_nxt0;
-	ed_buf.use_mem <float> (1) = err_nxt1;
-
-	if (! S_FLAG)
-	{
-		generate_rnd_eol (rnd_state);
-	}
-}
-
-
-
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-void	Bitdepth::process_seg_ostromoukhov_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, uint32_t &rnd_state, fmtcl::ErrDifBuf &ed_buf, int y) const
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (w > 0);
-	assert (&rnd_state != 0);
-	assert (&ed_buf != 0);
-
-	enum {         DIF_BITS = SRC_BITS - DST_BITS };
-
-	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
-	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
-
-	const int      ae = _ampe_i;
-
-	int16_t *      err_ptr = ed_buf.get_buf <int16_t> (0);
-
-	int            e1;
-	int            e2;
-	int            e3;
-	int            err_nxt = ed_buf.use_mem <int16_t> (0);
-
-	// Forward
-	if ((y & 1) == 0)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-			int            err = err_nxt;
-
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
-			);
-			diffuse_ostromoukhov_int <DIF_BITS> (err, e1, e2, e3, src_n_ptr [x]);
-
-			err_nxt = err_ptr [x + 1];
-			err_ptr [x - 1] += e2;
-			err_ptr [x    ]  = e3;
-			err_nxt         += e1;
-		}
-		err_ptr [w] = 0;
-	}
-
-	// Backward
-	else
-	{
-		for (int x = w - 1; x >= 0; --x)
-		{
-			int            err = err_nxt;
-
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
-			);
-			diffuse_ostromoukhov_int <DIF_BITS> (err, e1, e2, e3, src_n_ptr [x]);
-
-			err_nxt = err_ptr [x - 1];
-			err_ptr [x + 1] += e2;
-			err_ptr [x    ]  = e3;
-			err_nxt         += e1;
-		}
-		err_ptr [-1] = 0;
-	}
-
-	ed_buf.use_mem <int16_t> (0) = err_nxt;
 
 	if (! S_FLAG)
 	{
@@ -1944,6 +1411,28 @@ void	Bitdepth::generate_rnd_eol (uint32_t &state)
 	{
 		state = state * uint32_t (134775813) + 1;
 	}
+}
+
+
+
+Bitdepth::SegContext::SegContext ()
+:	_pattern_ptr (0)
+,	_rnd_state (0)
+,	_scale_info_ptr (0)
+,	_ed_buf_ptr (0)
+,	_y (-1)
+{
+	// Nothing
+}
+
+
+
+const Bitdepth::PatRow &	Bitdepth::SegContext::extract_pattern_row () const
+{
+	assert (_pattern_ptr != 0);
+	assert (_y >= 0);
+
+	return ((*_pattern_ptr) [_y & (PAT_WIDTH - 1)]);
 }
 
 
@@ -2019,76 +1508,192 @@ void	Bitdepth::quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, int
 
 
 
-void	Bitdepth::diffuse_floydsteinberg_int (int err, int &e1, int &e3, int &e5, int &e7)
+// Original coefficients                     : 7, 3, 5, 1
+// Optimised coefficients for serpentine scan: 7, 4, 5, 0
+// Source:
+// Sam Hocevar and Gary Niger,
+// Reinstating Floyd-Steinberg: Improved Metrics for Quality Assessment
+// of Error Diffusion Algorithms,
+// Lecture Notes in Computer Science LNCS 5099, pp. 38–45, 2008
+// (Proceedings of the International Conference on Image and Signal Processing
+// ICISP 2008) ISSN 0302-9743
+
+#define fmtc_Bitdepth_FS_OPTIMIZED_SERPENTINE_COEF
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
 {
-	e1 = (err     + 8) >> 4;
-	e3 = (err * 3 + 8) >> 4;
-	e5 = (err * 5 + 8) >> 4;
-	e7 = err - e1 - e3 - e5;
+#if defined (fmtc_Bitdepth_FS_OPTIMIZED_SERPENTINE_COEF)
+	const int      e1 = 0;
+	const int      e3 = (err * 4 + 8) >> 4;
+#else
+	const int      e1 = (err     + 8) >> 4;
+	const int      e3 = (err * 3 + 8) >> 4;
+#endif
+	const int      e5 = (err * 5 + 8) >> 4;
+	const int      e7 = err - e1 - e3 - e5;
+	spread_error <DIR> (e1, e3, e5, e7, err_nxt0, err0_ptr);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+{
+#if defined (fmtc_Bitdepth_FS_OPTIMIZED_SERPENTINE_COEF)
+	const float    e1 = 0;
+	const float    e3 = err * (4.0f / 16);
+#else
+	const float    e1 = err * (1.0f / 16);
+	const float    e3 = err * (3.0f / 16);
+#endif
+	const float    e5 = err * (5.0f / 16);
+	const float    e7 = err * (7.0f / 16);
+	spread_error <DIR> (e1, e3, e5, e7, err_nxt0, err0_ptr);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <typename EB>
+void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::prepare_next_line (EB *err_ptr)
+{
+	// Nothing
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR, typename ET, typename EB>
+void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET e3, ET e5, ET e7, ET &err_nxt0, EB *err0_ptr)
+{
+	err_nxt0 = err0_ptr [DIR];
+	err0_ptr [-DIR] += e3;
+	err0_ptr [   0] += e5;
+	err0_ptr [ DIR]  = e1;
+	err_nxt0        += e7;
 }
 
 
 
-void	Bitdepth::diffuse_floydsteinberg_flt (float err, float &e1, float &e3, float &e5, float &e7)
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
 {
-	e1 = err * (1.0f / 16);
-	e3 = err * (3.0f / 16);
-	e5 = err * (5.0f / 16);
-	e7 = err * (7.0f / 16);
+	const int      e1 = (err + 2) >> 2;
+	const int      e2 = err - 2 * e1;
+	spread_error <DIR> (e1, e2, err_nxt0, err0_ptr);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+{
+	const float    e1 = err * (1.0f / 4);
+	const float    e2 = err * (2.0f / 4);
+	spread_error <DIR> (e1, e2, err_nxt0, err0_ptr);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <typename EB>
+void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::prepare_next_line (EB *err_ptr)
+{
+	err_ptr [0] = EB (0);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR, typename ET, typename EB>
+void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET e2, ET &err_nxt0, EB *err0_ptr)
+{
+	err_nxt0 = err0_ptr [DIR];
+	err0_ptr [-DIR] += e1;
+	err0_ptr [   0]  = e1;
+	err_nxt0        += e2;
 }
 
 
 
-void	Bitdepth::diffuse_filterlite_int (int err, int &e1, int &e2)
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
 {
-	e1 = (err + 2) >> 2;
-	e2 = err - 2 * e1;
-}
-
-
-
-void	Bitdepth::diffuse_filterlite_flt (float err, float &e1, float &e2)
-{
-	e1 = err * (1.0f / 4);
-	e2 = err * (2.0f / 4);
-}
-
-
-
-void	Bitdepth::diffuse_stucki_int (int err, int &e1, int &e2, int &e4, int &e8)
-{
-	const int      m = (err << 4) / 42;
-
-	e1 = (m + 8) >> 4;
-	e2 = (m + 4) >> 3;
-	e4 = (m + 2) >> 2;
-//	e8 = (m + 1) >> 1;
+	const int      m  = (err << 4) / 42;
+	const int      e1 = (m + 8) >> 4;
+	const int      e2 = (m + 4) >> 3;
+	const int      e4 = (m + 2) >> 2;
+//	const int      e8 = (m + 1) >> 1;
 	const int      sum = (e1 << 1) + ((e2 + e4) << 2);
-	e8 = (err - sum + 1) >> 1;
+	const int      e8 = (err - sum + 1) >> 1;
+	spread_error <DIR> (e1, e2, e4, e8, err_nxt0, err_nxt1, err0_ptr, err1_ptr);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+{
+	const float    e1 = err * (1.0f / 42);
+	const float    e2 = err * (2.0f / 42);
+	const float    e4 = err * (4.0f / 42);
+	const float    e8 = err * (8.0f / 42);
+	spread_error <DIR> (e1, e2, e4, e8, err_nxt0, err_nxt1, err0_ptr, err1_ptr);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <typename EB>
+void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::prepare_next_line (EB *err_ptr)
+{
+	// Nothing
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR, typename ET, typename EB>
+void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET e2, ET e4, ET e8, ET &err_nxt0, ET &err_nxt1, EB *err0_ptr, EB *err1_ptr)
+{
+	err_nxt0 = err_nxt1 + e8;
+	err_nxt1 = err1_ptr [DIR * 2] + e4;
+	err0_ptr [-DIR * 2] += e2;
+	err0_ptr [-DIR    ] += e4;
+	err0_ptr [   0    ] += e8;
+	err0_ptr [ DIR    ] += e4;
+	err0_ptr [ DIR * 2] += e2;
+	err1_ptr [-DIR * 2] += e1;
+	err1_ptr [-DIR    ] += e2;
+	err1_ptr [   0    ] += e4;
+	err1_ptr [ DIR    ] += e2;
+	err1_ptr [ DIR * 2]  = e1;
 }
 
 
 
-void	Bitdepth::diffuse_stucki_flt (float err, float &e1, float &e2, float &e4, float &e8)
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
 {
-	e1 = err * (1.0f / 42);
-	e2 = err * (2.0f / 42);
-	e4 = err * (4.0f / 42);
-	e8 = err * (8.0f / 42);
+	const int      e1 = (err + 4) >> 3;
+	spread_error <DIR> (e1, err_nxt0, err_nxt1, err0_ptr, err1_ptr);
 }
 
-
-
-void	Bitdepth::diffuse_atkinson_int (int err, int &e1)
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
 {
-	e1 = (err + 4) >> 3;
+	const float    e1 = err * (1.0f / 8);
+	spread_error <DIR> (e1, err_nxt0, err_nxt1, err0_ptr, err1_ptr);
 }
 
-
-
-void	Bitdepth::diffuse_atkinson_flt (float err, float &e1)
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <typename EB>
+void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::prepare_next_line (EB *err_ptr)
 {
-	e1 = err * (1.0f / 8);
+	err_ptr [0] = EB (0);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR, typename ET, typename EB>
+void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET &err_nxt0, ET &err_nxt1, EB *err0_ptr, EB *err1_ptr)
+{
+	err_nxt0 = err_nxt1           + e1;
+	err_nxt1 = err1_ptr [2 * DIR] + e1;
+	err0_ptr [-DIR] += e1;
+	err0_ptr [   0] += e1;
+	err0_ptr [+DIR] += e1;
+	err1_ptr [   0]  = e1;
 }
 
 
@@ -2098,16 +1703,49 @@ void	Bitdepth::diffuse_atkinson_flt (float err, float &e1)
 // Proceedings of SIGGRAPH 2001, in ACM Computer Graphics,
 // Annual Conference Series, pp. 567-572, 2001.
 // Not optimised at all
-template <int DIF_BITS>
-void	Bitdepth::diffuse_ostromoukhov_int (int err, int &e1, int &e2, int &e3, int val)
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
 {
+	enum {         DIF_BITS = SRC_BITS - DST_BITS };
+
+	const int      val = src_ptr [0];
 	const int      index = fstb::sshift_l <int, 8 - DIF_BITS> (val) & 255;
-	const OTableEntry &  te = _ostromoukhov_table [index];
+	const Bitdepth::OTableEntry & te = Bitdepth::_ostromoukhov_table [index];
 	const int      d = te [3];
 
-	e1 = err * te [0] / d;
-	e2 = err * te [1] / d;
-	e3 = err - e1 - e2;
+	const int      e1 = err * te [0] / d;
+	const int      e2 = err * te [1] / d;
+	const int      e3 = err - e1 - e2;
+
+	spread_error <DIR> (e1, e2, e3, err_nxt0, err0_ptr);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR>
+void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+{
+
+	/*** To do ***/
+	assert (false);
+
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <typename EB>
+void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::prepare_next_line (EB *err_ptr)
+{
+	err_ptr [0] = EB (0);
+}
+
+template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <int DIR, typename ET, typename EB>
+void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET e2, ET e3, ET &err_nxt0, EB *err0_ptr)
+{
+	err_nxt0 = err0_ptr [DIR];
+	err0_ptr [-DIR] += e2;
+	err0_ptr [   0]  = e3;
+	err_nxt0        += e1;
 }
 
 
