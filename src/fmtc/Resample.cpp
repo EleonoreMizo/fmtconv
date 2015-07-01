@@ -290,19 +290,19 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 		if (plane_index < nbr_sx)
 		{
-			s._x = get_arg_flt (in, out, "sx", s._x);
+			s._x = get_arg_flt (in, out, "sx", s._x, plane_index);
 		}
 		if (plane_index < nbr_sy)
 		{
-			s._y = get_arg_flt (in, out, "sy", s._y);
+			s._y = get_arg_flt (in, out, "sy", s._y, plane_index);
 		}
 		if (plane_index < nbr_sw)
 		{
-			s._w = get_arg_flt (in, out, "sw", s._w);
+			s._w = get_arg_flt (in, out, "sw", s._w, plane_index);
 		}
 		if (plane_index < nbr_sh)
 		{
-			s._h = get_arg_flt (in, out, "sh", s._h);
+			s._h = get_arg_flt (in, out, "sh", s._h, plane_index);
 		}
 
 		if (s._w == 0)
