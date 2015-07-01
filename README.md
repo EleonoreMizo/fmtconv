@@ -8,7 +8,7 @@ It does:
 * Colorspace conversion (matrix and transfer characteristics).
 
 It supports:
-* Pixel data types: 8-, 9-, 10-, 12- and 16-bit integer, 32-bit float.
+* Pixel data types: 8-–12-, 14- and 16-bit integer, 32-bit float.
 * Colorspaces: RGB, Y, YUV in 4:4:4, 4:2:2, 4:2:0, 4:1:1 and YCgCo with the same chroma subsampling factors.
 * Progressive and interlaced content.
 
