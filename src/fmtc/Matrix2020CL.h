@@ -28,9 +28,12 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fstb/def.h"
+#include "fmtcl/Matrix2020CLProc.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
 #include "VapourSynth.h"
+
+#include <memory>
 
 #include <cstdint>
 
@@ -85,23 +88,6 @@ private:
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
-	void           setup_rgb_2_ycbcr ();
-	void           setup_ycbcr_2_rgb ();
-
-	template <typename DT, int DB>
-	void           conv_rgb_2_ycbcr_cpp_int (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-	void           conv_rgb_2_ycbcr_cpp_flt (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-
-	template <typename ST, int SB>
-	void           conv_ycbcr_2_rgb_cpp_int (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-	void           conv_ycbcr_2_rgb_cpp_flt (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-
-	template <typename T>
-	static fstb_FORCEINLINE T
-	               map_lin_to_gam (T v_lin, bool b12_flag);
-	template <typename T>
-	static fstb_FORCEINLINE T
-	               map_gam_to_lin (T v_gam, bool b12_flag);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
@@ -109,55 +95,12 @@ private:
 	               _vi_in;          // Input. Must be declared after _clip_src_sptr because of initialisation order.
 	::VSVideoInfo  _vi_out;         // Output. Must be declared after _vi_in.
 
-	bool				_sse_flag;
-	bool           _sse2_flag;
-
 	bool           _range_set_flag;
 	bool           _full_range_flag;
-
-	bool           _b12_flag;
 	bool           _to_yuv_flag;
-	bool           _flt_flag;
 
-	int16_t        _coef_rgby_int [NBR_PLANES];
-	uint16_t       _map_gamma_int [1 << RGB_INT_BITS];
-	uint16_t       _coef_yg_a_int;
-	int32_t        _coef_yg_b_int;
-	uint16_t       _coef_cb_a_int [2];  // 0: cb >= 0, 1: cb < 0
-	uint16_t       _coef_cr_a_int [2];
-	int32_t        _coef_cbcr_b_int;
-
-	void (ThisType::*
-	               _apply_matrix_ptr) (::VSFrameRef &dst, const ::VSFrameRef &src, int w, int h);
-
-	static const double
-	               _coef_rgb_to_y_dbl [NBR_PLANES];
-	static const double
-	               _coef_ryb_to_g_dbl [NBR_PLANES];
-	static const double
-	               _coef_cb_neg;
-	static const double
-	               _coef_cb_pos;
-	static const double
-	               _coef_cr_neg;
-	static const double
-	               _coef_cr_pos;
-
-	static const double
-	               _alpha_b12;
-	static const double
-	               _alpha_low;
-	static const double
-	               _beta_b12;
-	static const double
-	               _beta_low;
-	static const double
-	               _slope_lin;
-	static const double
-	               _gam_pow;
-
-
-
+	std::unique_ptr <fmtcl::Matrix2020CLProc>
+	               _proc_uptr;
 
 
 

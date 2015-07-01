@@ -469,6 +469,9 @@
     <ClInclude Include="fmtcl\TransLut.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\Matrix2020CLProc.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
     <ClInclude Include="fmtcl\ColorFamily.h">
       <Filter>fmtcl</Filter>
     </ClInclude>

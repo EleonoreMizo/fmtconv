@@ -188,6 +188,8 @@
     <ClInclude Include="fmtcl\KernelData.h" />
     <ClInclude Include="fmtcl\Mat4.h" />
     <ClInclude Include="fmtcl\Mat4.hpp" />
+    <ClInclude Include="fmtcl\Matrix2020CLProc.h" />
+    <ClInclude Include="fmtcl\Matrix2020CLProc_macro.h" />
     <ClInclude Include="fmtcl\MatrixProc.h" />
     <ClInclude Include="fmtcl\MatrixProc_macro.h" />
     <ClInclude Include="fmtcl\Proxy.h" />
@@ -347,6 +349,7 @@
       <XMLDocumentationFileName>$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
     </ClCompile>
     <ClCompile Include="fmtcl\KernelData.cpp" />
+    <ClCompile Include="fmtcl\Matrix2020CLProc.cpp" />
     <ClCompile Include="fmtcl\MatrixProc.cpp" />
     <ClCompile Include="fmtcl\MatrixProc_avx.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>

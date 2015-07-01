@@ -136,6 +136,9 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/KernelData.h \
                         ../../src/fmtcl/Mat4.h \
                         ../../src/fmtcl/Mat4.hpp \
+                        ../../src/fmtcl/Matrix2020CLProc.cpp \
+                        ../../src/fmtcl/Matrix2020CLProc.h \
+                        ../../src/fmtcl/Matrix2020CLProc_macro.h \
                         ../../src/fmtcl/MatrixProc.cpp \
                         ../../src/fmtcl/MatrixProc.h \
                         ../../src/fmtcl/MatrixProc_macro.h \
