@@ -112,8 +112,6 @@ private:
 	               find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, const ::VSFormat *fmt_dst_ptr, const ::VSFormat &fmt_src, ::VSCore &core);
 	void           make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_rgb_flag) const;
 
-	static fmtcl::SplFmt
-	               conv_to_splfmt (const ::VSFormat &fmt);
 	static void    make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag);
 	static void    make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag);
 	static void		make_mat_flt_int (fmtcl::Mat4 &m, bool to_flt_flag, const ::VSFormat &fmt, bool full_flag);

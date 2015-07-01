@@ -32,6 +32,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 #include "conc/Array.h"
 #include "fmtc/Matrix.h"
+#include "fmtc/fnc.h"
 #include "fmtcl/Mat4.h"
 #include "fstb/fnc.h"
 #include "vsutl/CpuOpt.h"
@@ -103,10 +104,8 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		throw_inval_arg ("greyscale format not supported as input.");
 	}
 	if (   (   fmt_src.sampleType == ::stInteger
-	        && fmt_src.bitsPerSample !=  8
-	        && fmt_src.bitsPerSample !=  9
-	        && fmt_src.bitsPerSample != 10
-	        && fmt_src.bitsPerSample != 12
+	        && (   fmt_src.bitsPerSample <  8
+	            || fmt_src.bitsPerSample > 12)
 	        && fmt_src.bitsPerSample != 16)
 	    || (   fmt_src.sampleType == ::stFloat
 	        && fmt_src.bitsPerSample != 32))
@@ -135,10 +134,8 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		throw_inval_arg ("unsupported color family for output.");
 	}
 	if (   (   fmt_dst_ptr->sampleType == ::stInteger
-	        && fmt_dst_ptr->bitsPerSample !=  8
-	        && fmt_dst_ptr->bitsPerSample !=  9
-	        && fmt_dst_ptr->bitsPerSample != 10
-	        && fmt_dst_ptr->bitsPerSample != 12
+	        && (   fmt_dst_ptr->bitsPerSample <  8
+	            || fmt_dst_ptr->bitsPerSample > 12)
 	        && fmt_dst_ptr->bitsPerSample != 16)
 	    || (   fmt_dst_ptr->sampleType == ::stFloat
 	        && fmt_dst_ptr->bitsPerSample != 32))
@@ -577,8 +574,8 @@ void	Matrix::prepare_coef (const ::VSFormat &fmt_dst, const ::VSFormat &fmt_src)
 	m *= _mat_main;
 	m *= m1s;
 
-	const fmtcl::SplFmt  splfmt_src  = conv_to_splfmt (fmt_src);
-	const fmtcl::SplFmt  splfmt_dst  = conv_to_splfmt (fmt_dst);
+	const fmtcl::SplFmt  splfmt_src = conv_vsfmt_to_splfmt (fmt_src);
+	const fmtcl::SplFmt  splfmt_dst = conv_vsfmt_to_splfmt (fmt_dst);
 	const fmtcl::MatrixProc::Err  ret_val = _proc_uptr->configure (
 		m, int_proc_flag,
 		splfmt_src, fmt_src.bitsPerSample,
@@ -741,34 +738,6 @@ void	Matrix::make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_
 	{
 		throw_inval_arg ("unknown matrix identifier.");
 	}
-}
-
-
-
-fmtcl::SplFmt	Matrix::conv_to_splfmt (const ::VSFormat &fmt)
-{
-	fmtcl::SplFmt  splfmt = fmtcl::SplFmt_ILLEGAL;
-
-	if (fmt.sampleType == ::stFloat)
-	{
-		if (fmt.bitsPerSample == 32)
-		{
-			splfmt = fmtcl::SplFmt_FLOAT;
-		}
-	}
-	else
-	{
-		if (fmt.bitsPerSample <= 8)
-		{
-			splfmt = fmtcl::SplFmt_INT8;
-		}
-		else if (fmt.bitsPerSample <= 16)
-		{
-			splfmt = fmtcl::SplFmt_INT16;
-		}
-	}
-
-	return (splfmt);
 }
 
 

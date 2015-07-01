@@ -472,6 +472,10 @@
     <ClInclude Include="fmtcl\TransOpCanonLog.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtc\fnc.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\Matrix2020CLProc_macro.h">
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">

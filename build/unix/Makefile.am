@@ -62,6 +62,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtc/Convert.h \
                         ../../src/fmtc/ConvStep.cpp \
                         ../../src/fmtc/ConvStep.h \
+                        ../../src/fmtc/fnc.cpp \
+                        ../../src/fmtc/fnc.h \
                         ../../src/fmtc/Matrix2020CL.cpp \
                         ../../src/fmtc/Matrix2020CL.h \
                         ../../src/fmtc/Matrix.cpp \

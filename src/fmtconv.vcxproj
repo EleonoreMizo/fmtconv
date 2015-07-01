@@ -231,6 +231,7 @@
     <ClInclude Include="fmtc\Bitdepth.h" />
     <ClInclude Include="fmtc\Convert.h" />
     <ClInclude Include="fmtc\ConvStep.h" />
+    <ClInclude Include="fmtc\fnc.h" />
     <ClInclude Include="fmtc\Matrix.h" />
     <ClInclude Include="fmtc\Matrix2020CL.h" />
     <ClInclude Include="fmtc\NativeToStack16.h" />
@@ -366,6 +367,10 @@
     <ClCompile Include="fmtc\Bitdepth.cpp" />
     <ClCompile Include="fmtc\Convert.cpp" />
     <ClCompile Include="fmtc\ConvStep.cpp" />
+    <ClCompile Include="fmtc\fnc.cpp">
+      <ObjectFileName>$(IntDir)%(Filename)3.obj</ObjectFileName>
+      <XMLDocumentationFileName>$(IntDir)%(Filename)3.xdc</XMLDocumentationFileName>
+    </ClCompile>
     <ClCompile Include="fmtc\Matrix.cpp" />
     <ClCompile Include="fmtc\Matrix2020CL.cpp" />
     <ClCompile Include="fmtc\NativeToStack16.cpp" />
