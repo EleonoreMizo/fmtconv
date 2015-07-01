@@ -3,9 +3,6 @@
         Transfer.cpp
         Author: Laurent de Soras, 2015
 
-To do:
-	- Remove code for destination bitdepth < 16
-
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to
@@ -30,6 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 
 #include "fmtc/Transfer.h"
+#include "fmtc/fnc.h"
 #include "fmtcl/TransOp2084.h"
 #include "fmtcl/TransOpAffine.h"
 #include "fmtcl/TransOpBypass.h"
@@ -47,10 +45,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	#include "fstb/ToolsSse2.h"
-#endif
-
 #include <algorithm>
 
 #include <cassert>
@@ -59,156 +53,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 namespace fmtc
 {
-
-
-
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
-
-
-template <class M>
-class Transfer_FindIndexSse2
-{
-public:
-	enum {         LINLUT_RES_L2  = Transfer::LINLUT_RES_L2 };
-	enum {         LINLUT_MIN_F   = Transfer::LINLUT_MIN_F  };
-	enum {         LINLUT_MAX_F   = Transfer::LINLUT_MAX_F  };
-	enum {         LINLUT_SIZE_F  = Transfer::LINLUT_SIZE_F };
-
-	enum {         LOGLUT_MIN_L2  = Transfer::LOGLUT_MIN_L2 };
-	enum {         LOGLUT_MAX_L2  = Transfer::LOGLUT_MAX_L2 };
-	enum {         LOGLUT_RES_L2  = Transfer::LOGLUT_RES_L2 };
-	enum {         LOGLUT_HSIZE   = Transfer::LOGLUT_HSIZE  };
-	enum {         LOGLUT_SIZE    = Transfer::LOGLUT_SIZE   };
-
-	static inline void
-		            find_index (const Transfer::FloatIntMix val_arr [4], __m128i &index, __m128 &frac);
-};
-
-
-
-template <>
-void	Transfer_FindIndexSse2 <Transfer::MapperLin>::find_index (const Transfer::FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
-{
-	assert (val_arr != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
-	
-	const int      offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
-	const __m128   scale     = _mm_set1_ps (1 << LINLUT_RES_L2);
-	const __m128i  offset_ps = _mm_set1_epi32 (offset);
-	const __m128   val_min   = _mm_set1_ps (0                 - offset);
-	const __m128   val_max   = _mm_set1_ps (LINLUT_SIZE_F - 2 - offset);
-
-	const __m128   v         =
-		_mm_load_ps (reinterpret_cast <const float *> (val_arr));
-	__m128         val_scl   = _mm_mul_ps (v, scale);
-	val_scl = _mm_min_ps (val_scl, val_max);
-	val_scl = _mm_max_ps (val_scl, val_min);
-	const __m128i  index_raw = _mm_cvtps_epi32 (val_scl);
-	index     = _mm_add_epi32 (index_raw, offset_ps);
-	frac      = _mm_sub_ps (val_scl, _mm_cvtepi32_ps (index_raw));
-}
-
-
-
-template <>
-void	Transfer_FindIndexSse2 <Transfer::MapperLog>::find_index (const Transfer::FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
-{
-	assert (val_arr != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
-
-	// Constants
-	static const int      mant_size = 23;
-	static const int      exp_bias  = 127;
-	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
-	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-//	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
-	static const int      frac_size = mant_size - LOGLUT_RES_L2;
-	static const uint32_t frac_mask = (1 << frac_size) - 1;
-
-	const __m128   zero_f     = _mm_setzero_ps ();
-	const __m128   one_f      = _mm_set1_ps (1);
-	const __m128   frac_mul   = _mm_set1_ps (1.0f / (1 << frac_size));
-	const __m128   mul_eps    = _mm_set1_ps (1.0f / val_min);
-	const __m128   mask_abs_f = _mm_load_ps (
-		reinterpret_cast <const float *> (fstb::ToolsSse2::_mask_abs)
-	);
-
-	const __m128i  zero_i          = _mm_setzero_si128 ();
-	const __m128i  mask_abs_epi32  = _mm_set1_epi32 (0x7FFFFFFF);
-	const __m128i  one_epi32       = _mm_set1_epi32 (1);
-	const __m128i  base_epi32      = _mm_set1_epi32 (int (base));
-	const __m128i  frac_mask_epi32 = _mm_set1_epi32 (frac_mask);
-	const __m128i  val_min_epi32   =
-		_mm_set1_epi32 ((LOGLUT_MIN_L2 + exp_bias) << mant_size);
-	const __m128i  val_max_epi32   =
-		_mm_set1_epi32 ((LOGLUT_MAX_L2 + exp_bias) << mant_size);
-	const __m128i  index_max_epi32 =
-		_mm_set1_epi32 ((LOGLUT_MAX_L2 - LOGLUT_MIN_L2) << LOGLUT_RES_L2);
-	const __m128i  hsize_epi32     = _mm_set1_epi32 (LOGLUT_HSIZE);
-	const __m128i  mirror_epi32    = _mm_set1_epi32 (LOGLUT_HSIZE - 1);
-
-	// It really starts here
-	const __m128   val_f = _mm_load_ps (reinterpret_cast <const float *> (val_arr));
-	const __m128   val_a = _mm_and_ps (val_f, mask_abs_f);
-	const __m128i  val_i = _mm_load_si128 (reinterpret_cast <const __m128i *> (val_arr));
-	const __m128i  val_u = _mm_and_si128 (val_i, mask_abs_epi32);
-
-	// Standard path
-	__m128i        index_std = _mm_sub_epi32 (val_u, base_epi32);
-	index_std = _mm_srli_epi32 (index_std, frac_size);
-	index_std = _mm_add_epi32 (index_std, one_epi32);
-	__m128i        frac_stdi = _mm_and_si128 (val_u, frac_mask_epi32);
-	__m128         frac_std  = _mm_cvtepi32_ps (frac_stdi);
-	frac_std  = _mm_mul_ps (frac_std, frac_mul);
-
-	// Epsilon path
-	__m128         frac_eps  = _mm_max_ps (val_a, zero_f);
-	frac_eps = _mm_mul_ps (frac_eps, mul_eps);
-
-	// Range cases
-	const __m128i  eps_flag_i = _mm_cmpgt_epi32 (val_min_epi32, val_u);
-	const __m128i  std_flag_i = _mm_cmpgt_epi32 (val_max_epi32, val_u);
-	const __m128   eps_flag_f = _mm_castsi128_ps (eps_flag_i);
-	const __m128   std_flag_f = _mm_castsi128_ps (std_flag_i);
-	__m128i        index_tmp  =
-		fstb::ToolsSse2::select (std_flag_i, index_std, index_max_epi32);
-	__m128         frac_tmp   =
-		fstb::ToolsSse2::select (std_flag_f, frac_std, one_f);
-	index_tmp = fstb::ToolsSse2::select (eps_flag_i, zero_i, index_tmp);
-	frac_tmp  = fstb::ToolsSse2::select (eps_flag_f, frac_eps, frac_tmp);
-
-	// Sign cases
-	const __m128i  neg_flag_i = _mm_srai_epi32 (val_i, 31);
-	const __m128   neg_flag_f = _mm_castsi128_ps (neg_flag_i);
-	const __m128i  index_neg  = _mm_sub_epi32 (mirror_epi32, index_tmp);
-	const __m128i  index_pos  = _mm_add_epi32 (hsize_epi32, index_tmp);
-	const __m128   frac_neg   = _mm_sub_ps (one_f, frac_tmp);
-	index = fstb::ToolsSse2::select (neg_flag_i, index_neg, index_pos);
-	frac  = fstb::ToolsSse2::select (neg_flag_f, frac_neg, frac_tmp);
-}
-
-
-
-template <class T>
-static fstb_FORCEINLINE void	Transfer_store_sse2 (T *dst_ptr, __m128 val)
-{
-	_mm_store_si128 (
-		reinterpret_cast <__m128i *> (dst_ptr),
-		_mm_cvtps_epi32 (val)
-	);
-}
-
-static fstb_FORCEINLINE void	Transfer_store_sse2 (float *dst_ptr, __m128 val)
-{
-	_mm_store_ps (dst_ptr, val);
-}
-
-
-
-#endif   // fstb_ARCHI_X86
 
 
 
@@ -234,8 +78,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 ,	_curve_d (fmtcl::TransCurve_UNDEF)
 ,	_loglut_flag (false)
 ,	_plane_processor (vsapi, *this, "transfer", true)
-,	_process_plane_ptr (0)
-,	_lut ()
+,	_lut_uptr ()
 {
 	assert (&in != 0);
 	assert (&out != 0);
@@ -287,7 +130,6 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 	_vi_out.format = &fmt_dst;
 
 	init_table ();
-	init_proc_fnc ();
 }
 
 
@@ -364,125 +206,6 @@ const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &
 
 
 
-Transfer::MapperLin::MapperLin (int lut_size, double range_beg, double range_lst)
-:	_lut_size (lut_size)
-,	_range_beg (range_beg)
-,	_step ((range_lst - range_beg) / (lut_size - 1))
-{
-	assert (lut_size >= 2);
-	assert (range_beg < range_lst);
-}
-
-
-
-void	Transfer::MapperLin::find_index (const FloatIntMix &val, int &index, float &frac)
-{
-	assert (&val != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
-
-	const float    val_scl   = val._f * (1 << LINLUT_RES_L2);
-	const int      index_raw = fstb::floor_int (val_scl);
-	const int      offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
-	index = fstb::limit (index_raw + offset, 0, LINLUT_SIZE_F - 2);
-	frac  = val_scl - float (index_raw);
-}
-
-
-
-double	Transfer::MapperLin::find_val (int index) const
-{
-	return (_range_beg + index * _step);
-}
-
-
-
-void	Transfer::MapperLog::find_index (const FloatIntMix &val, int &index, float &frac)
-{
-	assert (&val != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
-	static_assert (LOGLUT_MIN_L2 <= 0, "LOGLUT_MIN_L2 must be negative");
-	static_assert (LOGLUT_MAX_L2 >= 0, "LOGLUT_MAX_L2 must be positive");
-
-	static const int      mant_size = 23;
-	static const int      exp_bias  = 127;
-	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
-	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
-	static const int      frac_size = mant_size - LOGLUT_RES_L2;
-	static const uint32_t frac_mask = (1 << frac_size) - 1;
-
-	const uint32_t val_u = val._i & 0x7FFFFFFF;
-	const float    val_a = fabs (val._f);
-
-	// index is set relatively to the x=0 index...
-	if (val_a < val_min)
-	{
-		index = 0;
-		frac  = std::max (val_a, 0.0f) * (1.0f / val_min);
-	}
-	else if (val_a >= val_max)
-	{
-		index = ((LOGLUT_MAX_L2 - LOGLUT_MIN_L2) << LOGLUT_RES_L2);
-		frac  = 1;
-	}
-	else
-	{
-		index = ((val_u - base) >> frac_size) + 1;
-		frac  = (val_u & frac_mask) * (1.0f / (1 << frac_size));
-	}
-
-	// ...and shifted or mirrored depending on the sign
-	if (val._f >= 0)
-	{
-		index += LOGLUT_HSIZE;
-	}
-	else
-	{
-		// Because frac cannot be negative, step one index behind.
-		index = LOGLUT_HSIZE - 1 - index;
-		frac  = 1 - frac;
-	}
-
-	assert (index >= 0);
-	assert (index < LOGLUT_SIZE - 1);
-	assert (frac >= 0);
-	assert (frac <= 1);
-}
-
-
-
-double	Transfer::MapperLog::find_val (int index) const
-{
-	assert (index >= 0);
-	assert (index < LOGLUT_SIZE);
-
-	static const float    val_min  = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-	static const int      seg_size = 1 << LOGLUT_RES_L2;
-
-	// float is OK because the values are exactly represented in float.
-	float          val   = 0;
-	int            ind_2 = index - LOGLUT_HSIZE;
-	if (ind_2 != 0)
-	{
-		const int      ind_3     = std::abs (ind_2) - 1;
-		const int      log2_part = ind_3 >> LOGLUT_RES_L2;
-		const int      seg_part  = ind_3 & (seg_size - 1);
-		const float    lerp      = seg_part * (1.0f / seg_size);
-		const float    v0        = (int64_t (1) << log2_part) * val_min;
-		val = v0 * (1 + lerp);
-		if (ind_2 < 0)
-		{
-			val = -val;
-		}
-	}
-
-	return (val);
-}
-
-
-
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
@@ -512,8 +235,7 @@ int	Transfer::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 		uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
 		const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
 
-		assert (_process_plane_ptr != 0);
-		(this->*_process_plane_ptr) (
+		_lut_uptr->process_plane (
 			data_dst_ptr, data_src_ptr, stride_dst, stride_src, w, h
 		);
 	}
@@ -702,317 +424,16 @@ void	Transfer::init_table ()
 
 	// LUTify
 	OpSPtr         op_f (new fmtcl::TransOpCompose (op_s, op_d));
-	generate_lut (*op_f);
+
+	const fmtcl::SplFmt  src_fmt = conv_vsfmt_to_splfmt (*_vi_in.format);
+	const fmtcl::SplFmt  dst_fmt = conv_vsfmt_to_splfmt (*_vi_out.format);
+	_lut_uptr = std::unique_ptr <fmtcl::TransLut> (new fmtcl::TransLut (
+		*op_f, _loglut_flag,
+		src_fmt, _vi_in.format->bitsPerSample, _full_range_src_flag,
+		dst_fmt, _vi_out.format->bitsPerSample, _full_range_dst_flag,
+		_sse2_flag, _avx2_flag
+	));
 }
-
-
-
-void	Transfer::init_proc_fnc ()
-{
-	const int      s =
-		  (_loglut_flag                           ) ? 0
-		: (_vi_in.format->sampleType  == ::stFloat) ? 1
-		: (_vi_in.format->bitsPerSample  > 8      ) ? 2
-		:                                             3;
-	const int      d =
-		  (_vi_out.format->sampleType == ::stFloat) ? 0
-		: (_vi_out.format->bitsPerSample > 8      ) ? 1
-		:                                             2;
-	const int      p =
-		  (_vi_in.format->sampleType  == ::stInteger) ? 0
-		: (_sse2_flag                               ) ? 1
-		:                                               0;
-
-	const int      selector = d * 4 + s;
-
-	switch (selector + p * 3 * 4)
-	{
-	case (0*3+0)*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_cpp  <          float   , MapperLog>; break;
-	case (0*3+0)*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_cpp  <          float   , MapperLin>; break;
-	case (0*3+0)*4+2:	_process_plane_ptr = &ThisType::process_plane_int_any_cpp  <uint16_t, float              >; break;
-	case (0*3+0)*4+3:	_process_plane_ptr = &ThisType::process_plane_int_any_cpp  <uint8_t , float              >; break;
-	case (0*3+1)*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_cpp  <          uint16_t, MapperLog>; break;
-	case (0*3+1)*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_cpp  <          uint16_t, MapperLin>; break;
-	case (0*3+1)*4+2:	_process_plane_ptr = &ThisType::process_plane_int_any_cpp  <uint16_t, uint16_t           >; break;
-	case (0*3+1)*4+3:	_process_plane_ptr = &ThisType::process_plane_int_any_cpp  <uint8_t , uint16_t           >; break;
-	case (0*3+2)*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_cpp  <          uint8_t , MapperLog>; break;
-	case (0*3+2)*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_cpp  <          uint8_t , MapperLin>; break;
-	case (0*3+2)*4+2:	_process_plane_ptr = &ThisType::process_plane_int_any_cpp  <uint16_t, uint8_t            >; break;
-	case (0*3+2)*4+3:	_process_plane_ptr = &ThisType::process_plane_int_any_cpp  <uint8_t , uint8_t            >; break;
-
-	default:
-		assert (false);
-		break;
-	}
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	init_proc_fnc_sse2 (selector);
-	init_proc_fnc_avx2 (selector);
-#endif
-}
-
-
-
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
-void	Transfer::init_proc_fnc_sse2 (int selector)
-{
-	if (_sse2_flag && _vi_in.format->sampleType == ::stFloat)
-	{
-		switch (selector)
-		{
-		case 0*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <float   , MapperLog>; break;
-		case 0*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <float   , MapperLin>; break;
-		case 1*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <uint16_t, MapperLog>; break;
-		case 1*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <uint16_t, MapperLin>; break;
-		case 2*4+0:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <uint8_t , MapperLog>; break;
-		case 2*4+1:	_process_plane_ptr = &ThisType::process_plane_flt_any_sse2 <uint8_t , MapperLin>; break;
-
-		default:
-			// Nothing
-			break;
-		}
-	}
-}
-
-#endif   // fstb_ARCHI_X86
-
-
-
-void	Transfer::generate_lut (const fmtcl::TransOpInterface &curve)
-{
-	assert (&curve != 0);
-
-	if (_vi_in.format->sampleType == ::stFloat)
-	{
-		// When the source is float, the LUT output is always float
-		// so we can interpolate it easily and obtain the exact values.
-		// If the target data type is int, we quantize the interpolated
-		// values as a second step.
-		_lut.set_type <float> ();
-
-		if (_loglut_flag)
-		{
-			_lut.resize (LOGLUT_SIZE);
-			MapperLog   mapper;
-			generate_lut_flt <float> (curve, mapper);
-		}
-		else
-		{
-			_lut.resize (LINLUT_SIZE_F);
-			MapperLin   mapper (LINLUT_SIZE_F, LINLUT_MIN_F, LINLUT_MAX_F);
-			generate_lut_flt <float> (curve, mapper);
-		}
-	}
-
-	else
-	{
-		int            range = 1 << _vi_in.format->bitsPerSample;
-		if (_vi_in.format->bitsPerSample <= 8)
-		{
-			_lut.set_type <uint8_t> ();
-			_lut.resize (1 << 8);
-		}
-		else
-		{
-			_lut.set_type <uint16_t> ();
-			_lut.resize (1 << 16);
-		}
-		const int      sb16  = (_full_range_src_flag) ? 0      :  16 << 8;
-		const int      sw16  = (_full_range_src_flag) ? 0xFFFF : 235 << 8;
-		int            sbn   = sb16 >> (16 - _vi_in.format->bitsPerSample);
-		int            swn   = sw16 >> (16 - _vi_in.format->bitsPerSample);
-		const int      sdif  = swn - sbn;
-		const double   r_beg = double (0         - sbn) / sdif;
-		const double   r_lst = double (range - 1 - sbn) / sdif;
-		if (_vi_out.format->sampleType == ::stFloat)
-		{
-			MapperLin   mapper (range, r_beg, r_lst);
-			generate_lut_flt <float> (curve, mapper);
-		}
-		else
-		{
-			const int      db16 = (_full_range_dst_flag) ? 0      :  16 << 8;
-			const int      dw16 = (_full_range_dst_flag) ? 0xFFFF : 235 << 8;
-			int            dbn  = db16 >> (16 - _vi_out.format->bitsPerSample);
-			int            dwn  = dw16 >> (16 - _vi_out.format->bitsPerSample);
-			const double   mul  = dwn - dbn;
-			const double   add  = dbn;
-			if (_vi_out.format->bitsPerSample > 8)
-			{
-				generate_lut_int <uint16_t> (
-					curve, range, r_beg, r_lst, mul, add
-				);
-			}
-			else
-			{
-				generate_lut_int <uint8_t> (
-					curve, range, r_beg, r_lst, mul, add
-				);
-			}
-		}
-	}
-}
-
-
-
-// T = LUT data type (int or float)
-template <class T>
-void	Transfer::generate_lut_int (const fmtcl::TransOpInterface &curve, int lut_size, double range_beg, double range_lst, double mul, double add)
-{
-	assert (_vi_out.format->sampleType == ::stInteger);
-	assert (&curve != 0);
-	assert (lut_size > 1);
-	assert (range_beg < range_lst);
-
-	const double   scale   = (range_lst - range_beg) / (lut_size - 1);
-	const int      max_val = (1 << _vi_out.format->bitsPerSample) - 1;
-	for (int pos = 0; pos < lut_size; ++pos)
-	{
-		const double   x = range_beg + pos * scale;
-		const double   y = curve (x) * mul + add;
-		_lut.use <T> (pos) = T (fstb::limit (fstb::round_int (y), 0, max_val));
-	}
-}
-
-
-
-// T = float
-template <class T, class M>
-void	Transfer::generate_lut_flt (const fmtcl::TransOpInterface &curve, const M &mapper)
-{
-	assert (&curve != 0);
-	assert (&mapper != 0);
-
-	const int      lut_size = mapper.get_lut_size ();
-	for (int pos = 0; pos < lut_size; ++pos)
-	{
-		const double   x = mapper.find_val (pos);
-		const double   y = curve (x);
-		_lut.use <T> (pos) = T (y);
-	}
-}
-
-
-
-template <class TS, class TD>
-void	Transfer::process_plane_int_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (stride_dst != 0);
-	assert (stride_src != 0);
-	assert (w > 0);
-	assert (h > 0);
-
-	for (int y = 0; y < h; ++y)
-	{
-		const TS *     s_ptr = reinterpret_cast <const TS *> (src_ptr);
-		TD *           d_ptr = reinterpret_cast <      TD *> (dst_ptr);
-
-		for (int x = 0; x < w; ++x)
-		{
-			const int          index = s_ptr [x];
-			d_ptr [x] = _lut.use <TD> (index);
-		}
-
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
-	}
-}
-
-
-
-template <class TD, class M>
-void	Transfer::process_plane_flt_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (stride_dst != 0);
-	assert (stride_src != 0);
-	assert (w > 0);
-	assert (h > 0);
-
-	for (int y = 0; y < h; ++y)
-	{
-		const FloatIntMix *  s_ptr =
-			reinterpret_cast <const FloatIntMix *> (src_ptr);
-		TD *                 d_ptr =
-			reinterpret_cast <               TD *> (dst_ptr);
-
-		for (int x = 0; x < w; ++x)
-		{
-			int                index;
-			float              lerp;
-			M::find_index (s_ptr [x], index, lerp);
-			const float        p_0  = _lut.use <float> (index    );
-			const float        p_1  = _lut.use <float> (index + 1);
-			const float        dif  = p_1 - p_0;
-			const float        val  = p_0 + lerp * dif;
-			d_ptr [x] = Convert <TD>::cast (val);
-		}
-
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
-	}
-}
-
-
-
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
-
-
-template <class TD, class M>
-void	Transfer::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
-{
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (stride_dst != 0);
-	assert (stride_src != 0);
-	assert (w > 0);
-	assert (h > 0);
-
-	for (int y = 0; y < h; ++y)
-	{
-		const FloatIntMix *  s_ptr =
-			reinterpret_cast <const FloatIntMix *> (src_ptr);
-		TD *                 d_ptr =
-			reinterpret_cast <               TD *> (dst_ptr);
-
-		for (int x = 0; x < w; x += 4)
-		{
-			union
-			{
-				__m128i            _vect;
-				uint32_t           _scal [4];
-			}                  index;
-			__m128             lerp;
-			Transfer_FindIndexSse2 <M>::find_index (s_ptr + x, index._vect, lerp);
-			__m128             val = _mm_set_ps (
-				_lut.use <float> (index._scal [3]    ),
-				_lut.use <float> (index._scal [2]    ),
-				_lut.use <float> (index._scal [1]    ),
-				_lut.use <float> (index._scal [0]    )
-			);
-			__m128             va2 = _mm_set_ps (
-				_lut.use <float> (index._scal [3] + 1),
-				_lut.use <float> (index._scal [2] + 1),
-				_lut.use <float> (index._scal [1] + 1),
-				_lut.use <float> (index._scal [0] + 1)
-			);
-			const __m128       dif = _mm_sub_ps (va2, val);
-			val = _mm_add_ps (val, _mm_mul_ps (dif, lerp));
-			Transfer_store_sse2 (&d_ptr [x], val);
-		}
-
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
-	}
-}
-
-
-
-#endif
 
 
 
@@ -1209,20 +630,6 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 	}
 
 	return (ptr);
-}
-
-
-
-template <class T>
-T	Transfer::Convert <T>::cast (float val)
-{
-	return (T (fstb::conv_int_fast (val)));
-}
-
-template <>
-float	Transfer::Convert <float>::cast (float val)
-{
-	return (val);
 }
 
 

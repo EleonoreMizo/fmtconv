@@ -472,6 +472,9 @@
     <ClInclude Include="fmtcl\TransOpCanonLog.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\TransLut.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
     <ClInclude Include="fmtc\fnc.h">
       <Filter>fmtc</Filter>
     </ClInclude>
@@ -622,9 +625,6 @@
     <ClCompile Include="fmtc\Transfer.cpp">
       <Filter>fmtc</Filter>
     </ClCompile>
-    <ClCompile Include="fmtc\Transfer_avx2.cpp">
-      <Filter>fmtc</Filter>
-    </ClCompile>
     <ClCompile Include="vsutl\CpuOpt.cpp">
       <Filter>vsutl</Filter>
     </ClCompile>
@@ -667,5 +667,12 @@
     <ClCompile Include="fmtcl\TransOpCanonLog.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="fmtcl\TransLut.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransLut_avx2.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\Matrix2020CLProc.cpp">
   </ItemGroup>
 </Project>

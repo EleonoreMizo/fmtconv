@@ -211,6 +211,7 @@
     <ClInclude Include="fmtcl\SplFmt.h" />
     <ClInclude Include="fmtcl\SplFmt.hpp" />
     <ClInclude Include="fmtcl\TransCurve.h" />
+    <ClInclude Include="fmtcl\TransLut.h" />
     <ClInclude Include="fmtcl\TransOp2084.h" />
     <ClInclude Include="fmtcl\TransOpAffine.h" />
     <ClInclude Include="fmtcl\TransOpBypass.h" />
@@ -355,6 +356,10 @@
     <ClCompile Include="fmtcl\Scaler_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
+    <ClCompile Include="fmtcl\TransLut.cpp" />
+    <ClCompile Include="fmtcl\TransLut_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="fmtcl\TransOp2084.cpp" />
     <ClCompile Include="fmtcl\TransOpAffine.cpp" />
     <ClCompile Include="fmtcl\TransOpCanonLog.cpp" />
@@ -377,9 +382,6 @@
     <ClCompile Include="fmtc\Resample.cpp" />
     <ClCompile Include="fmtc\Stack16ToNative.cpp" />
     <ClCompile Include="fmtc\Transfer.cpp" />
-    <ClCompile Include="fmtc\Transfer_avx2.cpp">
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-    </ClCompile>
     <ClCompile Include="fstb\CpuId.cpp" />
     <ClCompile Include="fstb\ToolsAvx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>

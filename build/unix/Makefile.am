@@ -161,6 +161,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/SplFmt.h \
                         ../../src/fmtcl/SplFmt.hpp \
                         ../../src/fmtcl/TransCurve.h \
+                        ../../src/fmtcl/TransLut.cpp \
+                        ../../src/fmtcl/TransLut.h \
                         ../../src/fmtcl/TransOp2084.cpp \
                         ../../src/fmtcl/TransOp2084.h \
                         ../../src/fmtcl/TransOpAffine.cpp \
@@ -231,7 +233,7 @@ libavx2_la_SOURCES = ../../src/fmtcl/BitBltConv_avx2.cpp \
                      ../../src/fmtcl/ProxyRwAvx2.h \
                      ../../src/fmtcl/ProxyRwAvx2.hpp \
                      ../../src/fmtcl/Scaler_avx2.cpp \
-                     ../../src/fmtc/Transfer_avx2.cpp \
+                     ../../src/fmtcl/TransLut_avx2.cpp \
                      ../../src/fstb/ToolsAvx2.cpp \
                      ../../src/fstb/ToolsAvx2.h \
                      ../../src/fstb/ToolsAvx2.hpp

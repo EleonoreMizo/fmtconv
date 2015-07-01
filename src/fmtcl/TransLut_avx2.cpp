@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-        Transfer.cpp
+        TransLut_avx2.cpp
         Author: Laurent de Soras, 2015
 
 --- Legal stuff ---
@@ -25,7 +25,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fstb/def.h"
-#include "fmtc/Transfer.h"
+
+#include "fmtcl/TransLut.h"
 #include "fstb/ToolsAvx2.h"
 
 #include <immintrin.h>
@@ -36,34 +37,36 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-namespace fmtc
+
+
+namespace fmtcl
 {
 
 
 
 template <class M>
-class Transfer_FindIndexAvx2
+class TransLut_FindIndexAvx2
 {
 public:
-	enum {         LINLUT_RES_L2  = Transfer::LINLUT_RES_L2 };
-	enum {         LINLUT_MIN_F   = Transfer::LINLUT_MIN_F  };
-	enum {         LINLUT_MAX_F   = Transfer::LINLUT_MAX_F  };
-	enum {         LINLUT_SIZE_F  = Transfer::LINLUT_SIZE_F };
+	enum {         LINLUT_RES_L2  = TransLut::LINLUT_RES_L2 };
+	enum {         LINLUT_MIN_F   = TransLut::LINLUT_MIN_F  };
+	enum {         LINLUT_MAX_F   = TransLut::LINLUT_MAX_F  };
+	enum {         LINLUT_SIZE_F  = TransLut::LINLUT_SIZE_F };
 
-	enum {         LOGLUT_MIN_L2  = Transfer::LOGLUT_MIN_L2 };
-	enum {         LOGLUT_MAX_L2  = Transfer::LOGLUT_MAX_L2 };
-	enum {         LOGLUT_RES_L2  = Transfer::LOGLUT_RES_L2 };
-	enum {         LOGLUT_HSIZE   = Transfer::LOGLUT_HSIZE  };
-	enum {         LOGLUT_SIZE    = Transfer::LOGLUT_SIZE   };
+	enum {         LOGLUT_MIN_L2  = TransLut::LOGLUT_MIN_L2 };
+	enum {         LOGLUT_MAX_L2  = TransLut::LOGLUT_MAX_L2 };
+	enum {         LOGLUT_RES_L2  = TransLut::LOGLUT_RES_L2 };
+	enum {         LOGLUT_HSIZE   = TransLut::LOGLUT_HSIZE  };
+	enum {         LOGLUT_SIZE    = TransLut::LOGLUT_SIZE   };
 
 	static inline void
-		            find_index (const Transfer::FloatIntMix val_arr [8], __m256i &index, __m256 &frac);
+		            find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac);
 };
 
 
 
 template <>
-void	Transfer_FindIndexAvx2 <Transfer::MapperLin>::find_index (const Transfer::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
+void	TransLut_FindIndexAvx2 <TransLut::MapperLin>::find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
 {
 	assert (val_arr != 0);
 	assert (&index != 0);
@@ -88,7 +91,7 @@ void	Transfer_FindIndexAvx2 <Transfer::MapperLin>::find_index (const Transfer::F
 
 
 template <>
-void	Transfer_FindIndexAvx2 <Transfer::MapperLog>::find_index (const Transfer::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
+void	TransLut_FindIndexAvx2 <TransLut::MapperLog>::find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
 {
 	assert (val_arr != 0);
 	assert (&index != 0);
@@ -168,7 +171,7 @@ void	Transfer_FindIndexAvx2 <Transfer::MapperLog>::find_index (const Transfer::F
 
 
 template <class T>
-static fstb_FORCEINLINE void	Transfer_store_avx2 (T *dst_ptr, __m256 val)
+static fstb_FORCEINLINE void	TransLut_store_avx2 (T *dst_ptr, __m256 val)
 {
 	_mm256_store_si256 (
 		reinterpret_cast <__m256i *> (dst_ptr),
@@ -176,7 +179,7 @@ static fstb_FORCEINLINE void	Transfer_store_avx2 (T *dst_ptr, __m256 val)
 	);
 }
 
-static fstb_FORCEINLINE void	Transfer_store_avx2 (float *dst_ptr, __m256 val)
+static fstb_FORCEINLINE void	TransLut_store_avx2 (float *dst_ptr, __m256 val)
 {
 	_mm256_store_ps (dst_ptr, val);
 }
@@ -195,7 +198,7 @@ static fstb_FORCEINLINE void	Transfer_store_avx2 (float *dst_ptr, __m256 val)
 
 
 
-void	Transfer::init_proc_fnc_avx2 (int selector)
+void	TransLut::init_proc_fnc_avx2 (int selector)
 {
 	if (_avx2_flag)
 	{
@@ -218,12 +221,12 @@ void	Transfer::init_proc_fnc_avx2 (int selector)
 
 
 template <class TD, class M>
-void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
+void	TransLut::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
-	assert (stride_dst != 0);
-	assert (stride_src != 0);
+	assert (stride_dst != 0 || h == 1);
+	assert (stride_src != 0 || h == 1);
 	assert (w > 0);
 	assert (h > 0);
 
@@ -242,7 +245,7 @@ void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 				uint32_t           _scal [8];
 			}                  index;
 			__m256             lerp;
-			Transfer_FindIndexAvx2 <M>::find_index (s_ptr + x, index._vect, lerp);
+			TransLut_FindIndexAvx2 <M>::find_index (s_ptr + x, index._vect, lerp);
 #if 1	// Looks as fast as _mm256_set_ps
 			// G++ complains about sizeof() as argument
 			__m256             val = _mm256_i32gather_ps (
@@ -275,7 +278,7 @@ void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 #endif
 			const __m256       dif = _mm256_sub_ps (va2, val);
 			val = _mm256_add_ps (val, _mm256_mul_ps (dif, lerp));
-			Transfer_store_avx2 (&d_ptr [x], val);
+			TransLut_store_avx2 (&d_ptr [x], val);
 		}
 
 		src_ptr += stride_src;
@@ -287,7 +290,7 @@ void	Transfer::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 
 
 
-}	// namespace fmtc
+}	// namespace fmtcl
 
 
 
