@@ -29,11 +29,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "conc/Array.h"
 #include "conc/ObjPool.h"
-#include "fmtc/ArrayAlign.h"
 #include "fmtcl/BitBltConv.h"
 #include "fmtcl/ErrDifBuf.h"
 #include "fmtcl/ErrDifBufFactory.h"
 #include "fmtcl/SplFmt.h"
+#include "fstb/ArrayAlign.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
 #include "vsutl/PlaneProcCbInterface.h"
@@ -117,7 +117,7 @@ private:
 
 	typedef	int16_t	PatRow [PAT_WIDTH];
 	typedef	PatRow	PatData [PAT_WIDTH]; // [y] [x]
-	typedef	ArrayAlign <PatData, PAT_PERIOD, 16>	PatDataArray;
+	typedef	fstb::ArrayAlign <PatData, PAT_PERIOD, 16>	PatDataArray;
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;

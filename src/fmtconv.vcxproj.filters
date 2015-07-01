@@ -21,12 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="fmtc\ArrayAlign.h">
-      <Filter>fmtc</Filter>
-    </ClInclude>
-    <ClInclude Include="fmtc\ArrayAlign.hpp">
-      <Filter>fmtc</Filter>
-    </ClInclude>
     <ClInclude Include="fmtc\Bitdepth.h">
       <Filter>fmtc</Filter>
     </ClInclude>
@@ -486,6 +480,12 @@
     </ClInclude>
     <ClInclude Include="fmtcl\Matrix2020CLProc_macro.h">
       <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fstb\ArrayAlign.hpp">
+      <Filter>fstb</Filter>
+    </ClInclude>
+    <ClInclude Include="fstb\ArrayAlign.h">
+      <Filter>fstb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

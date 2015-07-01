@@ -54,8 +54,6 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/ffft/FFTReal.hpp \
                         ../../src/ffft/OscSinCos.h \
                         ../../src/ffft/OscSinCos.hpp \
-                        ../../src/fmtc/ArrayAlign.h \
-                        ../../src/fmtc/ArrayAlign.hpp \
                         ../../src/fmtc/Bitdepth.cpp \
                         ../../src/fmtc/Bitdepth.h \
                         ../../src/fmtc/Convert.cpp \
@@ -192,6 +190,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/TransOpSLog.h \
                         ../../src/fstb/AllocAlign.h \
                         ../../src/fstb/AllocAlign.hpp \
+                        ../../src/fstb/ArrayAlign.h \
+                        ../../src/fstb/ArrayAlign.hpp \
                         ../../src/fstb/CpuId.cpp \
                         ../../src/fstb/CpuId.h \
                         ../../src/fstb/def.h \

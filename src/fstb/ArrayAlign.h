@@ -21,8 +21,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-#if ! defined (fmtc_ArrayAlign_HEADER_INCLUDED)
-#define	fmtc_ArrayAlign_HEADER_INCLUDED
+#if ! defined (fstb_ArrayAlign_HEADER_INCLUDED)
+#define	fstb_ArrayAlign_HEADER_INCLUDED
 
 #if defined (_MSC_VER)
 	#pragma once
@@ -38,7 +38,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-namespace fmtc
+namespace fstb
 {
 
 
@@ -104,15 +104,15 @@ private:
 
 
 
-}	// namespace fmtc
+}	// namespace fstb
 
 
 
-#include "fmtc/ArrayAlign.hpp"
+#include "fstb/ArrayAlign.hpp"
 
 
 
-#endif	// fmtc_ArrayAlign_HEADER_INCLUDED
+#endif	// fstb_ArrayAlign_HEADER_INCLUDED
 
 
 

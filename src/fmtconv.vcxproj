@@ -229,8 +229,6 @@
     <ClInclude Include="fmtcl\TransOpLogTrunc.h" />
     <ClInclude Include="fmtcl\TransOpPow.h" />
     <ClInclude Include="fmtcl\TransOpSLog.h" />
-    <ClInclude Include="fmtc\ArrayAlign.h" />
-    <ClInclude Include="fmtc\ArrayAlign.hpp" />
     <ClInclude Include="fmtc\Bitdepth.h" />
     <ClInclude Include="fmtc\Convert.h" />
     <ClInclude Include="fmtc\ConvStep.h" />
@@ -244,6 +242,8 @@
     <ClInclude Include="fmtc\Stack16ToNative.h" />
     <ClInclude Include="fmtc\Transfer.h" />
     <ClInclude Include="fmtc\version.h" />
+    <ClInclude Include="fstb\ArrayAlign.h" />
+    <ClInclude Include="fstb\ArrayAlign.hpp" />
     <ClInclude Include="fstb\CpuId.h" />
     <ClInclude Include="fstb\ToolsAvx2.h" />
     <ClInclude Include="fstb\ToolsAvx2.hpp" />

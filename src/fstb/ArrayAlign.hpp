@@ -15,8 +15,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-#if ! defined (fmtc_ArrayAlign_CODEHEADER_INCLUDED)
-#define	fmtc_ArrayAlign_CODEHEADER_INCLUDED
+#if ! defined (fstb_ArrayAlign_CODEHEADER_INCLUDED)
+#define	fstb_ArrayAlign_CODEHEADER_INCLUDED
 
 
 
@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-namespace fmtc
+namespace fstb
 {
 
 
@@ -190,11 +190,11 @@ long	ArrayAlign <T, LEN, AL>::get_alignment ()
 
 
 
-}	// namespace fmtc
+}	// namespace fstb
 
 
 
-#endif	// fmtc_ArrayAlign_CODEHEADER_INCLUDED
+#endif	// fstb_ArrayAlign_CODEHEADER_INCLUDED
 
 
 
