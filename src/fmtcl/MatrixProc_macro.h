@@ -25,6 +25,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
+// Dst fmt, dst bits, src fmt, src bits
 #define fmtcl_MatrixProc_SPAN_I(CI) \
 	CI (INT8   ,  8, INT8   ,  8) \
 	                              \

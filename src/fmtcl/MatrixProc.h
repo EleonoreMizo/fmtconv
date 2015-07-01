@@ -60,13 +60,17 @@ public:
 		Err_INVALID_FORMAT_COMBINATION
 	};
 
-	enum {         NBR_PLANES    = 3  };
-	enum {         MAT_SIZE      = NBR_PLANES + 1 };
+	enum {         NBR_PLANES = 3  };
+	enum {         MAT_SIZE   = NBR_PLANES + 1 };
 
 	explicit       MatrixProc (bool sse_flag, bool sse2_flag, bool avx_flag, bool avx2_flag);
 	virtual        ~MatrixProc () {}
 
 	Err            configure (const Mat4 &m, bool int_proc_flag, SplFmt src_fmt, int src_bits, SplFmt dst_fmt, int dst_bits, int plane_out);
+
+	// All stride values are in bytes
+	// h must be the frame height too, not only the processed stripe height
+	// (required for Stack16 formats to compute the lsb offset)
 	void           process (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
 
 
@@ -93,9 +97,6 @@ private:
 	void           setup_fnc_avx2 (bool int_proc_flag, SplFmt src_fmt, int src_bits, SplFmt dst_fmt, int dst_bits, bool single_plane_flag);
 #endif   // fstb_ARCHI_X86
 
-	// All stride values are in bytes
-	// h must be the frame height too, not only the processed height (required
-	// for Stack16 formats)
 	template <typename DST, int DB, class SRC, int SB>
 	void           process_3_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
 	template <typename DT, int DB, typename ST, int SB>
@@ -121,7 +122,7 @@ private:
 	bool           _avx_flag;
 	bool           _avx2_flag;
 
-	void (MatrixProc::*           // 0 = not set
+	void (ThisType::*             // 0 = not set
 	               _proc_ptr) (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
 
 	std::vector <float>
