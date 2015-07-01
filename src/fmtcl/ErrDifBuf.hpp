@@ -42,7 +42,7 @@ void	ErrDifBuf::clear (int ds)
 	assert (ds <= MAX_DATA_SIZE);
 
 	memset (_buf_ptr, 0, _stride * NBR_LINES * ds);
-	for (int m = 0; m < MARGIN; ++m)
+	for (int m = 0; m < MARGIN * MAX_DATA_SIZE; ++m)
 	{
 		_mem [m] = 0;
 	}
