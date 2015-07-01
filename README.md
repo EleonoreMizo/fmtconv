@@ -17,3 +17,4 @@ This does not mean it is slow or unoptimized, but fmtconv is clearly not on par 
 
 See `doc/fmtconv.html` for more information.
 
+Support on the [Doom9](http://forum.doom9.org/showthread.php?t=166504) forums.
