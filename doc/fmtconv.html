@@ -64,7 +64,7 @@ It does:</p>
 
 <p>It supports:</p>
 <ul>
-<li>Pixel data types: 8-, 9-, 10-, 12- and 16-bit integer, 32-bit float.</li>
+<li>Pixel data types: 8-&ndash;12-, 14- and 16-bit integer, 32-bit float.</li>
 <li>Colorspaces: RGB, Y, YUV in 4:4:4, 4:2:2, 4:2:0, 4:1:1 and YCgCo with the same chroma subsampling factors.</li>
 <li>Progressive and interlaced content.</li>
 </ul>
@@ -1359,6 +1359,8 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <p><b>r16, 2015.xx.xx</b></p>
 <ul>
+<li><code>bitdepth</code>: added support for 11-bit and 14-bit integer input.</li>
+<li><code>resample</code>: <var>sx</var>, <var>sy</var>, <var>sw</var> and <var>sh</var> parameters passed as arrays are now correctly taken into account.</li>
 <li><code>transfer</code>: added the <var>blacklvl</var> parameter.</li>
 </ul>
 

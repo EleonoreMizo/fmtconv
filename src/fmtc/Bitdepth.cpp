@@ -110,9 +110,9 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		const int            bps = fmt_src.bytesPerSample;
 		const int            res = fmt_src.bitsPerSample;
 		if (! (   (st == ::stInteger && bps == 1 &&     res ==  8 )
-		       || (st == ::stInteger && bps == 2 && (   res ==  9
-		                                             || res == 10
-		                                             || res == 12
+		       || (st == ::stInteger && bps == 2 && (   (   res >=  9
+		                                                 && res <= 12)
+		                                             || res == 14
 		                                             || res == 16))
 		       || (st == ::stFloat   && bps == 4 &&     res == 32 )))
 		{
@@ -633,13 +633,20 @@ void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int ang
 	{ \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t,  9) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 10) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 11) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 12) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 16) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 10) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 11) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 12) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 16) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 11) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 12) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 16) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT16, uint16_t, 16) \
 	}
 
@@ -652,31 +659,41 @@ void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int ang
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT8 , uint8_t ,  8) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t,  9) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 10) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 11) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 12) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_INT16, uint16_t, 16) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT8 , uint8_t ,  8, fmtcl::SplFmt_FLOAT, float   , 32) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT8 , uint8_t ,  8) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t,  9) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 10) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 11) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 12) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_INT16, uint16_t, 16) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t,  9, fmtcl::SplFmt_FLOAT, float   , 32) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT8 , uint8_t ,  8) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t,  9) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 10) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 11) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 12) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_INT16, uint16_t, 16) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 10, fmtcl::SplFmt_FLOAT, float   , 32) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT8 , uint8_t ,  8) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT16, uint16_t,  9) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT16, uint16_t, 10) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT16, uint16_t, 11) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT16, uint16_t, 12) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_INT16, uint16_t, 16) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 12, fmtcl::SplFmt_FLOAT, float   , 32) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_INT8 , uint8_t ,  8) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_INT16, uint16_t,  9) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_INT16, uint16_t, 10) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_INT16, uint16_t, 11) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_INT16, uint16_t, 12) \
+	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_INT16, uint16_t, 16) \
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_FLOAT, float   , 32) \
 	}
