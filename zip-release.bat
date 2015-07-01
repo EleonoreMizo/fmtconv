@@ -33,3 +33,5 @@
 @cd ..
 
 @rmdir /s /q "reltmp"
+
+@pause
