@@ -70,6 +70,10 @@ public:
 	inline Mat4 &  operator -= (const Mat4 &other);
 	inline Mat4 &  operator *= (const Mat4 &other);
 
+	inline double  det3 () const;
+	inline Mat4    compute_inverse3 () const;
+	inline Mat4 &  invert3 ();
+
 	inline const Row4 &
                   operator [] (long pos) const;
 	inline Row4 &  operator [] (long pos);

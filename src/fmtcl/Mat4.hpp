@@ -173,6 +173,49 @@ Mat4 &	Mat4::operator *= (const Mat4 &other)
 
 
 
+double	Mat4::det3 () const
+{
+	return (
+		  _data [0] [0] * _data [1] [1] * _data [2] [2]
+		+ _data [1] [0] * _data [2] [1] * _data [0] [2]
+		+ _data [2] [0] * _data [0] [1] * _data [1] [2]
+		- _data [0] [0] * _data [2] [1] * _data [1] [2]
+		- _data [1] [0] * _data [0] [1] * _data [2] [2]
+		- _data [2] [0] * _data [1] [1] * _data [0] [2]
+	);
+}
+
+
+
+Mat4	Mat4::compute_inverse3 () const
+{
+	const double   d3 = det3 ();
+
+	Mat4           r (*this);
+	r [0] [0] = (_data [1] [1] * _data [2] [2] - _data [2] [1] * _data [1] [2]) / d3;
+	r [0] [1] = (_data [2] [0] * _data [1] [2] - _data [1] [0] * _data [2] [2]) / d3;
+	r [0] [2] = (_data [1] [0] * _data [2] [1] - _data [2] [0] * _data [1] [1]) / d3;
+	r [1] [0] = (_data [2] [1] * _data [0] [2] - _data [0] [1] * _data [2] [2]) / d3;
+	r [1] [1] = (_data [0] [0] * _data [2] [2] - _data [2] [0] * _data [0] [2]) / d3;
+	r [1] [2] = (_data [2] [0] * _data [0] [1] - _data [0] [0] * _data [2] [1]) / d3;
+	r [2] [0] = (_data [0] [1] * _data [1] [2] - _data [1] [1] * _data [0] [2]) / d3;
+	r [2] [1] = (_data [1] [0] * _data [0] [2] - _data [0] [0] * _data [1] [2]) / d3;
+	r [2] [2] = (_data [0] [0] * _data [1] [1] - _data [1] [0] * _data [0] [1]) / d3;
+
+	return (r);
+}
+
+
+
+Mat4 &	Mat4::invert3 ()
+{
+	*this = compute_inverse3 ();
+
+	return (*this);
+}
+
+
+
 const Mat4::Row4 &	Mat4::operator [] (long pos) const
 {
 	assert (pos >= 0);
