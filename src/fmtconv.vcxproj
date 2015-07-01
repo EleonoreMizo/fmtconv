@@ -161,6 +161,7 @@
     <ClInclude Include="fmtcl\ArrayMultiType.hpp" />
     <ClInclude Include="fmtcl\BitBltConv.h" />
     <ClInclude Include="fmtcl\ChromaPlacement.h" />
+    <ClInclude Include="fmtcl\ColorFamily.h" />
     <ClInclude Include="fmtcl\ColorSpaceH265.h" />
     <ClInclude Include="fmtcl\ContFirBlackman.h" />
     <ClInclude Include="fmtcl\ContFirBlackmanMinLobe.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="fmtcl\ErrDifBuf.hpp" />
     <ClInclude Include="fmtcl\ErrDifBufFactory.h" />
     <ClInclude Include="fmtcl\FilterResize.h" />
+    <ClInclude Include="fmtcl\fnc.h" />
     <ClInclude Include="fmtcl\KernelData.h" />
     <ClInclude Include="fmtcl\Mat4.h" />
     <ClInclude Include="fmtcl\Mat4.hpp" />
@@ -340,6 +342,10 @@
     <ClCompile Include="fmtcl\ErrDifBuf.cpp" />
     <ClCompile Include="fmtcl\ErrDifBufFactory.cpp" />
     <ClCompile Include="fmtcl\FilterResize.cpp" />
+    <ClCompile Include="fmtcl\fnc.cpp">
+      <ObjectFileName>$(IntDir)%(Filename)2.obj</ObjectFileName>
+      <XMLDocumentationFileName>$(IntDir)%(Filename)2.xdc</XMLDocumentationFileName>
+    </ClCompile>
     <ClCompile Include="fmtcl\KernelData.cpp" />
     <ClCompile Include="fmtcl\MatrixProc.cpp" />
     <ClCompile Include="fmtcl\MatrixProc_avx.cpp">

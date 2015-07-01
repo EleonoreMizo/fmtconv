@@ -89,6 +89,7 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/CoefArrInt.cpp \
                         ../../src/fmtcl/CoefArrInt.h \
                         ../../src/fmtcl/CoefArrInt.hpp \
+                        ../../src/fmtcl/ColorFamily.h \
                         ../../src/fmtcl/ColorSpaceH265.h \
                         ../../src/fmtcl/ContFirBlackman.cpp \
                         ../../src/fmtcl/ContFirBlackman.h \
@@ -131,6 +132,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/ErrDifBufFactory.h \
                         ../../src/fmtcl/FilterResize.cpp \
                         ../../src/fmtcl/FilterResize.h \
+                        ../../src/fmtcl/fnc.cpp \
+                        ../../src/fmtcl/fnc.h \
                         ../../src/fmtcl/KernelData.cpp \
                         ../../src/fmtcl/KernelData.h \
                         ../../src/fmtcl/Mat4.h \

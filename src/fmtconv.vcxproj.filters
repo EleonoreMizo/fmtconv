@@ -475,10 +475,18 @@
     <ClInclude Include="fmtcl\TransLut.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\ColorFamily.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\fnc.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
     <ClInclude Include="fmtc\fnc.h">
       <Filter>fmtc</Filter>
     </ClInclude>
     <ClInclude Include="fmtcl\Matrix2020CLProc_macro.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">
@@ -674,5 +682,13 @@
       <Filter>fmtcl</Filter>
     </ClCompile>
     <ClCompile Include="fmtcl\Matrix2020CLProc.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\fnc.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtc\fnc.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
