@@ -490,6 +490,9 @@
     <ClInclude Include="fstb\ArrayAlign.h">
       <Filter>fstb</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\VoidAndCluster.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">
@@ -692,6 +695,9 @@
     </ClCompile>
     <ClCompile Include="fmtc\fnc.cpp">
       <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\VoidAndCluster.cpp">
+      <Filter>fmtcl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

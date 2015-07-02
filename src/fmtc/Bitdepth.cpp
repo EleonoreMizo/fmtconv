@@ -34,6 +34,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/ProxyRwSse2.h"
 #endif
+#include "fmtcl/VoidAndCluster.h"
 #include "fstb/fnc.h"
 #include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
@@ -72,6 +73,7 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_ampn (get_arg_flt (in, out, "ampn", 0.0))
 ,	_dyn_flag (get_arg_int (in, out, "dyn", 0) != 0)
 ,	_static_noise_flag (get_arg_int (in, out, "staticnoise", 0) != 0)
+,	_pat_size (get_arg_int (in, out, "patsize", PAT_WIDTH))
 ,	_ampo_i (0)
 ,	_ampn_i (0)
 ,	_ampe_i (0)
@@ -214,6 +216,11 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	if (_ampn < 0)
 	{
 		throw_inval_arg ("ampn cannot be negative.");
+	}
+
+	if (_pat_size < 4 || PAT_WIDTH % _pat_size != 0)
+	{
+		throw_inval_arg ("Wrong value for patsize.");
 	}
 
 	int            w = _vi_in.width;
@@ -522,6 +529,10 @@ void	Bitdepth::build_dither_pat ()
 	default:
 		build_dither_pat_round ();
 		break;
+
+	case	DMode_VOIDCLUST:
+		build_dither_pat_void_and_cluster (_pat_size);
+		break;
 	}
 }
 
@@ -570,6 +581,28 @@ void	Bitdepth::build_dither_pat_bayer ()
 				pat_data [y + 1] [x    ] = int16_t (val + 192-128);
 				pat_data [y + 1] [x + 1] = int16_t (val +  64-128);
 			}
+		}
+	}
+
+	build_next_dither_pat ();
+}
+
+
+
+void	Bitdepth::build_dither_pat_void_and_cluster (int w)
+{
+	assert (PAT_WIDTH % w == 0);
+	fmtcl::VoidAndCluster   vc_gen;
+	fmtcl::VoidAndCluster::MatrixWrap <uint16_t> pat_raw (w, w);
+	vc_gen.create_matrix (pat_raw);
+
+	PatData &		pat_data = _dither_pat_arr [0];
+	const int      area = w * w;
+	for (int y = 0; y < PAT_WIDTH; ++y)
+	{
+		for (int x = 0; x < PAT_WIDTH; ++x)
+		{
+			pat_data [y] [x] = int16_t (pat_raw (x, y) * 256 / area - 128);
 		}
 	}
 
@@ -936,6 +969,7 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 	{
 	case	DMode_BAYER:
 	case	DMode_ROUND:
+	case	DMode_VOIDCLUST:
 		ctx._pattern_ptr = &pattern;
 		break;
 

@@ -85,7 +85,7 @@ protected:
 private:
 
 	enum {         MAX_NBR_PLANES =     3 };
-	enum {         PAT_WIDTH      =     8 };  // Number of pixels for Bayer dithering
+	enum {         PAT_WIDTH      =    32 };  // Number of pixels for halftone dithering
 	enum {         PAT_PERIOD     =     4 };  // Must be a power of 2 (because cycled with & as modulo)
 	enum {         AMP_BITS       =     5 };  // Bit depth of the amplitude fractionnal part. The whole thing is 7 bits, and we need a few bits for the integer part.
 	enum {         ERR_RES        =    24 };  // Resolution (bits) of the temporary data for error diffusion when source bitdepth is not high enough (relative to the destination bitdepth) to guarantee an accurate error diffusion.
@@ -102,6 +102,7 @@ private:
 		DMode_ATKINSON,   // 5
 		DMode_FLOYD,      // 6
 		DMode_OSTRO,      // 7
+		DMode_VOIDCLUST,  // 8
 
 		DMode_NBR_ELT
 	};
@@ -115,7 +116,7 @@ private:
 		               _ptr;
 	};
 
-	typedef	int16_t	PatRow [PAT_WIDTH];
+	typedef	int16_t	PatRow [PAT_WIDTH];  // Contains data in [-128; +127]
 	typedef	PatRow	PatData [PAT_WIDTH]; // [y] [x]
 	typedef	fstb::ArrayAlign <PatData, PAT_PERIOD, 16>	PatDataArray;
 
@@ -140,6 +141,7 @@ private:
 	void           build_dither_pat ();
 	void           build_dither_pat_round ();
 	void           build_dither_pat_bayer ();
+	void           build_dither_pat_void_and_cluster (int w);
 	void           build_next_dither_pat ();
 	void           copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle);
 	void           init_fnc_fast ();
@@ -317,6 +319,7 @@ private:
 	double         _ampn;
 	bool           _dyn_flag;
 	bool           _static_noise_flag;
+	int            _pat_size;        // Must be a divisor of PAT_WIDTH
 
 	int            _ampo_i;          // [0 ;  127], 1.0 = 1 << AMP_BITS
 	int            _ampn_i;          // [0 ;  127], 1.0 = 1 << AMP_BITS

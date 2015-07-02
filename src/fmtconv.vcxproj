@@ -231,6 +231,7 @@
     <ClInclude Include="fmtcl\TransOpLogTrunc.h" />
     <ClInclude Include="fmtcl\TransOpPow.h" />
     <ClInclude Include="fmtcl\TransOpSLog.h" />
+    <ClInclude Include="fmtcl\VoidAndCluster.h" />
     <ClInclude Include="fmtc\Bitdepth.h" />
     <ClInclude Include="fmtc\Convert.h" />
     <ClInclude Include="fmtc\ConvStep.h" />
@@ -378,6 +379,7 @@
     <ClCompile Include="fmtcl\TransOpLogTrunc.cpp" />
     <ClCompile Include="fmtcl\TransOpPow.cpp" />
     <ClCompile Include="fmtcl\TransOpSLog.cpp" />
+    <ClCompile Include="fmtcl\VoidAndCluster.cpp" />
     <ClCompile Include="fmtc\Bitdepth.cpp" />
     <ClCompile Include="fmtc\Convert.cpp" />
     <ClCompile Include="fmtc\ConvStep.cpp" />

@@ -260,7 +260,9 @@ contains autotools settings.</p>
 	ampn       : float: opt; (0)
 	dyn        : int  : opt; (False)
 	staticnoise: int  : opt; (False)
-)	cpuopt     : int  : opt; (-1)
+	cpuopt     : int  : opt; (-1)
+	patsize    : int  : opt; (32)
+)
 </pre>
 
 <p>Bitdepth conversion with optional dithering.</p>
@@ -346,6 +348,7 @@ formats.</p>
 <tr><td><b>5</b></td><td>Atkinson error diffusion. Generates distinct patterns but keeps clean the flat areas.</td></tr>
 <tr><td><b>6</b></td><td>Floyd-Steinberg error diffusion. Classic.</td></tr>
 <tr><td><b>7</b></td><td><a href="http://www.iro.umontreal.ca/~ostrom/publications/publications_abstracts.html#SIGGRAPH01_VarcoeffED">Ostromoukhov error diffusion</a>. Slow, available only for integer input at the moment. Avoids usual F-S artefacts.</td></tr>
+<tr><td><b>6</b></td><td>Void and cluster halftone dithering. Better visual aspect than ordered dithering.</td></tr>
 </table>
 
 <p>When using error-diffusion dithering on interlaced content, you should
@@ -381,6 +384,10 @@ and remains the same every frame.</p>
 0: default instruction set only (depends on the compilation settings),
 1: limit to SSE2,
 10: limit to AVX2.</p>
+
+<p class="var">patsize</p>
+<p>Width of the pattern used in the Void and cluster algorithm.
+The only valid values are 4, 8, 16 and 32.</p>
 
 
 
@@ -1356,6 +1363,11 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 
 <h2><a id="changelog"></a>V) Changelog</h2>
+
+<p><b>r17, 20xx.xx.xx</b></p>
+<ul>
+<li><code>bitdepth</code>: added “Void and cluster” dithering method and its <var>patsize</var> parameter.</li>
+</ul>
 
 <p><b>r16, 2015.07.01</b></p>
 <ul>

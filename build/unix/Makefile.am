@@ -191,6 +191,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/TransOpPow.h \
                         ../../src/fmtcl/TransOpSLog.cpp \
                         ../../src/fmtcl/TransOpSLog.h \
+                        ../../src/fmtcl/VoidAndCluster.cpp \
+                        ../../src/fmtcl/VoidAndCluster.h \
                         ../../src/fstb/AllocAlign.h \
                         ../../src/fstb/AllocAlign.hpp \
                         ../../src/fstb/ArrayAlign.h \

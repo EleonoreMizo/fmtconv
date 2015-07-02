@@ -546,6 +546,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"dyn:int:opt;"
 		"staticnoise:int:opt;"
 		"cpuopt:int:opt;"
+		"patsize:int:opt;"
 		, &vsutl::Redirect <fmtc::Bitdepth>::create, 0, plugin_ptr
 	);
 
