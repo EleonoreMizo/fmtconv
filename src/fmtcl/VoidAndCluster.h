@@ -81,7 +81,8 @@ protected:
 
 private:
 
-	enum {         KERNEL_MAX_RAD = 5 };
+	enum {         KERNEL_MAX_RAD  = 4 };
+	enum {         KERNEL_DEF_SIZE = KERNEL_MAX_RAD * 2 + 1 };
 
 	void           homogenize_initial_mat (MatrixWrap <uint16_t> &m) const;
 	void           find_cluster_kernel (std::vector <std::pair <int, int> > &pos_arr, const MatrixWrap <uint16_t> &m, int color, int kw, int kh) const;

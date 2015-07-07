@@ -70,7 +70,7 @@ void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 		{
 			-- rank;
 			std::vector <std::pair <int, int> > c_arr;
-			find_cluster_kernel (c_arr, mat, 1, 9, 9);
+			find_cluster_kernel (c_arr, mat, 1, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
 			const int      x = c_arr [0].first;
 			const int      y = c_arr [0].second;
 			mat (x, y) = 0;
@@ -84,7 +84,7 @@ void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 		while (rank < w * h)
 		{
 			std::vector <std::pair <int, int> > v_arr;
-			find_cluster_kernel (v_arr, mat, 0, 9, 9);
+			find_cluster_kernel (v_arr, mat, 0, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
 			const int      x = v_arr [0].first;
 			const int      y = v_arr [0].second;
 			mat (x, y) = 1;
@@ -158,11 +158,11 @@ void	VoidAndCluster::homogenize_initial_mat (MatrixWrap <uint16_t> &m) const
 	std::vector <std::pair <int, int> > v_arr;
 	do
 	{
-		find_cluster_kernel (c_arr, m, 1, 9, 9);
+		find_cluster_kernel (c_arr, m, 1, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
 		cx = c_arr [0].first;
 		cy = c_arr [0].second;
 		m (cx, cy) = 0;
-		find_cluster_kernel (v_arr, m, 0, 9, 9);
+		find_cluster_kernel (v_arr, m, 0, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
 		vx = v_arr [0].first;
 		vy = v_arr [0].second;
 		m (vx, vy) = 1;
@@ -176,6 +176,8 @@ void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &p
 {
 	assert (&pos_arr != 0);
 	assert (&m != 0);
+	assert (kw <= _kernel_gauss_uptr->get_w ());
+	assert (kh <= _kernel_gauss_uptr->get_h ());
 
 	pos_arr.clear ();
 
