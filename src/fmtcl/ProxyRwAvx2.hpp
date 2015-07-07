@@ -105,13 +105,13 @@ __m256i	ProxyRwAvx2 <SplFmt_INT8>::read_i16_partial (const PtrConst::Type &ptr, 
 void	ProxyRwAvx2 <SplFmt_INT8>::write_flt (const Ptr::Type &ptr, const __m256 &src0, const __m256 &src1, const __m256i &mask_lsb, const __m256i &sign_bit, const __m256 &offset)
 {
 	const __m256i	val = prepare_write_flt (src0, src1, sign_bit, offset);
-	fstb::ToolsAvx2::store_16_16m (ptr, val, mask_lsb);
+	fstb::ToolsAvx2::store_16_16l (ptr, val, mask_lsb);
 }
 
 void	ProxyRwAvx2 <SplFmt_INT8>::write_flt_partial (const Ptr::Type &ptr, const __m256 &src0, const __m256 &src1, const __m256i &mask_lsb, const __m256i &sign_bit, const __m256 &offset, int len)
 {
 	const __m256i	val = prepare_write_flt (src0, src1, sign_bit, offset);
-	fstb::ToolsAvx2::store_16_16m_partial (ptr, val, mask_lsb, len);
+	fstb::ToolsAvx2::store_16_16l_partial (ptr, val, mask_lsb, len);
 }
 
 void	ProxyRwAvx2 <SplFmt_INT8>::finish_read_flt (__m256 &src0, __m256 &src1, const __m128i &src128)

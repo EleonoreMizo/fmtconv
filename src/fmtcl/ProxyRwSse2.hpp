@@ -106,13 +106,13 @@ __m128i	ProxyRwSse2 <SplFmt_INT8>::read_i16_partial (const PtrConst::Type &ptr, 
 void	ProxyRwSse2 <SplFmt_INT8>::write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset)
 {
 	const __m128i  val = prepare_write_flt (src0, src1, sign_bit, offset);
-	fstb::ToolsSse2::store_8_16m (ptr, val, mask_lsb);
+	fstb::ToolsSse2::store_8_16l (ptr, val, mask_lsb);
 }
 
 void	ProxyRwSse2 <SplFmt_INT8>::write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len)
 {
 	const __m128i  val = prepare_write_flt (src0, src1, sign_bit, offset);
-	fstb::ToolsSse2::store_8_16m_partial (ptr, val, mask_lsb, len);
+	fstb::ToolsSse2::store_8_16l_partial (ptr, val, mask_lsb, len);
 }
 
 __m128i	ProxyRwSse2 <SplFmt_INT8>::prepare_write_flt (const __m128 &src0, const __m128 &src1, const __m128i &sign_bit, const __m128 &offset)
