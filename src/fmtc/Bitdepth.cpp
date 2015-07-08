@@ -1078,13 +1078,14 @@ void	Bitdepth::process_seg_fast_int_int_sse (uint8_t *dst_ptr, const uint8_t *sr
 	SrcPtr         src_n_ptr = reinterpret_cast <SrcPtr> (src_ptr);
 	DstPtr         dst_n_ptr = reinterpret_cast <DstPtr> (dst_ptr);
 	const __m128i  zero      = _mm_setzero_si128 ();
+	const __m128i  mask_lsb  = _mm_set1_epi16 (0x00FF);
 
 	for (int pos = 0; pos < w; pos += 8)
 	{
 		const __m128i  s   =
 			fmtcl::ProxyRwSse2 <SRC_FMT>::read_i16 (src_n_ptr + pos, zero);
 		const __m128i  pix = _mm_srli_epi16 (s, DIF_BITS);
-		fmtcl::ProxyRwSse2 <DST_FMT>::write_i16 (dst_n_ptr + pos, pix, zero);
+		fmtcl::ProxyRwSse2 <DST_FMT>::write_i16 (dst_n_ptr + pos, pix, mask_lsb);
 	}
 }
 
