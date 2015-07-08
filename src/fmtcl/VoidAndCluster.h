@@ -27,6 +27,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/MatrixWrap.h"
+
 #include <cstdint>
 
 #include <memory>
@@ -45,24 +47,6 @@ class VoidAndCluster
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 public:
-
-	template <class T>
-	class MatrixWrap
-	{
-	public:
-		explicit       MatrixWrap (int w, int h);
-		               MatrixWrap (const MatrixWrap &other) = default;
-		void           clear (T fill_val = 0);
-		int            get_w () const { return (_w); }
-		int            get_h () const { return (_h); }
-		T &            operator () (int x, int y);
-		const T &      operator () (int x, int y) const;
-	private:
-		int            _w;
-		int            _h;
-		std::vector <T>
-		               _mat;
-	};
 
 	               VoidAndCluster ();
 	virtual			~VoidAndCluster () {}

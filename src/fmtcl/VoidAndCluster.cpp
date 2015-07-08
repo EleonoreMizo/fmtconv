@@ -96,48 +96,6 @@ void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 
 
 
-template <class T>
-VoidAndCluster::MatrixWrap <T>::MatrixWrap (int w, int h)
-:	_w (w)
-,	_h (h)
-,	_mat (w * h, 0)
-{
-	assert (w > 0);
-	assert (h > 0);
-}
-
-
-
-template <class T>
-void	VoidAndCluster::MatrixWrap <T>::clear (T fill_val)
-{
-	_mat.assign (_mat.size (), fill_val);
-}
-
-
-
-template <class T>
-T &	VoidAndCluster::MatrixWrap <T>::operator () (int x, int y)
-{
-	x = (x + _w * 1024) % _w;
-	y = (y + _h * 1024) % _h;
-
-	return (_mat [y * _w + x]);
-}
-
-
-
-template <class T>
-const T &	VoidAndCluster::MatrixWrap <T>::operator () (int x, int y) const
-{
-	x = (x + _w * 1024) % _w;
-	y = (y + _h * 1024) % _h;
-
-	return (_mat [y * _w + x]);
-}
-
-
-
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
@@ -181,7 +139,6 @@ void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &p
 
 	pos_arr.clear ();
 
-	const double   s     = 1.5;
 	double         max_v = -1;
 	const int      w     = m.get_w ();
 	const int      h     = m.get_h ();
@@ -225,7 +182,7 @@ void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &p
 
 
 
-std::unique_ptr <VoidAndCluster::MatrixWrap <double> >	VoidAndCluster::create_gauss_kernel (int w, int h, double sigma)
+std::unique_ptr <MatrixWrap <double> >	VoidAndCluster::create_gauss_kernel (int w, int h, double sigma)
 {
 	std::unique_ptr <MatrixWrap <double> >   ker_uptr (
 		new MatrixWrap <double> (w, h)

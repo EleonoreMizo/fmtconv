@@ -540,7 +540,7 @@ void	Bitdepth::build_dither_pat ()
 
 void	Bitdepth::build_dither_pat_round ()
 {
-	PatData &		pat_data = _dither_pat_arr [0];
+	PatData &      pat_data = _dither_pat_arr [0];
 	for (int y = 0; y < PAT_WIDTH; ++y)
 	{
 		for (int x = 0; x < PAT_WIDTH; ++x)
@@ -558,7 +558,7 @@ void	Bitdepth::build_dither_pat_bayer ()
 {
 	assert (fstb::is_pow_2 (int (PAT_WIDTH)));
 
-	PatData &		pat_data = _dither_pat_arr [0];
+	PatData &      pat_data = _dither_pat_arr [0];
 	for (int y = 0; y < PAT_WIDTH; ++y)
 	{
 		for (int x = 0; x < PAT_WIDTH; ++x)
@@ -573,9 +573,9 @@ void	Bitdepth::build_dither_pat_bayer ()
 		{
 			for (int x = 0; x < PAT_WIDTH; x += 2)
 			{
-				const int		xx = (x >> 1) + (PAT_WIDTH >> 1);
-				const int		yy = (y >> 1) + (PAT_WIDTH >> 1);
-				const int		val = (pat_data [yy] [xx] + 128) >> 2;
+				const int      xx = (x >> 1) + (PAT_WIDTH >> 1);
+				const int      yy = (y >> 1) + (PAT_WIDTH >> 1);
+				const int      val = (pat_data [yy] [xx] + 128) >> 2;
 				pat_data [y    ] [x    ] = int16_t (val +   0-128);
 				pat_data [y    ] [x + 1] = int16_t (val + 128-128);
 				pat_data [y + 1] [x    ] = int16_t (val + 192-128);
@@ -593,10 +593,10 @@ void	Bitdepth::build_dither_pat_void_and_cluster (int w)
 {
 	assert (PAT_WIDTH % w == 0);
 	fmtcl::VoidAndCluster   vc_gen;
-	fmtcl::VoidAndCluster::MatrixWrap <uint16_t> pat_raw (w, w);
+	fmtcl::MatrixWrap <uint16_t> pat_raw (w, w);
 	vc_gen.create_matrix (pat_raw);
 
-	PatData &		pat_data = _dither_pat_arr [0];
+	PatData &      pat_data = _dither_pat_arr [0];
 	const int      area = w * w;
 	for (int y = 0; y < PAT_WIDTH; ++y)
 	{
@@ -615,7 +615,7 @@ void	Bitdepth::build_next_dither_pat ()
 {
 	for (int seq = 1; seq < PAT_PERIOD; ++seq)
 	{
-		const int		angle = (_dyn_flag) ? seq & 3 : 0;
+		const int      angle = (_dyn_flag) ? seq & 3 : 0;
 		copy_dither_pat_rotate (
 			_dither_pat_arr [seq],
 			_dither_pat_arr [0],

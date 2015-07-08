@@ -142,6 +142,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/MatrixProc.cpp \
                         ../../src/fmtcl/MatrixProc.h \
                         ../../src/fmtcl/MatrixProc_macro.h \
+                        ../../src/fmtcl/MatrixWrap.h \
+                        ../../src/fmtcl/MatrixWrap.hpp \
                         ../../src/fmtcl/Proxy.h \
                         ../../src/fmtcl/Proxy.hpp \
                         ../../src/fmtcl/ProxyRwCpp.h \
