@@ -179,10 +179,10 @@ private:
 
 	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	static inline void
-	               quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, int x, int &err, uint32_t &rnd_state, int ampe_i, int ampn_i);
+	               quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, int &err, uint32_t &rnd_state, int ampe_i, int ampn_i);
 	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 	static inline void
-	               quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, int x, float &err, uint32_t &rnd_state, float ampe_f, float ampn_f, float mul, float add);
+	               quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, float &err, uint32_t &rnd_state, float ampe_f, float ampn_f, float mul, float add);
 
 	template <class DT, int DB, class ST, int SB, int EL>
 	class ErrDifAddParam
@@ -202,10 +202,10 @@ private:
 	public:
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
 		template <typename EB>
 		static fstb_FORCEINLINE void
 		               prepare_next_line (EB *err_ptr);
@@ -222,10 +222,10 @@ private:
 	public:
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
 		template <typename EB>
 		static fstb_FORCEINLINE void
 		               prepare_next_line (EB *err_ptr);
@@ -242,10 +242,10 @@ private:
 	public:
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
 		template <typename EB>
 		static fstb_FORCEINLINE void
 		               prepare_next_line (EB *err_ptr);
@@ -262,10 +262,10 @@ private:
 	public:
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
 		template <typename EB>
 		static fstb_FORCEINLINE void
 		               prepare_next_line (EB *err_ptr);
@@ -275,17 +275,49 @@ private:
 		               spread_error (ET e1, ET &err_nxt0, ET &err_nxt1, EB *err0_ptr, EB *err1_ptr);
 	};
 
+	class DiffuseOstromoukhovBase
+	{
+	public:
+		struct TableEntry
+		{
+			int            _c0;
+			int            _c1;
+			int            _c2;        // Actually not used
+			int            _sum;
+			float          _inv_sum;   // Possible optimization: store 1/_c0 and 1/_c1 instead of this field.
+		};
+		enum {         T_BITS = 8 };
+		enum {         T_LEN  = 1 << T_BITS };
+		enum {         T_MASK = T_LEN - 1 };
+
+		static const TableEntry
+		               _table [T_LEN];
+	};
+
+	template <int DST_BITS, int SRC_BITS>
+	class DiffuseOstromoukhovBase2
+	:	public DiffuseOstromoukhovBase
+	{
+	public:
+		template <class SRC_TYPE>
+		static inline int
+		               get_index (SRC_TYPE src_raw);
+		static inline int
+		               get_index (float src_raw);
+	};
+
 	template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	class DiffuseOstromoukhov
 	:	public ErrDifAddParam <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS, 1>
+	,	public DiffuseOstromoukhovBase2 <DST_BITS, SRC_BITS>
 	{
 	public:
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
 		template <int DIR>
 		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr);
+		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
 		template <typename EB>
 		static fstb_FORCEINLINE void
 		               prepare_next_line (EB *err_ptr);
@@ -338,11 +370,6 @@ private:
 	               _process_seg_int_int_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 	void (ThisType::*
 	               _process_seg_flt_int_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-
-	typedef	int	OTableEntry [4];  // 3 Coefs + sum
-
-	static const OTableEntry
-	               _ostromoukhov_table [256];
 
 
 

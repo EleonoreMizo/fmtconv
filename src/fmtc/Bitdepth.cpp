@@ -5,7 +5,6 @@
 
 To do:
 - SSE2 for ordered dithering
-- Ostromoukhov in float
 
 --- Legal stuff ---
 
@@ -906,7 +905,7 @@ void	Bitdepth::init_fnc_errdiff ()
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FilterLite, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Ostromoukhov, simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
@@ -1301,13 +1300,14 @@ void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 		for (int x = 0; x < w; ++x)
 		{
 			int            err = err_nxt0;
+			SRC_TYPE       src_raw;
 
 			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
+				dst_n_ptr, src_n_ptr, src_raw, x, err, rnd_state, ae, _ampn_i
 			);
 			ERRDIF::template diffuse <1> (
 				err, err_nxt0, err_nxt1,
-				err0_ptr + x, err1_ptr + x, src_n_ptr + x
+				err0_ptr + x, err1_ptr + x, src_raw
 			);
 		}
 		ERRDIF::prepare_next_line (err1_ptr + w);
@@ -1319,13 +1319,14 @@ void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 		for (int x = w - 1; x >= 0; --x)
 		{
 			int            err = err_nxt0;
+			SRC_TYPE       src_raw;
 
 			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, _ampn_i
+				dst_n_ptr, src_n_ptr, src_raw, x, err, rnd_state, ae, _ampn_i
 			);
 			ERRDIF::template diffuse <-1> (
 				err, err_nxt0, err_nxt1,
-				err0_ptr + x, err1_ptr + x, src_n_ptr + x
+				err0_ptr + x, err1_ptr + x, src_raw
 			);
 		}
 		ERRDIF::prepare_next_line (err1_ptr - 1);
@@ -1390,13 +1391,14 @@ void	Bitdepth::process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 		for (int x = 0; x < w; ++x)
 		{
 			float          err = err_nxt0;
+			SRC_TYPE       src_raw;
 
 			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
+				dst_n_ptr, src_n_ptr, src_raw, x, err, rnd_state, ae, an, mul, add
 			);
 			ERRDIF::template diffuse <1> (
 				err, err_nxt0, err_nxt1,
-				err0_ptr + x, err1_ptr + x, src_n_ptr + x
+				err0_ptr + x, err1_ptr + x, src_raw
 			);
 		}
 		ERRDIF::prepare_next_line (err1_ptr + w);
@@ -1408,13 +1410,14 @@ void	Bitdepth::process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 		for (int x = w - 1; x >= 0; --x)
 		{
 			float          err = err_nxt0;
+			SRC_TYPE       src_raw;
 
 			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
-				dst_n_ptr, src_n_ptr, x, err, rnd_state, ae, an, mul, add
+				dst_n_ptr, src_n_ptr, src_raw, x, err, rnd_state, ae, an, mul, add
 			);
 			ERRDIF::template diffuse <-1> (
 				err, err_nxt0, err_nxt1,
-				err0_ptr + x, err1_ptr + x, src_n_ptr + x
+				err0_ptr + x, err1_ptr + x, src_raw
 			);
 		}
 		ERRDIF::prepare_next_line (err1_ptr - 1);
@@ -1472,7 +1475,7 @@ const Bitdepth::PatRow &	Bitdepth::SegContext::extract_pattern_row () const
 
 
 template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-void	Bitdepth::quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, int x, int &err, uint32_t &rnd_state, int ampe_i, int ampn_i)
+void	Bitdepth::quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, int &err, uint32_t &rnd_state, int ampe_i, int ampn_i)
 {
 	enum {         DIF_BITS = SRC_BITS - DST_BITS };
 	enum {         TMP_BITS =
@@ -1485,7 +1488,8 @@ void	Bitdepth::quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, int
 	const int      rcst     = 1 << (TMP_INVS - 1);
 	const int      vmax     = (1 << DST_BITS) - 1;
 
-	const int		src     = src_ptr [x] << TMP_SHFT;
+	src_raw = src_ptr [x];
+	const int		src     = src_raw << TMP_SHFT;
 	const int      preq    = src + err;
 
 	int            sum     = preq;
@@ -1512,16 +1516,28 @@ void	Bitdepth::quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, int
 
 
 
+template <class SRC_TYPE>
+static inline SRC_TYPE	Bitdepth_extract_src (SRC_TYPE src_read, float src)
+{
+	return (src_read);
+}
+
+static inline float	Bitdepth_extract_src (float src_read, float src)
+{
+	return (src);
+}
+
 template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-void	Bitdepth::quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, int x, float &err, uint32_t &rnd_state, float ampe_f, float ampn_f, float mul, float add)
+void	Bitdepth::quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, float &err, uint32_t &rnd_state, float ampe_f, float ampn_f, float mul, float add)
 {
 	const int      vmax = (1 << DST_BITS) - 1;
 
-	float          src     = float (src_ptr [x]);
-	src = src * mul + add;
-	const float    preq    = src + err;
+	const SRC_TYPE src_read = src_ptr [x];
+	const float    src      = float (src_read) * mul + add;
+	src_raw = Bitdepth_extract_src (src_read, src);
+	const float    preq     = src + err;
 
-	float          sum     = preq;
+	float          sum      = preq;
 	if (! S_FLAG)
 	{
 		generate_rnd (rnd_state);
@@ -1556,7 +1572,7 @@ void	Bitdepth::quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, int
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
 #if defined (fmtc_Bitdepth_FS_OPTIMIZED_SERPENTINE_COEF)
 	const int      e1 = 0;
@@ -1572,7 +1588,7 @@ void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::d
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
 #if defined (fmtc_Bitdepth_FS_OPTIMIZED_SERPENTINE_COEF)
 	const float    e1 = 0;
@@ -1608,7 +1624,7 @@ void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::s
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
 	const int      e1 = (err + 2) >> 2;
 	const int      e2 = err - 2 * e1;
@@ -1617,7 +1633,7 @@ void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffu
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
 	const float    e1 = err * (1.0f / 4);
 	const float    e2 = err * (2.0f / 4);
@@ -1645,7 +1661,7 @@ void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::sprea
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
 	const int      m  = (err << 4) / 42;
 	const int      e1 = (m + 8) >> 4;
@@ -1659,7 +1675,7 @@ void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
 	const float    e1 = err * (1.0f / 42);
 	const float    e2 = err * (2.0f / 42);
@@ -1697,7 +1713,7 @@ void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_er
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
 	const int      e1 = (err + 4) >> 3;
 	spread_error <DIR> (e1, err_nxt0, err_nxt1, err0_ptr, err1_ptr);
@@ -1705,7 +1721,7 @@ void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
 	const float    e1 = err * (1.0f / 8);
 	spread_error <DIR> (e1, err_nxt0, err_nxt1, err0_ptr, err1_ptr);
@@ -1739,30 +1755,58 @@ void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_
 // Not optimised at all
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
 	enum {         DIF_BITS = SRC_BITS - DST_BITS };
 
-	const int      val = src_ptr [0];
-	const int      index = fstb::sshift_l <int, 8 - DIF_BITS> (val) & 255;
-	const Bitdepth::OTableEntry & te = Bitdepth::_ostromoukhov_table [index];
-	const int      d = te [3];
+	const int      index    = fstb::sshift_l <
+		int,
+		DiffuseOstromoukhov::T_BITS - DIF_BITS
+	> (src_raw) & DiffuseOstromoukhov::T_MASK;
+	const typename DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::TableEntry & te =
+		DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::_table [index];
+	const int      d        = te._sum;
 
-	const int      e1 = err * te [0] / d;
-	const int      e2 = err * te [1] / d;
+	const int      e1 = err * te._c0 / d;
+	const int      e2 = err * te._c1 / d;
 	const int      e3 = err - e1 - e2;
 
 	spread_error <DIR> (e1, e2, e3, err_nxt0, err0_ptr);
 }
 
+template <int DST_BITS, int SRC_BITS>
+template <class SRC_TYPE>
+int	Bitdepth::DiffuseOstromoukhovBase2 <DST_BITS, SRC_BITS>::get_index (SRC_TYPE src_raw)
+{
+	enum {         DIF_BITS = SRC_BITS - DST_BITS };
+
+	return (fstb::sshift_l <
+		int,
+		DiffuseOstromoukhovBase::T_BITS - DIF_BITS
+	> (src_raw) & DiffuseOstromoukhovBase::T_MASK);
+}
+
+template <int DST_BITS, int SRC_BITS>
+int	Bitdepth::DiffuseOstromoukhovBase2 <DST_BITS, SRC_BITS>::get_index (float src_raw)
+{
+	return (  fstb::round_int (src_raw * DiffuseOstromoukhovBase::T_LEN)
+	        & DiffuseOstromoukhovBase::T_MASK);
+}
+
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
-void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, const SRC_TYPE *src_ptr)
+void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
+	const int      index    = DiffuseOstromoukhov::get_index (src_raw);
+	const typename DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::TableEntry &   te =
+		DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::_table [index];
+	const float    invd     = te._inv_sum;
 
-	/*** To do ***/
-	assert (false);
+	const float    e1 = err * te._c0 * invd;
+	const float    e2 = err * te._c1 * invd;
+	const float    e3 = err - e1 - e2;
 
+	spread_error <DIR> (e1, e2, e3, err_nxt0, err0_ptr);
 }
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
@@ -1784,272 +1828,272 @@ void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spr
 
 
 
-const Bitdepth::OTableEntry	Bitdepth::_ostromoukhov_table [256] =
+const Bitdepth::DiffuseOstromoukhovBase::TableEntry	Bitdepth::DiffuseOstromoukhovBase::_table [T_LEN] =
 {
-	{   13,    0,    5,   18 },
-	{   13,    0,    5,   18 },
-	{   21,    0,   10,   31 },
-	{    7,    0,    4,   11 },
-	{    8,    0,    5,   13 },
-	{   47,    3,   28,   78 },
-	{   23,    3,   13,   39 },
-	{   15,    3,    8,   26 },
-	{   22,    6,   11,   39 },
-	{   43,   15,   20,   78 },
-	{    7,    3,    3,   13 },
-	{  501,  224,  211,  936 },
-	{  249,  116,  103,  468 },
-	{  165,   80,   67,  312 },
-	{  123,   62,   49,  234 },
-	{  489,  256,  191,  936 },
-	{   81,   44,   31,  156 },
-	{  483,  272,  181,  936 },
-	{   60,   35,   22,  117 },
-	{   53,   32,   19,  104 },
-	{  237,  148,   83,  468 },
-	{  471,  304,  161,  936 },
-	{    3,    2,    1,    6 },
-	{  481,  314,  185,  980 },
-	{  354,  226,  155,  735 },
-	{ 1389,  866,  685, 2940 },
-	{  227,  138,  125,  490 },
-	{  267,  158,  163,  588 },
-	{  327,  188,  220,  735 },
-	{   61,   34,   45,  140 },
-	{  627,  338,  505, 1470 },
-	{ 1227,  638, 1075, 2940 },
+	{   13,    0,    5,   18, 1.0f /   18 },
+	{   13,    0,    5,   18, 1.0f /   18 },
+	{   21,    0,   10,   31, 1.0f /   31 },
+	{    7,    0,    4,   11, 1.0f /   11 },
+	{    8,    0,    5,   13, 1.0f /   13 },
+	{   47,    3,   28,   78, 1.0f /   78 },
+	{   23,    3,   13,   39, 1.0f /   39 },
+	{   15,    3,    8,   26, 1.0f /   26 },
+	{   22,    6,   11,   39, 1.0f /   39 },
+	{   43,   15,   20,   78, 1.0f /   78 },
+	{    7,    3,    3,   13, 1.0f /   13 },
+	{  501,  224,  211,  936, 1.0f /  936 },
+	{  249,  116,  103,  468, 1.0f /  468 },
+	{  165,   80,   67,  312, 1.0f /  312 },
+	{  123,   62,   49,  234, 1.0f /  234 },
+	{  489,  256,  191,  936, 1.0f /  936 },
+	{   81,   44,   31,  156, 1.0f /  156 },
+	{  483,  272,  181,  936, 1.0f /  936 },
+	{   60,   35,   22,  117, 1.0f /  117 },
+	{   53,   32,   19,  104, 1.0f /  104 },
+	{  237,  148,   83,  468, 1.0f /  468 },
+	{  471,  304,  161,  936, 1.0f /  936 },
+	{    3,    2,    1,    6, 1.0f /    6 },
+	{  481,  314,  185,  980, 1.0f /  980 },
+	{  354,  226,  155,  735, 1.0f /  735 },
+	{ 1389,  866,  685, 2940, 1.0f / 2940 },
+	{  227,  138,  125,  490, 1.0f /  490 },
+	{  267,  158,  163,  588, 1.0f /  588 },
+	{  327,  188,  220,  735, 1.0f /  735 },
+	{   61,   34,   45,  140, 1.0f /  140 },
+	{  627,  338,  505, 1470, 1.0f / 1470 },
+	{ 1227,  638, 1075, 2940, 1.0f / 2940 },
 
-	{   20,   10,   19,   49 },
-	{ 1937, 1000, 1767, 4704 },
-	{  977,  520,  855, 2352 },
-	{  657,  360,  551, 1568 },
-	{   71,   40,   57,  168 },
-	{ 2005, 1160, 1539, 4704 },
-	{  337,  200,  247,  784 },
-	{ 2039, 1240, 1425, 4704 },
-	{  257,  160,  171,  588 },
-	{  691,  440,  437, 1568 },
-	{ 1045,  680,  627, 2352 },
-	{  301,  200,  171,  672 },
-	{  177,  120,   95,  392 },
-	{ 2141, 1480, 1083, 4704 },
-	{ 1079,  760,  513, 2352 },
-	{  725,  520,  323, 1568 },
-	{  137,  100,   57,  294 },
-	{ 2209, 1640,  855, 4704 },
-	{   53,   40,   19,  112 },
-	{ 2243, 1720,  741, 4704 },
-	{  565,  440,  171, 1176 },
-	{  759,  600,  209, 1568 },
-	{ 1147,  920,  285, 2352 },
-	{ 2311, 1880,  513, 4704 },
-	{   97,   80,   19,  196 },
-	{  335,  280,   57,  672 },
-	{ 1181, 1000,  171, 2352 },
-	{  793,  680,   95, 1568 },
-	{  599,  520,   57, 1176 },
-	{ 2413, 2120,  171, 4704 },
-	{  405,  360,   19,  784 },
-	{ 2447, 2200,   57, 4704 },
+	{   20,   10,   19,   49, 1.0f /   49 },
+	{ 1937, 1000, 1767, 4704, 1.0f / 4704 },
+	{  977,  520,  855, 2352, 1.0f / 2352 },
+	{  657,  360,  551, 1568, 1.0f / 1568 },
+	{   71,   40,   57,  168, 1.0f /  168 },
+	{ 2005, 1160, 1539, 4704, 1.0f / 4704 },
+	{  337,  200,  247,  784, 1.0f /  784 },
+	{ 2039, 1240, 1425, 4704, 1.0f / 4704 },
+	{  257,  160,  171,  588, 1.0f /  588 },
+	{  691,  440,  437, 1568, 1.0f / 1568 },
+	{ 1045,  680,  627, 2352, 1.0f / 2352 },
+	{  301,  200,  171,  672, 1.0f /  672 },
+	{  177,  120,   95,  392, 1.0f /  392 },
+	{ 2141, 1480, 1083, 4704, 1.0f / 4704 },
+	{ 1079,  760,  513, 2352, 1.0f / 2352 },
+	{  725,  520,  323, 1568, 1.0f / 1568 },
+	{  137,  100,   57,  294, 1.0f /  294 },
+	{ 2209, 1640,  855, 4704, 1.0f / 4704 },
+	{   53,   40,   19,  112, 1.0f /  112 },
+	{ 2243, 1720,  741, 4704, 1.0f / 4704 },
+	{  565,  440,  171, 1176, 1.0f / 1176 },
+	{  759,  600,  209, 1568, 1.0f / 1568 },
+	{ 1147,  920,  285, 2352, 1.0f / 2352 },
+	{ 2311, 1880,  513, 4704, 1.0f / 4704 },
+	{   97,   80,   19,  196, 1.0f /  196 },
+	{  335,  280,   57,  672, 1.0f /  672 },
+	{ 1181, 1000,  171, 2352, 1.0f / 2352 },
+	{  793,  680,   95, 1568, 1.0f / 1568 },
+	{  599,  520,   57, 1176, 1.0f / 1176 },
+	{ 2413, 2120,  171, 4704, 1.0f / 4704 },
+	{  405,  360,   19,  784, 1.0f /  784 },
+	{ 2447, 2200,   57, 4704, 1.0f / 4704 },
 
-	{   11,   10,    0,   21 },
-	{  158,  151,    3,  312 },
-	{  178,  179,    7,  364 },
-	{ 1030, 1091,   63, 2184 },
-	{  248,  277,   21,  546 },
-	{  318,  375,   35,  728 },
-	{  458,  571,   63, 1092 },
-	{  878, 1159,  147, 2184 },
-	{    5,    7,    1,   13 },
-	{  172,  181,   37,  390 },
-	{   97,   76,   22,  195 },
-	{   72,   41,   17,  130 },
-	{  119,   47,   29,  195 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{   65,   18,   17,  100 },
-	{   95,   29,   26,  150 },
-	{  185,   62,   53,  300 },
-	{   30,   11,    9,   50 },
-	{   35,   14,   11,   60 },
-	{   85,   37,   28,  150 },
-	{   55,   26,   19,  100 },
-	{   80,   41,   29,  150 },
-	{  155,   86,   59,  300 },
-	{    5,    3,    2,   10 },
+	{   11,   10,    0,   21, 1.0f /   21 },
+	{  158,  151,    3,  312, 1.0f /  312 },
+	{  178,  179,    7,  364, 1.0f /  364 },
+	{ 1030, 1091,   63, 2184, 1.0f / 2184 },
+	{  248,  277,   21,  546, 1.0f /  546 },
+	{  318,  375,   35,  728, 1.0f /  728 },
+	{  458,  571,   63, 1092, 1.0f / 1092 },
+	{  878, 1159,  147, 2184, 1.0f / 2184 },
+	{    5,    7,    1,   13, 1.0f /   13 },
+	{  172,  181,   37,  390, 1.0f /  390 },
+	{   97,   76,   22,  195, 1.0f /  195 },
+	{   72,   41,   17,  130, 1.0f /  130 },
+	{  119,   47,   29,  195, 1.0f /  195 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{   65,   18,   17,  100, 1.0f /  100 },
+	{   95,   29,   26,  150, 1.0f /  150 },
+	{  185,   62,   53,  300, 1.0f /  300 },
+	{   30,   11,    9,   50, 1.0f /   50 },
+	{   35,   14,   11,   60, 1.0f /   60 },
+	{   85,   37,   28,  150, 1.0f /  150 },
+	{   55,   26,   19,  100, 1.0f /  100 },
+	{   80,   41,   29,  150, 1.0f /  150 },
+	{  155,   86,   59,  300, 1.0f /  300 },
+	{    5,    3,    2,   10, 1.0f /   10 },
 
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{  305,  176,  119,  600 },
-	{  155,   86,   59,  300 },
-	{  105,   56,   39,  200 },
-	{   80,   41,   29,  150 },
-	{   65,   32,   23,  120 },
-	{   55,   26,   19,  100 },
-	{  335,  152,  113,  600 },
-	{   85,   37,   28,  150 },
-	{  115,   48,   37,  200 },
-	{   35,   14,   11,   60 },
-	{  355,  136,  109,  600 },
-	{   30,   11,    9,   50 },
-	{  365,  128,  107,  600 },
-	{  185,   62,   53,  300 },
-	{   25,    8,    7,   40 },
-	{   95,   29,   26,  150 },
-	{  385,  112,  103,  600 },
-	{   65,   18,   17,  100 },
-	{  395,  104,  101,  600 },
-	{    4,    1,    1,    6 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{  305,  176,  119,  600, 1.0f /  600 },
+	{  155,   86,   59,  300, 1.0f /  300 },
+	{  105,   56,   39,  200, 1.0f /  200 },
+	{   80,   41,   29,  150, 1.0f /  150 },
+	{   65,   32,   23,  120, 1.0f /  120 },
+	{   55,   26,   19,  100, 1.0f /  100 },
+	{  335,  152,  113,  600, 1.0f /  600 },
+	{   85,   37,   28,  150, 1.0f /  150 },
+	{  115,   48,   37,  200, 1.0f /  200 },
+	{   35,   14,   11,   60, 1.0f /   60 },
+	{  355,  136,  109,  600, 1.0f /  600 },
+	{   30,   11,    9,   50, 1.0f /   50 },
+	{  365,  128,  107,  600, 1.0f /  600 },
+	{  185,   62,   53,  300, 1.0f /  300 },
+	{   25,    8,    7,   40, 1.0f /   40 },
+	{   95,   29,   26,  150, 1.0f /  150 },
+	{  385,  112,  103,  600, 1.0f /  600 },
+	{   65,   18,   17,  100, 1.0f /  100 },
+	{  395,  104,  101,  600, 1.0f /  600 },
+	{    4,    1,    1,    6, 1.0f /    6 },
 
 	// Symetric
-	{    4,    1,    1,    6 },
-	{  395,  104,  101,  600 },
-	{   65,   18,   17,  100 },
-	{  385,  112,  103,  600 },
-	{   95,   29,   26,  150 },
-	{   25,    8,    7,   40 },
-	{  185,   62,   53,  300 },
-	{  365,  128,  107,  600 },
-	{   30,   11,    9,   50 },
-	{  355,  136,  109,  600 },
-	{   35,   14,   11,   60 },
-	{  115,   48,   37,  200 },
-	{   85,   37,   28,  150 },
-	{  335,  152,  113,  600 },
-	{   55,   26,   19,  100 },
-	{   65,   32,   23,  120 },
-	{   80,   41,   29,  150 },
-	{  105,   56,   39,  200 },
-	{  155,   86,   59,  300 },
-	{  305,  176,  119,  600 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
-	{    5,    3,    2,   10 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{  395,  104,  101,  600, 1.0f /  600 },
+	{   65,   18,   17,  100, 1.0f /  100 },
+	{  385,  112,  103,  600, 1.0f /  600 },
+	{   95,   29,   26,  150, 1.0f /  150 },
+	{   25,    8,    7,   40, 1.0f /   40 },
+	{  185,   62,   53,  300, 1.0f /  300 },
+	{  365,  128,  107,  600, 1.0f /  600 },
+	{   30,   11,    9,   50, 1.0f /   50 },
+	{  355,  136,  109,  600, 1.0f /  600 },
+	{   35,   14,   11,   60, 1.0f /   60 },
+	{  115,   48,   37,  200, 1.0f /  200 },
+	{   85,   37,   28,  150, 1.0f /  150 },
+	{  335,  152,  113,  600, 1.0f /  600 },
+	{   55,   26,   19,  100, 1.0f /  100 },
+	{   65,   32,   23,  120, 1.0f /  120 },
+	{   80,   41,   29,  150, 1.0f /  150 },
+	{  105,   56,   39,  200, 1.0f /  200 },
+	{  155,   86,   59,  300, 1.0f /  300 },
+	{  305,  176,  119,  600, 1.0f /  600 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{    5,    3,    2,   10, 1.0f /   10 },
 
-	{    5,    3,    2,   10 },
-	{  155,   86,   59,  300 },
-	{   80,   41,   29,  150 },
-	{   55,   26,   19,  100 },
-	{   85,   37,   28,  150 },
-	{   35,   14,   11,   60 },
-	{   30,   11,    9,   50 },
-	{  185,   62,   53,  300 },
-	{   95,   29,   26,  150 },
-	{   65,   18,   17,  100 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{    4,    1,    1,    6 },
-	{  119,   47,   29,  195 },
-	{   72,   41,   17,  130 },
-	{   97,   76,   22,  195 },
-	{  172,  181,   37,  390 },
-	{    5,    7,    1,   13 },
-	{  878, 1159,  147, 2184 },
-	{  458,  571,   63, 1092 },
-	{  318,  375,   35,  728 },
-	{  248,  277,   21,  546 },
-	{ 1030, 1091,   63, 2184 },
-	{  178,  179,    7,  364 },
-	{  158,  151,    3,  312 },
-	{   11,   10,    0,   21 },
+	{    5,    3,    2,   10, 1.0f /   10 },
+	{  155,   86,   59,  300, 1.0f /  300 },
+	{   80,   41,   29,  150, 1.0f /  150 },
+	{   55,   26,   19,  100, 1.0f /  100 },
+	{   85,   37,   28,  150, 1.0f /  150 },
+	{   35,   14,   11,   60, 1.0f /   60 },
+	{   30,   11,    9,   50, 1.0f /   50 },
+	{  185,   62,   53,  300, 1.0f /  300 },
+	{   95,   29,   26,  150, 1.0f /  150 },
+	{   65,   18,   17,  100, 1.0f /  100 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{    4,    1,    1,    6, 1.0f /    6 },
+	{  119,   47,   29,  195, 1.0f /  195 },
+	{   72,   41,   17,  130, 1.0f /  130 },
+	{   97,   76,   22,  195, 1.0f /  195 },
+	{  172,  181,   37,  390, 1.0f /  390 },
+	{    5,    7,    1,   13, 1.0f /   13 },
+	{  878, 1159,  147, 2184, 1.0f / 2184 },
+	{  458,  571,   63, 1092, 1.0f / 1092 },
+	{  318,  375,   35,  728, 1.0f /  728 },
+	{  248,  277,   21,  546, 1.0f /  546 },
+	{ 1030, 1091,   63, 2184, 1.0f / 2184 },
+	{  178,  179,    7,  364, 1.0f /  364 },
+	{  158,  151,    3,  312, 1.0f /  312 },
+	{   11,   10,    0,   21, 1.0f /   21 },
 
-	{ 2447, 2200,   57, 4704 },
-	{  405,  360,   19,  784 },
-	{ 2413, 2120,  171, 4704 },
-	{  599,  520,   57, 1176 },
-	{  793,  680,   95, 1568 },
-	{ 1181, 1000,  171, 2352 },
-	{  335,  280,   57,  672 },
-	{   97,   80,   19,  196 },
-	{ 2311, 1880,  513, 4704 },
-	{ 1147,  920,  285, 2352 },
-	{  759,  600,  209, 1568 },
-	{  565,  440,  171, 1176 },
-	{ 2243, 1720,  741, 4704 },
-	{   53,   40,   19,  112 },
-	{ 2209, 1640,  855, 4704 },
-	{  137,  100,   57,  294 },
-	{  725,  520,  323, 1568 },
-	{ 1079,  760,  513, 2352 },
-	{ 2141, 1480, 1083, 4704 },
-	{  177,  120,   95,  392 },
-	{  301,  200,  171,  672 },
-	{ 1045,  680,  627, 2352 },
-	{  691,  440,  437, 1568 },
-	{  257,  160,  171,  588 },
-	{ 2039, 1240, 1425, 4704 },
-	{  337,  200,  247,  784 },
-	{ 2005, 1160, 1539, 4704 },
-	{   71,   40,   57,  168 },
-	{  657,  360,  551, 1568 },
-	{  977,  520,  855, 2352 },
-	{ 1937, 1000, 1767, 4704 },
-	{   20,   10,   19,   49 },
+	{ 2447, 2200,   57, 4704, 1.0f / 4704 },
+	{  405,  360,   19,  784, 1.0f /  784 },
+	{ 2413, 2120,  171, 4704, 1.0f / 4704 },
+	{  599,  520,   57, 1176, 1.0f / 1176 },
+	{  793,  680,   95, 1568, 1.0f / 1568 },
+	{ 1181, 1000,  171, 2352, 1.0f / 2352 },
+	{  335,  280,   57,  672, 1.0f /  672 },
+	{   97,   80,   19,  196, 1.0f /  196 },
+	{ 2311, 1880,  513, 4704, 1.0f / 4704 },
+	{ 1147,  920,  285, 2352, 1.0f / 2352 },
+	{  759,  600,  209, 1568, 1.0f / 1568 },
+	{  565,  440,  171, 1176, 1.0f / 1176 },
+	{ 2243, 1720,  741, 4704, 1.0f / 4704 },
+	{   53,   40,   19,  112, 1.0f /  112 },
+	{ 2209, 1640,  855, 4704, 1.0f / 4704 },
+	{  137,  100,   57,  294, 1.0f /  294 },
+	{  725,  520,  323, 1568, 1.0f / 1568 },
+	{ 1079,  760,  513, 2352, 1.0f / 2352 },
+	{ 2141, 1480, 1083, 4704, 1.0f / 4704 },
+	{  177,  120,   95,  392, 1.0f /  392 },
+	{  301,  200,  171,  672, 1.0f /  672 },
+	{ 1045,  680,  627, 2352, 1.0f / 2352 },
+	{  691,  440,  437, 1568, 1.0f / 1568 },
+	{  257,  160,  171,  588, 1.0f /  588 },
+	{ 2039, 1240, 1425, 4704, 1.0f / 4704 },
+	{  337,  200,  247,  784, 1.0f /  784 },
+	{ 2005, 1160, 1539, 4704, 1.0f / 4704 },
+	{   71,   40,   57,  168, 1.0f /  168 },
+	{  657,  360,  551, 1568, 1.0f / 1568 },
+	{  977,  520,  855, 2352, 1.0f / 2352 },
+	{ 1937, 1000, 1767, 4704, 1.0f / 4704 },
+	{   20,   10,   19,   49, 1.0f /   49 },
 
-	{ 1227,  638, 1075, 2940 },
-	{  627,  338,  505, 1470 },
-	{   61,   34,   45,  140 },
-	{  327,  188,  220,  735 },
-	{  267,  158,  163,  588 },
-	{  227,  138,  125,  490 },
-	{ 1389,  866,  685, 2940 },
-	{  354,  226,  155,  735 },
-	{  481,  314,  185,  980 },
-	{    3,    2,    1,    6 },
-	{  471,  304,  161,  936 },
-	{  237,  148,   83,  468 },
-	{   53,   32,   19,  104 },
-	{   60,   35,   22,  117 },
-	{  483,  272,  181,  936 },
-	{   81,   44,   31,  156 },
-	{  489,  256,  191,  936 },
-	{  123,   62,   49,  234 },
-	{  165,   80,   67,  312 },
-	{  249,  116,  103,  468 },
-	{  501,  224,  211,  936 },
-	{    7,    3,    3,   13 },
-	{   43,   15,   20,   78 },
-	{   22,    6,   11,   39 },
-	{   15,    3,    8,   26 },
-	{   23,    3,   13,   39 },
-	{   47,    3,   28,   78 },
-	{    8,    0,    5,   13 },
-	{    7,    0,    4,   11 },
-	{   21,    0,   10,   31 },
-	{   13,    0,    5,   18 },
-	{   13,    0,    5,   18 }
+	{ 1227,  638, 1075, 2940, 1.0f / 2940 },
+	{  627,  338,  505, 1470, 1.0f / 1470 },
+	{   61,   34,   45,  140, 1.0f /  140 },
+	{  327,  188,  220,  735, 1.0f /  735 },
+	{  267,  158,  163,  588, 1.0f /  588 },
+	{  227,  138,  125,  490, 1.0f /  490 },
+	{ 1389,  866,  685, 2940, 1.0f / 2940 },
+	{  354,  226,  155,  735, 1.0f /  735 },
+	{  481,  314,  185,  980, 1.0f /  980 },
+	{    3,    2,    1,    6, 1.0f /    6 },
+	{  471,  304,  161,  936, 1.0f /  936 },
+	{  237,  148,   83,  468, 1.0f /  468 },
+	{   53,   32,   19,  104, 1.0f /  104 },
+	{   60,   35,   22,  117, 1.0f /  117 },
+	{  483,  272,  181,  936, 1.0f /  936 },
+	{   81,   44,   31,  156, 1.0f /  156 },
+	{  489,  256,  191,  936, 1.0f /  936 },
+	{  123,   62,   49,  234, 1.0f /  234 },
+	{  165,   80,   67,  312, 1.0f /  312 },
+	{  249,  116,  103,  468, 1.0f /  468 },
+	{  501,  224,  211,  936, 1.0f /  936 },
+	{    7,    3,    3,   13, 1.0f /   13 },
+	{   43,   15,   20,   78, 1.0f /   78 },
+	{   22,    6,   11,   39, 1.0f /   39 },
+	{   15,    3,    8,   26, 1.0f /   26 },
+	{   23,    3,   13,   39, 1.0f /   39 },
+	{   47,    3,   28,   78, 1.0f /   78 },
+	{    8,    0,    5,   13, 1.0f /   13 },
+	{    7,    0,    4,   11, 1.0f /   11 },
+	{   21,    0,   10,   31, 1.0f /   31 },
+	{   13,    0,    5,   18, 1.0f /   18 },
+	{   13,    0,    5,   18, 1.0f /   18 }
 };
 
 
