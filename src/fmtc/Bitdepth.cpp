@@ -3,9 +3,6 @@
         Bitdepth.cpp
         Author: Laurent de Soras, 2012
 
-To do:
-- SSE2 for ordered dithering
-
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to
@@ -746,24 +743,24 @@ void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int ang
 			&ThisType::process_seg_##NAMF##_flt_int_cpp <true, DT, DP, ST>; \
 		break;
 
-#define fmtc_Bitdepth_SET_FNC_INT_SSE(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+#define fmtc_Bitdepth_SET_FNC_INT_SSE2(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
 	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse <false, DF, DP, SF, SP>; \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, DF, DP, SF, SP>; \
 		break; \
 	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse <true, DF, DP, SF, SP>; \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <true, DF, DP, SF, SP>; \
 		break;
 
-#define fmtc_Bitdepth_SET_FNC_FLT_SSE(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+#define fmtc_Bitdepth_SET_FNC_FLT_SSE2(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
 	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse <false, DF, DP, SF>; \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, DF, DP, SF>; \
 		break; \
 	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse <true, DF, DP, SF>; \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true, DF, DP, SF>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_ERRDIF_INT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
@@ -808,11 +805,11 @@ void	Bitdepth::init_fnc_fast ()
 	if (_sse2_flag)
 	{
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT_SSE, fast, fast, false,
+			fmtc_Bitdepth_SET_FNC_INT_SSE2, fast, fast, false,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT_SSE, fast, fast, false,
+			fmtc_Bitdepth_SET_FNC_FLT_SSE2, fast, fast, false,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 	}
@@ -839,6 +836,20 @@ void	Bitdepth::init_fnc_ordered ()
 		fmtc_Bitdepth_SET_FNC_FLT, ord, ord, simple_flag,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+	if (_sse2_flag)
+	{
+		fmtc_Bitdepth_SPAN_INT (
+			fmtc_Bitdepth_SET_FNC_INT_SSE2, ord, ord, simple_flag,
+			dst_res, dst_fmt, src_res, src_fmt
+		)
+		fmtc_Bitdepth_SPAN_FLT (
+			fmtc_Bitdepth_SET_FNC_FLT_SSE2, ord, ord, simple_flag,
+			dst_res, dst_fmt, src_res, src_fmt
+		)
+	}
+#endif
 }
 
 
@@ -1064,7 +1075,7 @@ void	Bitdepth::process_seg_fast_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *sr
 
 
 template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
-void	Bitdepth::process_seg_fast_int_int_sse (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const
+void	Bitdepth::process_seg_fast_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
@@ -1092,7 +1103,7 @@ void	Bitdepth::process_seg_fast_int_int_sse (uint8_t *dst_ptr, const uint8_t *sr
 
 
 template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
-void	Bitdepth::process_seg_fast_flt_int_sse (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+void	Bitdepth::process_seg_fast_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
@@ -1254,6 +1265,214 @@ void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 		generate_rnd_eol (rnd_state);
 	}
 }
+
+
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+
+
+
+template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	assert (dst_ptr != 0);
+	assert (src_ptr != 0);
+	assert (w > 0);
+
+	enum {         DIF_BITS = SRC_BITS - DST_BITS };
+	static_assert (DIF_BITS >= 0, "This function cannot increase bidepth.");
+
+	const PatRow & pattern   = ctx.extract_pattern_row ();
+	uint32_t &     rnd_state = ctx._rnd_state;
+
+	typedef typename  fmtcl::ProxyRwSse2 <SRC_FMT>::PtrConst::Type SrcPtr;
+	typedef typename  fmtcl::ProxyRwSse2 <DST_FMT>::Ptr::Type      DstPtr;
+	SrcPtr         src_n_ptr = reinterpret_cast <SrcPtr> (src_ptr);
+	DstPtr         dst_n_ptr = reinterpret_cast <DstPtr> (dst_ptr);
+	const __m128i  zero      = _mm_setzero_si128 ();
+	const __m128i  mask_lsb  = _mm_set1_epi16 (0x00FF);
+	const __m128i  c128_16   = _mm_set1_epi16 (0x80);
+	const __m128i  sign_bit  = _mm_set1_epi16 (-0x8000);
+	const __m128i  rcst      = _mm_set1_epi16 (1 << (DIF_BITS - 1));
+	const __m128i  vmax      = _mm_set1_epi16 ((1 << DST_BITS) - 1);
+
+	const __m128i  ampo_i    = _mm_set1_epi16 (_ampo_i);  // 8 ?16 [0 ; 255]
+	const __m128i  ampn_i    = _mm_set1_epi16 (_ampn_i);  // 8 ?16 [0 ; 255]
+
+	for (int pos = 0; pos < w; pos += 8)
+	{
+		const __m128i  s =	// 8 u16
+			fmtcl::ProxyRwSse2 <SRC_FMT>::read_i16 (src_n_ptr + pos, zero);
+
+		__m128i        dith_o = 
+			_mm_load_si128 (reinterpret_cast <const __m128i *> (
+				&pattern [pos & (PAT_WIDTH - 1)]
+			)
+		);
+
+		__m128i        dither;
+		if (S_FLAG)
+		{
+			enum {         DIT_SHFT = 8 - DIF_BITS };
+			dither = _mm_srai_epi16 (dith_o, DIT_SHFT);
+		}
+		else
+		{
+			// Random generation
+			generate_rnd (rnd_state);
+			const uint32_t rnd_03  = rnd_state;
+			generate_rnd (rnd_state);
+			const uint32_t rnd_47  = rnd_state;
+			const __m128i  rnd_val = _mm_set_epi32 (0, 0, rnd_47, rnd_03);
+
+			__m128i			dith_n =
+				_mm_unpacklo_epi8 (rnd_val, zero);           // 8 ?16 [0 ; 255]
+			dith_n = _mm_sub_epi16 (dith_n, c128_16);       // 8 s16 [-128 ; 127]
+
+			dith_o = _mm_mullo_epi16 (dith_o, ampo_i);      // 8 s16 (full range)
+			dith_n = _mm_mullo_epi16 (dith_n, ampn_i);      // 8 s16 (full range)
+			dither = _mm_adds_epi16 (dith_o, dith_n);       // 8 s16 = s8 * s8
+
+			enum {         DIT_SHFT = AMP_BITS + 8 - DIF_BITS };
+			dither = _mm_srai_epi16 (dither, DIT_SHFT);     // 8 s16 = s16 >> cst
+		}
+
+		const __m128i  dith_rcst = _mm_adds_epi16 (dither, rcst);
+
+		__m128i        quant;
+		if (S_FLAG && SRC_BITS < 16)
+		{
+			__m128i        sum = _mm_adds_epi16 (s, dith_rcst);
+			quant = _mm_srai_epi16 (sum, DIF_BITS);
+		}
+		else
+		{
+			__m128i        sum  = _mm_xor_si128 (s, sign_bit); // 8 s16
+			sum   = _mm_adds_epi16 (sum, dith_rcst);
+			sum   = _mm_xor_si128 (sum, sign_bit);          // 8 u16
+			quant = _mm_srli_epi16 (sum, DIF_BITS);
+		}
+
+		__m128i        pix = quant;
+		if (SRC_BITS < 16)
+		{
+			pix = _mm_max_epi16 (pix, zero);
+			pix = _mm_min_epi16 (pix, vmax);
+		}
+
+		fmtcl::ProxyRwSse2 <DST_FMT>::write_i16 (dst_n_ptr + pos, pix, mask_lsb);
+	}
+
+	if (! S_FLAG)
+	{
+		generate_rnd_eol (rnd_state);
+	}
+}
+
+
+
+template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	assert (dst_ptr != 0);
+	assert (src_ptr != 0);
+	assert (w > 0);
+	assert (&ctx != 0);
+	assert (&ctx._pattern_ptr != 0);
+	assert (&ctx._scale_info_ptr != 0);
+	assert (((_mm_getcsr () >> 13) & 3) == 0);   // 00 = Round to nearest (even)
+
+	const PatRow & pattern   = ctx.extract_pattern_row ();
+	uint32_t &     rnd_state = ctx._rnd_state;
+
+	const float    qt_cst    = 1.0f / (
+		65536.0f * float (1 << ((S_FLAG ? 0 : AMP_BITS) + 8))
+	);
+
+	typedef typename  fmtcl::ProxyRwSse2 <SRC_FMT>::PtrConst::Type SrcPtr;
+	typedef typename  fmtcl::ProxyRwSse2 <DST_FMT>::Ptr::Type      DstPtr;
+	SrcPtr         src_n_ptr = reinterpret_cast <SrcPtr> (src_ptr);
+	DstPtr         dst_n_ptr = reinterpret_cast <DstPtr> (dst_ptr);
+	const __m128   zero_f    = _mm_setzero_ps ();
+	const __m128i  zero_i    = _mm_setzero_si128 ();
+	const __m128i  c128_16   = _mm_set1_epi16 (0x80);
+	const __m128   mul       = _mm_set1_ps (float (ctx._scale_info_ptr->_gain));
+	const __m128   add       = _mm_set1_ps (float (ctx._scale_info_ptr->_add_cst));
+	const __m128   qt        = _mm_set1_ps (qt_cst);
+	const __m128   vmax      = _mm_set1_ps ((1 << DST_BITS) - 1);
+	const __m128   offset    = _mm_set1_ps (-32768);
+	const __m128i  mask_lsb  = _mm_set1_epi16 (0x00FF);
+	const __m128i  sign_bit  = _mm_set1_epi16 (-0x8000);
+
+	const __m128i  ampo_i    = _mm_set1_epi16 (_ampo_i);  // 8 ?16 [0 ; 255]
+	const __m128i  ampn_i    = _mm_set1_epi16 (_ampn_i);  // 8 ?16 [0 ; 255]
+
+	for (int pos = 0; pos < w; pos += 8)
+	{
+		__m128         s0;
+		__m128         s1;
+		fmtcl::ProxyRwSse2 <SRC_FMT>::read_flt (
+			src_n_ptr + pos, s0, s1, zero_i
+		);
+		s0 = _mm_add_ps (_mm_mul_ps (s0, mul), add);
+		s1 = _mm_add_ps (_mm_mul_ps (s1, mul), add);
+
+		__m128i        dith_o = 
+			_mm_load_si128 (reinterpret_cast <const __m128i *> (
+				&pattern [pos & (PAT_WIDTH - 1)]
+			)
+		);
+
+		__m128i        dither;
+		if (S_FLAG)
+		{
+			dither = dith_o;
+		}
+		else
+		{
+			// Random generation
+			generate_rnd (rnd_state);
+			const uint32_t rnd_03  = rnd_state;
+			generate_rnd (rnd_state);
+			const uint32_t rnd_47  = rnd_state;
+			const __m128i  rnd_val = _mm_set_epi32 (0, 0, rnd_47, rnd_03);
+
+			__m128i			dith_n =
+				_mm_unpacklo_epi8 (rnd_val, zero_i);         // 8 ?16 [0 ; 255]
+			dith_n = _mm_sub_epi16 (dith_n, c128_16);       // 8 s16 [-128 ; 127]
+
+			dith_o = _mm_mullo_epi16 (dith_o, ampo_i);      // 8 s16 (full range)
+			dith_n = _mm_mullo_epi16 (dith_n, ampn_i);      // 8 s16 (full range)
+			dither = _mm_adds_epi16 (dith_o, dith_n);       // 8 s16 = s8 * s8
+		}
+
+		__m128i        dither_03i = _mm_unpacklo_epi16 (zero_i, dither);  // 4 s32 << 16
+		__m128i        dither_47i = _mm_unpackhi_epi16 (zero_i, dither);  // 4 s32 << 16
+		__m128         dither_03  = _mm_cvtepi32_ps (dither_03i);
+		__m128         dither_47  = _mm_cvtepi32_ps (dither_47i);
+		dither_03 = _mm_mul_ps (dither_03, qt);
+		dither_47 = _mm_mul_ps (dither_47, qt);
+
+		s0 = _mm_add_ps (s0, dither_03);
+		s1 = _mm_add_ps (s1, dither_47);
+
+		s0 = _mm_max_ps (_mm_min_ps (s0, vmax), zero_f);
+		s1 = _mm_max_ps (_mm_min_ps (s1, vmax), zero_f);
+
+		fmtcl::ProxyRwSse2 <DST_FMT>::write_flt (
+			dst_n_ptr + pos, s0, s1, mask_lsb, sign_bit, offset
+		);
+	}
+
+	if (! S_FLAG)
+	{
+		generate_rnd_eol (rnd_state);
+	}
+}
+
+
+
+#endif   // fstb_ARCHI_X86
 
 
 

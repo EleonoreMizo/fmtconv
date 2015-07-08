@@ -157,15 +157,22 @@ private:
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
-	void           process_seg_fast_int_int_sse (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const;
+	void           process_seg_fast_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const;
 	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
-	void           process_seg_fast_flt_int_sse (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+	void           process_seg_fast_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 #endif
 
 	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	void           process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 	void           process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+	void           process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+	void           process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+#endif
 
 	template <bool S_FLAG, class ERRDIF>
 	void           process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
