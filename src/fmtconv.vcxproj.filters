@@ -493,6 +493,12 @@
     <ClInclude Include="fmtcl\VoidAndCluster.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\MatrixWrap.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\MatrixWrap.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">

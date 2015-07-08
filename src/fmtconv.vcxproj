@@ -192,6 +192,8 @@
     <ClInclude Include="fmtcl\Matrix2020CLProc_macro.h" />
     <ClInclude Include="fmtcl\MatrixProc.h" />
     <ClInclude Include="fmtcl\MatrixProc_macro.h" />
+    <ClInclude Include="fmtcl\MatrixWrap.h" />
+    <ClInclude Include="fmtcl\MatrixWrap.hpp" />
     <ClInclude Include="fmtcl\Proxy.h" />
     <ClInclude Include="fmtcl\Proxy.hpp" />
     <ClInclude Include="fmtcl\ProxyRwAvx2.h" />
