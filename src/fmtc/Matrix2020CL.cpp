@@ -3,9 +3,6 @@
         Matrix2020CL.cpp
         Author: Laurent de Soras, 2013
 
-TO DO:
-	- SSE2/AVX2 optimizations
-
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to

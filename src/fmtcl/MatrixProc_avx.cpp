@@ -6,10 +6,6 @@
 To be compiled with /arch:AVX in order to avoid SSE/AVX state switch
 slowdown.
 
-TO DO:
-	- Make a special case for kRkGkB matrix conversions, where the luma plane
-		is not used to compute the chroma planes.
-
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to

@@ -3,6 +3,9 @@
         Matrix2020CLProc.cpp
         Author: Laurent de Soras, 2015
 
+TO DO:
+	- AVX2 optimizations
+
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to
