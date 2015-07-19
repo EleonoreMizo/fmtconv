@@ -25,11 +25,10 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/VoidAndCluster.h"
-
-#include <functional>
-#include <random>
+#include "fstb/fnc.h"
 
 #include <cassert>
+#include <cmath>
 
 
 
@@ -214,30 +213,6 @@ void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
 
 	const double   thr = 0.1;
 
-#if 0
-
-	std::default_random_engine rand_gen;
-	std::uniform_real_distribution <double> dist (0, 1);
-	auto           dice = std::bind (dist, rand_gen);
-
-	const int      w = m.get_w ();
-	const int      h = m.get_h ();
-	for (int y = 0; y < h; ++y)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-			const double   r = dice ();
-			uint16_t       v = 0;
-			if (r < thr)
-			{
-				v = 1;
-			}
-			m (x, y) = v;
-		}
-	}
-
-#else
-
 	const int      w = m.get_w ();
 	const int      h = m.get_h ();
 	MatrixWrap <double>  err_mat (w, h);
@@ -254,7 +229,7 @@ void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
 				double         err = err_mat (x, y);
 				err_mat (x, y) = 0;
 				const double   val = thr + err;
-				const int      qnt = int (floor (val + 0.5));
+				const int      qnt = fstb::round_int (val);
 				assert (qnt >= 0 && qnt <= 1);
 				m (x, y) = qnt;
 				err = val - double (qnt);
@@ -269,8 +244,6 @@ void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
 			dir = -dir;
 		}
 	}
-
-#endif
 }
 
 
