@@ -366,6 +366,7 @@ private:
 	float          _ampe_f;
 	float          _ampn_f;
 	bool           _errdif_flag;     // Indicates a dithering method using error diffusion.
+	bool           _simple_flag;     // Simplified implementation for ampo == 1 and ampn == 0
 	PatDataArray   _dither_pat_arr;  // Contains levels for ordered dithering
 
 	conc::ObjPool <fmtcl::ErrDifBuf>

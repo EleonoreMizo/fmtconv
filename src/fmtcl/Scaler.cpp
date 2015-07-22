@@ -129,7 +129,7 @@ fmtcl_Scaler_SPAN_I (fmtcl_Scaler_INIT_I_CPP)
 	assert (win_height > 0);
 	assert (kernel_scale > 0);
 	assert (&kernel_fnc != 0);
-	assert (gain != 0);
+	assert (! fstb::is_null (gain));
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	if (sse2_flag)
@@ -829,7 +829,7 @@ void	Scaler::build_scale_data ()
 			{
 				n = _norm_val;
 			}
-			assert (n != 0);
+			assert (! fstb::is_null (n));
 			amp = 1.0 / fabs (n);
 		}
 
@@ -868,7 +868,7 @@ void	Scaler::build_scale_data ()
 		// Case 1: We've gone past the bottom of the source and haven't stored
 		//         the last line data yet
 		// Case 2: We even haven't reached any valid line.
-		if (accu != 0 || info._kernel_size == 0)
+		if (! fstb::is_null (accu) || info._kernel_size == 0)
 		{
 			++ info._kernel_size;
 

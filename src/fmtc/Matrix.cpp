@@ -763,9 +763,9 @@ U, V range : [-0.5 ; 0.5]
 void	Matrix::make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag)
 {
 	assert (&m != 0);
-	assert (kg != 0);
-	assert (kb != 1);
-	assert (kr != 1);
+	assert (! fstb::is_null (kg));
+	assert (! fstb::is_eq (kb, 1.0));
+	assert (! fstb::is_eq (kr, 1.0));
 
 	const double   r = 0.5;
 	const double   x = 1.0 / r;

@@ -25,6 +25,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/DiscreteFirCustom.h"
+#include "fstb/fnc.h"
 
 #include <cassert>
 
@@ -73,7 +74,9 @@ int	DiscreteFirCustom::compute_real_support () const
 	const int      half_len = (len - 1) / 2;
 	int            sup      = half_len + 1;
 	for (int pos = 0
-	;	pos < half_len && _coef_arr [pos] == 0 && _coef_arr [len - 1 - pos] == 0
+	;	   pos < half_len
+		&& fstb::is_null (_coef_arr [          pos])
+		&& fstb::is_null (_coef_arr [len - 1 - pos])
 	;	++pos)
 	{
 		sup = half_len - pos;

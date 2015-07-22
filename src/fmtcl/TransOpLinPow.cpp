@@ -88,7 +88,7 @@ double	TransOpLinPow::operator () (double x) const
 		}
 		else
 		{
-			if (_p2 == 1)
+			if (fstb::is_eq (_p2, 1.0))
 			{
 				y =        x         / _slope;
 			}
@@ -116,7 +116,7 @@ double	TransOpLinPow::operator () (double x) const
 		}
 		else
 		{
-			if (_p2 == 1)
+			if (fstb::is_eq (_p2, 1.0))
 			{
 				y =        x * _slope;
 			}

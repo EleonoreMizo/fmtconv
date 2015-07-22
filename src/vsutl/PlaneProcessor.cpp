@@ -24,6 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/fnc.h"
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
 #include "vsutl/PlaneProcMode.h"
@@ -151,7 +152,8 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 						_vsapi.setError (&out, err_msg.c_str ());
 						ok_flag = false;
 					}
-					else if (_proc_mode_arr [plane_index] == PlaneProcMode_PROCESS)
+					else if (   fstb::round_int (_proc_mode_arr [plane_index])
+					         == PlaneProcMode_PROCESS)
 					{
 						const std::string err_msg =
 							_filter_name + ": plane specified twice.";
@@ -266,9 +268,10 @@ int	PlaneProcessor::process_frame (::VSFrameRef &dst, int n, void *frame_data_pt
 	;	plane_index < _nbr_planes && ret_val == 0
 	;	++plane_index)
 	{
-		const double   mode = _proc_mode_arr [plane_index];
+		const double   mode   = _proc_mode_arr [plane_index];
+		const int      mode_i = fstb::round_int (mode);
 
-		if (_manual_flag || mode == PlaneProcMode_PROCESS)
+		if (_manual_flag || mode_i == PlaneProcMode_PROCESS)
 		{
 			ret_val = _cb.process_plane (
 				dst,
@@ -282,12 +285,12 @@ int	PlaneProcessor::process_frame (::VSFrameRef &dst, int n, void *frame_data_pt
 				src_node3_sptr
 			);
 		}
-		else if (mode >= PlaneProcMode_COPY1 && mode <= PlaneProcMode_COPY3)
+		else if (mode_i >= PlaneProcMode_COPY1 && mode_i <= PlaneProcMode_COPY3)
 		{
 			NodeRefSPtr    src_clip_sptr (
-				  (mode == PlaneProcMode_COPY3) ? src_node3_sptr
-				: (mode == PlaneProcMode_COPY2) ? src_node2_sptr
-				:                                 src_node1_sptr);
+				  (mode_i == PlaneProcMode_COPY3) ? src_node3_sptr
+				: (mode_i == PlaneProcMode_COPY2) ? src_node2_sptr
+				:                                   src_node1_sptr);
 			if (src_clip_sptr.get () != 0)
 			{
 				FrameRefSPtr   src_sptr (

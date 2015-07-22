@@ -104,11 +104,11 @@ FilterResize::FilterResize (const ResampleSpecPlane &spec, ContFirInterface &ker
 	assert (spec._dst_height > 0);
 	assert (spec._win_w > 0);
 	assert (spec._win_h > 0);
-	assert (spec._kernel_scale_h != 0);
-	assert (spec._kernel_scale_v != 0);
+	assert (! fstb::is_null (spec._kernel_scale_h));
+	assert (! fstb::is_null (spec._kernel_scale_v));
 	assert (&kernel_fnc_h != 0);
 	assert (&kernel_fnc_v != 0);
-	assert (gain != 0);
+	assert (! fstb::is_null (gain));
 	assert (dst_type >= 0);
 	assert (dst_type < SplFmt_NBR_ELT);
 	assert (dst_res >= 8);
@@ -147,10 +147,10 @@ FilterResize::FilterResize (const ResampleSpecPlane &spec, ContFirInterface &ker
 			   _win_pos [dir] < 0
 		   || _win_pos [dir] + _win_size [dir] > _src_size [dir]
 		   || fabs (_win_pos [dir] - fstb::round (_win_pos [dir])) > 1e-5
-		   || _win_size [dir] != _dst_size [dir]
-		   || _kernel_scale [dir] != 1.0
+		   || ! fstb::is_eq (_win_size [dir], double (_dst_size [dir]))
+		   || ! fstb::is_eq (_kernel_scale [dir], 1.0)
 		   || _kernel_force_flag [dir]
-			|| _center_pos_src [dir] != _center_pos_dst [dir]
+			|| ! fstb::is_eq (_center_pos_src [dir], _center_pos_dst [dir])
 		);
 		if (_resize_flag [dir])
 		{

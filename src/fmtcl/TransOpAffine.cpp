@@ -25,6 +25,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/TransOpAffine.h"
+#include "fstb/fnc.h"
 
 #include <cassert>
 
@@ -43,7 +44,7 @@ TransOpAffine::TransOpAffine (double a, double b)
 :	_a (a)
 ,	_b (b)
 {
-	assert (a != 0);
+	assert (! fstb::is_null (a));
 }
 
 

@@ -36,6 +36,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/ProxyRwSse2.h"
 #endif
+#include "fstb/fnc.h"
 
 #include <stdexcept>
 
@@ -220,10 +221,7 @@ void	BitBltConv::bitblt_int_to_flt (uint8_t *dst_ptr, int dst_stride, fmtcl::Spl
 		reinterpret_cast <const uint16_t *> (src_ptr)
 	);
 
-	const bool     scale_flag =
-		(   scale_info_ptr != 0
-		 && (   scale_info_ptr->_gain    != 1
-		     || scale_info_ptr->_add_cst != 0));
+	const bool     scale_flag = ! is_si_neutral (scale_info_ptr);
 
 #define	fmtcl_BitBltConv_CASE(SCF, SSE2F, TYPEF, TYPEP, SFMT, SRES, SPTR) \
 	case	((SCF << 17) + (SSE2F << 16) + (SplFmt_##SFMT << 8) + SRES): \
@@ -817,9 +815,9 @@ void	BitBltConv::bitblt_ixx_to_x16_sse2 (typename DST::Ptr::Type dst_ptr, int ds
 
 bool	BitBltConv::is_si_neutral (const ScaleInfo *scale_info_ptr)
 {
-	return (       scale_info_ptr           == 0
-	        || (   scale_info_ptr->_gain    == 1
-	            && scale_info_ptr->_add_cst == 0));
+	return (       scale_info_ptr == 0
+	        || (   fstb::is_eq (scale_info_ptr->_gain, 1.0)
+	            && fstb::is_null (scale_info_ptr->_add_cst)));
 }
 
 

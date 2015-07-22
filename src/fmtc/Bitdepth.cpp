@@ -76,6 +76,7 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_ampe_f (0)
 ,	_ampn_f (0)
 ,	_errdif_flag (false)
+,	_simple_flag (false)
 ,	_dither_pat_arr ()
 ,	_buf_factory_uptr ()
 ,	_process_seg_int_int_ptr (0)
@@ -231,9 +232,13 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	build_dither_pat ();
 
 	const int		amp_mul = 1 << AMP_BITS;
-	_ampo_i = std::min (fstb::round_int (_ampo * amp_mul), 127);
-	_ampn_i = std::min (fstb::round_int (_ampn * amp_mul), 127);
+	const int      ampo_i_raw = fstb::round_int (_ampo * amp_mul);
+	const int      ampn_i_raw = fstb::round_int (_ampn * amp_mul);
+	_ampo_i = std::min (ampo_i_raw, 127);
+	_ampn_i = std::min (ampn_i_raw, 127);
 	_ampn_f = float (_ampn * (1.0f / 4294967296.0f));  // / (2 ^ 32)
+
+	_simple_flag = (ampo_i_raw == amp_mul && ampn_i_raw == 0);
 
 	if (_errdif_flag)
 	{
@@ -826,14 +831,13 @@ void	Bitdepth::init_fnc_ordered ()
 	const int            dst_res = _vi_out.format->bitsPerSample;
 	const fmtcl::SplFmt  src_fmt = _splfmt_src;
 	const int            src_res = _vi_in.format->bitsPerSample;
-	const bool           simple_flag = (_ampo == 1 && _ampn == 0);
 
 	fmtc_Bitdepth_SPAN_INT (
-		fmtc_Bitdepth_SET_FNC_INT, ord, ord, simple_flag,
+		fmtc_Bitdepth_SET_FNC_INT, ord, ord, _simple_flag,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
 	fmtc_Bitdepth_SPAN_FLT (
-		fmtc_Bitdepth_SET_FNC_FLT, ord, ord, simple_flag,
+		fmtc_Bitdepth_SET_FNC_FLT, ord, ord, _simple_flag,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
 
@@ -841,11 +845,11 @@ void	Bitdepth::init_fnc_ordered ()
 	if (_sse2_flag)
 	{
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT_SSE2, ord, ord, simple_flag,
+			fmtc_Bitdepth_SET_FNC_INT_SSE2, ord, ord, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT_SSE2, ord, ord, simple_flag,
+			fmtc_Bitdepth_SET_FNC_FLT_SSE2, ord, ord, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 	}
@@ -862,61 +866,60 @@ void	Bitdepth::init_fnc_errdiff ()
 	const int            dst_res = _vi_out.format->bitsPerSample;
 	const fmtcl::SplFmt  src_fmt = _splfmt_src;
 	const int            src_res = _vi_in.format->bitsPerSample;
-	const bool           simple_flag = (_ampo == 1 && _ampn == 0);
 
 	switch (_dmode)
 	{
 	case	DMode_FILTERLITE:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, FilterLite, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, FilterLite, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FilterLite, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FilterLite, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_STUCKI:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Stucki, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Stucki, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Stucki, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Stucki, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_ATKINSON:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Atkinson, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Atkinson, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Atkinson, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Atkinson, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_FLOYD:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, FloydSteinberg, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, FloydSteinberg, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FloydSteinberg, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FloydSteinberg, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_OSTRO:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Ostromoukhov, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Ostromoukhov, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Ostromoukhov, simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Ostromoukhov, _simple_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
@@ -955,8 +958,8 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 
 	const bool     sc_flag =
 		(   src_fmt == fmtcl::SplFmt_FLOAT
-		 || scale_info._gain * ((uint64_t (1)) << (src_res - dst_res)) != 1
-		 || scale_info._add_cst != 0);
+		 || ! fstb::is_eq (scale_info._gain * ((uint64_t (1)) << (src_res - dst_res)), 1.0, 1e-6)
+		 || ! fstb::is_null (scale_info._add_cst, 1e-6));
 
 	void (ThisType::* process_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const =
 		  (sc_flag)

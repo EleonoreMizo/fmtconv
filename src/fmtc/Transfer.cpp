@@ -409,14 +409,14 @@ void	Transfer::init_table ()
 	}
 
 	// Gamma correction
-	if (_gcor != 1)
+	if (! fstb::is_eq (_gcor, 1.0))
 	{
 		OpSPtr         op_g (new fmtcl::TransOpPow (true, _gcor, 1, 1e6));
 		op_d = OpSPtr (new fmtcl::TransOpCompose (op_g, op_d));
 	}
 
 	// Contrast
-	if (_contrast != 1)
+	if (! fstb::is_eq (_contrast, 1.0))
 	{
 		OpSPtr         op_c (new fmtcl::TransOpContrast (_contrast));
 		op_d = OpSPtr (new fmtcl::TransOpCompose (op_c, op_d));

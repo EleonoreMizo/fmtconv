@@ -30,6 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/BitBltConv.h"
 #include "fmtcl/Proxy.h"
 #include "fmtcl/ProxyRwAvx2.h"
+#include "fstb/fnc.h"
 
 #include <stdexcept>
 
@@ -62,10 +63,7 @@ void	BitBltConv::bitblt_int_to_flt_avx2_switch (uint8_t *dst_ptr, int dst_stride
 		reinterpret_cast <const uint16_t *> (src_ptr)
 	);
 
-	const bool     scale_flag =
-		(   scale_info_ptr != 0
-		 && (   scale_info_ptr->_gain    != 1
-		     || scale_info_ptr->_add_cst != 0));
+	const bool     scale_flag = ! is_si_neutral (scale_info_ptr);
 
 #define	fmtcl_BitBltConv_CASE(SCF, SFMT, SRES, SPTR) \
 	case	((SCF << 16) + (SplFmt_##SFMT << 8) + SRES): \
@@ -109,10 +107,7 @@ void	BitBltConv::bitblt_flt_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_r
 		reinterpret_cast <uint16_t *> (dst_ptr)
 	);
 
-	const bool     scale_flag =
-		(   scale_info_ptr != 0
-		 && (   scale_info_ptr->_gain    != 1
-		     || scale_info_ptr->_add_cst != 0));
+	const bool     scale_flag = ! is_si_neutral (scale_info_ptr);
 
 #define	fmtcl_BitBltConv_CASE(SCF, DFMT, DPTR) \
 	case	(SCF << 4) + SplFmt_##DFMT: \
