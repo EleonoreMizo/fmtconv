@@ -24,6 +24,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "def.h"
 
+#include <type_traits>
+
 #if defined (_MSC_VER)
 	#if (fstb_ARCHI == fstb_ARCHI_X86)
 		#include <intrin.h>
@@ -318,6 +320,7 @@ int	ceil_int (double x)
 template <class T>
 int	conv_int_fast (T x)
 {
+	static_assert (std::is_floating_point <T>::value, "T must be floating point");
 
 	int            p;
 
@@ -440,19 +443,31 @@ double	sinc (double x)
 
 
 template <class T, int S, bool L>
-class fnc_ShiftGeneric { public: static T sh (T x) { return (x << S); } };
+class fnc_ShiftGeneric
+{
+public:
+	static_assert (S < int (sizeof (T) * CHAR_BIT), "Shift too large");
+	static T sh (T x) { return (x << S); }
+};
 template <class T, int S>
-class fnc_ShiftGeneric <T, S, false> { public: static T sh (T x) { return (x >> S); } };
+class fnc_ShiftGeneric <T, S, false>
+{
+public:
+	static_assert (S < int (sizeof (T) * CHAR_BIT), "Shift too large");
+	static T sh (T x) { return (x >> S); }
+};
 
 template <class T, int S>
 T	sshift_l (T x)
 {
+	static_assert (std::is_integral <T>::value, "T must be integer");
 	return (fnc_ShiftGeneric <T, (S < 0) ? -S : S, (S > 0)>::sh (x));
 }
 
 template <class T, int S>
 T	sshift_r (T x)
 {
+	static_assert (std::is_integral <T>::value, "T must be integer");
 	return (fnc_ShiftGeneric <T, (S < 0) ? -S : S, (S < 0)>::sh (x));
 }
 
