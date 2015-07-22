@@ -315,59 +315,10 @@ int	ceil_int (double x)
 
 
 
-int	conv_int_fast (float x)
+template <class T>
+int	conv_int_fast (T x)
 {
-	int            p;
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
- #if defined (_MSC_VER)
-
-  #if defined (_WIN64) || defined (__64BIT__) || defined (__amd64__) || defined (__x86_64__)
-
-	p = conv_int_fast (double (x));
-
-  #else
-
-	__asm
-	{
-		fld            x;
-		fistp          p;
-	}
-
-  #endif
-
- #elif defined (__GNUC__)
-
-	asm (
-		"flds				%[x]		\n"
-		"fistpl			%[v]		\n"
-	:	[v]	"=m"	(p)
-	:	[x]	"m"	(x)
-	:	
-	);
-
- #else
-
-	// Slow...
-	p = int (x);
-
- #endif
-
-#else
-
-	// Slow...
-	p = int (x);
-
-#endif
-
-	return (p);
-}
-
-
-
-int	conv_int_fast (double x)
-{
 	int            p;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
