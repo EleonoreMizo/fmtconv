@@ -372,6 +372,43 @@ int	conv_int_fast (T x)
 
 
 
+template <class T>
+bool	is_null (T val, T eps)
+{
+	static_assert (std::is_floating_point <T>::value, "T must be floating point");
+	assert (eps >= 0);
+
+	return (fabs (val) <= eps);
+}
+
+
+
+template <class T>
+bool	is_eq (T v1, T v2, T eps)
+{
+	static_assert (std::is_floating_point <T>::value, "T must be floating point");
+	assert (eps >= 0);
+
+	return (is_null (v2 - v1, eps));
+}
+
+
+
+template <class T>
+bool	is_eq_rel (T v1, T v2, T tol)
+{
+	static_assert (std::is_floating_point <T>::value, "T must be floating point");
+	assert (tol >= 0);
+
+	const T        v1a = T (fabs (v1));
+	const T        v2a = T (fabs (v2));
+	const T        eps = std::max (v1a, v2a) * tol;
+
+	return (is_eq (v1, v2, eps));
+}
+
+
+
 int	get_prev_pow_2 (uint32_t x)
 {
 	assert (x > 0);
