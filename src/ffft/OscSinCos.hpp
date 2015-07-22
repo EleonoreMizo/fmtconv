@@ -27,7 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include	<cmath>
+#include <cmath>
 
 namespace std { }
 
@@ -84,8 +84,8 @@ typename OscSinCos <T>::DataType	OscSinCos <T>::get_sin () const
 template <class T>
 void	OscSinCos <T>::step ()
 {
-	const DataType	old_cos = _pos_cos;
-	const DataType	old_sin = _pos_sin;
+	const DataType old_cos = _pos_cos;
+	const DataType old_sin = _pos_sin;
 
 	_pos_cos = old_cos * _step_cos - old_sin * _step_sin;
 	_pos_sin = old_cos * _step_sin + old_sin * _step_cos;

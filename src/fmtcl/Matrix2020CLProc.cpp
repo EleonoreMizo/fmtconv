@@ -258,7 +258,7 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_rgb_2_ycbcr ()
 		const int      ofs_grey   = 1 << (SHIFT_INT + RGB_INT_BITS - 1);
 		const double   coef_a_y   = a_y * coef_scale;
 		const double   coef_b_y   = b_y * coef_scale + cst_r;
-		const double	coef_a_c   = a_c * coef_scale;
+		const double   coef_a_c   = a_c * coef_scale;
 		const double   coef_a_cb0 = coef_a_c / _coef_cb_pos;
 		const double   coef_a_cb1 = coef_a_c / _coef_cb_neg;
 		const double   coef_a_cr0 = coef_a_c / _coef_cr_pos;
@@ -373,7 +373,7 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_ycbcr_2_rgb ()
 		const int      cst_r      = 1 << (SHIFT_INT - dif_bits - 1);
 		const double   coef_a_y   = a_y * coef_scale;
 		const double   coef_b_y   = b_y * coef_scale + cst_r;
-		const double	coef_a_c   = a_c * coef_scale;
+		const double   coef_a_c   = a_c * coef_scale;
 		const double   coef_a_cb0 = coef_a_c * _coef_cb_pos;
 		const double   coef_a_cb1 = coef_a_c * _coef_cb_neg;
 		const double   coef_a_cr0 = coef_a_c * _coef_cr_pos;
@@ -998,7 +998,7 @@ T	Matrix2020CLProc::map_lin_to_gam (T v_lin, bool b12_flag)
 {
 	const T        beta  = T ((b12_flag) ?  _beta_b12 :  _beta_low);
 	const T        alpha = T ((b12_flag) ? _alpha_b12 : _alpha_low);
-	const T     	v_gam = T (
+	const T        v_gam = T (
 			  (v_lin <= beta)
 			? v_lin * T (_slope_lin)
 			: alpha * pow (v_lin, T (_gam_pow)) - (alpha - 1)
@@ -1016,7 +1016,7 @@ T	Matrix2020CLProc::map_gam_to_lin (T v_gam, bool b12_flag)
 {
 	const T        beta  = T ((b12_flag) ?  _beta_b12 :  _beta_low);
 	const T        alpha = T ((b12_flag) ? _alpha_b12 : _alpha_low);
-	const T     	v_lin = T (
+	const T        v_lin = T (
 			  (v_gam <= T (beta * _slope_lin))
 			? v_gam * T (1 / _slope_lin)
 			: pow ((v_gam + (alpha - 1)) * (1 / alpha), T (1 / _gam_pow))

@@ -27,7 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include	"ffft/def.h"
+#include "ffft/def.h"
 
 
 
@@ -46,19 +46,19 @@ public:
 
 	typedef	T	DataType;
 
-						OscSinCos ();
+	               OscSinCos ();
 
 	ffft_FORCEINLINE void
-						set_step (double angle_rad);
+	               set_step (double angle_rad);
 
 	ffft_FORCEINLINE DataType
-						get_cos () const;
+	               get_cos () const;
 	ffft_FORCEINLINE DataType
-						get_sin () const;
+	               get_sin () const;
 	ffft_FORCEINLINE void
-						step ();
+	               step ();
 	ffft_FORCEINLINE void
-						clear_buffers ();
+	               clear_buffers ();
 
 
 
@@ -72,10 +72,10 @@ protected:
 
 private:
 
-	DataType			_pos_cos;		// Current phase expressed with sin and cos. [-1 ; 1]
-	DataType			_pos_sin;		// -
-	DataType			_step_cos;		// Phase increment per step, [-1 ; 1]
-	DataType			_step_sin;		// -
+	DataType       _pos_cos;      // Current phase expressed with sin and cos. [-1 ; 1]
+	DataType       _pos_sin;      // -
+	DataType       _step_cos;     // Phase increment per step, [-1 ; 1]
+	DataType       _step_sin;     // -
 
 
 
@@ -83,10 +83,10 @@ private:
 
 private:
 
-						OscSinCos (const OscSinCos &other);
-	OscSinCos &		operator = (const OscSinCos &other);
-	bool				operator == (const OscSinCos &other);
-	bool				operator != (const OscSinCos &other);
+	               OscSinCos (const OscSinCos &other);
+	OscSinCos &    operator = (const OscSinCos &other);
+	bool           operator == (const OscSinCos &other);
+	bool           operator != (const OscSinCos &other);
 
 };	// class OscSinCos
 
@@ -96,7 +96,7 @@ private:
 
 
 
-#include	"ffft/OscSinCos.hpp"
+#include "ffft/OscSinCos.hpp"
 
 
 

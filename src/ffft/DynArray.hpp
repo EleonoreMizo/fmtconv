@@ -27,7 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include	<cassert>
+#include <cassert>
 
 
 
@@ -59,7 +59,7 @@ DynArray <T>::DynArray (long sz)
 	if (sz > 0)
 	{
 		_data_ptr = new DataType [sz];
-		_len = sz;
+		_len      = sz;
 	}
 }
 
@@ -70,7 +70,7 @@ DynArray <T>::~DynArray ()
 {
 	delete [] _data_ptr;
 	_data_ptr = 0;
-	_len = 0;
+	_len      = 0;
 }
 
 
@@ -89,11 +89,11 @@ void	DynArray <T>::resize (long sz)
 	assert (sz >= 0);
 	if (sz > 0)
 	{
-		DataType *		old_data_ptr = _data_ptr;
-		DataType *		tmp_data_ptr = new DataType [sz];
+		DataType *     old_data_ptr = _data_ptr;
+		DataType *     tmp_data_ptr = new DataType [sz];
 
 		_data_ptr = tmp_data_ptr;
-		_len = sz;
+		_len      = sz;
 
 		delete [] old_data_ptr;
 	}

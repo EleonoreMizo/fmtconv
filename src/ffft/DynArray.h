@@ -44,17 +44,17 @@ public:
 
 	typedef	T	DataType;
 
-						DynArray ();
-	explicit			DynArray (long sz);
-						~DynArray ();
+	               DynArray ();
+	explicit       DynArray (long sz);
+	               ~DynArray ();
 
-	inline long		size () const;
-	inline void		resize (long sz);
+	inline long    size () const;
+	inline void    resize (long sz);
 
 	inline const DataType &
-						operator [] (long pos) const;
+	               operator [] (long pos) const;
 	inline DataType &
-						operator [] (long pos);
+	               operator [] (long pos);
 
 
 
@@ -68,8 +68,8 @@ protected:
 
 private:
 
-	DataType *		_data_ptr;
-	long				_len;
+	DataType *     _data_ptr;
+	long           _len;
 
 
 
@@ -77,10 +77,10 @@ private:
 
 private:
 
-						DynArray (const DynArray &other);
-	DynArray &		operator = (const DynArray &other);
-	bool				operator == (const DynArray &other);
-	bool				operator != (const DynArray &other);
+	               DynArray (const DynArray &other);
+	DynArray &     operator = (const DynArray &other);
+	bool           operator == (const DynArray &other);
+	bool           operator != (const DynArray &other);
 
 };	// class DynArray
 
@@ -90,7 +90,7 @@ private:
 
 
 
-#include	"ffft/DynArray.hpp"
+#include "ffft/DynArray.hpp"
 
 
 
