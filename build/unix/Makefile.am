@@ -205,6 +205,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fstb/fnc.cpp \
                         ../../src/fstb/fnc.h \
                         ../../src/fstb/fnc.hpp \
+                        ../../src/fstb/SingleObj.h \
+                        ../../src/fstb/SingleObj.hpp \
                         ../../src/fstb/ToolsSse2.cpp \
                         ../../src/fstb/ToolsSse2.h \
                         ../../src/fstb/ToolsSse2.hpp \

@@ -250,6 +250,8 @@
     <ClInclude Include="fstb\ArrayAlign.h" />
     <ClInclude Include="fstb\ArrayAlign.hpp" />
     <ClInclude Include="fstb\CpuId.h" />
+    <ClInclude Include="fstb\SingleObj.h" />
+    <ClInclude Include="fstb\SingleObj.hpp" />
     <ClInclude Include="fstb\ToolsAvx2.h" />
     <ClInclude Include="fstb\ToolsAvx2.hpp" />
     <ClInclude Include="vsutl\CpuOpt.h" />
