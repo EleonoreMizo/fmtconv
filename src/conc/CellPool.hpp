@@ -25,6 +25,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "conc/AioMax.h"
 #include "conc/AtomicIntOp.h"
 
+#include <type_traits>
+
 #include <cassert>
 
 
@@ -87,7 +89,7 @@ void	CellPool <T>::clear_all ()
 		CellType *     zone_ptr = zone_ptr_ref;
 		if (zone_ptr != 0)
 		{
-			delete [] zone_ptr;
+			dealloc_cells (zone_ptr);
 			zone_ptr_ref = 0;
 		}
 	}
@@ -185,12 +187,12 @@ void	CellPool <T>::allocate_zone (int zone_index, size_t cur_size, AtomicPtr <Ce
 
 	std::lock_guard <std::mutex>  lock (_alloc_mutex);
 
-	CellType *     zone_ptr = new CellType [cur_size];
+	CellType *     zone_ptr = alloc_cells (cur_size);
 
 	if (zone_ptr_ref.cas (zone_ptr, 0) != (CellType *)0)
 	{
 		// CAS has failed, meaning that another thread is allocating this zone.
-		delete [] zone_ptr;
+		dealloc_cells (zone_ptr);
 
 		// Note: because of the mutex, this part shouldn't be accessed.
 	}
@@ -237,6 +239,62 @@ size_t	CellPool <T>::compute_total_size_for_zones (int nbr_zones)
 	}
 
 	return (total_size);
+}
+
+
+
+template <class T>
+typename CellPool <T>::CellType *	CellPool <T>::alloc_cells (size_t n)
+{
+	const size_t   nbr_bytes =
+		sizeof (AliAllo) + (n + 1) * sizeof (CellType);
+	const int      align     = std::alignment_of <CellType>::value;
+	uint8_t *      raw_ptr   = new uint8_t [nbr_bytes];
+	const intptr_t cell_zone =
+		(  reinterpret_cast <intptr_t> (raw_ptr)
+		 + sizeof (AliAllo)
+		 + sizeof (CellType)) & -align;
+	CellType *     cell_ptr  = reinterpret_cast <CellType *> (cell_zone);
+	AliAllo *      info_ptr  = reinterpret_cast <AliAllo *> (cell_zone) - 1;
+
+	info_ptr->_ptr     = raw_ptr;
+	info_ptr->_nbr_elt = n;
+
+	size_t         count = 0;
+	try
+	{
+		for (count = 0; count < n; ++count)
+		{
+			new (cell_ptr + count) CellType;
+		}
+	}
+	catch (...)
+	{
+		for (size_t i = count; i > 0; --count)
+		{
+			(cell_ptr + i - 1)->~CellType ();
+		}
+		delete [] raw_ptr;
+		throw;
+	}
+
+	return (cell_ptr);
+}
+
+
+template <class T>
+void	CellPool <T>::dealloc_cells (CellType *ptr)
+{
+	AliAllo *      info_ptr = reinterpret_cast <AliAllo *> (ptr) - 1;
+	const size_t   n        = info_ptr->_nbr_elt;
+	uint8_t *      raw_ptr  = info_ptr->_ptr;
+
+	for (size_t i = n; i > 0; --i)
+	{
+		(ptr + i - 1)->~CellType ();
+	}
+
+	delete [] raw_ptr;
 }
 
 

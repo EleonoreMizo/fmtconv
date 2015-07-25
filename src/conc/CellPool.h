@@ -36,6 +36,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include <mutex>
 
 #include <cstddef>
+#include <cstdint>
 
 
 
@@ -87,12 +88,22 @@ private:
 	typedef	AtomicInt <int>		CountZones;
 	typedef	Array <AtomicPtr <CellType>, MAX_NBR_ZONES>	ZoneList;
 
+	class AliAllo
+	{
+	public:
+		uint8_t *      _ptr;
+		size_t         _nbr_elt;
+	};
+
 	void           allocate_zone (int zone_index, size_t cur_size, AtomicPtr <CellType> & zone_ptr_ref);
 
 	static inline size_t
 	               compute_grown_size (size_t prev_size);
 	static inline size_t
 	               compute_total_size_for_zones (int nbr_zones);
+	static CellType *
+	               alloc_cells (size_t n);
+	static void    dealloc_cells (CellType *ptr);
 
 	CellStack      _cell_stack;
 	ZoneList       _zone_list;
