@@ -44,6 +44,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "conc/CellPool.h"
 #include "conc/LockFreeStack.h"
 #include "conc/ObjFactoryInterface.h"
+#include "fstb/SingleObj.h"
 
 
 
@@ -94,7 +95,8 @@ private:
 	Factory *      _factory_ptr;     // 0 = not set
 	PtrStack       _stack_free;
 	PtrStack       _stack_all;
-	PtrPool        _obj_cell_pool;
+	fstb::SingleObj <PtrPool>
+	               _obj_cell_pool_ptr;
 
 
 

@@ -50,6 +50,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "conc/AtomicPtrIntPair.h"
 #include "conc/LockFreeCell.h"
+#include "fstb/SingleObj.h"
 
 #include <cstddef>
 
@@ -95,10 +96,17 @@ private:
 
 	typedef	AtomicPtrIntPair <CellType>	SafePointer;
 
-	SafePointer    _head;   // Contains ocount
-	SafePointer    _tail;   // Contains icount
+	class Members	// Must be aligned
+	{
+	public:
+		SafePointer    _head;   // Contains ocount
+		SafePointer    _tail;   // Contains icount
 
-	CellType       _dummy;
+		CellType       _dummy;
+	};
+
+	fstb::SingleObj <Members>
+	               _m_ptr;
 
 
 

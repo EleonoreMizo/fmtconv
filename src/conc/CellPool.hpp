@@ -43,16 +43,17 @@ namespace conc
 template <class T>
 CellPool <T>::CellPool ()
 :	_cell_stack ()
-,	_zone_list ()
-,	_nbr_avail_cells (0)
-,	_nbr_zones (0)
 ,	_alloc_mutex ()
+,	_m_ptr ()
 {
 	static_assert (BASE_SIZE * GROW_RATE_NUM / GROW_RATE_DEN > BASE_SIZE, "");
 
+	_m_ptr->_nbr_avail_cells = 0;
+	_m_ptr->_nbr_zones       = 0;
+
 	for (int zone_index = 0; zone_index < MAX_NBR_ZONES; ++zone_index)
 	{
-		_zone_list [zone_index] = 0;
+		_m_ptr->_zone_list [zone_index] = 0;
 	}
 }
 
@@ -73,9 +74,9 @@ void	CellPool <T>::clear_all ()
 {
 #if !defined (NDEBUG)
 	size_t         nbr_total_cells =
-		compute_total_size_for_zones (_nbr_zones);
+		compute_total_size_for_zones (_m_ptr->_nbr_zones);
 	
-	assert (_nbr_avail_cells == nbr_total_cells);
+	assert (_m_ptr->_nbr_avail_cells == nbr_total_cells);
 #endif
 	
 	while (_cell_stack.pop () != 0)
@@ -83,9 +84,10 @@ void	CellPool <T>::clear_all ()
 		continue;
 	}
 
-	for (int zone_index = 0; zone_index < _nbr_zones; ++zone_index)
+	const int      nbr_zones = _m_ptr->_nbr_zones;
+	for (int zone_index = 0; zone_index < nbr_zones; ++zone_index)
 	{
-		AtomicPtr <CellType> &  zone_ptr_ref = _zone_list [zone_index];
+		AtomicPtr <CellType> &  zone_ptr_ref = _m_ptr->_zone_list [zone_index];
 		CellType *     zone_ptr = zone_ptr_ref;
 		if (zone_ptr != 0)
 		{
@@ -93,8 +95,8 @@ void	CellPool <T>::clear_all ()
 			zone_ptr_ref = 0;
 		}
 	}
-	_nbr_zones = 0;
-	_nbr_avail_cells = 0;
+	_m_ptr->_nbr_zones       = 0;
+	_m_ptr->_nbr_avail_cells = 0;
 }
 
 
@@ -110,7 +112,7 @@ void	CellPool <T>::expand_to (size_t nbr_cells)
 	int            zone_index = 0;
 	while (total_size < nbr_cells && zone_index < MAX_NBR_ZONES)
 	{
-		AtomicPtr <CellType> &  zone_ptr_ref = _zone_list [zone_index];
+		AtomicPtr <CellType> &  zone_ptr_ref = _m_ptr->_zone_list [zone_index];
 		CellType *     zone_ptr = zone_ptr_ref;
 		if (zone_ptr == 0)
 		{
@@ -123,7 +125,7 @@ void	CellPool <T>::expand_to (size_t nbr_cells)
 	}
 
 	AioMax <int>	ftor (zone_index);
-	AtomicIntOp::exec (_nbr_zones, ftor);
+	AtomicIntOp::exec (_m_ptr->_nbr_zones, ftor);
 }
 
 
@@ -134,7 +136,7 @@ typename CellPool <T>::CellType *	CellPool <T>::take_cell (bool autogrow_flag)
 {
 	CellType *     cell_ptr = 0;
 	
-	const int      nbr_zones = _nbr_zones;
+	const int      nbr_zones = _m_ptr->_nbr_zones;
 
 	do
 	{
@@ -150,7 +152,7 @@ typename CellPool <T>::CellType *	CellPool <T>::take_cell (bool autogrow_flag)
 
 	if (cell_ptr != 0)
 	{
-		-- _nbr_avail_cells;
+		-- _m_ptr->_nbr_avail_cells;
 	}
 
 	return (cell_ptr);
@@ -166,7 +168,7 @@ void	CellPool <T>::return_cell (CellType &cell)
 
 	_cell_stack.push (cell);
 
-	++ _nbr_avail_cells;
+	++ _m_ptr->_nbr_avail_cells;
 }
 
 
@@ -205,7 +207,7 @@ void	CellPool <T>::allocate_zone (int zone_index, size_t cur_size, AtomicPtr <Ce
 			CellType &     cell = zone_ptr [pos];
 			_cell_stack.push (cell);
 
-			++ _nbr_avail_cells;
+			++ _m_ptr->_nbr_avail_cells;
 		}
 	}
 }

@@ -8,6 +8,8 @@ Template parameters:
 - T. Contained object. Requires:
 	T::T();
 
+The cell must be aligned because of the AtomicPtr.
+
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to

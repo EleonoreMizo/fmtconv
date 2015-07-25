@@ -37,9 +37,9 @@ namespace conc
 
 template <class T>
 LockFreeStack <T>::LockFreeStack ()
-:	_head_ptr ()
+:	_head_ptr_ptr ()
 {
-	_head_ptr.set (0, 0);
+	_head_ptr_ptr->set (0, 0);
 }
 
 
@@ -53,11 +53,11 @@ void	LockFreeStack <T>::push (CellType &cell)
 	ptrdiff_t      count;
 	do
 	{
-		head_ptr = _head_ptr.get_ptr ();
-		count    = _head_ptr.get_val ();
+		head_ptr = _head_ptr_ptr->get_ptr ();
+		count    = _head_ptr_ptr->get_val ();
 		cell._next_ptr = head_ptr;
 	}
-	while (! _head_ptr.cas2 (&cell, count + 1, head_ptr, count));
+	while (! _head_ptr_ptr->cas2 (&cell, count + 1, head_ptr, count));
 }
 
 
@@ -70,7 +70,7 @@ typename LockFreeStack <T>::CellType *	LockFreeStack <T>::pop ()
 	bool           cont_flag = true;
 	do
 	{
-		cell_ptr = _head_ptr.get_ptr ();
+		cell_ptr = _head_ptr_ptr->get_ptr ();
 
 		if (cell_ptr == 0)
 		{
@@ -79,11 +79,11 @@ typename LockFreeStack <T>::CellType *	LockFreeStack <T>::pop ()
 
 		else
 		{
-			const ptrdiff_t   count = _head_ptr.get_val ();
+			const ptrdiff_t   count = _head_ptr_ptr->get_val ();
 			if (cell_ptr != 0)
 			{
 				CellType *     next_ptr = cell_ptr->_next_ptr;
-				if (_head_ptr.cas2 (next_ptr, count + 1, cell_ptr, count))
+				if (_head_ptr_ptr->cas2 (next_ptr, count + 1, cell_ptr, count))
 				{
 					cell_ptr->_next_ptr = 0;
 					cont_flag = false;

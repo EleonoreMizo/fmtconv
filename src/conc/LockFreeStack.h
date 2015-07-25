@@ -44,6 +44,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "conc/AtomicPtrIntPair.h"
 #include "conc/LockFreeCell.h"
+#include "fstb/SingleObj.h"
 
 
 
@@ -81,8 +82,8 @@ protected:
 
 private:
 
-	AtomicPtrIntPair <CellType>
-	               _head_ptr;
+	fstb::SingleObj <AtomicPtrIntPair <CellType> >
+	               _head_ptr_ptr;
 
 
 

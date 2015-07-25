@@ -32,6 +32,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "conc/AtomicInt.h"
 #include "conc/LockFreeCell.h"
 #include "conc/LockFreeStack.h"
+#include "fstb/SingleObj.h"
 
 #include <mutex>
 
@@ -83,10 +84,18 @@ private:
 	enum {         GROW_RATE_DEN  = 2  };
 	enum {         BASE_SIZE      = 64 };  // Number of cells for the first zone
 
-	typedef	LockFreeStack <T>	CellStack;
-	typedef	AtomicInt <size_t>	CountCells;
-	typedef	AtomicInt <int>		CountZones;
-	typedef	Array <AtomicPtr <CellType>, MAX_NBR_ZONES>	ZoneList;
+	typedef  LockFreeStack <T>    CellStack;
+	typedef  AtomicInt <size_t>   CountCells;
+	typedef  AtomicInt <int>      CountZones;
+	typedef  Array <AtomicPtr <CellType>, MAX_NBR_ZONES>  ZoneList;
+
+	class Members	// These ones must be aligned
+	{
+	public:
+		CountCells     _nbr_avail_cells;
+		CountZones     _nbr_zones;
+		ZoneList       _zone_list;
+	};
 
 	class AliAllo
 	{
@@ -106,10 +115,9 @@ private:
 	static void    dealloc_cells (CellType *ptr);
 
 	CellStack      _cell_stack;
-	ZoneList       _zone_list;
-	CountCells     _nbr_avail_cells;
-	CountZones     _nbr_zones;
 	std::mutex     _alloc_mutex;
+	fstb::SingleObj <Members>
+	               _m_ptr;
 
 
 

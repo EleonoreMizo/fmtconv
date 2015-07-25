@@ -51,9 +51,9 @@ ObjPool <T>::ObjPool ()
 :	_factory_ptr (0)
 ,	_stack_free ()
 ,	_stack_all ()
-,	_obj_cell_pool ()
+,	_obj_cell_pool_ptr ()
 {
-	_obj_cell_pool.expand_to (1024);
+	_obj_cell_pool_ptr->expand_to (1024);
 }
 
 
@@ -136,7 +136,7 @@ T *	ObjPool <T>::take_obj ()
 			bool        ok_flag = false;
 			try
 			{
-				cell_ptr = _obj_cell_pool.take_cell (true);
+				cell_ptr = _obj_cell_pool_ptr->take_cell (true);
 				if (cell_ptr != 0)
 				{
 					cell_ptr->_val = obj_ptr;
@@ -159,7 +159,7 @@ T *	ObjPool <T>::take_obj ()
 	else
 	{
 		obj_ptr = cell_ptr->_val;
-		_obj_cell_pool.return_cell (*cell_ptr);
+		_obj_cell_pool_ptr->return_cell (*cell_ptr);
 	}
 
 	return (obj_ptr);
@@ -189,7 +189,7 @@ void	ObjPool <T>::return_obj (T &obj)
 	PtrCell *      cell_ptr = 0;
 	try
 	{
-		cell_ptr = _obj_cell_pool.take_cell (true);
+		cell_ptr = _obj_cell_pool_ptr->take_cell (true);
 	}
 	catch (...)
 	{
@@ -266,7 +266,7 @@ int	ObjPool <T>::delete_obj_stack (PtrStack &ptr_stack, bool destroy_flag)
 				obj_ptr = 0;
 			}
 
-			_obj_cell_pool.return_cell (*cell_ptr);
+			_obj_cell_pool_ptr->return_cell (*cell_ptr);
 			++ count;
 		}
 	}
