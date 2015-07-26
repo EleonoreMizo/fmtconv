@@ -57,7 +57,6 @@ class AtomicPtrIntPair
 public:
 
 	               AtomicPtrIntPair ();
-	virtual        ~AtomicPtrIntPair () {}
 
 	void           set (T * ptr, ptrdiff_t val);
 	void           get (T * &ptr, ptrdiff_t &val) const;
