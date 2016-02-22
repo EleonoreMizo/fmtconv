@@ -40,8 +40,8 @@ LockFreeQueue <T>::LockFreeQueue ()
 :	_m_ptr ()
 {
 	_m_ptr->_dummy._next_ptr = 0;
-	_m_ptr->_head.set (&_dummy, 0);
-	_m_ptr->_tail.set (&_dummy, 0);
+	_m_ptr->_head.set (&_m_ptr->_dummy, 0);
+	_m_ptr->_tail.set (&_m_ptr->_dummy, 0);
 }
 
 
