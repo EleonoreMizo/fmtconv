@@ -43,9 +43,9 @@ class ErrDifBuf
 
 public:
 
-	enum {         NBR_LINES     = 2 };
-	enum {         MARGIN        = 2 };
-	enum {         MAX_DATA_SIZE = 4 };
+	static const int  NBR_LINES     = 2;
+	static const int  MARGIN        = 2;
+	static const int  MAX_DATA_SIZE = 4;
 
 	explicit       ErrDifBuf (long width);
 	virtual        ~ErrDifBuf ();
@@ -83,11 +83,11 @@ private:
 
 private:
 
-	               ErrDifBuf ();
-	               ErrDifBuf (const ErrDifBuf &other);
-	ErrDifBuf &    operator = (const ErrDifBuf &other);
-	bool           operator == (const ErrDifBuf &other) const;
-	bool           operator != (const ErrDifBuf &other) const;
+	               ErrDifBuf ()                               = delete;
+	               ErrDifBuf (const ErrDifBuf &other)         = delete;
+	ErrDifBuf &    operator = (const ErrDifBuf &other)        = delete;
+	bool           operator == (const ErrDifBuf &other) const = delete;
+	bool           operator != (const ErrDifBuf &other) const = delete;
 
 };	// class ErrDifBuf
 

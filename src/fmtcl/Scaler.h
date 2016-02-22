@@ -109,12 +109,12 @@ public:
 
 	typedef	Scaler	ThisType;
 
-	enum {         SRC_ALIGN	= 16 };	// Pixels
+	static const int  SRC_ALIGN   = 16; // Pixels
 
 #if defined (fmtcl_Scaler_SSE2_16BITS)
-	enum {         SHIFT_INT   = 14 };  // Number of bits for the fractional part
+	static const int  SHIFT_INT   = 14; // Number of bits for the fractional part
 #else
-	enum {         SHIFT_INT   = 12 };  // Number of bits for the fractional part
+	static const int  SHIFT_INT   = 12; // Number of bits for the fractional part
 #endif   // fmtcl_Scaler_SSE2_16BITS
 
 	explicit       Scaler (int src_height, int dst_height, double win_top, double win_height, ContFirInterface &kernel_fnc, double kernel_scale, bool norm_flag, double norm_val, double center_pos_src, double center_pos_dst, double gain, double add_cst, bool int_flag, bool sse2_flag, bool avx2_flag);
@@ -167,7 +167,7 @@ private:
 	class KernelInfo
 	{
 	public:
-		int            _start_line;	// Y position of the first line of the kernel
+		int            _start_line;	   // Y position of the first line of the kernel
 		int            _coef_index;
 		int            _kernel_size;
 		bool           _copy_flt_flag;
@@ -210,7 +210,7 @@ private:
 	double         _kernel_scale;
 	ContFirInterface &
 	               _kernel_fnc;
-	bool           _can_int_flag;    // Indicates that integer processing is allowed.
+	bool           _can_int_flag;       // Indicates that integer processing is allowed.
 	bool           _norm_flag;
 	double         _norm_val;
 	double         _center_pos_src;
@@ -220,11 +220,11 @@ private:
 	int32_t        _add_cst_int;
 	int            _fir_len;
 
-	std::vector <KernelInfo>			// For each destination line
+	std::vector <KernelInfo>            // For each destination line
 	               _kernel_info_arr;
-	std::vector <float, fstb::AllocAlign <float, 16> >	// All kernel coefs, for all lines.
-	               _coef_flt_arr;    // Beware, kernels may not be contiguous.
-	CoefArrInt     _coef_int_arr;    // Same here
+	std::vector <float, fstb::AllocAlign <float, 16> > // All kernel coefs, for all lines.
+	               _coef_flt_arr;       // Beware, kernels may not be contiguous.
+	CoefArrInt     _coef_int_arr;       // Same here
 
 #define fmtcl_Scaler_FNCPTR_F(DT, ST, DE, SE, FN) \
 	void (ThisType::* \
@@ -246,11 +246,11 @@ private:
 
 private:
 
-	               Scaler ();
-	               Scaler (const Scaler &other);
-	Scaler &       operator = (const Scaler &other);
-	bool           operator == (const Scaler &other) const;
-	bool           operator != (const Scaler &other) const;
+	               Scaler ()                               = delete;
+	               Scaler (const Scaler &other)            = delete;
+	Scaler &       operator = (const Scaler &other)        = delete;
+	bool           operator == (const Scaler &other) const = delete;
+	bool           operator != (const Scaler &other) const = delete;
 
 };	// class Scaler
 

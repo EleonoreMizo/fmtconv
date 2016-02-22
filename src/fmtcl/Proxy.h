@@ -112,12 +112,12 @@ private:
 
 private:
 
-	               Proxy ();
-	               Proxy (const Proxy &other);
+	               Proxy ()                               = delete;
+	               Proxy (const Proxy &other)             = delete;
 	virtual        ~Proxy () {}
-	Proxy &        operator = (const Proxy &other);
-	bool           operator == (const Proxy &other) const;
-	bool           operator != (const Proxy &other) const;
+	Proxy &        operator = (const Proxy &other)        = delete;
+	bool           operator == (const Proxy &other) const = delete;
+	bool           operator != (const Proxy &other) const = delete;
 
 };	// class Proxy
 

@@ -54,26 +54,25 @@ public:
 		Range_NBR_ELT
 	};
 
-	               ConvStep ();
-	               ConvStep (const ConvStep &other);
-	virtual        ~ConvStep () {}
+	               ConvStep ()                        = default;
+	               ConvStep (const ConvStep &other)   = default;
+	virtual        ~ConvStep ()                       = default;
+	ConvStep &     operator = (const ConvStep &other) = default;
 
-	ConvStep &     operator = (const ConvStep &other);
+	int            _col_fam      = -1;  // ::VSColorFamily, negative if unspecified
+	Range          _range        = Range_UNDEF;        // Data range, negative if unspecified
+	int            _css_h        = -1;  // Log2 of the chroma subsampling, negative if unspecified
+	int            _css_v        = -1;  // Same, vertically
+	fmtcl::ChromaPlacement              // Chroma placement, negative if unspecified
+	               _cplace       = fmtcl::ChromaPlacement_UNDEF;
+	fmtcl::TransCurve                   // Transfer curve, negative if unspecified
+	                _tcurve      = fmtcl::TransCurve_UNDEF;
+	double         _gammac       = -1;  // Additional gamma correction, negative if unspecified
 
-	int            _col_fam;      // ::VSColorFamily, negative if unspecified
-	Range          _range;        // Data range, negative if unspecified
-	int            _css_h;        // Log2 of the chroma subsampling, negative if unspecified
-	int            _css_v;        // Same, vertically
-	fmtcl::ChromaPlacement        // Chroma placement, negative if unspecified
-	               _cplace;
-	fmtcl::TransCurve
-	                _tcurve;      // Transfer curve, negative if unspecified
-	double         _gammac;       // Additional gamma correction, negative if unspecified
+	bool           _resized_flag = false;  // Indicates if all the planes of the frame are now resized to their final resolution
 
-	bool           _resized_flag; // Indicates if all the planes of the frame are now resized to their final resolution
-
-	int            _sample_type;  // ::VSSampleType (int or float), negative if unspecified
-	int            _bitdepth;     // Pixel bitdepth, negative if unspecified
+	int            _sample_type  = -1;  // ::VSSampleType (int or float), negative if unspecified
+	int            _bitdepth     = -1;  // Pixel bitdepth, negative if unspecified
 
 
 
@@ -93,8 +92,8 @@ private:
 
 private:
 
-	bool           operator == (const ConvStep &other) const;
-	bool           operator != (const ConvStep &other) const;
+	bool           operator == (const ConvStep &other) const = delete;
+	bool           operator != (const ConvStep &other) const = delete;
 
 };	// class ConvStep
 

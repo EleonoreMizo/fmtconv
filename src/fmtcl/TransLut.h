@@ -52,19 +52,19 @@ public:
 
 	typedef	TransLut	ThisType;
 
-	enum {         LINLUT_RES_L2  = 16   }; // log2 of the linear table resolution (size of a unity segment)
-	enum {         LINLUT_MIN_F   = -1   }; // Min value for float LUTs
-	enum {         LINLUT_MAX_F   = 2    }; // Max value for float LUTs
+	static const int  LINLUT_RES_L2  = 16; // log2 of the linear table resolution (size of a unity segment)
+	static const int  LINLUT_MIN_F   = -1; // Min value for float LUTs
+	static const int  LINLUT_MAX_F   = 2;  // Max value for float LUTs
 
-	enum {         LINLUT_SIZE_F  = ((LINLUT_MAX_F - LINLUT_MIN_F) << LINLUT_RES_L2) + 1 };
+	static const int  LINLUT_SIZE_F  = ((LINLUT_MAX_F - LINLUT_MIN_F) << LINLUT_RES_L2) + 1;
 
 	// Log LUT are only for floating point input
-	enum {         LOGLUT_MIN_L2  = -32  }; // log2(x) for the first index in a log table (negative)
-	enum {         LOGLUT_MAX_L2  = 16   }; // log2(x) for the last index in a log table (positive)
-	enum {         LOGLUT_RES_L2  = 10   }; // log2 of the log table resolution (size of each [x ; 2*x[ segment).
+	static const int  LOGLUT_MIN_L2  = -32; // log2(x) for the first index in a log table (negative)
+	static const int  LOGLUT_MAX_L2  = 16;  // log2(x) for the last index in a log table (positive)
+	static const int  LOGLUT_RES_L2  = 10;  // log2 of the log table resolution (size of each [x ; 2*x[ segment).
 
-	enum {         LOGLUT_HSIZE   = ((LOGLUT_MAX_L2 - LOGLUT_MIN_L2) << LOGLUT_RES_L2) + 1 }; // Table made of half-open segments (and whitout x=0) + 1 more value for LOGLUT_MAX, closing the last segment.
-	enum {         LOGLUT_SIZE    = 2 * LOGLUT_HSIZE + 1 };   // Negative + 0 + positive
+	static const int  LOGLUT_HSIZE   = ((LOGLUT_MAX_L2 - LOGLUT_MIN_L2) << LOGLUT_RES_L2) + 1; // Table made of half-open segments (and whitout x=0) + 1 more value for LOGLUT_MAX, closing the last segment.
+	static const int  LOGLUT_SIZE    = 2 * LOGLUT_HSIZE + 1;   // Negative + 0 + positive
 
 	union FloatIntMix
 	{
@@ -167,11 +167,11 @@ private:
 
 private:
 
-	               TransLut ();
-	               TransLut (const TransLut &other);
-	TransLut &     operator = (const TransLut &other);
-	bool           operator == (const TransLut &other) const;
-	bool           operator != (const TransLut &other) const;
+	               TransLut ()                               = delete;
+	               TransLut (const TransLut &other)          = delete;
+	TransLut &     operator = (const TransLut &other)        = delete;
+	bool           operator == (const TransLut &other) const = delete;
+	bool           operator != (const TransLut &other) const = delete;
 
 };	// class TransLut
 

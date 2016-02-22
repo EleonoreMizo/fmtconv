@@ -71,12 +71,12 @@ private:
 
 private:
 
-	               TransOpFilmStream ();
-	               TransOpFilmStream (const TransOpFilmStream &other);
+	               TransOpFilmStream ()                               = delete;
+	               TransOpFilmStream (const TransOpFilmStream &other) = delete;
 	TransOpFilmStream &
-	               operator = (const TransOpFilmStream &other);
-	bool           operator == (const TransOpFilmStream &other) const;
-	bool           operator != (const TransOpFilmStream &other) const;
+	               operator = (const TransOpFilmStream &other)        = delete;
+	bool           operator == (const TransOpFilmStream &other) const = delete;
+	bool           operator != (const TransOpFilmStream &other) const = delete;
 
 };	// class TransOpFilmStream
 

@@ -81,10 +81,10 @@ private:
 		Col_B = 2
 	};
 
-	enum {         NBR_PLANES    = 3  };
-	enum {         SHIFT_INT     = 12 };   // Number of bits for the fractional part
-	enum {         VECT_LEN      = 16 / sizeof (int16_t) };
-	enum {         RGB_INT_BITS  = 16 };
+	static const int  NBR_PLANES    = 3;
+	static const int  SHIFT_INT     = 12;  // Number of bits for the fractional part
+	static const int  VECT_LEN      = 16 / sizeof (int16_t);
+	static const int  RGB_INT_BITS  = 16;
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
@@ -108,11 +108,11 @@ private:
 
 private:
 
-	               Matrix2020CL ();
-	               Matrix2020CL (const Matrix2020CL &other);
-	Matrix2020CL & operator = (const Matrix2020CL &other);
-	bool           operator == (const Matrix2020CL &other) const;
-	bool           operator != (const Matrix2020CL &other) const;
+	               Matrix2020CL ()                                = delete;
+	               Matrix2020CL (const Matrix2020CL &other)       = delete;
+	Matrix2020CL & operator = (const Matrix2020CL &other)         = delete;
+	bool           operator == (const Matrix2020CL &other) const  = delete;
+	bool           operator != (const Matrix2020CL &other) const  = delete;
 
 };	// class Matrix2020CL
 

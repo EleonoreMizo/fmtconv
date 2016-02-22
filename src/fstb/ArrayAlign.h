@@ -53,8 +53,8 @@ public:
 
 	typedef	T	Element;
 
-	enum {         NBR_ELT   = LEN };
-	enum {         ALIGNMENT = AL  };
+	static const int  NBR_ELT   = LEN;
+	static const int  ALIGNMENT = AL;
 
 	               ArrayAlign ();
 	               ArrayAlign (const ArrayAlign &other);
@@ -86,7 +86,7 @@ protected:
 
 private:
 
-	enum {         ELT_SIZE_BYTE = sizeof (Element) * CHAR_BIT / 8	};
+	static const int  ELT_SIZE_BYTE = sizeof (Element) * CHAR_BIT / 8;
 
 	uint8_t        _data [NBR_ELT * ELT_SIZE_BYTE + ALIGNMENT - 1];
 	Element *      _data_ptr;
@@ -97,8 +97,8 @@ private:
 
 private:
 
-	bool           operator == (const ArrayAlign &other) const;
-	bool           operator != (const ArrayAlign &other) const;
+	bool           operator == (const ArrayAlign &other) const = delete;
+	bool           operator != (const ArrayAlign &other) const = delete;
 
 };	// class ArrayAlign
 

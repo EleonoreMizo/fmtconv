@@ -43,7 +43,7 @@ class Mat4
 
 public:
 
-	enum {         VECT_SIZE = 4 };
+	static const int  VECT_SIZE = 4;
 
 	enum Preset
 	{
@@ -55,13 +55,13 @@ public:
 
 	typedef conc::Array <double, VECT_SIZE> Row4;
 
-	inline         Mat4 ();
+	inline         Mat4 ()                        = default;
 	inline explicit
 	               Mat4 (double filler, Preset preset = Preset_SOLID);
 	inline         Mat4 (const double content [4] [4]);
-	inline         Mat4 (const Mat4 &other);
+	inline         Mat4 (const Mat4 &other)       = default;
 	virtual        ~Mat4 () {}
-	inline Mat4 &  operator = (const Mat4 &other);
+	inline Mat4 &  operator = (const Mat4 &other) = default;
 
 	inline bool    operator == (const Mat4 &other) const;
 	inline bool    operator != (const Mat4 &other) const;

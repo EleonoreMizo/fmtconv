@@ -60,7 +60,7 @@ class Resample
 public:
 
 	explicit       Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi);
-	virtual        ~Resample () {}
+	virtual        ~Resample () = default;
 
 	// vsutl::FilterBase
 	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
@@ -86,7 +86,7 @@ protected:
 
 private:
 
-	enum {         MAX_NBR_PLANES = 3 };
+	static const int  MAX_NBR_PLANES = 3;
 
 	enum InterlacingParam
 	{
@@ -222,11 +222,11 @@ private:
 
 private:
 
-	               Resample ();
-	               Resample (const Resample &other);
-	Resample &     operator = (const Resample &other);
-	bool           operator == (const Resample &other) const;
-	bool           operator != (const Resample &other) const;
+	               Resample ()                               = delete;
+	               Resample (const Resample &other)          = delete;
+	Resample &     operator = (const Resample &other)        = delete;
+	bool           operator == (const Resample &other) const = delete;
+	bool           operator != (const Resample &other) const = delete;
 
 };	// class Resample
 

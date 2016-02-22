@@ -86,11 +86,11 @@ private:
 
 private:
 
-	               TransOpLogC ();
-	               TransOpLogC (const TransOpLogC &other);
-	TransOpLogC &  operator = (const TransOpLogC &other);
-	bool           operator == (const TransOpLogC &other) const;
-	bool           operator != (const TransOpLogC &other) const;
+	               TransOpLogC ()                               = delete;
+	               TransOpLogC (const TransOpLogC &other)       = delete;
+	TransOpLogC &  operator = (const TransOpLogC &other)        = delete;
+	bool           operator == (const TransOpLogC &other) const = delete;
+	bool           operator != (const TransOpLogC &other) const = delete;
 
 };	// class TransOpLogC
 

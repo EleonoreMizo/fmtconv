@@ -142,12 +142,12 @@ private:
 
 private:
 
-	               ToolsAvx2 ();
-	               ToolsAvx2 (const ToolsAvx2 &other);
-	virtual        ~ToolsAvx2 () {}
-	ToolsAvx2 &    operator = (const ToolsAvx2 &other);
-	bool           operator == (const ToolsAvx2 &other) const;
-	bool           operator != (const ToolsAvx2 &other) const;
+	               ToolsAvx2 ()                               = delete;
+	               ToolsAvx2 (const ToolsAvx2 &other)         = delete;
+	virtual        ~ToolsAvx2 ()                              = delete;
+	ToolsAvx2 &    operator = (const ToolsAvx2 &other)        = delete;
+	bool           operator == (const ToolsAvx2 &other) const = delete;
+	bool           operator != (const ToolsAvx2 &other) const = delete;
 
 };	// class ToolsAvx2
 

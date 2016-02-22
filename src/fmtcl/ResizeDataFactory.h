@@ -74,12 +74,12 @@ private:
 
 private:
 
-	               ResizeDataFactory ();
-	               ResizeDataFactory (const ResizeDataFactory &other);
+	               ResizeDataFactory ()                               = delete;
+	               ResizeDataFactory (const ResizeDataFactory &other) = delete;
 	ResizeDataFactory &
-	               operator = (const ResizeDataFactory &other);
-	bool           operator == (const ResizeDataFactory &other) const;
-	bool           operator != (const ResizeDataFactory &other) const;
+	               operator = (const ResizeDataFactory &other)        = delete;
+	bool           operator == (const ResizeDataFactory &other) const = delete;
+	bool           operator != (const ResizeDataFactory &other) const = delete;
 
 };	// class ResizeDataFactory
 

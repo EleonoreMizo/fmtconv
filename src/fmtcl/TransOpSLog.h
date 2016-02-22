@@ -70,11 +70,11 @@ private:
 
 private:
 
-	               TransOpSLog ();
-	               TransOpSLog (const TransOpSLog &other);
-	TransOpSLog &  operator = (const TransOpSLog &other);
-	bool           operator == (const TransOpSLog &other) const;
-	bool           operator != (const TransOpSLog &other) const;
+	               TransOpSLog ()                               = delete;
+	               TransOpSLog (const TransOpSLog &other)       = delete;
+	TransOpSLog &  operator = (const TransOpSLog &other)        = delete;
+	bool           operator == (const TransOpSLog &other) const = delete;
+	bool           operator != (const TransOpSLog &other) const = delete;
 
 };	// class TransOpSLog
 

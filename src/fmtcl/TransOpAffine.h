@@ -71,11 +71,11 @@ private:
 
 private:
 
-	               TransOpAffine ();
-	               TransOpAffine (const TransOpAffine &other);
-	TransOpAffine& operator = (const TransOpAffine &other);
-	bool           operator == (const TransOpAffine &other) const;
-	bool           operator != (const TransOpAffine &other) const;
+	               TransOpAffine ()                               = delete;
+	               TransOpAffine (const TransOpAffine &other)     = delete;
+	TransOpAffine& operator = (const TransOpAffine &other)        = delete;
+	bool           operator == (const TransOpAffine &other) const = delete;
+	bool           operator != (const TransOpAffine &other) const = delete;
 
 };	// class TransOpAffine
 

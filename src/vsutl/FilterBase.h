@@ -47,7 +47,7 @@ class FilterBase
 public:
 
 	explicit       FilterBase (const ::VSAPI &vsapi, const char name_0 [], ::VSFilterMode filter_mode, int /* ::NodeFlags */ flags);
-	virtual        ~FilterBase () {}
+	virtual        ~FilterBase () = default;
 
 	const std::string &
 	               use_filter_name () const;
@@ -117,11 +117,11 @@ private:
 
 private:
 
-	               FilterBase ();
-	               FilterBase (const FilterBase &other);
-	FilterBase &   operator = (const FilterBase &other);
-	bool           operator == (const FilterBase &other) const;
-	bool           operator != (const FilterBase &other) const;
+	               FilterBase ()                               = delete;
+	               FilterBase (const FilterBase &other)        = delete;
+	FilterBase &   operator = (const FilterBase &other)        = delete;
+	bool           operator == (const FilterBase &other) const = delete;
+	bool           operator != (const FilterBase &other) const = delete;
 
 };	// class FilterBase
 

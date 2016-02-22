@@ -64,7 +64,7 @@ public:
 		Err_INVALID_FORMAT_COMBINATION = -1000
 	};
 
-	enum {         NBR_PLANES = 3  };
+	static const int   NBR_PLANES = 3;
 
 	explicit        Matrix2020CLProc (bool sse2_flag, bool avx2_flag);
 	virtual        ~Matrix2020CLProc () {}
@@ -95,9 +95,9 @@ private:
 		Col_B = 2
 	};
 
-	enum {         SHIFT_INT     =   12 };   // Number of bits for the fractional part
-	enum {         RGB_INT_BITS  =   16 };
-	enum {         BUF_LEN       = 2048 };
+	static const int  SHIFT_INT     =   12;   // Number of bits for the fractional part
+	static const int  RGB_INT_BITS  =   16;
+	static const int  BUF_LEN       = 2048;
 
 	typedef float FltBuf [BUF_LEN];
 	typedef fstb::ArrayAlign <FltBuf, 3, 32> BufAlign;
@@ -190,12 +190,12 @@ private:
 
 private:
 
-	               Matrix2020CLProc ();
-	               Matrix2020CLProc (const Matrix2020CLProc &other);
+	               Matrix2020CLProc ()                               = delete;
+	               Matrix2020CLProc (const Matrix2020CLProc &other)  = delete;
 	Matrix2020CLProc &
-	               operator = (const Matrix2020CLProc &other);
-	bool           operator == (const Matrix2020CLProc &other) const;
-	bool           operator != (const Matrix2020CLProc &other) const;
+	               operator = (const Matrix2020CLProc &other)        = delete;
+	bool           operator == (const Matrix2020CLProc &other) const = delete;
+	bool           operator != (const Matrix2020CLProc &other) const = delete;
 
 };	// class Matrix2020CLProc
 

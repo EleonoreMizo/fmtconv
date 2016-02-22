@@ -73,7 +73,7 @@ public:
 	typedef	LockFreeCell <T>	CellType;
 
 	               LockFreeQueue ();
-	virtual        ~LockFreeQueue () {}
+	virtual        ~LockFreeQueue () = default;
 
 	void           enqueue (CellType &cell);
 	CellType *     dequeue ();
@@ -92,7 +92,7 @@ private:
 
 	typedef	void *	InternalType;
 
-	enum {         SL2 = (sizeof (InternalType) == 8) ? 4 : 3 };
+	static const int  SL2 = (sizeof (InternalType) == 8) ? 4 : 3;
 
 	typedef	AtomicPtrIntPair <CellType>	SafePointer;
 
@@ -114,11 +114,11 @@ private:
 
 private:
 
-	               LockFreeQueue (const LockFreeQueue <T> &other);
+	               LockFreeQueue (const LockFreeQueue <T> &other)     = delete;
 	LockFreeQueue <T> &
-	               operator = (const LockFreeQueue <T> &other);
-	bool           operator == (const LockFreeQueue <T> &other) const;
-	bool           operator != (const LockFreeQueue <T> &other) const;
+	               operator = (const LockFreeQueue <T> &other)        = delete;
+	bool           operator == (const LockFreeQueue <T> &other) const = delete;
+	bool           operator != (const LockFreeQueue <T> &other) const = delete;
 
 };	// class LockFreeQueue
 

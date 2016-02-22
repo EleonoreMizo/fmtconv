@@ -65,7 +65,7 @@ public:
 	typedef	LockFreeCell <T>	CellType;
 
 	               LockFreeStack ();
-	virtual        ~LockFreeStack () {}
+	virtual        ~LockFreeStack () = default;
 
 	void           push (CellType &cell);
 	CellType *     pop ();
@@ -91,11 +91,11 @@ private:
 
 private:
 
-	               LockFreeStack (const LockFreeStack <T> &other);
+	               LockFreeStack (const LockFreeStack <T> &other)     = delete;
 	LockFreeStack <T> &
-	               operator = (const LockFreeStack <T> &other);
-	bool           operator == (const LockFreeStack <T> &other) const;
-	bool           operator != (const LockFreeStack <T> &other) const;
+	               operator = (const LockFreeStack <T> &other)        = delete;
+	bool           operator == (const LockFreeStack <T> &other) const = delete;
+	bool           operator != (const LockFreeStack <T> &other) const = delete;
 
 };	// class LockFreeStack
 

@@ -44,7 +44,7 @@ class TransOpBypass
 
 public:
 
-	               TransOpBypass () {}
+	               TransOpBypass () = default;
 	virtual        ~TransOpBypass () {}
 
 	// TransOpInterface
@@ -68,10 +68,10 @@ private:
 
 private:
 
-	               TransOpBypass (const TransOpBypass &other);
-	TransOpBypass& operator = (const TransOpBypass &other);
-	bool           operator == (const TransOpBypass &other) const;
-	bool           operator != (const TransOpBypass &other) const;
+	               TransOpBypass (const TransOpBypass &other)     = delete;
+	TransOpBypass& operator = (const TransOpBypass &other)        = delete;
+	bool           operator == (const TransOpBypass &other) const = delete;
+	bool           operator != (const TransOpBypass &other) const = delete;
 
 };	// class TransOpBypass
 

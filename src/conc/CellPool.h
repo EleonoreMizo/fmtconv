@@ -79,10 +79,10 @@ protected:
 
 private:
 
-	enum {         MAX_NBR_ZONES  = 64 };
-	enum {         GROW_RATE_NUM  = 3  };
-	enum {         GROW_RATE_DEN  = 2  };
-	enum {         BASE_SIZE      = 64 };  // Number of cells for the first zone
+	static const int  MAX_NBR_ZONES  = 64;
+	static const int  GROW_RATE_NUM  = 3;
+	static const int  GROW_RATE_DEN  = 2;
+	static const int  BASE_SIZE      = 64; // Number of cells for the first zone
 
 	typedef  LockFreeStack <T>    CellStack;
 	typedef  AtomicInt <size_t>   CountCells;
@@ -125,10 +125,10 @@ private:
 
 private:
 
-	               CellPool (const CellPool <T> &other);
-	CellPool <T> & operator = (const CellPool <T> &other);
-	bool           operator == (const CellPool <T> &other) const;
-	bool           operator != (const CellPool <T> &other) const;
+	               CellPool (const CellPool <T> &other)          = delete;
+	CellPool <T> & operator = (const CellPool <T> &other)        = delete;
+	bool           operator == (const CellPool <T> &other) const = delete;
+	bool           operator != (const CellPool <T> &other) const = delete;
 
 };	// class CellPool
 

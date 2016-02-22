@@ -95,9 +95,9 @@ private:
 		PassType_NBR_ELT
 	};
 
-	enum {         MAX_NBR_PASSES = 4               }; // 2 * (transpose + resize)
-	enum {         BUF_SIZE       = 65536           }; // Number of pixels (float or int16_t)
-	enum {         MAX_BUF_SIZE   = BUF_SIZE * 1024 }; // Number of pixels (float or int16_t)
+	static const int  MAX_NBR_PASSES = 4;                 // 2 * (transpose + resize)
+	static const int  BUF_SIZE       = 65536;             // Number of pixels (float or int16_t)
+	static const int  MAX_BUF_SIZE   = BUF_SIZE * 1024;   // Number of pixels (float or int16_t)
 
 	class TaskRszGlobal
 	{
@@ -210,11 +210,11 @@ private:
 
 private:
 
-	               FilterResize ();
-	               FilterResize (const FilterResize &other);
-	FilterResize & operator = (const FilterResize &other);
-	bool           operator == (const FilterResize &other) const;
-	bool           operator != (const FilterResize &other) const;
+	               FilterResize ()                               = delete;
+	               FilterResize (const FilterResize &other)      = delete;
+	FilterResize & operator = (const FilterResize &other)        = delete;
+	bool           operator == (const FilterResize &other) const = delete;
+	bool           operator != (const FilterResize &other) const = delete;
 
 };	// class FilterResize
 

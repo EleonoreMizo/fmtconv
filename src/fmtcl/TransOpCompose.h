@@ -77,12 +77,12 @@ private:
 
 private:
 
-	               TransOpCompose ();
-	               TransOpCompose (const TransOpCompose &other);
+	               TransOpCompose ()                               = delete;
+	               TransOpCompose (const TransOpCompose &other)    = delete;
 	TransOpCompose &
-	               operator = (const TransOpCompose &other);
-	bool           operator == (const TransOpCompose &other) const;
-	bool           operator != (const TransOpCompose &other) const;
+	               operator = (const TransOpCompose &other)        = delete;
+	bool           operator == (const TransOpCompose &other) const = delete;
+	bool           operator != (const TransOpCompose &other) const = delete;
 
 };	// class TransOpCompose
 

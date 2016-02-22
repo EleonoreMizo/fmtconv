@@ -77,12 +77,12 @@ private:
 
 private:
 
-	               Stack16ToNative ();
-	               Stack16ToNative (const Stack16ToNative &other);
+	               Stack16ToNative ()                               = delete;
+	               Stack16ToNative (const Stack16ToNative &other)   = delete;
 	Stack16ToNative &
-	               operator = (const Stack16ToNative &other);
-	bool           operator == (const Stack16ToNative &other) const;
-	bool           operator != (const Stack16ToNative &other) const;
+	               operator = (const Stack16ToNative &other)        = delete;
+	bool           operator == (const Stack16ToNative &other) const = delete;
+	bool           operator != (const Stack16ToNative &other) const = delete;
 
 };	// class Stack16ToNative
 

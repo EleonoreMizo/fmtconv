@@ -60,8 +60,8 @@ public:
 		Err_INVALID_FORMAT_COMBINATION
 	};
 
-	enum {         NBR_PLANES = 3  };
-	enum {         MAT_SIZE   = NBR_PLANES + 1 };
+	static const int  NBR_PLANES = 3;
+	static const int  MAT_SIZE   = NBR_PLANES + 1;
 
 	explicit       MatrixProc (bool sse_flag, bool sse2_flag, bool avx_flag, bool avx2_flag);
 	virtual        ~MatrixProc () {}
@@ -85,7 +85,7 @@ protected:
 
 private:
 
-	enum {         SHIFT_INT     = 12 };   // Number of bits for the fractional part
+	static const int  SHIFT_INT = 12;   // Number of bits for the fractional part
 
 	void           set_matrix_flt (const Mat4 &m, int plane_out);
 	Err            set_matrix_int (const Mat4 &m, int plane_out, int src_bits, int dst_bits);
@@ -122,7 +122,7 @@ private:
 	bool           _avx_flag;
 	bool           _avx2_flag;
 
-	void (ThisType::*             // 0 = not set
+	void (ThisType::*                   // 0 = not set
 	               _proc_ptr) (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
 
 	std::vector <float>
@@ -131,7 +131,7 @@ private:
 	// Integer coefficients are all scaled with SHIFT_INT.
 	// The additive coefficient contains the rounding constant too.
 	std::vector <int>
-						_coef_int_arr;
+	               _coef_int_arr;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	// Same as integer, excepted:
@@ -148,11 +148,11 @@ private:
 
 private:
 
-	               MatrixProc ();
-	               MatrixProc (const MatrixProc &other);
-	MatrixProc &   operator = (const MatrixProc &other);
-	bool           operator == (const MatrixProc &other) const;
-	bool           operator != (const MatrixProc &other) const;
+	               MatrixProc ()                               = delete;
+	               MatrixProc (const MatrixProc &other)        = delete;
+	MatrixProc &   operator = (const MatrixProc &other)        = delete;
+	bool           operator == (const MatrixProc &other) const = delete;
+	bool           operator != (const MatrixProc &other) const = delete;
 
 };	// class MatrixProc
 

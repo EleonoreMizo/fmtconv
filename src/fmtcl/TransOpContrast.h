@@ -72,12 +72,12 @@ private:
 
 private:
 
-	               TransOpContrast ();
-	               TransOpContrast (const TransOpContrast &other);
+	               TransOpContrast ()                               = delete;
+	               TransOpContrast (const TransOpContrast &other)   = delete;
 	TransOpContrast &
-	               operator = (const TransOpContrast &other);
-	bool           operator == (const TransOpContrast &other) const;
-	bool           operator != (const TransOpContrast &other) const;
+	               operator = (const TransOpContrast &other)        = delete;
+	bool           operator == (const TransOpContrast &other) const = delete;
+	bool           operator != (const TransOpContrast &other) const = delete;
 
 };	// class TransOpContrast
 

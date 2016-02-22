@@ -90,11 +90,11 @@ private:
 
 private:
 
-	               TransOpLinPow ();
-	               TransOpLinPow (const TransOpLinPow &other);
-	TransOpLinPow& operator = (const TransOpLinPow &other);
-	bool           operator == (const TransOpLinPow &other) const;
-	bool           operator != (const TransOpLinPow &other) const;
+	               TransOpLinPow ()                               = delete;
+	               TransOpLinPow (const TransOpLinPow &other)     = delete;
+	TransOpLinPow& operator = (const TransOpLinPow &other)        = delete;
+	bool           operator == (const TransOpLinPow &other) const = delete;
+	bool           operator != (const TransOpLinPow &other) const = delete;
 
 };	// class TransOpLinPow
 

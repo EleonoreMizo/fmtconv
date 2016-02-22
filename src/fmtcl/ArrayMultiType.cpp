@@ -39,16 +39,6 @@ namespace fmtcl
 
 
 
-ArrayMultiType::ArrayMultiType ()
-:	_arr ()
-,	_length (0)
-,	_data_len (0)
-{
-	// Nothing
-}
-
-
-
 void	ArrayMultiType::resize (size_t length)
 {
 	const size_t   old_len = _length;

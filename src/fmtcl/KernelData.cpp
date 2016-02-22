@@ -61,16 +61,6 @@ namespace fmtcl
 
 
 
-KernelData::KernelData ()
-:	_k_uptr ()
-,	_discrete_uptr ()
-,	_hash (0)
-{
-	// Nothing
-}
-
-
-
 uint32_t	KernelData::get_hash () const
 {
 	return (_hash);

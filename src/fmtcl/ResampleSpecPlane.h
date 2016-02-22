@@ -43,7 +43,10 @@ class ResampleSpecPlane
 
 public:
 
-//	               ~ResampleSpecPlane () {}
+	               ResampleSpecPlane ()                               = default;
+	               ResampleSpecPlane (const ResampleSpecPlane &other) = default;
+	ResampleSpecPlane &
+	               operator = (const ResampleSpecPlane &other)        = default;
 
 	bool           operator < (const ResampleSpecPlane &other) const;
 
@@ -83,12 +86,8 @@ private:
 
 private:
 
-//	               ResampleSpecPlane ();
-//	               ResampleSpecPlane (const ResampleSpecPlane &other);
-//	ResampleSpecPlane &
-//	               operator = (const ResampleSpecPlane &other);
-	bool           operator == (const ResampleSpecPlane &other) const;
-	bool           operator != (const ResampleSpecPlane &other) const;
+	bool           operator == (const ResampleSpecPlane &other) const = delete;
+	bool           operator != (const ResampleSpecPlane &other) const = delete;
 
 };	// class ResampleSpecPlane
 

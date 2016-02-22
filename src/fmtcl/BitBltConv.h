@@ -50,15 +50,15 @@ public:
 	class ScaleInfo
 	{
 	public:
-		double         _gain;
-		double         _add_cst;
+		double         _gain    = 1;
+		double         _add_cst = 0;
 	};
 
 	explicit       BitBltConv (bool sse2_flag, bool avx2_flag);
-	               BitBltConv (const BitBltConv &other);
+	               BitBltConv (const BitBltConv &other) = default;
 	virtual        ~BitBltConv () {}
 
-	BitBltConv &   operator = (const BitBltConv &other);
+	BitBltConv &   operator = (const BitBltConv &other) = default;
 
 	void           bitblt (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr = 0);
 
@@ -125,9 +125,9 @@ private:
 
 private:
 
-	               BitBltConv ();
-	bool           operator == (const BitBltConv &other) const;
-	bool           operator != (const BitBltConv &other) const;
+	               BitBltConv ()                               = delete;
+	bool           operator == (const BitBltConv &other) const = delete;
+	bool           operator != (const BitBltConv &other) const = delete;
 
 };	// class BitBltConv
 

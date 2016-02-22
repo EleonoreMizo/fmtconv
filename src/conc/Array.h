@@ -44,9 +44,9 @@ class Array
 
 public:
 
-	typedef	T	Element;
+	typedef T Element;
 
-   enum {         NBR_ELT  = LENGTH };
+   static const int  NBR_ELT  = LENGTH;
 
 	conc_FORCEINLINE const Element &
                   operator [] (long pos) const;
@@ -78,8 +78,8 @@ private:
 
 private:
 
-	bool           operator == (const Array <T, LENGTH> &other) const;
-	bool           operator != (const Array <T, LENGTH> &other) const;
+	bool           operator == (const Array <T, LENGTH> &other) const = delete;
+	bool           operator != (const Array <T, LENGTH> &other) const = delete;
 
 };	// class Array
 

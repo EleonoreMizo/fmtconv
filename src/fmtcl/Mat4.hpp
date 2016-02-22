@@ -33,14 +33,6 @@ namespace fmtcl
 
 
 
-Mat4::Mat4 ()
-:	_data ()
-{
-	// Nothing
-}
-
-
-
 Mat4::Mat4 (double filler, Preset preset)
 :	_data ()
 {
@@ -77,28 +69,6 @@ Mat4::Mat4 (const double content [4] [4])
 			_data [y] [x] = content [y] [x];
 		}
 	}
-}
-
-
-
-Mat4::Mat4 (const Mat4 &other)
-:	_data (other._data)
-{
-	assert (&other != 0);
-}
-
-
-
-Mat4 &	Mat4::operator = (const Mat4 &other)
-{
-	assert (&other != 0);
-
-	if (&other != this)
-	{
-		_data = other._data;
-	}
-
-	return (*this);
 }
 
 

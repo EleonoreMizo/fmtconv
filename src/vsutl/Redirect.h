@@ -73,12 +73,12 @@ private:
 
 private:
 
-	               Redirect ();
-	virtual        ~Redirect () {}
-	               Redirect (const Redirect <T> &other);
-	Redirect <T> & operator = (const Redirect <T> &other);
-	bool           operator == (const Redirect <T> &other) const;
-	bool           operator != (const Redirect <T> &other) const;
+	               Redirect ()                                   = delete;
+	virtual        ~Redirect ()                                  = delete;
+	               Redirect (const Redirect <T> &other)          = delete;
+	Redirect <T> & operator = (const Redirect <T> &other)        = delete;
+	bool           operator == (const Redirect <T> &other) const = delete;
+	bool           operator != (const Redirect <T> &other) const = delete;
 
 };	// class Redirect
 

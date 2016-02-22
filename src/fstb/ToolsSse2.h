@@ -152,12 +152,12 @@ private:
 
 private:
 
-	               ToolsSse2 ();
-	               ToolsSse2 (const ToolsSse2 &other);
-	virtual        ~ToolsSse2 () {}
-	ToolsSse2 &    operator = (const ToolsSse2 &other);
-	bool           operator == (const ToolsSse2 &other) const;
-	bool           operator != (const ToolsSse2 &other) const;
+	               ToolsSse2 ()                               = delete;
+	               ToolsSse2 (const ToolsSse2 &other)         = delete;
+	virtual        ~ToolsSse2 ()                              = delete;
+	ToolsSse2 &    operator = (const ToolsSse2 &other)        = delete;
+	bool           operator == (const ToolsSse2 &other) const = delete;
+	bool           operator != (const ToolsSse2 &other) const = delete;
 
 };	// class ToolsSse2
 

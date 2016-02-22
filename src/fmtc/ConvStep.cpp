@@ -39,63 +39,6 @@ namespace fmtc
 
 
 
-ConvStep::ConvStep ()
-:	_col_fam (-1)
-,	_range (Range_UNDEF)
-,	_css_h (-1)
-,	_css_v (-1)
-,	_cplace (fmtcl::ChromaPlacement_UNDEF)
-,	_tcurve (fmtcl::TransCurve_UNDEF)
-,	_gammac (-1)
-,	_resized_flag (false)
-,	_sample_type (-1)
-,	_bitdepth (-1)
-{
-	// Nothing
-}
-
-
-
-ConvStep::ConvStep (const ConvStep &other)
-:	_col_fam (other._col_fam)
-,	_range (other._range)
-,	_css_h (other._css_h)
-,	_css_v (other._css_v)
-,	_cplace (other._cplace)
-,	_tcurve (other._tcurve)
-,	_gammac (other._gammac)
-,	_resized_flag (other._resized_flag)
-,	_sample_type (other._sample_type)
-,	_bitdepth (other._bitdepth)
-{
-	assert (&other != 0);
-}
-
-
-
-ConvStep &	ConvStep::operator = (const ConvStep &other)
-{
-	assert (&other != 0);
-
-	if (this != &other)
-	{
-		_col_fam      = other._col_fam;
-		_range        = other._range;
-		_css_h        = other._css_h;
-		_css_v        = other._css_v;
-		_cplace       = other._cplace;
-		_tcurve       = other._tcurve;
-		_gammac       = other._gammac;
-		_resized_flag = other._resized_flag;
-		_sample_type  = other._sample_type;
-		_bitdepth     = other._bitdepth;
-	}
-
-	return (*this);
-}
-
-
-
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 

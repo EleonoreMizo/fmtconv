@@ -90,12 +90,12 @@ private:
 
 private:
 
-	               AtomicIntOp ();
-	               AtomicIntOp (const AtomicIntOp &other);
-	virtual        ~AtomicIntOp () {}
-	AtomicIntOp &  operator = (const AtomicIntOp &other);
-	bool           operator == (const AtomicIntOp &other) const;
-	bool           operator != (const AtomicIntOp &other) const;
+	               AtomicIntOp ()                               = delete;
+	               AtomicIntOp (const AtomicIntOp &other)       = delete;
+	virtual        ~AtomicIntOp ()                              = delete;
+	AtomicIntOp &  operator = (const AtomicIntOp &other)        = delete;
+	bool           operator == (const AtomicIntOp &other) const = delete;
+	bool           operator != (const AtomicIntOp &other) const = delete;
 
 };	// class AtomicIntOp
 

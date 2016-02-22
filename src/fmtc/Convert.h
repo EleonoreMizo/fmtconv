@@ -122,11 +122,11 @@ private:
 
 private:
 
-	               Convert ();
-	               Convert (const Convert &other);
-	Convert &      operator = (const Convert &other);
-	bool           operator == (const Convert &other) const;
-	bool           operator != (const Convert &other) const;
+	               Convert ()                               = delete;
+	               Convert (const Convert &other)           = delete;
+	Convert &      operator = (const Convert &other)        = delete;
+	bool           operator == (const Convert &other) const = delete;
+	bool           operator != (const Convert &other) const = delete;
 
 };	// class Convert
 

@@ -48,13 +48,13 @@ class CoefArrInt
 
 public:
 
-	enum {         VECT_LEN_SSE2 = 16 / sizeof (int16_t) };
-	enum {         VECT_LEN_AVX2 = 32 / sizeof (int16_t) };
+	static const int  VECT_LEN_SSE2 = 16 / sizeof (int16_t);
+	static const int  VECT_LEN_AVX2 = 32 / sizeof (int16_t);
 
 	typedef conc::Array <int16_t, VECT_LEN_SSE2>  VectSse2i16;
 	typedef conc::Array <int16_t, VECT_LEN_AVX2>  VectAvx2i16;
 
-	               CoefArrInt ();
+	               CoefArrInt () = default;
 	virtual			~CoefArrInt () {}
 
 	void           clear ();
@@ -87,9 +87,9 @@ private:
 
 	std::vector <int16_t, fstb::AllocAlign <int16_t, 32> >
 	               _coef_arr;
-	bool           _avx2_flag;
-	int            _size;
-	int            _vect_shift;
+	bool           _avx2_flag  = false;
+	int            _size       = 0;
+	int            _vect_shift = 3;     // For SSE2
 
 
 
@@ -97,10 +97,10 @@ private:
 
 private:
 
-	               CoefArrInt (const CoefArrInt &other);
-	CoefArrInt &   operator = (const CoefArrInt &other);
-	bool           operator == (const CoefArrInt &other) const;
-	bool           operator != (const CoefArrInt &other) const;
+	               CoefArrInt (const CoefArrInt &other)        = delete;
+	CoefArrInt &   operator = (const CoefArrInt &other)        = delete;
+	bool           operator == (const CoefArrInt &other) const = delete;
+	bool           operator != (const CoefArrInt &other) const = delete;
 
 };	// class CoefArrInt
 

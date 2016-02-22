@@ -68,12 +68,12 @@ private:
 
 private:
 
-	               SplFmtUtl ();
-	               SplFmtUtl (const SplFmtUtl &other);
-	virtual        ~SplFmtUtl () {}
-	SplFmtUtl &    operator = (const SplFmtUtl &other);
-	bool           operator == (const SplFmtUtl &other) const;
-	bool           operator != (const SplFmtUtl &other) const;
+	               SplFmtUtl ()                               = delete;
+	               SplFmtUtl (const SplFmtUtl &other)         = delete;
+	virtual        ~SplFmtUtl ()                              = delete;
+	SplFmtUtl &    operator = (const SplFmtUtl &other)        = delete;
+	bool           operator == (const SplFmtUtl &other) const = delete;
+	bool           operator != (const SplFmtUtl &other) const = delete;
 
 };	// class SplFmtUtl
 

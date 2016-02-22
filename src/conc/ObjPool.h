@@ -92,7 +92,7 @@ private:
 
 	int            delete_obj_stack (PtrStack &ptr_stack, bool destroy_flag);
 
-	Factory *      _factory_ptr;     // 0 = not set
+	Factory *      _factory_ptr = 0;    // 0 = not set
 	PtrStack       _stack_free;
 	PtrStack       _stack_all;
 	fstb::SingleObj <PtrPool>
@@ -104,10 +104,10 @@ private:
 
 private:
 
-	               ObjPool (const ObjPool <T> &other);
-	ObjPool <T> &  operator = (const ObjPool <T> &other);
-	bool           operator == (const ObjPool <T> &other) const;
-	bool           operator != (const ObjPool <T> &other) const;
+	               ObjPool (const ObjPool <T> &other)           = delete;
+	ObjPool <T> &  operator = (const ObjPool <T> &other)        = delete;
+	bool           operator == (const ObjPool <T> &other) const = delete;
+	bool           operator != (const ObjPool <T> &other) const = delete;
 
 };	// class ObjPool
 

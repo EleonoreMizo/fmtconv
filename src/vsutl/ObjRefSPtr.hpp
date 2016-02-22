@@ -39,16 +39,6 @@ namespace vsutl
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *), void (VS_CC *::VSAPI::*FF) (T *)>
-ObjRefSPtr <T, FC, FF>::ObjRefSPtr ()
-:	_obj_ptr (0)
-,	_vsapi_ptr (0)
-{
-	// Nothing
-}
-
-
-
 // Does not increase the reference count.
 template <class T, T * (VS_CC *::VSAPI::*FC) (T *), void (VS_CC *::VSAPI::*FF) (T *)>
 ObjRefSPtr <T, FC, FF>::ObjRefSPtr (T *ptr, const ::VSAPI &vsapi)

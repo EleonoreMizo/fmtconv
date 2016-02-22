@@ -41,14 +41,6 @@ namespace fmtcl
 
 
 
-VoidAndCluster::VoidAndCluster ()
-:	_kernel_gauss_uptr ()
-{
-	// Nothing
-}
-
-
-
 void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 {
 	const int      w   = vnc.get_w ();

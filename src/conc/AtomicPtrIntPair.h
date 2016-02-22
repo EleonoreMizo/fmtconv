@@ -128,11 +128,11 @@ private:
 
 private:
 
-	               AtomicPtrIntPair (const AtomicPtrIntPair <T> &other);
+	               AtomicPtrIntPair (const AtomicPtrIntPair <T> &other) = delete;
 	AtomicPtrIntPair <T> &
-	               operator = (const AtomicPtrIntPair <T> &other);
-	bool           operator == (const AtomicPtrIntPair <T> &other);
-	bool           operator != (const AtomicPtrIntPair <T> &other);
+	               operator = (const AtomicPtrIntPair <T> &other)       = delete;
+	bool           operator == (const AtomicPtrIntPair <T> &other)      = delete;
+	bool           operator != (const AtomicPtrIntPair <T> &other)      = delete;
 
 };	// class AtomicPtrIntPair
 

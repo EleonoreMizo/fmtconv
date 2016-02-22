@@ -71,12 +71,12 @@ private:
 
 private:
 
-	               TransOpCanonLog ();
-	               TransOpCanonLog (const TransOpCanonLog &other);
+	               TransOpCanonLog ()                               = delete;
+	               TransOpCanonLog (const TransOpCanonLog &other)   = delete;
 	TransOpCanonLog &
-	               operator = (const TransOpCanonLog &other);
-	bool           operator == (const TransOpCanonLog &other) const;
-	bool           operator != (const TransOpCanonLog &other) const;
+	               operator = (const TransOpCanonLog &other)        = delete;
+	bool           operator == (const TransOpCanonLog &other) const = delete;
+	bool           operator != (const TransOpCanonLog &other) const = delete;
 
 };	// class TransOpCanonLog
 

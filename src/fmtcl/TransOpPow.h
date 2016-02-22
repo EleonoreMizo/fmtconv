@@ -75,11 +75,11 @@ private:
 
 private:
 
-	               TransOpPow ();
-	               TransOpPow (const TransOpPow &other);
-	TransOpPow &   operator = (const TransOpPow &other);
-	bool           operator == (const TransOpPow &other) const;
-	bool           operator != (const TransOpPow &other) const;
+	               TransOpPow ()                               = delete;
+	               TransOpPow (const TransOpPow &other)        = delete;
+	TransOpPow &   operator = (const TransOpPow &other)        = delete;
+	bool           operator == (const TransOpPow &other) const = delete;
+	bool           operator != (const TransOpPow &other) const = delete;
 
 };	// class TransOpPow
 

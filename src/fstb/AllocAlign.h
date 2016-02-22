@@ -56,11 +56,11 @@ public:
 	typedef	size_t	size_type;
 	typedef	ptrdiff_t	difference_type;
 
-	               AllocAlign () {}
-	               AllocAlign (AllocAlign <T, ALIG> const &other) {}
+	               AllocAlign ()                                  = default;
+	               AllocAlign (AllocAlign <T, ALIG> const &other) = default;
 	template <typename U>
 	               AllocAlign (AllocAlign <U, ALIG> const &other) {}
-	               ~AllocAlign () {}
+	               ~AllocAlign ()                                 = default;
 
 	// Address
 	inline pointer address (reference r);

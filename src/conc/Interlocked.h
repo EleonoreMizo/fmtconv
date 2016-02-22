@@ -63,9 +63,9 @@ public:
 	{
 	public:
 		conc_FORCEINLINE bool
-							operator == (const Data128 & other) const;
+		               operator == (const Data128 & other) const;
 		conc_FORCEINLINE bool
-							operator != (const Data128 & other) const;
+		               operator != (const Data128 & other) const;
 							
 		uint64_t       _data [2];
 	};
@@ -114,12 +114,12 @@ private:
 
 private:
 
-						Interlocked ();
-						Interlocked (const Interlocked &other);
-	virtual			~Interlocked () {}
-	Interlocked &	operator = (const Interlocked &other);
-	bool				operator == (const Interlocked &other) const;
-	bool				operator != (const Interlocked &other) const;
+	               Interlocked ()                               = delete;
+	               Interlocked (const Interlocked &other)       = delete;
+	virtual        ~Interlocked ()                              = delete;
+	Interlocked &  operator = (const Interlocked &other)        = delete;
+	bool           operator == (const Interlocked &other) const = delete;
+	bool           operator != (const Interlocked &other) const = delete;
 
 };	// class Interlocked
 

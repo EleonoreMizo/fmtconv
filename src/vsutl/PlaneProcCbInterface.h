@@ -49,7 +49,7 @@ class PlaneProcCbInterface
 
 public:
 
-	virtual        ~PlaneProcCbInterface () {}
+	virtual        ~PlaneProcCbInterface () = default;
 
 	int            process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const NodeRefSPtr &src_node1_sptr, const NodeRefSPtr &src_node2_sptr, const NodeRefSPtr &src_node3_sptr);
 

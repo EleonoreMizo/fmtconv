@@ -72,12 +72,12 @@ private:
 
 private:
 
-	               ErrDifBufFactory ();
-	               ErrDifBufFactory (const ErrDifBufFactory &other);
+	               ErrDifBufFactory ()                              = delete;
+	               ErrDifBufFactory (const ErrDifBufFactory &other) = delete;
 	ErrDifBufFactory &
-	               operator = (const ErrDifBufFactory &other);
-	bool           operator == (const ErrDifBufFactory &other) const;
-	bool           operator != (const ErrDifBufFactory &other) const;
+	               operator = (const ErrDifBufFactory &other)        = delete;
+	bool           operator == (const ErrDifBufFactory &other) const = delete;
+	bool           operator != (const ErrDifBufFactory &other) const = delete;
 
 };	// class ErrDifBufFactory
 

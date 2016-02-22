@@ -84,12 +84,12 @@ protected:
 
 private:
 
-	enum {         MAX_NBR_PLANES =     3 };
-	enum {         PAT_WIDTH      =    32 };  // Number of pixels for halftone dithering
-	enum {         PAT_PERIOD     =     4 };  // Must be a power of 2 (because cycled with & as modulo)
-	enum {         AMP_BITS       =     5 };  // Bit depth of the amplitude fractionnal part. The whole thing is 7 bits, and we need a few bits for the integer part.
-	enum {         ERR_RES        =    24 };  // Resolution (bits) of the temporary data for error diffusion when source bitdepth is not high enough (relative to the destination bitdepth) to guarantee an accurate error diffusion.
-	enum {         MAX_UNK_WIDTH  = 65536 };  // Maximum width (pixels) for variable formats
+	static const int  MAX_NBR_PLANES =     3;
+	static const int  PAT_WIDTH      =    32; // Number of pixels for halftone dithering
+	static const int  PAT_PERIOD     =     4; // Must be a power of 2 (because cycled with & as modulo)
+	static const int  AMP_BITS       =     5; // Bit depth of the amplitude fractionnal part. The whole thing is 7 bits, and we need a few bits for the integer part.
+	static const int  ERR_RES        =    24; // Resolution (bits) of the temporary data for error diffusion when source bitdepth is not high enough (relative to the destination bitdepth) to guarantee an accurate error diffusion.
+	static const int  MAX_UNK_WIDTH  = 65536; // Maximum width (pixels) for variable formats
 
 	enum DMode
 	{
@@ -113,7 +113,7 @@ private:
 		fmtcl::BitBltConv::ScaleInfo
 		               _info;
 		fmtcl::BitBltConv::ScaleInfo *   // 0 if _info is not used.
-		               _ptr;
+		               _ptr = 0;
 	};
 
 	typedef	int16_t	PatRow [PAT_WIDTH];  // Contains data in [-128; +127]
@@ -197,9 +197,9 @@ private:
 	public:
 		typedef DT DstType;
 		typedef ST SrcType;
-		enum { DST_BITS      = DB };
-		enum { SRC_BITS      = SB };
-		enum { NBR_ERR_LINES = EL };
+		static const int  DST_BITS      = DB;
+		static const int  SRC_BITS      = SB;
+		static const int  NBR_ERR_LINES = EL;
 	};
 
 	template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
@@ -293,9 +293,9 @@ private:
 			int            _sum;
 			float          _inv_sum;   // Possible optimization: store 1/_c0 and 1/_c1 instead of this field.
 		};
-		enum {         T_BITS = 8 };
-		enum {         T_LEN  = 1 << T_BITS };
-		enum {         T_MASK = T_LEN - 1 };
+		static const int  T_BITS = 8;
+		static const int  T_LEN  = 1 << T_BITS;
+		static const int  T_MASK = T_LEN - 1;
 
 		static const TableEntry
 		               _table [T_LEN];
@@ -385,11 +385,11 @@ private:
 
 private:
 
-	               Bitdepth ();
-	               Bitdepth (const Bitdepth &other);
-	Bitdepth &     operator = (const Bitdepth &other);
-	bool           operator == (const Bitdepth &other) const;
-	bool           operator != (const Bitdepth &other) const;
+	               Bitdepth ()                               = delete;
+	               Bitdepth (const Bitdepth &other)          = delete;
+	Bitdepth &     operator = (const Bitdepth &other)        = delete;
+	bool           operator == (const Bitdepth &other) const = delete;
+	bool           operator != (const Bitdepth &other) const = delete;
 
 };	// class Bitdepth
 

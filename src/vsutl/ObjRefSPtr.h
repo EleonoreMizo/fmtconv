@@ -53,7 +53,7 @@ class ObjRefSPtr
 
 public:
 
-	               ObjRefSPtr ();
+	               ObjRefSPtr () = default;
 	               ObjRefSPtr (T *ptr, const ::VSAPI &vsapi);
 	               ObjRefSPtr (const ObjRefSPtr <T, FC, FF> &other);
 	virtual        ~ObjRefSPtr ();
@@ -81,8 +81,8 @@ private:
 
 	void           release_resource ();
 
-	T *            _obj_ptr;
-	const ::VSAPI* _vsapi_ptr;    // Can be 0 only if _obj_ptr is 0 too.
+	T *            _obj_ptr   = 0;
+	const ::VSAPI* _vsapi_ptr = 0;      // Can be 0 only if _obj_ptr is 0 too.
 
 
 

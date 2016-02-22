@@ -44,22 +44,6 @@ namespace fstb
 
 
 CpuId::CpuId ()
-:	_mmx_flag (false)
-,	_isse_flag (false)
-,	_sse_flag (false)
-,	_sse2_flag (false)
-,	_sse3_flag (false)
-,	_ssse3_flag (false)
-,	_sse41_flag (false)
-,	_sse42_flag (false)
-,	_sse4a_flag (false)
-,	_fma3_flag (false)
-,	_fma4_flag (false)
-,	_avx_flag (false)
-,	_avx2_flag (false)
-,	_avx512f_flag (false)
-,	_f16c_flag (false)
-,	_cx16_flag (false)
 {
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 
@@ -98,56 +82,6 @@ CpuId::CpuId ()
 	}
 
 #endif
-}
-
-
-
-CpuId::CpuId (const CpuId &other)
-:	_mmx_flag (other._mmx_flag)
-,	_isse_flag (other._isse_flag)
-,	_sse_flag (other._sse_flag)
-,	_sse2_flag (other._sse2_flag)
-,	_sse3_flag (other._sse3_flag)
-,	_ssse3_flag (other._ssse3_flag)
-,	_sse41_flag (other._sse41_flag)
-,	_sse42_flag (other._sse42_flag)
-,	_sse4a_flag (other._sse4a_flag)
-,	_fma3_flag (other._fma3_flag)
-,	_fma4_flag (other._fma4_flag)
-,	_avx_flag (other._avx_flag)
-,	_avx2_flag (other._avx2_flag)
-,	_avx512f_flag (other._avx512f_flag)
-,	_f16c_flag (other._f16c_flag)
-,	_cx16_flag (other._cx16_flag)
-{
-	assert (&other != 0);
-}
-
-
-
-CpuId &	CpuId::operator = (const CpuId &other)
-{
-	if (&other != this)
-	{
-		_mmx_flag     = other._mmx_flag;
-		_isse_flag    = other._isse_flag;
-		_sse_flag     = other._sse_flag;
-		_sse2_flag    = other._sse2_flag;
-		_sse3_flag    = other._sse3_flag;
-		_ssse3_flag   = other._ssse3_flag;
-		_sse41_flag   = other._sse41_flag;
-		_sse42_flag   = other._sse42_flag;
-		_sse4a_flag   = other._sse4a_flag;
-		_fma3_flag    = other._fma3_flag;
-		_fma4_flag    = other._fma4_flag;
-		_avx_flag     = other._avx_flag;
-		_avx2_flag    = other._avx2_flag;
-		_avx512f_flag = other._avx512f_flag;
-		_f16c_flag    = other._f16c_flag;
-		_cx16_flag    = other._cx16_flag;
-	}
-
-	return (*this);
 }
 
 

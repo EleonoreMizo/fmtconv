@@ -50,7 +50,7 @@ class KernelData
 
 public:
 
-	               KernelData ();
+	               KernelData () = default;
 	virtual        ~KernelData () {}
 
    uint32_t       get_hash () const;
@@ -101,7 +101,7 @@ private:
 	template <typename T>
 	void           hash_val (const T &val);
 
-	uint32_t       _hash;
+	uint32_t       _hash = 0;
 
 	static void    conv_to_float_arr (std::vector <double> &coef_arr, const std::string &str);
 
@@ -114,10 +114,10 @@ private:
 
 private:
 
-	               KernelData (const KernelData &other);
-	KernelData &   operator = (const KernelData &other);
-	bool           operator == (const KernelData &other) const;
-	bool           operator != (const KernelData &other) const;
+	               KernelData (const KernelData &other)        = delete;
+	KernelData &   operator = (const KernelData &other)        = delete;
+	bool           operator == (const KernelData &other) const = delete;
+	bool           operator != (const KernelData &other) const = delete;
 
 };	// class KernelData
 

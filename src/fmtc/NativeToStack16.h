@@ -77,12 +77,12 @@ private:
 
 private:
 
-	               NativeToStack16 ();
-	               NativeToStack16 (const NativeToStack16 &other);
+	               NativeToStack16 ()                               = delete;
+	               NativeToStack16 (const NativeToStack16 &other)   = delete;
 	NativeToStack16 &
-	               operator = (const NativeToStack16 &other);
-	bool           operator == (const NativeToStack16 &other) const;
-	bool           operator != (const NativeToStack16 &other) const;
+	               operator = (const NativeToStack16 &other)        = delete;
+	bool           operator == (const NativeToStack16 &other) const = delete;
+	bool           operator != (const NativeToStack16 &other) const = delete;
 
 };	// class NativeToStack16
 

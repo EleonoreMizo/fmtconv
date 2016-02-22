@@ -44,7 +44,7 @@ class ObjFactoryInterface
 
 public:
 
-	virtual        ~ObjFactoryInterface () {}
+	virtual        ~ObjFactoryInterface () = default;
 
 	T *            create ();
 

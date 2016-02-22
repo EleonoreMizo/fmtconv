@@ -45,7 +45,7 @@ class ResizeData
 
 public:
 
-	enum {         NBR_BUF	= 2 };
+	static const int  NBR_BUF = 2;
 
 	explicit       ResizeData (int w, int h);
 	virtual        ~ResizeData () {}
@@ -74,11 +74,11 @@ private:
 
 private:
 
-	               ResizeData ();
-	               ResizeData (const ResizeData &other);
-	ResizeData &   operator = (const ResizeData &other);
-	bool           operator == (const ResizeData &other) const;
-	bool           operator != (const ResizeData &other) const;
+	               ResizeData ()                               = delete;
+	               ResizeData (const ResizeData &other)        = delete;
+	ResizeData &   operator = (const ResizeData &other)        = delete;
+	bool           operator == (const ResizeData &other) const = delete;
+	bool           operator != (const ResizeData &other) const = delete;
 
 };	// class ResizeData
 

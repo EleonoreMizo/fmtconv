@@ -112,11 +112,11 @@ private:
 
 private:
 
-	               CpuOpt ();
-	               CpuOpt (const CpuOpt &other);
-	CpuOpt &       operator = (const CpuOpt &other);
-	bool           operator == (const CpuOpt &other) const;
-	bool           operator != (const CpuOpt &other) const;
+	               CpuOpt ()                               = delete;
+	               CpuOpt (const CpuOpt &other)            = delete;
+	CpuOpt &       operator = (const CpuOpt &other)        = delete;
+	bool           operator == (const CpuOpt &other) const = delete;
+	bool           operator != (const CpuOpt &other) const = delete;
 
 };	// class CpuOpt
 

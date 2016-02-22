@@ -48,7 +48,7 @@ class VoidAndCluster
 
 public:
 
-	               VoidAndCluster ();
+	               VoidAndCluster () = default;
 	virtual			~VoidAndCluster () {}
 
 	void           create_matrix (MatrixWrap <uint16_t> &vnc);
@@ -65,8 +65,8 @@ protected:
 
 private:
 
-	enum {         KERNEL_MAX_RAD  = 4 };
-	enum {         KERNEL_DEF_SIZE = KERNEL_MAX_RAD * 2 + 1 };
+	static const int  KERNEL_MAX_RAD  = 4;
+	static const int  KERNEL_DEF_SIZE = KERNEL_MAX_RAD * 2 + 1;
 
 	void           homogenize_initial_mat (MatrixWrap <uint16_t> &m) const;
 	void           find_cluster_kernel (std::vector <std::pair <int, int> > &pos_arr, const MatrixWrap <uint16_t> &m, int color, int kw, int kh) const;
@@ -85,11 +85,11 @@ private:
 
 private:
 
-	               VoidAndCluster (const VoidAndCluster &other);
+	               VoidAndCluster (const VoidAndCluster &other)    = delete;
 	VoidAndCluster &
-	               operator = (const VoidAndCluster &other);
-	bool           operator == (const VoidAndCluster &other) const;
-	bool           operator != (const VoidAndCluster &other) const;
+	               operator = (const VoidAndCluster &other)        = delete;
+	bool           operator == (const VoidAndCluster &other) const = delete;
+	bool           operator != (const VoidAndCluster &other) const = delete;
 
 };	// class VoidAndCluster
 

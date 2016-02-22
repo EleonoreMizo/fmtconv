@@ -48,7 +48,7 @@ class ArrayMultiType
 
 public:
 
-	               ArrayMultiType ();
+	               ArrayMultiType () = default;
 	virtual			~ArrayMultiType () {}
 
 	template <class T>
@@ -76,8 +76,8 @@ private:
 
 	std::vector <uint8_t>
 	               _arr;
-	size_t         _length;
-	int            _data_len;     // Element size in bytes. 0 = not set
+	size_t         _length   = 0;
+	int            _data_len = 0;       // Element size in bytes. 0 = not set
 
 
 
@@ -85,11 +85,11 @@ private:
 
 private:
 
-	               ArrayMultiType (const ArrayMultiType &other);
+	               ArrayMultiType (const ArrayMultiType &other)    = delete;
 	ArrayMultiType &
-	               operator = (const ArrayMultiType &other);
-	bool           operator == (const ArrayMultiType &other) const;
-	bool           operator != (const ArrayMultiType &other) const;
+	               operator = (const ArrayMultiType &other)        = delete;
+	bool           operator == (const ArrayMultiType &other) const = delete;
+	bool           operator != (const ArrayMultiType &other) const = delete;
 
 };	// class ArrayMultiType
 

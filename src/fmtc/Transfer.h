@@ -57,7 +57,7 @@ class Transfer
 public:
 
 	explicit       Transfer (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi);
-	virtual        ~Transfer () {}
+	virtual        ~Transfer () = default;
 
 	// vsutl::FilterBase
 	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
@@ -123,11 +123,11 @@ private:
 
 private:
 
-	               Transfer ();
-	               Transfer (const Transfer &other);
-	Transfer &     operator = (const Transfer &other);
-	bool           operator == (const Transfer &other) const;
-	bool           operator != (const Transfer &other) const;
+	               Transfer ()                               = delete;
+	               Transfer (const Transfer &other)          = delete;
+	Transfer &     operator = (const Transfer &other)        = delete;
+	bool           operator == (const Transfer &other) const = delete;
+	bool           operator != (const Transfer &other) const = delete;
 
 };	// class Transfer
 

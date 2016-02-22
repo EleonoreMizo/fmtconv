@@ -71,8 +71,8 @@ class PlaneProcessor
 
 public:
 
-	enum {         MAX_NBR_PLANES	= 3   };
-	enum {         MAX_NBR_CLIPS	= 1+3 };	// Index 0 = destination
+	static const int  MAX_NBR_PLANES	= 3;
+	static const int  MAX_NBR_CLIPS	= 1+3;   // Index 0 = destination
 
 	explicit       PlaneProcessor (const ::VSAPI &vsapi, PlaneProcCbInterface &cb, const char filter_name_0 [], bool manual_flag);
 	virtual        ~PlaneProcessor () {}
@@ -125,12 +125,12 @@ private:
 
 private:
 
-	               PlaneProcessor ();
-	               PlaneProcessor (const PlaneProcessor &other);
+	               PlaneProcessor ()                               = delete;
+	               PlaneProcessor (const PlaneProcessor &other)    = delete;
 	PlaneProcessor &
-	               operator = (const PlaneProcessor &other);
-	bool           operator == (const PlaneProcessor &other) const;
-	bool           operator != (const PlaneProcessor &other) const;
+	               operator = (const PlaneProcessor &other)        = delete;
+	bool           operator == (const PlaneProcessor &other) const = delete;
+	bool           operator != (const PlaneProcessor &other) const = delete;
 
 };	// class PlaneProcessor
 

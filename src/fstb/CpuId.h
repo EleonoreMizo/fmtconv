@@ -44,31 +44,31 @@ class CpuId
 public:
 
 	               CpuId ();
-	               CpuId (const CpuId &other);
-	virtual        ~CpuId () {}
+	               CpuId (const CpuId &other)      = default;
+	virtual        ~CpuId ()                       = default;
 
-	CpuId &        operator = (const CpuId &other);
+	CpuId &        operator = (const CpuId &other) = default;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	static void		call_cpuid (unsigned int fnc_nbr, unsigned int &v_eax, unsigned int &v_ebx, unsigned int &v_ecx, unsigned int &v_edx);
 #endif
 
-	bool           _mmx_flag;
-	bool           _isse_flag;
-	bool           _sse_flag;
-	bool           _sse2_flag;
-	bool           _sse3_flag;
-	bool           _ssse3_flag;
-	bool           _sse41_flag;
-	bool           _sse42_flag;
-	bool           _sse4a_flag;
-	bool           _fma3_flag;
-	bool           _fma4_flag;
-	bool           _avx_flag;
-	bool           _avx2_flag;
-	bool           _avx512f_flag;
-	bool           _f16c_flag;    // Half-precision FP
-	bool           _cx16_flag;    // CMPXCHG16B
+	bool           _mmx_flag     = false;
+	bool           _isse_flag    = false;
+	bool           _sse_flag     = false;
+	bool           _sse2_flag    = false;
+	bool           _sse3_flag    = false;
+	bool           _ssse3_flag   = false;
+	bool           _sse41_flag   = false;
+	bool           _sse42_flag   = false;
+	bool           _sse4a_flag   = false;
+	bool           _fma3_flag    = false;
+	bool           _fma4_flag    = false;
+	bool           _avx_flag     = false;
+	bool           _avx2_flag    = false;
+	bool           _avx512f_flag = false;
+	bool           _f16c_flag    = false;  // Half-precision FP
+	bool           _cx16_flag    = false;  // CMPXCHG16B
 
 
 
@@ -88,8 +88,8 @@ private:
 
 private:
 
-	bool           operator == (const CpuId &other) const;
-	bool           operator != (const CpuId &other) const;
+	bool           operator == (const CpuId &other) const = delete;
+	bool           operator != (const CpuId &other) const = delete;
 
 };	// class CpuId
 

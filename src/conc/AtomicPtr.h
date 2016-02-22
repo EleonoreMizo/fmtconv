@@ -103,8 +103,8 @@ private:
 
 private:
 
-	bool           operator == (const AtomicPtr <T> &other) const;
-	bool           operator != (const AtomicPtr <T> &other) const;
+	bool           operator == (const AtomicPtr <T> &other) const = delete;
+	bool           operator != (const AtomicPtr <T> &other) const = delete;
 
 };	// class AtomicPtr
 

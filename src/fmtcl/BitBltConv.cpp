@@ -63,27 +63,6 @@ BitBltConv::BitBltConv (bool sse2_flag, bool avx2_flag)
 
 
 
-BitBltConv::BitBltConv (const BitBltConv &other)
-:	_sse2_flag (other._sse2_flag)
-,	_avx2_flag (other._avx2_flag)
-{
-	assert (&other != 0);
-}
-
-
-
-BitBltConv &	BitBltConv::operator = (const BitBltConv &other)
-{
-	assert (&other != 0);
-
-	_sse2_flag = other._sse2_flag;
-	_avx2_flag = other._avx2_flag;
-
-	return (*this);
-}
-
-
-
 // Stride offsets in bytes
 // w and h in plane pixels
 // No bitdepth reduction (i.e. 10 to 8 forbidden), excepted float to 16-bit integers

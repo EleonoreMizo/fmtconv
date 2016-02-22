@@ -40,17 +40,6 @@ namespace fmtcl
 
 
 
-CoefArrInt::CoefArrInt ()
-:	_coef_arr ()
-,	_avx2_flag (false)
-,	_size (0)
-,	_vect_shift (3)   // For SSE2
-{
-	// Nothing
-}
-
-
-
 void	CoefArrInt::clear ()
 {
 	_coef_arr.clear ();

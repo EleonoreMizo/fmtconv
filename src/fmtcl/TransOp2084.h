@@ -71,11 +71,11 @@ private:
 
 private:
 
-	               TransOp2084 ();
-	               TransOp2084 (const TransOp2084 &other);
-	TransOp2084 &  operator = (const TransOp2084 &other);
-	bool           operator == (const TransOp2084 &other) const;
-	bool           operator != (const TransOp2084 &other) const;
+	               TransOp2084 ()                               = delete;
+	               TransOp2084 (const TransOp2084 &other)       = delete;
+	TransOp2084 &  operator = (const TransOp2084 &other)        = delete;
+	bool           operator == (const TransOp2084 &other) const = delete;
+	bool           operator != (const TransOp2084 &other) const = delete;
 
 };	// class TransOp2084
 

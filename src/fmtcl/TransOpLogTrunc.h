@@ -73,12 +73,12 @@ private:
 
 private:
 
-	               TransOpLogTrunc ();
-	               TransOpLogTrunc (const TransOpLogTrunc &other);
+	               TransOpLogTrunc ()                               = delete;
+	               TransOpLogTrunc (const TransOpLogTrunc &other)   = delete;
 	TransOpLogTrunc &
-	               operator = (const TransOpLogTrunc &other);
-	bool           operator == (const TransOpLogTrunc &other) const;
-	bool           operator != (const TransOpLogTrunc &other) const;
+	               operator = (const TransOpLogTrunc &other)        = delete;
+	bool           operator == (const TransOpLogTrunc &other) const = delete;
+	bool           operator != (const TransOpLogTrunc &other) const = delete;
 
 };	// class TransOpLogTrunc
 
