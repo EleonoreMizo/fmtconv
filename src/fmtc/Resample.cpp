@@ -60,8 +60,6 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_plane_arr ()
 ,	_src_width (0)
 ,	_src_height (0)
-,	_dst_width (0)
-,	_dst_height (0)
 ,	_norm_val_h (0)
 ,	_norm_val_v (0)
 ,	_interlaced_src (static_cast <InterlacingParam> (

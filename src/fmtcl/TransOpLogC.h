@@ -67,15 +67,14 @@ private:
 	double         compute_inverse (double x) const;
 
 	const bool     _inv_flag;
-	const bool     _v2_flag;
-	double         _cut;
-	double         _a;
-	double         _b;
-	double         _c;
-	double         _d;
-	double         _e;
-	double         _f;
-	double         _cut_i;
+	const double   _cut;
+	const double   _a;
+	const double   _b;
+	const double   _c;
+	const double   _d;
+	const double   _e;
+	const double   _f;
+	const double   _cut_i;
 
 	static const double
 		            _noise_margin;

@@ -48,7 +48,6 @@ const double		TransOpLogC::_noise_margin = -8.0 / 65536;
 
 TransOpLogC::TransOpLogC (bool inv_flag, bool v2_flag)
 :	_inv_flag (inv_flag)
-,	_v2_flag (v2_flag)
 ,	_cut (v2_flag ? 0.000000 : 0.010591)
 ,	_a (  v2_flag ? 5.061087 : 5.555556)
 ,	_b (  v2_flag ? 0.089004 : 0.052272)
@@ -56,8 +55,9 @@ TransOpLogC::TransOpLogC (bool inv_flag, bool v2_flag)
 ,	_d (  v2_flag ? 0.391007 : 0.385537)
 ,	_e (  v2_flag ? 4.950469 : 5.367655)
 ,	_f (  v2_flag ? 0.131313 : 0.092809)
+,	_cut_i (_e * _cut + _f)
 {
-	_cut_i = _e * _cut + _f;
+	// Nothing
 }
 
 
@@ -72,6 +72,8 @@ double	TransOpLogC::get_max () const
 {
 	return (compute_inverse (1.0));
 }
+
+
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 

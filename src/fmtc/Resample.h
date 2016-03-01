@@ -182,8 +182,6 @@ private:
 	int            _src_height;
 	fmtcl::SplFmt  _src_type;
 	int            _src_res;
-	int            _dst_width;
-	int            _dst_height;
 	fmtcl::SplFmt  _dst_type;
 	int            _dst_res;
 	double         _norm_val_h;

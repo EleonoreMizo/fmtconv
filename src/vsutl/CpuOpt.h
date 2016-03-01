@@ -102,7 +102,6 @@ protected:
 
 private:
 
-	FilterBase &   _filter;
 	fstb::CpuId    _cpu;
 	Level          _level;
 
