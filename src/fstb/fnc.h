@@ -63,6 +63,8 @@ inline T       sshift_r (T x);
 
 void           conv_to_lower_case (std::string &str);
 
+int            snprintf4all (char *out_0, size_t size, const char *format_0, ...);
+
 
 
 }	// namespace fstb
