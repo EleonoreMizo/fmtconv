@@ -105,16 +105,12 @@ private:
 	const ::VSFormat *
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src, int &plane_out, bool &force_col_fam_flag) const;
 
-	void           prepare_coef (const ::VSFormat &fmt_dst, const ::VSFormat &fmt_src);
-	void           override_fmt_with_csp (::VSFormat &fmt) const;
-
 	const ::VSFormat *
 	               find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, const ::VSFormat *fmt_dst_ptr, const ::VSFormat &fmt_src, ::VSCore &core);
 	void           make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_rgb_flag) const;
 
 	static void    make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag);
 	static void    make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag);
-	static void		make_mat_flt_int (fmtcl::Mat4 &m, bool to_flt_flag, const ::VSFormat &fmt, bool full_flag);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;

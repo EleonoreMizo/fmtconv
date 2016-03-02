@@ -27,18 +27,30 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/ColorSpaceH265.h"
 #include "fmtcl/SplFmt.h"
 
 
 
 struct VSFormat;
 
+namespace fmtcl
+{
+	class Mat4;
+	class MatrixProc;
+}
+namespace vsutl
+{
+	class FilterBase;
+}
+
 namespace fmtc
 {
 
 
 
-fmtcl::SplFmt conv_vsfmt_to_splfmt (const ::VSFormat &fmt);
+fmtcl::SplFmt  conv_vsfmt_to_splfmt (const ::VSFormat &fmt);
+void           prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSFormat &fmt_dst, bool full_range_dst_flag, const ::VSFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out = fmtcl::ColorSpaceH265_UNSPECIFIED, int plane_out = -1);
 
 
 
