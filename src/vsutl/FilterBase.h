@@ -46,6 +46,9 @@ class FilterBase
 
 public:
 
+	static const size_t
+	               _max_error_buf_len = 4096;
+
 	explicit       FilterBase (const ::VSAPI &vsapi, const char name_0 [], ::VSFilterMode filter_mode, int /* ::NodeFlags */ flags);
 	virtual        ~FilterBase () = default;
 
@@ -75,6 +78,8 @@ public:
 	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core) = 0;
 	virtual const ::VSFrameRef *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core) = 0;
+
+	static char    _filter_error_msg_0 [_max_error_buf_len + 1];
 
 
 

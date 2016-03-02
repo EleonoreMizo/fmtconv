@@ -291,6 +291,10 @@ std::vector <std::string>	FilterBase::get_arg_vstr (const ::VSMap &in, ::VSMap &
 
 
 
+char	FilterBase::_filter_error_msg_0 [_max_error_buf_len + 1] = "";
+
+
+
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
