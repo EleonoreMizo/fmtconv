@@ -708,7 +708,7 @@ void	Matrix::make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_
 		m[0][0] = 1; m[0][1] = 0; m[0][2] = 0;
 		m[1][0] = 0; m[1][1] = 1; m[1][2] = 0;
 		m[2][0] = 0; m[2][1] = 0; m[2][2] = 1;
-		complete_mat3 (m);
+		m.clean3 (1);
 	}
 	else if (mat == "601")
 	{
@@ -783,7 +783,7 @@ void	Matrix::make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool
 		m[2][0] = r          ; m[2][1] = r*kg/(kr-1); m[2][2] = r*kb/(kr-1);
 	}
 
-	complete_mat3 (m);
+	m.clean3 (1);
 }
 
 
@@ -824,7 +824,7 @@ void	Matrix::make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag)
 		m[2][0] =  0.5 ; m[2][1] = 0  ; m[2][2] = -0.5 ;
 	}
 
-	complete_mat3 (m);
+	m.clean3 (1);
 }
 
 
@@ -861,18 +861,6 @@ void	Matrix::make_mat_flt_int (fmtcl::Mat4 &m, bool to_flt_flag, const ::VSForma
 	m[1][0] =  0; m[1][1] = ac; m[1][2] =  0; m[1][3] = bc;
 	m[2][0] =  0; m[2][1] =  0; m[2][2] = ac; m[2][3] = bc;
 	m[3][0] =  0; m[3][1] =  0; m[3][2] =  0; m[3][3] =  1;
-}
-
-
-
-void	Matrix::complete_mat3 (fmtcl::Mat4 &m)
-{
-	assert (&m != 0);
-
-	                                       m[0][3] = 0;
-	                                       m[1][3] = 0;
-	                                       m[2][3] = 0;
-	m[3][0] = 0; m[3][1] = 0; m[3][2] = 0; m[3][3] = 1;
 }
 
 

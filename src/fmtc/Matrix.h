@@ -115,7 +115,6 @@ private:
 	static void    make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag);
 	static void    make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag);
 	static void		make_mat_flt_int (fmtcl::Mat4 &m, bool to_flt_flag, const ::VSFormat &fmt, bool full_flag);
-	static void    complete_mat3 (fmtcl::Mat4 &m);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;

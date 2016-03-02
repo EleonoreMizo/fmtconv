@@ -73,6 +73,7 @@ public:
 	inline double  det3 () const;
 	inline Mat4    compute_inverse3 () const;
 	inline Mat4 &  invert3 ();
+	inline Mat4 &  clean3 (double diag = 0);
 
 	inline const Row4 &
                   operator [] (long pos) const;

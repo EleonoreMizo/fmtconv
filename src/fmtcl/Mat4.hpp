@@ -186,6 +186,18 @@ Mat4 &	Mat4::invert3 ()
 
 
 
+Mat4 &	Mat4::clean3 (double diag)
+{
+	                                                         _data [0] [3] = 0;
+	                                                         _data [1] [3] = 0;
+	                                                         _data [2] [3] = 0;
+	_data [3] [0] = 0; _data [3] [1] = 0; _data [3] [2] = 0; _data [3] [3] = diag;
+
+	return (*this);
+}
+
+
+
 const Mat4::Row4 &	Mat4::operator [] (long pos) const
 {
 	assert (pos >= 0);
