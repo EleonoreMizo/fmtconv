@@ -24,6 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/fnc.h"
 #include "vsutl/FilterBase.h"
 
 #include <algorithm>
@@ -291,7 +292,7 @@ std::vector <std::string>	FilterBase::get_arg_vstr (const ::VSMap &in, ::VSMap &
 
 
 
-char	FilterBase::_filter_error_msg_0 [_max_error_buf_len + 1] = "";
+char	FilterBase::_filter_error_msg_0 [_max_error_buf_len] = "";
 
 
 
@@ -378,22 +379,16 @@ void	FilterBase::test_arg_err (::VSMap &out, const char name_0 [], int err) cons
 
 	if (err != 0)
 	{
-		const int      buf_size = 1024;
-		char           buf_0 [buf_size];
-#if defined (_MSC_VER)
-		_snprintf_s (
-			buf_0, buf_size, _TRUNCATE,
-#else
-		snprintf (
-			buf_0, buf_size,
-#endif
+		fstb::snprintf4all (
+			_filter_error_msg_internal_0,
+			_max_error_buf_len,
 			"%s: invalid argument %s, error code %d.",
 			_filter_name.c_str (), name_0, err
 		);
 
-		_vsapi.setError (&out, buf_0);
+		_vsapi.setError (&out, _filter_error_msg_internal_0);
 
-		throw std::invalid_argument (buf_0);
+		throw std::invalid_argument (_filter_error_msg_internal_0);
 	}
 }
 
@@ -405,15 +400,9 @@ void	FilterBase::throw_generic (const char msg_0 [], ExceptionType e) const
 	assert (e >= 0);
 	assert (e < ExceptionType_NBR_ELT);
 
-	const int      buf_size = 1024;
-	char           buf_0 [buf_size];
-#if defined (_MSC_VER)
-	_snprintf_s (
-		buf_0, buf_size, _TRUNCATE,
-#else
-	snprintf (
-		buf_0, buf_size,
-#endif
+	fstb::snprintf4all (
+		_filter_error_msg_internal_0,
+		_max_error_buf_len,
 		"%s: %s",
 		_filter_name.c_str (),
 		msg_0
@@ -422,17 +411,21 @@ void	FilterBase::throw_generic (const char msg_0 [], ExceptionType e) const
 	switch (e)
 	{
 	case	ExceptionType_INVALID_ARGUMENT:
-		throw std::invalid_argument (buf_0);
+		throw std::invalid_argument (_filter_error_msg_internal_0);
 		break;
 	case	ExceptionType_RUNTIME_ERROR:
-		throw std::runtime_error (buf_0);
+		throw std::runtime_error (_filter_error_msg_internal_0);
 		break;
 	case	ExceptionType_LOGIC_ERROR:
 	default:
-		throw std::logic_error (buf_0);
+		throw std::logic_error (_filter_error_msg_internal_0);
 		break;
 	}
 }
+
+
+
+char	FilterBase::_filter_error_msg_internal_0 [_max_error_buf_len] = "";
 
 
 

@@ -79,7 +79,7 @@ public:
 	virtual const ::VSFrameRef *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core) = 0;
 
-	static char    _filter_error_msg_0 [_max_error_buf_len + 1];
+	static char    _filter_error_msg_0 [_max_error_buf_len];
 
 
 
@@ -115,6 +115,8 @@ private:
 	void           clip_neg_arg_pos (int &pos, const ::VSMap &in, const char name_0 []) const;
 	void           test_arg_err (::VSMap &out, const char name_0 [], int err) const;
 	void           throw_generic (const char msg_0 [], ExceptionType e) const;
+
+	static char    _filter_error_msg_internal_0 [_max_error_buf_len];
 
 
 
