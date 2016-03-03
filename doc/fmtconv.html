@@ -142,13 +142,13 @@ c = core.std.SelectEvery (clip=c, cycle=2, offsets=0)</pre>
 
 <h4>Colorspace conversions</h4>
 
-<p>YUV 4:2:0 to RGB:</p>
+<p>Y’Cb’Cr’ 4:2:0 to R’G’B’:</p>
 
 <pre class="src">c = core.fmtc.resample (clip=c, css="444")
 c = core.fmtc.matrix (clip=c, mat="601", col_fam=vs.RGB)
 c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 
-<p>RGB to YUV 4:2:0:</p>
+<p>R’G’B’ to Y’Cb’Cr’ 4:2:0:</p>
 
 <pre class="src">c = core.fmtc.matrix (clip=c, mat="601", col_fam=vs.YUV, bits=16)
 c = core.fmtc.resample (clip=c, css="420")
@@ -542,7 +542,7 @@ Possible values are:</p>
 <tr><td><b><code>"240"</code></b></td><td>SMPTE 240M</td></tr>
 <tr><td><b><code>"FCC"</code></b></td><td>FCC</td></tr>
 <tr><td><b><code>"YCgCo"</code></b></td><td>Y’Cg’Co’</td></tr>
-<tr><td><b><code>"RGB"</code></b></td><td>RGB. Identity, no cross-plane calculations.</td></tr>
+<tr><td><b><code>"RGB"</code></b></td><td>R’G’B’. Identity, no cross-plane calculations.</td></tr>
 </table>
 
 <p class="var">mats, matd</p>
@@ -719,7 +719,7 @@ in float. The output is not dithered, therefore you should output at a higher
 bitdepth than the input and dither afterward with <code>bitdepth</code> to
 avoid potential banding.</p>
 
-<p>Please note that the RGB content is always considered as linear light.
+<p>Please note that the RGB content is always assumed to be linear light.
 The BT.2020 gamma curve is used in both directions.
 When operating on floating point data, the function uses the 12-bit variant
 of the scaling coefficients.</p>
@@ -1045,7 +1045,7 @@ in Masktools 2.</p>
 <var>fulls</var> is for input, <var>fulld</var> for output.
 Reference black and white have different values depending on the range.
 In 8 bits, pixel values scale from 0 to 255 in full range, and 16 to 235
-in TV-range (16 to 240 for the YUV chroma planes).
+in TV-range (16 to 240 for the Y’Cb’Cr’ chroma planes).
 This value has no meaning for float data.</p>
 <p>The default value depends on the colorspace.
 For example, full-range is assumed for RGB and YCgCo colorspaces.
@@ -1305,7 +1305,7 @@ or to 1 to convert to floating point data.</p>
 <var>fulls</var> is for input, <var>fulld</var> for output.
 Reference black and white have different values depending on the range.
 In 8 bits, pixel values scale from 0 to 255 in full range, and 16 to 235
-in TV-range (16 to 240 for the YUV chroma planes).
+in TV-range (16 to 240 for the Y’Cb’Cr’ chroma planes).
 This value has no meaning for float data.</p>
 
 <p class="var">cpuopt</p>
