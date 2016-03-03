@@ -505,6 +505,18 @@
     <ClInclude Include="fstb\SingleObj.hpp">
       <Filter>fstb</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\Vec3.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\Vec3.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\Mat3.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\Mat3.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">

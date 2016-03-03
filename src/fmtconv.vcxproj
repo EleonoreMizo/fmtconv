@@ -186,6 +186,8 @@
     <ClInclude Include="fmtcl\FilterResize.h" />
     <ClInclude Include="fmtcl\fnc.h" />
     <ClInclude Include="fmtcl\KernelData.h" />
+    <ClInclude Include="fmtcl\Mat3.h" />
+    <ClInclude Include="fmtcl\Mat3.hpp" />
     <ClInclude Include="fmtcl\Mat4.h" />
     <ClInclude Include="fmtcl\Mat4.hpp" />
     <ClInclude Include="fmtcl\Matrix2020CLProc.h" />
@@ -233,6 +235,8 @@
     <ClInclude Include="fmtcl\TransOpLogTrunc.h" />
     <ClInclude Include="fmtcl\TransOpPow.h" />
     <ClInclude Include="fmtcl\TransOpSLog.h" />
+    <ClInclude Include="fmtcl\Vec3.h" />
+    <ClInclude Include="fmtcl\Vec3.hpp" />
     <ClInclude Include="fmtcl\VoidAndCluster.h" />
     <ClInclude Include="fmtc\Bitdepth.h" />
     <ClInclude Include="fmtc\Convert.h" />

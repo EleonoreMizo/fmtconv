@@ -134,6 +134,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/fnc.h \
                         ../../src/fmtcl/KernelData.cpp \
                         ../../src/fmtcl/KernelData.h \
+                        ../../src/fmtcl/Mat3.h \
+                        ../../src/fmtcl/Mat3.hpp \
                         ../../src/fmtcl/Mat4.h \
                         ../../src/fmtcl/Mat4.hpp \
                         ../../src/fmtcl/Matrix2020CLProc.cpp \
@@ -193,6 +195,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/TransOpPow.h \
                         ../../src/fmtcl/TransOpSLog.cpp \
                         ../../src/fmtcl/TransOpSLog.h \
+                        ../../src/fmtcl/Vec3.h \
+                        ../../src/fmtcl/Vec3.hpp \
                         ../../src/fmtcl/VoidAndCluster.cpp \
                         ../../src/fmtcl/VoidAndCluster.h \
                         ../../src/fstb/AllocAlign.h \

@@ -22,6 +22,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/Mat3.h"
 
 
 namespace fmtcl
@@ -143,45 +144,15 @@ Mat4 &	Mat4::operator *= (const Mat4 &other)
 
 
 
-double	Mat4::det3 () const
+void	Mat4::insert3 (const Mat3 &other)
 {
-	return (
-		  _data [0] [0] * _data [1] [1] * _data [2] [2]
-		+ _data [1] [0] * _data [2] [1] * _data [0] [2]
-		+ _data [2] [0] * _data [0] [1] * _data [1] [2]
-		- _data [0] [0] * _data [2] [1] * _data [1] [2]
-		- _data [1] [0] * _data [0] [1] * _data [2] [2]
-		- _data [2] [0] * _data [1] [1] * _data [0] [2]
-	);
-}
-
-
-
-Mat4	Mat4::compute_inverse3 () const
-{
-	const double   d3 = det3 ();
-
-	Mat4           r (*this);
-	r [0] [0] = (_data [1] [1] * _data [2] [2] - _data [1] [2] * _data [2] [1]) / d3;
-	r [0] [1] = (_data [0] [2] * _data [2] [1] - _data [0] [1] * _data [2] [2]) / d3;
-	r [0] [2] = (_data [0] [1] * _data [1] [2] - _data [0] [2] * _data [1] [1]) / d3;
-	r [1] [0] = (_data [1] [2] * _data [2] [0] - _data [1] [0] * _data [2] [2]) / d3;
-	r [1] [1] = (_data [0] [0] * _data [2] [2] - _data [0] [2] * _data [2] [0]) / d3;
-	r [1] [2] = (_data [0] [2] * _data [1] [0] - _data [0] [0] * _data [1] [2]) / d3;
-	r [2] [0] = (_data [1] [0] * _data [2] [1] - _data [1] [1] * _data [2] [0]) / d3;
-	r [2] [1] = (_data [0] [1] * _data [2] [0] - _data [0] [0] * _data [2] [1]) / d3;
-	r [2] [2] = (_data [0] [0] * _data [1] [1] - _data [0] [1] * _data [1] [0]) / d3;
-
-	return (r);
-}
-
-
-
-Mat4 &	Mat4::invert3 ()
-{
-	*this = compute_inverse3 ();
-
-	return (*this);
+	for (int y = 0; y < Mat3::VECT_SIZE; ++y)
+	{
+		for (int x = 0; x < Mat3::VECT_SIZE; ++x)
+		{
+			_data [y] [x] = other [y] [x];
+		}
+	}
 }
 
 

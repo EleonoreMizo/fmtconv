@@ -36,6 +36,8 @@ namespace fmtcl
 
 
 
+class Mat3;
+
 class Mat4
 {
 
@@ -70,9 +72,7 @@ public:
 	inline Mat4 &  operator -= (const Mat4 &other);
 	inline Mat4 &  operator *= (const Mat4 &other);
 
-	inline double  det3 () const;
-	inline Mat4    compute_inverse3 () const;
-	inline Mat4 &  invert3 ();
+	inline void    insert3 (const Mat3 &other);
 	inline Mat4 &  clean3 (double diag = 0);
 
 	inline const Row4 &
