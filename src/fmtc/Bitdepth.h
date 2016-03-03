@@ -27,7 +27,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "conc/Array.h"
 #include "conc/ObjPool.h"
 #include "fmtcl/BitBltConv.h"
 #include "fmtcl/ErrDifBuf.h"
@@ -40,6 +39,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "vsutl/PlaneProcessor.h"
 #include "VapourSynth.h"
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -345,7 +345,7 @@ private:
 	fmtcl::SplFmt  _splfmt_src;
 	fmtcl::SplFmt  _splfmt_dst;
 
-	conc::Array <SclInf, MAX_NBR_PLANES>
+	std::array <SclInf, MAX_NBR_PLANES>
 	               _scale_info_arr;
 	bool           _upconv_flag;
 	bool           _sse2_flag;

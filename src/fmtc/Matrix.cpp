@@ -30,7 +30,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fstb/def.h"
-#include "conc/Array.h"
 #include "fmtc/Matrix.h"
 #include "fmtc/fnc.h"
 #include "fmtcl/Mat4.h"

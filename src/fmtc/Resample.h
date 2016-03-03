@@ -27,7 +27,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "conc/Array.h"
 #include "fmtcl/ChromaPlacement.h"
 #include "fmtcl/FilterResize.h"
 #include "fmtcl/KernelData.h"
@@ -38,6 +37,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "vsutl/PlaneProcessor.h"
 #include "VapourSynth.h"
 
+#include <array>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -134,13 +134,13 @@ private:
 	};
 
 	// Array order: [dest] [src]
-	typedef conc::Array <fmtcl::ResampleSpecPlane, InterlacingType_NBR_ELT> SpecSrcArray;
-	typedef conc::Array <SpecSrcArray,             InterlacingType_NBR_ELT> SpecArray;
+	typedef std::array <fmtcl::ResampleSpecPlane, InterlacingType_NBR_ELT> SpecSrcArray;
+	typedef std::array <SpecSrcArray,             InterlacingType_NBR_ELT> SpecArray;
 
 	class PlaneData
 	{
 	public:
-		typedef conc::Array <
+		typedef std::array <
 			fmtcl::KernelData,
 			fmtcl::FilterResize::Dir_NBR_ELT
 		>  KernelArray;
@@ -154,7 +154,7 @@ private:
 		bool           _preserve_center_flag;
 	};
 
-	typedef conc::Array <PlaneData, MAX_NBR_PLANES> PlaneDataArray;
+	typedef std::array <PlaneData, MAX_NBR_PLANES> PlaneDataArray;
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;

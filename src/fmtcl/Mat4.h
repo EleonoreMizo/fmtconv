@@ -27,7 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "conc/Array.h"
+#include <array>
 
 
 
@@ -55,7 +55,7 @@ public:
 		Preset_NBR_ELT
 	};
 
-	typedef conc::Array <double, VECT_SIZE> Row4;
+	typedef std::array <double, VECT_SIZE> Row4;
 
 	inline         Mat4 ()                        = default;
 	inline explicit
@@ -91,7 +91,7 @@ protected:
 
 private:
 
-	typedef conc::Array <Row4, VECT_SIZE> MatArr;
+	typedef std::array <Row4, VECT_SIZE> MatArr;
 
 	MatArr         _data;
 

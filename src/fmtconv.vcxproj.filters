@@ -90,12 +90,6 @@
     <ClInclude Include="conc\AioSub.hpp">
       <Filter>conc</Filter>
     </ClInclude>
-    <ClInclude Include="conc\Array.h">
-      <Filter>conc</Filter>
-    </ClInclude>
-    <ClInclude Include="conc\Array.hpp">
-      <Filter>conc</Filter>
-    </ClInclude>
     <ClInclude Include="conc\AtomicInt.h">
       <Filter>conc</Filter>
     </ClInclude>

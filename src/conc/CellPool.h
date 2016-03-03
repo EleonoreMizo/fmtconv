@@ -27,13 +27,13 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "conc/Array.h"
 #include "conc/AtomicPtr.h"
 #include "conc/AtomicInt.h"
 #include "conc/LockFreeCell.h"
 #include "conc/LockFreeStack.h"
 #include "fstb/SingleObj.h"
 
+#include <array>
 #include <mutex>
 
 #include <cstddef>
@@ -87,7 +87,7 @@ private:
 	typedef  LockFreeStack <T>    CellStack;
 	typedef  AtomicInt <size_t>   CountCells;
 	typedef  AtomicInt <int>      CountZones;
-	typedef  Array <AtomicPtr <CellType>, MAX_NBR_ZONES>  ZoneList;
+	typedef  std::array <AtomicPtr <CellType>, MAX_NBR_ZONES>  ZoneList;
 
 	class Members	// These ones must be aligned
 	{

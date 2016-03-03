@@ -277,8 +277,6 @@
     <ClInclude Include="conc\AioMax.hpp" />
     <ClInclude Include="conc\AioSub.h" />
     <ClInclude Include="conc\AioSub.hpp" />
-    <ClInclude Include="conc\Array.h" />
-    <ClInclude Include="conc\Array.hpp" />
     <ClInclude Include="conc\AtomicInt.h" />
     <ClInclude Include="conc\AtomicInt.hpp" />
     <ClInclude Include="conc\AtomicIntOp.h" />

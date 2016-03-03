@@ -27,9 +27,9 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "conc/Array.h"
 #include "fstb/AllocAlign.h"
 
+#include <array>
 #include <vector>
 
 #include <cstdint>
@@ -51,8 +51,8 @@ public:
 	static const int  VECT_LEN_SSE2 = 16 / sizeof (int16_t);
 	static const int  VECT_LEN_AVX2 = 32 / sizeof (int16_t);
 
-	typedef conc::Array <int16_t, VECT_LEN_SSE2>  VectSse2i16;
-	typedef conc::Array <int16_t, VECT_LEN_AVX2>  VectAvx2i16;
+	typedef std::array <int16_t, VECT_LEN_SSE2>  VectSse2i16;
+	typedef std::array <int16_t, VECT_LEN_AVX2>  VectAvx2i16;
 
 	               CoefArrInt () = default;
 	virtual			~CoefArrInt () {}
