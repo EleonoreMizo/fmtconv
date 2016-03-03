@@ -41,6 +41,7 @@
 	<li><a href="#convert">convert</a></li>
 	<li><a href="#matrix">matrix</a></li>
 	<li><a href="#matrix2020cl">matrix2020cl</a></li>
+	<li><a href="#primaries">primaries</a></li>
 	<li><a href="#resample">resample</a></li>
 	<li><a href="#transfer">transfer</a></li>
 	<li><a href="#stack16tonative">stack16tonative, nativetostack16</a></li>
@@ -154,13 +155,28 @@ c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 c = core.fmtc.resample (clip=c, css="420")
 c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 
-<p>YUV colormatrix conversion from BT. 601 to BT. 709.
-For example to insert a DVD content in an HDTV stream.
+<p>Y’Cb’Cr colormatrix conversion from BT. 601 to BT. 709.
+For example to insert a PAL DVD content into an HDTV stream.
 Note that we need to convert the clip to 4:4:4 in an intermediate step
 because <code>matrix</code> can only process 4:4:4.</p>
 
 <pre class="src">c = core.fmtc.resample (clip=c, css="444")
 c = core.fmtc.matrix (clip=c, mats="601", matd="709")
+c = core.fmtc.resample (clip=c, css="420")
+c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+
+<p>Same as above, but with a 525-line content, requiring a gamut conversion.
+We have to insert an intermediate step in linear RGB.
+For this, we use the BT. 1886 transfer curve in both directions:</p>
+
+<pre class="src">c = core.fmtc.resample (clip=c, css="444")
+c = core.fmtc.matrix (clip=c, mats="601")
+c = core.fmtc.transfer (clip=c, transs="1886", transd="linear")
+c = core.fmtc.primaries (clip=c,
+	rs=[0.630, 0.340], gs=[0.310, 0.595], bs=[0.155, 0.070], ws=[0.3127, 0.3290],
+	rd=[0.640, 0.330], gd=[0.300, 0.600], bd=[0.150, 0.060], wd=[0.3127, 0.3290])
+c = core.fmtc.transfer (clip=clip, transs="linear", transd="1886")
+c = core.fmtc.matrix (clip=clip, mat="709")
 c = core.fmtc.resample (clip=c, css="420")
 c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 
@@ -517,8 +533,8 @@ primaries.
 The R’G’B’ data are always releative to their specified standard.
 For example, converting Y’Cb’Cr’ data straight from BT.2020 to BT.709 doesn’t
 make sense as these colorspaces are defined with different primaries.
-For meaningful results, convert to R’G’B’ and use a 3-D LUT to perform the
-intermediary conversion.</p>
+For meaningful results, convert to R’G’B’ then to linear RGB and use
+</code>primaries</code> to perform the intermediary conversion.</p>
 
 <h4>Parameters</h4>
 
@@ -759,6 +775,60 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 <p>Limits the CPU instruction set.
 &minus;1: automatic (no limitation),
 0: default instruction set only (depends on the compilation settings).</p>
+
+
+
+<h3><a id="primaries"></a>primaries</h3>
+
+<pre class="proto">fmtc.primaries (
+	clip       : clip      ;
+	rs         : float[]: opt;
+	gs         : float[]: opt;
+	bs         : float[]: opt;
+	ws         : float[]: opt;
+	rd         : float[]: opt;
+	gd         : float[]: opt;
+	bd         : float[]: opt;
+	wd         : float[]: opt;
+	csp        : int    : opt;
+	cpuopt     : int    : opt; (-1)
+)</pre>
+
+<p>Performs a gamut conversion given a set of three primary colors and
+a reference white to another set of primary colors and a target reference
+white.</p>
+
+<p>All colors are given in xyY colorspace, with their x and y coordinates.</p>
+
+<p></p>
+
+<h4>Parameters</h4>
+
+<p class="var">clip</p>
+<p>The input clip. Mandatory.
+Supported colorspaces are 16-bit int or 32-bit float <i>linear</i> RGB.
+You should use the <code>transfer</code> function to convert between linear
+RGB and gamma-compressed R’G’B ’colorspaces.</p>
+
+<p class="var">rs, gs, bs, ws</p>
+<p>Primaries for the source colorspace as red, green, blue and reference
+white.
+Each variable is an array of two components, x and y.</p>
+
+<p class="var">rd, gd, bd, wd</p>
+<p>Primaries for the target colorspace.</p>
+
+<p class="var">csp</p>
+<p>The destination format, as Vapoursynth constant.
+It must be compatible with what is logically expected as output (16- or 32-bit
+RGB).</p>
+
+<p class="var">cpuopt</p>
+<p>Limits the CPU instruction set.
+&minus;1: automatic (no limitation),
+0: default instruction set only (depends on the compilation settings),
+1: limit to SSE2,
+10: limit to AVX2.</p>
 
 
 
@@ -1366,6 +1436,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <p><b>Latest version</b></p>
 <ul>
+<li>Added the <code>primaries</code> function to convert between gamuts.</li>
 <li>The “full” range is now closer to what is specified in the standards.</li>
 <li>A recent Vapoursynth is now required because API headers were updated to version 3.1.4.</li>
 </ul>

@@ -245,6 +245,7 @@
     <ClInclude Include="fmtc\Matrix.h" />
     <ClInclude Include="fmtc\Matrix2020CL.h" />
     <ClInclude Include="fmtc\NativeToStack16.h" />
+    <ClInclude Include="fmtc\Primaries.h" />
     <ClInclude Include="fmtc\Resample.h" />
     <ClInclude Include="fmtc\SplFmtUtl.h" />
     <ClInclude Include="fmtc\SplFmtUtl.hpp" />
@@ -396,6 +397,7 @@
     <ClCompile Include="fmtc\Matrix.cpp" />
     <ClCompile Include="fmtc\Matrix2020CL.cpp" />
     <ClCompile Include="fmtc\NativeToStack16.cpp" />
+    <ClCompile Include="fmtc\Primaries.cpp" />
     <ClCompile Include="fmtc\Resample.cpp" />
     <ClCompile Include="fmtc\Stack16ToNative.cpp" />
     <ClCompile Include="fmtc\Transfer.cpp" />

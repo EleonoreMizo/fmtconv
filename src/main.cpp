@@ -22,6 +22,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/Matrix.h"
 #include "fmtc/Matrix2020CL.h"
 #include "fmtc/NativeToStack16.h"
+#include "fmtc/Primaries.h"
 #include "fmtc/Resample.h"
 #include "fmtc/Stack16ToNative.h"
 #include "fmtc/Transfer.h"
@@ -563,6 +564,21 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"cpuopt:int:opt;"
 		"blacklvl:float:opt;"
 		, &vsutl::Redirect <fmtc::Transfer>::create, 0, plugin_ptr
+	);
+
+	register_fnc ("primaries",
+		"clip:clip;"
+		"rs:float[]:opt;"
+		"gs:float[]:opt;"
+		"bs:float[]:opt;"
+		"ws:float[]:opt;"
+		"rd:float[]:opt;"
+		"gd:float[]:opt;"
+		"bd:float[]:opt;"
+		"wd:float[]:opt;"
+		"csp:int:opt;"
+		"cpuopt:int:opt;"
+		, &vsutl::Redirect <fmtc::Primaries>::create, 0, plugin_ptr
 	);
 
 #if 0

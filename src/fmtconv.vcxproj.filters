@@ -499,6 +499,9 @@
     <ClInclude Include="fstb\SingleObj.hpp">
       <Filter>fstb</Filter>
     </ClInclude>
+    <ClInclude Include="fmtc\Primaries.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
     <ClInclude Include="fmtcl\Vec3.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
@@ -716,6 +719,9 @@
     </ClCompile>
     <ClCompile Include="fmtcl\VoidAndCluster.cpp">
       <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtc\Primaries.cpp">
+      <Filter>fmtc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -68,6 +68,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtc/Matrix.h \
                         ../../src/fmtc/NativeToStack16.cpp \
                         ../../src/fmtc/NativeToStack16.h \
+                        ../../src/fmtc/Primaries.cpp \
+                        ../../src/fmtc/Primaries.h \
                         ../../src/fmtc/Resample.cpp \
                         ../../src/fmtc/Resample.h \
                         ../../src/fmtc/SplFmtUtl.h \
