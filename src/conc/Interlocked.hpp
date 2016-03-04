@@ -246,6 +246,10 @@ void	Interlocked::swap (Data128 &old, volatile Data128 &dest, const Data128 &exc
 
 #if defined (__APPLE__)
 
+	Data128 *         old_ptr  = &old;
+	volatile Data128* dest_ptr = &dest;
+	const Data128 *   excg_ptr = &excg;
+
 	asm volatile ( 
 	"	mov				 %[excg], %%r9			\n"
 
@@ -265,9 +269,9 @@ void	Interlocked::swap (Data128 &old, volatile Data128 &dest, const Data128 &exc
 	"	movq				%%rdx, 8(%%r10)		\n"
 	"	pop				%%rbx						\n"
 	: 
-	: [excg] "m" (&excg)
-	, [old]  "m" (&old)
-	, [dest] "m" (&dest)
+	: [excg] "m" (excg_ptr)
+	, [old]  "m" (old_ptr)
+	, [dest] "m" (dest_ptr)
 	: "rsi", "rax", "rcx", "rdx", "r9", "r10"
 	);
 
@@ -293,6 +297,11 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 
 #if defined (__APPLE__) || (defined (__CYGWIN__) && conc_WORD_SIZE == 64)
 
+	Data128 *         old_ptr  = &old;
+	volatile Data128* dest_ptr = &dest;
+	const Data128 *   excg_ptr = &excg;
+	const Data128 *   comp_ptr = &comp;
+
 	asm volatile (
 	"	mov              %[comp], %%r8   \n"
 	"	mov              %[excg], %%r9   \n"
@@ -309,10 +318,10 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 	"	movq             %%rdx, 8(%%r10) \n"
 	"	pop              %%rbx           \n"
 	:
-	: [old]  "m" (&old)
-	, [dest] "m" (&dest)
-	, [excg] "m" (&excg)
-	, [comp] "m" (&comp)
+	: [old]  "m" (old_ptr)
+	, [dest] "m" (dest_ptr)
+	, [excg] "m" (excg_ptr)
+	, [comp] "m" (comp_ptr)
 	: "rsi", "rax", "rcx", "rdx", "r8", "r9", "r10"
 	);
 
