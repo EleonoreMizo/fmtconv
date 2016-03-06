@@ -84,18 +84,8 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 	const ::VSFormat &   fmt_src = *_vi_in.format;
 	check_colorspace (fmt_src, "input");
 
-	// Destination colorspace
-	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
-	int                  csp_dst     = get_arg_int (in, out, "csp", ::pfNone);
-	if (csp_dst != ::pfNone)
-	{
-		fmt_dst_ptr = _vsapi.getFormatPreset (csp_dst, &core);
-		if (fmt_dst_ptr == 0)
-		{
-			throw_inval_arg ("unknown output colorspace.");
-		}
-	}
-	const ::VSFormat &   fmt_dst = *fmt_dst_ptr;
+	// Destination colorspace (currently the same as the source)
+	const ::VSFormat &   fmt_dst = fmt_src;
 	check_colorspace (fmt_dst, "output");
 
 	// Output format is validated.
@@ -107,7 +97,7 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 
 	const fmtcl::Mat3 mat_conv = compute_conversion_matrix ();
 	_mat_main.insert3 (mat_conv);
-	_mat_main.clean3 ();
+	_mat_main.clean3 (1);
 
 	prepare_matrix_coef (
 		*this, *_proc_uptr, _mat_main,

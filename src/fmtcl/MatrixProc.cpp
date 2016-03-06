@@ -83,6 +83,8 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 	assert (dst_bits >= 8);
 	assert (dst_bits <= 32);
 	assert (plane_out <= NBR_PLANES);
+	assert (   (dst_fmt == SplFmt_FLOAT && src_fmt == SplFmt_FLOAT)
+	        || (dst_fmt != SplFmt_FLOAT && src_fmt != SplFmt_FLOAT));
 
 	Err            ret_val = Err_OK;
 	_proc_ptr = 0;
