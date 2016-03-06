@@ -92,8 +92,18 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 	_vi_out.format = &fmt_dst;
 
 	// Primaries
+	_prim_s.init (*this, in, out, "prims");
+	_prim_d.init (*this, in, out, "primd");
 	_prim_s.init (*this, in, out, "rs", "gs", "bs", "ws");
 	_prim_d.init (*this, in, out, "rd", "gd", "bd", "wd");
+	if (! _prim_s.is_ready ())
+	{
+		throw_inval_arg ("input primaries not set.");
+	}
+	if (! _prim_d.is_ready ())
+	{
+		throw_inval_arg ("input primaries not set.");
+	}
 
 	const fmtcl::Mat3 mat_conv = compute_conversion_matrix ();
 	_mat_main.insert3 (mat_conv);
@@ -198,6 +208,116 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 
 
 
+Primaries::Vec2::Vec2 (double c0, double c1)
+:	Inherited ({ { c0, c1 } })
+{
+	// Nothing
+}
+
+
+
+Primaries::RGBSystem::RGBSystem ()
+:	_rgb ()
+,	_white ()
+,	_init_flag_arr ({ {false, false, false, false } })
+{
+	// Nothing
+}
+
+
+
+void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0)
+{
+	assert (&filter != 0);
+	assert (&in != 0);
+	assert (&out != 0);
+	assert (preset_0 != 0);
+
+	std::string    preset = filter.get_arg_str (in, out, preset_0, "");
+	if (! preset.empty ())
+	{
+		fstb::conv_to_lower_case (preset);
+
+		if (        preset == "709"
+		         || preset == "1361"
+		         || preset == "61966-2-1"
+		         || preset == "61966-2-4")
+		{
+			_rgb [0] = { 0.640 , 0.330  };
+			_rgb [1] = { 0.300 , 0.600  };
+			_rgb [2] = { 0.150 , 0.060  };
+			_white   = { 0.3127, 0.3290 };
+		}
+		else if (   preset == "470m")
+		{
+			_rgb [0] = { 0.670 , 0.330  };
+			_rgb [1] = { 0.210 , 0.710  };
+			_rgb [2] = { 0.140 , 0.080  };
+			_white   = { 0.3100, 0.3160 };
+		}
+		else if (   preset == "470m93")
+		{
+			_rgb [0] = { 0.670 , 0.330  };
+			_rgb [1] = { 0.210 , 0.710  };
+			_rgb [2] = { 0.140 , 0.080  };
+			_white   = { 0.2848, 0.2932 };
+		}
+		else if (   preset == "470bg"
+		         || preset == "601-625"
+		         || preset == "1358-625"
+		         || preset == "1700-625")
+		{
+			_rgb [0] = { 0.640 , 0.330  };
+			_rgb [1] = { 0.290 , 0.600  };
+			_rgb [2] = { 0.150 , 0.060  };
+			_white   = { 0.3127, 0.3290 };
+		}
+		else if (   preset == "170m"
+		         || preset == "240m"
+		         || preset == "601-525"
+		         || preset == "1358-525"
+		         || preset == "1700-525")
+		{
+			_rgb [0] = { 0.630 , 0.340  };
+			_rgb [1] = { 0.310 , 0.595  };
+			_rgb [2] = { 0.155 , 0.070  };
+			_white   = { 0.3127, 0.3290 };
+		}
+		else if (   preset == "gf")
+		{
+			_rgb [0] = { 0.681 , 0.319  };
+			_rgb [1] = { 0.243 , 0.692  };
+			_rgb [2] = { 0.145 , 0.049  };
+			_white   = { 0.3100, 0.3160 };
+		}
+		else if (   preset == "2020")
+		{
+			_rgb [0] = { 0.708 , 0.292  };
+			_rgb [1] = { 0.170 , 0.797  };
+			_rgb [2] = { 0.131 , 0.046  };
+			_white   = { 0.3127, 0.3290 };
+		}
+		else
+		{
+			fstb::snprintf4all (
+				filter._filter_error_msg_0,
+				filter._max_error_buf_len,
+				"%s: unknown preset \"%s\".",
+				preset_0,
+				preset.c_str ()
+			);
+			filter.throw_inval_arg (filter._filter_error_msg_0);
+		}
+
+		for (bool &init_flag : _init_flag_arr)
+		{
+			init_flag = true;
+		}
+	}
+}
+
+
+
 void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 [])
 {
 	assert (&filter != 0);
@@ -211,68 +331,92 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 	const char *   name_0_arr [NBR_PLANES] = { r_0, g_0, b_0 };
 	for (int k = 0; k < NBR_PLANES; ++k)
 	{
-		read_coord_tuple (_rgb [k], filter, in, out, name_0_arr [k]);
+		_init_flag_arr [k] |=
+			read_coord_tuple (_rgb [k], filter, in, out, name_0_arr [k]);
 	}
 
-	read_coord_tuple (_white, filter, in, out, w_0);
+	_init_flag_arr [NBR_PLANES] |=
+		read_coord_tuple (_white, filter, in, out, w_0);
 }
 
 
 
-void	Primaries::RGBSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0)
+bool	Primaries::RGBSystem::is_ready () const
 {
+	for (bool init_flag : _init_flag_arr)
+	{
+		if (! init_flag)
+		{
+			return false;
+		}
+	}
+	return (true);
+}
+
+
+
+bool	Primaries::RGBSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0)
+{
+	bool           set_flag = false;
 	typedef std::vector <double> Vect;
 	Vect           v_def;
 
 	Vect           c_v =
 		filter.get_arg_vflt (in, out, name_0, v_def);
-	if (c_v.size () != c.size ())
+	if (c_v.size () != 0)
 	{
-		fstb::snprintf4all (
-			filter._filter_error_msg_0,
-			filter._max_error_buf_len,
-			"%s: wrong number of coordinates (expected %d).",
-			name_0,
-			int (c.size ())
-		);
-		filter.throw_inval_arg (filter._filter_error_msg_0);
-	}
-	double            sum = 0;
-	for (size_t k = 0; k < c_v.size (); ++k)
-	{
-		if (c_v [k] < 0 || c_v [k] > 1)
+		if (c_v.size () != c.size ())
 		{
 			fstb::snprintf4all (
 				filter._filter_error_msg_0,
 				filter._max_error_buf_len,
-				"%s: (x, y) coordinates must be in range 0-1.",
+				"%s: wrong number of coordinates (expected %d).",
+				name_0,
+				int (c.size ())
+			);
+			filter.throw_inval_arg (filter._filter_error_msg_0);
+		}
+		double            sum = 0;
+		for (size_t k = 0; k < c_v.size (); ++k)
+		{
+			if (c_v [k] < 0 || c_v [k] > 1)
+			{
+				fstb::snprintf4all (
+					filter._filter_error_msg_0,
+					filter._max_error_buf_len,
+					"%s: (x, y) coordinates must be in range 0-1.",
+					name_0
+				);
+				filter.throw_inval_arg (filter._filter_error_msg_0);
+			}
+			sum += c_v [k];
+			c [k] = c_v [k];
+		}
+		if (c [1] == 0)
+		{
+			fstb::snprintf4all (
+				filter._filter_error_msg_0,
+				filter._max_error_buf_len,
+				"%s: y coordinates must be greater than 0.",
 				name_0
 			);
 			filter.throw_inval_arg (filter._filter_error_msg_0);
 		}
-		sum += c_v [k];
-		c [k] = c_v [k];
+		else if (sum > 1)
+		{
+			fstb::snprintf4all (
+				filter._filter_error_msg_0,
+				filter._max_error_buf_len,
+				"%s: sum of (x, y) coordinates must be in range 0-1.",
+				name_0
+			);
+			filter.throw_inval_arg (filter._filter_error_msg_0);
+		}
+
+		set_flag = true;
 	}
-	if (c [1] == 0)
-	{
-		fstb::snprintf4all (
-			filter._filter_error_msg_0,
-			filter._max_error_buf_len,
-			"%s: y coordinates must be greater than 0.",
-			name_0
-		);
-		filter.throw_inval_arg (filter._filter_error_msg_0);
-	}
-	else if (sum > 1)
-	{
-		fstb::snprintf4all (
-			filter._filter_error_msg_0,
-			filter._max_error_buf_len,
-			"%s: sum of (x, y) coordinates must be in range 0-1.",
-			name_0
-		);
-		filter.throw_inval_arg (filter._filter_error_msg_0);
-	}
+
+	return (set_flag);
 }
 
 

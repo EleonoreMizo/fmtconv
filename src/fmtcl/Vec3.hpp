@@ -36,7 +36,7 @@ namespace fmtcl
 
 
 Vec3::Vec3 (double c0, double c1, double c2)
-:	Inherited ({ c0, c1, c2 })
+:	Inherited ({ { c0, c1, c2 } })
 {
 	// Nothing
 }

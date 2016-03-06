@@ -72,7 +72,7 @@ Mat3::Mat3 (const double content [VECT_SIZE] [VECT_SIZE])
 
 
 Mat3::Mat3 (const Vec3 &v0, const Vec3 &v1, const Vec3 &v2)
-:	Inherited ({ v0, v1, v2 })
+:	Inherited ({ { v0, v1, v2 } })
 {
 	// Nothing
 }

@@ -71,16 +71,28 @@ private:
 
 	static const int  NBR_PLANES    = 3;
 
-	typedef std::array <double, NBR_PLANES - 1> Vec2;
+	class Vec2
+	:	public std::array <double, NBR_PLANES - 1>
+	{
+		typedef std::array <double, NBR_PLANES - 1> Inherited;
+	public:
+		               Vec2 () = default;
+		               Vec2 (double c0, double c1);
+	};
 
 	class RGBSystem
 	{
 	public:
+		               RGBSystem ();
+		void           init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0);
 		void           init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 []);
-		static void    read_coord_tuple (Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0);
+		bool           is_ready () const;
+		static bool    read_coord_tuple (Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0);
 		std::array <Vec2, NBR_PLANES>       // x,y coordinates for R, G and B
 		               _rgb;
 		Vec2           _white;              // XYZ coordinates for the ref. white
+		std::array <bool, NBR_PLANES + 1>
+		               _init_flag_arr;      // R, G, B, W
 	};
 
 	void           check_colorspace (const ::VSFormat &fmt, const char *inout_0) const;

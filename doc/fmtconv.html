@@ -172,9 +172,7 @@ For this, we use the BT. 1886 transfer curve in both directions:</p>
 <pre class="src">c = core.fmtc.resample (clip=c, css="444")
 c = core.fmtc.matrix (clip=c, mats="601")
 c = core.fmtc.transfer (clip=c, transs="1886", transd="linear")
-c = core.fmtc.primaries (clip=c,
-	rs=[0.630, 0.340], gs=[0.310, 0.595], bs=[0.155, 0.070], ws=[0.3127, 0.3290],
-	rd=[0.640, 0.330], gd=[0.300, 0.600], bd=[0.150, 0.060], wd=[0.3127, 0.3290])
+c = core.fmtc.primaries (clip=c, prims="601-525", primd="709")
 c = core.fmtc.transfer (clip=clip, transs="linear", transd="1886")
 c = core.fmtc.matrix (clip=clip, mat="709")
 c = core.fmtc.resample (clip=c, css="420")
@@ -790,6 +788,8 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 	gd         : float[]: opt;
 	bd         : float[]: opt;
 	wd         : float[]: opt;
+	prims      : data   : opt;
+	primd      : data   : opt;
 	csp        : int    : opt;
 	cpuopt     : int    : opt; (-1)
 )</pre>
@@ -818,6 +818,20 @@ Each variable is an array of two components, x and y.</p>
 <p class="var">rd, gd, bd, wd</p>
 <p>Primaries for the target colorspace.</p>
 
+<p class="var">prims, primd</p>
+<p>Primaries presets for the source and destination colorspaces.
+Superseded by individual r, g, b and w settings.
+Possible values are:</p>
+<table>
+<tr><th>Value</th><th>Primary</th><th>x</th><th>y</th><th>Description</th></tr>
+<tr><td><b><code>"709"<br />"1361"<br />"61966-2-1"<br />"61966-2-4"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.300,<br />0.150,<br />0.3127,</td><td>0.330<br />0.600<br />0.060<br />0.3290</td><td>ITU-R BT.709-5<br />ITU-R BT.1361<br />IEC 61966-2-1 (sRGB or sYCC)<br />IEC 61966-2-4<br />Annex B of SMPTE RP 177 (1993)</td></tr>
+<tr><td><b><code>"470m"</code></b></td><td>R<br />G<br />B<br />W (C)</td><td>0.670,<br />0.210,<br />0.140,<br />0.3100,</td><td>0.330<br />0.710<br />0.080<br />0.3160</td><td>ITU-R BT.470-6 System M (historical)<br />NTSC (1953)<br />FCC</td></tr>
+<tr><td><b><code>"470m93"</code></b></td><td>R<br />G<br />B<br />W (9305K)</td><td>0.670,<br />0.210,<br />0.140,<br />0.2848,</td><td>0.330<br />0.710<br />0.080<br />0.2932</td><td>ITU-R BT.470-6 System M — Japan (NTSC-J)</td></tr>
+<tr><td><b><code>"470bg"<br />"601-625"<br />"1358-625"<br />"1700-625"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.290,<br />0.150,<br />0.3127,</td><td>0.330<br />0.600<br />0.060<br />0.3290</td><td>ITU-R BT.470-6 System B, G (historical)<br />ITU-R BT.601-6 625<br />ITU-R BT.1358 625<br />ITU-R BT.1700 625 PAL and 625 SECAM</td></tr>
+<tr><td><b><code>"170m"<br />"240m"<br />"601-525"<br />"1358-525"<br />"1700-525"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.630,<br />0.310,<br />0.155,<br />0.3127</td><td>0.340<br />0.595<br />0.070<br />0.3290</td><td>SMPTE 170M (2004)<br />SMPTE 240M (1999)<br />ITU-R BT.601-6 525<br />ITU-R BT.1358 525<br />ITU-R BT.1700 NTSC</td></tr>
+<tr><td><b><code>"gf"</code></b></td><td>R (Wratten 25)<br />G (Wratten 58)<br />B (Wratten 47)<br />W (C)</td><td>0.681,<br />0.243,<br />0.145,<br />0.3100,</td><td>0.319<br />0.692<br />0.049<br />0.3160</td><td>Generic film (colour filters using Illuminant C)</td></tr>
+<tr><td><b><code>"2020"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.708,<br />0.170,<br />0.131,<br />0.3127</td><td>0.292<br />0.797<br />0.046<br />0.3290</td><td>ITU-R BT.2020</td></tr>
+</table>
 
 <p class="var">cpuopt</p>
 <p>Limits the CPU instruction set.
