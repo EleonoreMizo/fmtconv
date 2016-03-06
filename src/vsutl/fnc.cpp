@@ -91,8 +91,7 @@ double	compute_pix_scale (const ::VSFormat &fmt, int plane_index, bool full_flag
 		const int      bps_m8 = fmt.bitsPerSample - 8;
 		if (full_flag)
 		{
-			// Final mul in double to make sure we don't overflow even for uint64.
-			scale = double ((uint64_t (1)) << bps_m8) * 256;
+			scale = double ((uint64_t (1) << fmt.bitsPerSample) - 1);
 		}
 		else if (is_chroma_plane (fmt, plane_index))
 		{
@@ -124,7 +123,15 @@ double	get_pix_min (const ::VSFormat &fmt, int plane_index, bool full_flag)
 			add_val = -0.5;
 		}
 	}
-	else if (! full_flag)
+	else if (full_flag)
+	{
+		if (is_chroma_plane (fmt, plane_index))
+		{
+			// So the neutral value (0) is exactly: 1 << (nbr_bits - 1)
+			add_val = 0.5;
+		}
+	}
+	else
 	{
 		add_val = double ((uint64_t (16)) << (fmt.bitsPerSample - 8));
 	}
