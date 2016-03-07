@@ -1019,9 +1019,9 @@ Zero is ignored.</p>
 Possible values are:</p>
 <table>
 <tr><td><b><code>"point"</code></b></td><td>Nearest neighbour interpolation. Same as Avisynth’s <code>PointResize</code>.</td></tr>
-<tr><td><b><code>"rect"</code> or <code>"box"</code></b></td><td>Box filter.</td></tr>
-<tr><td><b><code>"linear"</code> or<br /><code>"bilinear"</code></b></td><td>Bilinear interpolation. Same as Avisynth’s <code>BilinearResize</code>.</td></tr>
-<tr><td><b><code>"cubic"</code> or<br /><code>"bicubic"</code></b></td><td>Bicubic interpolation. Same as <code>BicubicResize</code>. The b and c variables are mapped on <var>a1</var> and <var>a2</var> and are both set to 1/3 by default.</td></tr>
+<tr><td><b><code>"rect"</code></b> or <b><code>"box"</code></b></td><td>Box filter.</td></tr>
+<tr><td><b><code>"linear"</code></b> or<br /><b><code>"bilinear"</code></b></td><td>Bilinear interpolation. Same as Avisynth’s <code>BilinearResize</code>.</td></tr>
+<tr><td><b><code>"cubic"</code></b> or<br /><b><code>"bicubic"</code></b></td><td>Bicubic interpolation. Same as <code>BicubicResize</code>. The b and c variables are mapped on <var>a1</var> and <var>a2</var> and are both set to 1/3 by default.</td></tr>
 <tr><td><b><code>"lanczos"</code></b></td><td>Sinc function windowed by the central lobe of a sinc. Use <var>taps</var> to specify its impulse length. Same as <code>LanczosResize</code>.</td></tr>
 <tr><td><b><code>"blackman"</code></b></td><td>Blackman-Harris windowed sinc. Use <var>taps</var> to control its length. Same as <code>BlackmanResize</code>.</td></tr>
 <tr><td><b><code>"blackmanminlobe"</code></b></td><td>Another kind of Blackman windowed sinc, with a bit less ringing. Use <var>taps</var> for you know what.</td></tr>
@@ -1029,7 +1029,7 @@ Possible values are:</p>
 <tr><td><b><code>"spline36"</code></b></td><td>Spline, 6 sample points. Same as <code>Spline36Resize</code>.</td></tr>
 <tr><td><b><code>"spline64"</code></b></td><td>Spline, 8 sample points. Same as <code>Spline64Resize</code>.</td></tr>
 <tr><td><b><code>"spline"</code></b></td><td>Generic splines, number of sample points is twice the <var>taps</var> parameter, so you can use <var>taps&nbsp;= 6</var> to get a <code>Spline144Resize</code> equivalent.</td></tr>
-<tr><td><b><code>"gauss"</code> or<br /><code>"gaussian"</code></b></td><td>Gaussian kernel. The p parameter is mapped on <var>a1</var> and controls the curve width. The higher p, the sharper. It is set to 30 by default. This resizer is the same as <code>GaussResize</code>, but <var>taps</var> offers a control on the filter impulse length. For low p values (soft and blurry), it’s better to increase the number of taps to avoid truncating the gaussian curve too early and creating artifacts.</td></tr>
+<tr><td><b><code>"gauss"</code></b> or<br /><b><code>"gaussian"</code></b></td><td>Gaussian kernel. The p parameter is mapped on <var>a1</var> and controls the curve width. The higher p, the sharper. It is set to 30 by default. This resizer is the same as <code>GaussResize</code>, but <var>taps</var> offers a control on the filter impulse length. For low p values (soft and blurry), it’s better to increase the number of taps to avoid truncating the gaussian curve too early and creating artifacts.</td></tr>
 <tr><td><b><code>"sinc"</code></b></td><td>Truncated sinc function. Use <var>taps</var> to control its length. Same as <code>SincResize</code>.</td></tr>
 </table>
 
