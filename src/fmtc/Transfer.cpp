@@ -532,6 +532,10 @@ fmtcl::TransCurve	Transfer::conv_string_to_curve (const vsutl::FilterBase &flt, 
 	{
 		c = fmtcl::TransCurve_CANONLOG;
 	}
+	else if (str == "adobergb")
+	{
+		c = fmtcl::TransCurve_ADOBE_RGB;
+	}
 	else
 	{
 		flt.throw_inval_arg ("unknown matrix identifier.");
@@ -618,6 +622,12 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 		break;
 	case fmtcl::TransCurve_CANONLOG:
 		ptr = OpSPtr (new fmtcl::TransOpCanonLog (inv_flag));
+		break;
+	case fmtcl::TransCurve_ADOBE_RGB:
+		ptr = OpSPtr (new fmtcl::TransOpPow (inv_flag, 563.0 / 256));
+		break;
+	case fmtcl::TransCurve_ROMM_RGB:
+		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1, 0.001953, 1.0 / 1.8, 16));
 		break;
 	default:
 		assert (false);

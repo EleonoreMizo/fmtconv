@@ -1379,6 +1379,8 @@ much higher.</p>
 <tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 2.x (800 EI), linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise.</td></tr>
 <tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 3.x (800 EI), linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise.</td></tr>
 <tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
+<tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td>Adobe RGB (1998 and Wide Gamut)</td></tr>
+<tr><td><b><code>&quot;romm&quot;  </code></b></td><td>0&hellip;1</td><td>ProPhoto, ROMM</td></tr>
 </table>
 
 <p class="var">cont</p>
@@ -1473,6 +1475,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li>Added the <code>primaries</code> function to convert between gamuts.</li>
 <li>The “full” range is now closer to what is specified in the standards.</li>
 <li>A recent Vapoursynth is now required because API headers were updated to version 3.1.4.</li>
+<li><code>transfer</code>: added the Adobe RGB and ProPhoto / ROMM curves.</li>
 </ul>
 
 <p><b>r17, 2015.07.08</b></p>
