@@ -5,7 +5,7 @@ Fmtconv is a format-conversion plug-in for the Vapoursynth video processing engi
 It does:
 * Resizing.
 * Bitdepth conversion with dithering.
-* Colorspace conversion (matrix and transfer characteristics).
+* Colorspace conversion (matrix, transfer characteristics and chromatic adaptation).
 
 It supports:
 * Pixel data types: 8-–12-, 14- and 16-bit integer, 32-bit float.
