@@ -779,7 +779,7 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 <h3><a id="primaries"></a>primaries</h3>
 
 <pre class="proto">fmtc.primaries (
-	clip       : clip      ;
+	clip       : clip        ;
 	rs         : float[]: opt;
 	gs         : float[]: opt;
 	bs         : float[]: opt;
@@ -796,11 +796,27 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 
 <p>Performs a gamut conversion given a set of three primary colors and
 a reference white to another set of primary colors and a target reference
-white.</p>
+white.
+Illuminant conversions are done using the Bradford method.</p>
+
+<p>Pixel values are left intact after the transform, they are not bound
+to the target gamut and could be invalid colors.
+However, when using 16-bit unsigned integer they are clipped to representable
+data values.</p>
 
 <p>All colors are given in xyY colorspace, with their x and y coordinates.</p>
 
-<p></p>
+<p>You must supply the full description of the original and target gamuts,
+with the built-in presets or by setting individual components.</p>
+
+<p>Please note that this function does not work at the same level as
+<code>matrix</code>.
+The latter converts between  gamma-compressed RGB and YUV-like colorspaces,
+while <code>primaries</code> operates on linear RGB colorspaces exclusively,
+whose specifications are given by the primaries.
+For more details, see Charles Poynton, <i>A Guided Tour of Color Space</i>,
+1997.</p>
+
 
 <h4>Parameters</h4>
 
@@ -824,13 +840,20 @@ Superseded by individual r, g, b and w settings.
 Possible values are:</p>
 <table>
 <tr><th>Value</th><th>Primary</th><th>x</th><th>y</th><th>Description</th></tr>
-<tr><td><b><code>"709"<br />"1361"<br />"61966-2-1"<br />"61966-2-4"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.300,<br />0.150,<br />0.3127,</td><td>0.330<br />0.600<br />0.060<br />0.3290</td><td>ITU-R BT.709-5<br />ITU-R BT.1361<br />IEC 61966-2-1 (sRGB or sYCC)<br />IEC 61966-2-4<br />Annex B of SMPTE RP 177 (1993)</td></tr>
-<tr><td><b><code>"470m"</code></b></td><td>R<br />G<br />B<br />W (C)</td><td>0.670,<br />0.210,<br />0.140,<br />0.3100,</td><td>0.330<br />0.710<br />0.080<br />0.3160</td><td>ITU-R BT.470-6 System M (historical)<br />NTSC (1953)<br />FCC</td></tr>
-<tr><td><b><code>"470m93"</code></b></td><td>R<br />G<br />B<br />W (9305K)</td><td>0.670,<br />0.210,<br />0.140,<br />0.2848,</td><td>0.330<br />0.710<br />0.080<br />0.2932</td><td>ITU-R BT.470-6 System M — Japan (NTSC-J)</td></tr>
-<tr><td><b><code>"470bg"<br />"601-625"<br />"1358-625"<br />"1700-625"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.290,<br />0.150,<br />0.3127,</td><td>0.330<br />0.600<br />0.060<br />0.3290</td><td>ITU-R BT.470-6 System B, G (historical)<br />ITU-R BT.601-6 625<br />ITU-R BT.1358 625<br />ITU-R BT.1700 625 PAL and 625 SECAM</td></tr>
-<tr><td><b><code>"170m"<br />"240m"<br />"601-525"<br />"1358-525"<br />"1700-525"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.630,<br />0.310,<br />0.155,<br />0.3127</td><td>0.340<br />0.595<br />0.070<br />0.3290</td><td>SMPTE 170M (2004)<br />SMPTE 240M (1999)<br />ITU-R BT.601-6 525<br />ITU-R BT.1358 525<br />ITU-R BT.1700 NTSC</td></tr>
-<tr><td><b><code>"gf"</code></b></td><td>R (Wratten 25)<br />G (Wratten 58)<br />B (Wratten 47)<br />W (C)</td><td>0.681,<br />0.243,<br />0.145,<br />0.3100,</td><td>0.319<br />0.692<br />0.049<br />0.3160</td><td>Generic film (colour filters using Illuminant C)</td></tr>
-<tr><td><b><code>"2020"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.708,<br />0.170,<br />0.131,<br />0.3127</td><td>0.292<br />0.797<br />0.046<br />0.3290</td><td>ITU-R BT.2020</td></tr>
+<tr><td><b><code>"709"</code></b> or<br /><b><code>"1361"</code></b> or<br /><b><code>"61966-2-1"</code></b> or<br /><b><code>"61966-2-4"</code></b> or<br /><b><code>"hdtv"</code></b> or<br /><b><code>"srgb"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.300,<br />0.150,<br />0.3127,</td><td>0.330<br />0.600<br />0.060<br />0.3290</td><td>ITU-R BT.709-5<br />ITU-R BT.1361<br />IEC 61966-2-1 (sRGB or sYCC)<br />IEC 61966-2-4<br />Annex B of SMPTE RP 177 (1993)</td></tr>
+<tr><td><b><code>"470m"</code></b> or<br /><b><code>"ntsc"</code></b></td><td>R<br />G<br />B<br />W (C)</td><td>0.670,<br />0.210,<br />0.140,<br />0.3100,</td><td>0.330<br />0.710<br />0.080<br />0.3160</td><td>ITU-R BT.470-6 System M (historical)<br />NTSC (1953)<br />FCC</td></tr>
+<tr><td><b><code>"470m93"</code></b> or<br /><b><code>"ntscj"</code></b></td><td>R<br />G<br />B<br />W (9305K)</td><td>0.670,<br />0.210,<br />0.140,<br />0.2848,</td><td>0.330<br />0.710<br />0.080<br />0.2932</td><td>ITU-R BT.470-6 System M — Japan (NTSC-J)</td></tr>
+<tr><td><b><code>"470bg"</code></b> or<br /><b><code>"601-625"</code></b> or<br /><b><code>"1358-625"</code></b> or<br /><b><code>"1700-625"</code></b> or<br /><b><code>"pal"</code></b> or<br /><b><code>"secam"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.290,<br />0.150,<br />0.3127,</td><td>0.330<br />0.600<br />0.060<br />0.3290</td><td>ITU-R BT.470-6 System B, G (historical)<br />ITU-R BT.601-6 625<br />ITU-R BT.1358 625<br />ITU-R BT.1700 625 PAL and 625 SECAM</td></tr>
+<tr><td><b><code>"170m"</code></b> or<br /><b><code>"240m"</code></b> or<br /><b><code>"601-525"</code></b> or<br /><b><code>"1358-525"</code></b> or<br /><b><code>"1700-525"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.630,<br />0.310,<br />0.155,<br />0.3127</td><td>0.340<br />0.595<br />0.070<br />0.3290</td><td>SMPTE 170M (2004)<br />SMPTE 240M (1999)<br />ITU-R BT.601-6 525<br />ITU-R BT.1358 525<br />ITU-R BT.1700 NTSC</td></tr>
+<tr><td><b><code>"filmc"</code></b></td><td>R (Wratten 25)<br />G (Wratten 58)<br />B (Wratten 47)<br />W (C)</td><td>0.681,<br />0.243,<br />0.145,<br />0.3100,</td><td>0.319<br />0.692<br />0.049<br />0.3160</td><td>Generic film (colour filters using Illuminant C)</td></tr>
+<tr><td><b><code>"2020"</code></b> or<br /><b><code>"uhdtv"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.708,<br />0.170,<br />0.131,<br />0.3127</td><td>0.292<br />0.797<br />0.046<br />0.3290</td><td>ITU-R BT.2020</td></tr>
+<tr><td><b><code>"61966-2-2"</code></b> or<br /><b><code>"scrgb"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.300,<br />0.150,<br />0.31271</td><td>0.330<br />0.600<br />0.060<br />0.32902</td><td>IEC 61966-2-4 (scRGB)</td></tr>
+<tr><td><b><code>"adobe98"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.210,<br />0.150,<br />0.31271</td><td>0.330<br />0.710<br />0.060<br />0.32902</td><td>Adobe RGB (1998)</td></tr>
+<tr><td><b><code>"adobewide"</code></b></td><td>R<br />G<br />B<br />W (D50)</td><td>0.735,<br />0.115,<br />0.157,<br />0.34567</td><td>0.330<br />0.710<br />0.060<br />0.35850</td><td>Adobe Wide Gamut RGB</td></tr>
+<tr><td><b><code>"apple"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.625,<br />0.280,<br />0.155,<br />0.31271</td><td>0.265<br />0.826<br />0.018<br />0.32902</td><td>Apple RGB</td></tr>
+<tr><td><b><code>"photopro"</code></b> or<br /><b><code>"romm"</code></b></td><td>R<br />G<br />B<br />W (D50)</td><td>0.7347,<br />0.1596,<br />0.0366,<br />0.34567</td><td>0.2653<br />0.8404<br />0.0001<br />0.35850</td><td>PhotoPro<br />ROMM</td></tr>
+<tr><td><b><code>"ciergb"</code></b></td><td>R<br />G<br />B<br />W (E)</td><td>0.7347,<br />0.2738,<br />0.1666,<br />1 / 3</td><td>0.2653<br />0.7174<br />0.0089<br />1 / 3</td><td>CIE RGB (1931)</td></tr>
+<tr><td><b><code>"ciexyz"</code></b></td><td>R<br />G<br />B<br />W (E)</td><td>1.0,<br />0.0,<br />0.0,<br />1 / 3</td><td>0.0<br />1.0<br />0.0<br />1 / 3</td><td>CIE XYZ (1931)</td></tr>
 </table>
 
 <p class="var">cpuopt</p>

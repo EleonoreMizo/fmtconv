@@ -241,21 +241,25 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 		if (        preset == "709"
 		         || preset == "1361"
 		         || preset == "61966-2-1"
-		         || preset == "61966-2-4")
+		         || preset == "61966-2-4"
+		         || preset == "hdtv"
+		         || preset == "srgb")
 		{
 			_rgb [0] = { 0.640 , 0.330  };
 			_rgb [1] = { 0.300 , 0.600  };
 			_rgb [2] = { 0.150 , 0.060  };
 			_white   = { 0.3127, 0.3290 };
 		}
-		else if (   preset == "470m")
+		else if (   preset == "470m"
+		         || preset == "ntsc")
 		{
 			_rgb [0] = { 0.670 , 0.330  };
 			_rgb [1] = { 0.210 , 0.710  };
 			_rgb [2] = { 0.140 , 0.080  };
 			_white   = { 0.3100, 0.3160 };
 		}
-		else if (   preset == "470m93")
+		else if (   preset == "470m93"
+		         || preset == "ntscj")
 		{
 			_rgb [0] = { 0.670 , 0.330  };
 			_rgb [1] = { 0.210 , 0.710  };
@@ -265,7 +269,9 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 		else if (   preset == "470bg"
 		         || preset == "601-625"
 		         || preset == "1358-625"
-		         || preset == "1700-625")
+		         || preset == "1700-625"
+		         || preset == "pal"
+		         || preset == "secam")
 		{
 			_rgb [0] = { 0.640 , 0.330  };
 			_rgb [1] = { 0.290 , 0.600  };
@@ -283,19 +289,71 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 			_rgb [2] = { 0.155 , 0.070  };
 			_white   = { 0.3127, 0.3290 };
 		}
-		else if (   preset == "gf")
+		else if (   preset == "filmc")
 		{
 			_rgb [0] = { 0.681 , 0.319  };
 			_rgb [1] = { 0.243 , 0.692  };
 			_rgb [2] = { 0.145 , 0.049  };
 			_white   = { 0.3100, 0.3160 };
 		}
-		else if (   preset == "2020")
+		else if (   preset == "2020"
+		         || preset == "hdtv")
 		{
 			_rgb [0] = { 0.708 , 0.292  };
 			_rgb [1] = { 0.170 , 0.797  };
 			_rgb [2] = { 0.131 , 0.046  };
 			_white   = { 0.3127, 0.3290 };
+		}
+		else if (   preset == "61966-2-2"
+		         || preset == "scrgb")
+		{
+			_rgb [0] = { 0.640  , 0.330   };
+			_rgb [1] = { 0.300  , 0.600   };
+			_rgb [2] = { 0.150  , 0.060   };
+			_white   = { 0.31271, 0.32902 };
+		}
+		else if (   preset == "adobe98")
+		{
+			_rgb [0] = { 0.640  , 0.330   };
+			_rgb [1] = { 0.210  , 0.710   };
+			_rgb [2] = { 0.150  , 0.060   };
+			_white   = { 0.31271, 0.32902 };
+		}
+		else if (   preset == "adobewide")
+		{
+			_rgb [0] = { 0.735  , 0.265   };
+			_rgb [1] = { 0.115  , 0.826   };
+			_rgb [2] = { 0.157  , 0.018   };
+			_white   = { 0.34567, 0.35850 };
+		}
+		else if (   preset == "apple")
+		{
+			_rgb [0] = { 0.625  , 0.340   };
+			_rgb [1] = { 0.280  , 0.595   };
+			_rgb [2] = { 0.155  , 0.070   };
+			_white   = { 0.31271, 0.32902 };
+		}
+		else if (   preset == "photopro"
+		         || preset == "romm")
+		{
+			_rgb [0] = { 0.7347 , 0.2653  };
+			_rgb [1] = { 0.1596 , 0.8404  };
+			_rgb [2] = { 0.0366 , 0.0001  };
+			_white   = { 0.34567, 0.35850 };
+		}
+		else if (   preset == "ciergb")
+		{
+			_rgb [0] = { 0.7347 , 0.2653  };
+			_rgb [1] = { 0.2738 , 0.7174  };
+			_rgb [2] = { 0.1666 , 0.0089  };
+			_white   = { 1.0 / 3, 1.0 / 3 };
+		}
+		else if (   preset == "ciexyz")
+		{
+			_rgb [0] = { 1.0    , 0.0     };
+			_rgb [1] = { 0.0    , 1.0     };
+			_rgb [2] = { 0.0    , 0.0     };
+			_white   = { 1.0 / 3, 1.0 / 3 };
 		}
 		else
 		{
