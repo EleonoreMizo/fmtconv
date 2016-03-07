@@ -93,17 +93,16 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 
 	// Primaries
 	_prim_s.init (*this, in, out, "prims");
-	_prim_d.init (*this, in, out, "primd");
 	_prim_s.init (*this, in, out, "rs", "gs", "bs", "ws");
-	_prim_d.init (*this, in, out, "rd", "gd", "bd", "wd");
 	if (! _prim_s.is_ready ())
 	{
 		throw_inval_arg ("input primaries not set.");
 	}
-	if (! _prim_d.is_ready ())
-	{
-		throw_inval_arg ("input primaries not set.");
-	}
+
+	_prim_d = _prim_s;
+	_prim_d.init (*this, in, out, "primd");
+	_prim_d.init (*this, in, out, "rd", "gd", "bd", "wd");
+	assert (_prim_d.is_ready ());
 
 	const fmtcl::Mat3 mat_conv = compute_conversion_matrix ();
 	_mat_main.insert3 (mat_conv);

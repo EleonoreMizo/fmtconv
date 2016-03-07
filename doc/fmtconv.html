@@ -790,7 +790,6 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 	wd         : float[]: opt;
 	prims      : data   : opt;
 	primd      : data   : opt;
-	csp        : int    : opt;
 	cpuopt     : int    : opt; (-1)
 )</pre>
 
@@ -832,7 +831,8 @@ white.
 Each variable is an array of two components, x and y.</p>
 
 <p class="var">rd, gd, bd, wd</p>
-<p>Primaries for the target colorspace.</p>
+<p>Primaries for the target colorspace.
+If not specified, the value is copied from the source colorspace.</p>
 
 <p class="var">prims, primd</p>
 <p>Primaries presets for the source and destination colorspaces.
