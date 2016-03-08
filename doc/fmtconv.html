@@ -15,7 +15,7 @@
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r17</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r18</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
 <tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a></td></tr>
@@ -779,18 +779,18 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 <h3><a id="primaries"></a>primaries</h3>
 
 <pre class="proto">fmtc.primaries (
-	clip       : clip        ;
-	rs         : float[]: opt;
-	gs         : float[]: opt;
-	bs         : float[]: opt;
-	ws         : float[]: opt;
-	rd         : float[]: opt;
-	gd         : float[]: opt;
-	bd         : float[]: opt;
-	wd         : float[]: opt;
-	prims      : data   : opt;
-	primd      : data   : opt;
-	cpuopt     : int    : opt; (-1)
+	clip  : clip        ;
+	rs    : float[]: opt;
+	gs    : float[]: opt;
+	bs    : float[]: opt;
+	ws    : float[]: opt;
+	rd    : float[]: opt;
+	gd    : float[]: opt;
+	bd    : float[]: opt;
+	wd    : float[]: opt;
+	prims : data   : opt;
+	primd : data   : opt;
+	cpuopt: int    : opt; (-1)
 )</pre>
 
 <p>Performs a gamut conversion given a set of three primary colors and
@@ -1470,7 +1470,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
-<p><b>Latest version</b></p>
+<p><b>r18, 2016.03.08</b></p>
 <ul>
 <li>Added the <code>primaries</code> function to convert between gamuts.</li>
 <li>The “full” range is now closer to what is specified in the standards.</li>
