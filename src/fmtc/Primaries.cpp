@@ -225,6 +225,118 @@ Primaries::RGBSystem::RGBSystem ()
 
 
 
+void	Primaries::RGBSystem::init (fmtcl::PrimariesPreset preset)
+{
+	assert (   (   preset >= 0
+	            && preset < fmtcl::PrimariesPreset_NBR_ELT)
+	        || (   preset > fmtcl::PrimariesPreset_ISO_RANGE_LAST
+	            && preset < fmtcl::PrimariesPreset_NBR_ELT_CUSTOM));
+
+	bool           init_flag = true;
+	switch (preset)
+	{
+	case fmtcl::PrimariesPreset_BT709:
+		_rgb [0] = { 0.640 , 0.330  };
+		_rgb [1] = { 0.300 , 0.600  };
+		_rgb [2] = { 0.150 , 0.060  };
+		_white   = { 0.3127, 0.3290 };
+		break;
+	case fmtcl::PrimariesPreset_FCC:
+		_rgb [0] = { 0.670 , 0.330  };
+		_rgb [1] = { 0.210 , 0.710  };
+		_rgb [2] = { 0.140 , 0.080  };
+		_white   = { 0.3100, 0.3160 };
+		break;
+	case fmtcl::PrimariesPreset_NTSCJ:
+		_rgb [0] = { 0.670 , 0.330  };
+		_rgb [1] = { 0.210 , 0.710  };
+		_rgb [2] = { 0.140 , 0.080  };
+		_white   = { 0.2848, 0.2932 };
+		break;
+	case fmtcl::PrimariesPreset_BT470BG:
+		_rgb [0] = { 0.640 , 0.330  };
+		_rgb [1] = { 0.290 , 0.600  };
+		_rgb [2] = { 0.150 , 0.060  };
+		_white   = { 0.3127, 0.3290 };
+		break;
+	case fmtcl::PrimariesPreset_SMPTE170M:
+	case fmtcl::PrimariesPreset_SMPTE240M:
+		_rgb [0] = { 0.630 , 0.340  };
+		_rgb [1] = { 0.310 , 0.595  };
+		_rgb [2] = { 0.155 , 0.070  };
+		_white   = { 0.3127, 0.3290 };
+		break;
+	case fmtcl::PrimariesPreset_GENERIC_FILM:
+		_rgb [0] = { 0.681 , 0.319  };
+		_rgb [1] = { 0.243 , 0.692  };
+		_rgb [2] = { 0.145 , 0.049  };
+		_white   = { 0.3100, 0.3160 };
+		break;
+	case fmtcl::PrimariesPreset_BT2020:
+		_rgb [0] = { 0.708 , 0.292  };
+		_rgb [1] = { 0.170 , 0.797  };
+		_rgb [2] = { 0.131 , 0.046  };
+		_white   = { 0.3127, 0.3290 };
+		break;
+	case fmtcl::PrimariesPreset_SCRGB:
+		_rgb [0] = { 0.640  , 0.330   };
+		_rgb [1] = { 0.300  , 0.600   };
+		_rgb [2] = { 0.150  , 0.060   };
+		_white   = { 0.31271, 0.32902 };
+		break;
+	case fmtcl::PrimariesPreset_ADOBE_RGB_98:
+		_rgb [0] = { 0.640  , 0.330   };
+		_rgb [1] = { 0.210  , 0.710   };
+		_rgb [2] = { 0.150  , 0.060   };
+		_white   = { 0.31271, 0.32902 };
+		break;
+	case fmtcl::PrimariesPreset_ADOBE_RGB_WIDE:
+		_rgb [0] = { 0.735  , 0.265   };
+		_rgb [1] = { 0.115  , 0.826   };
+		_rgb [2] = { 0.157  , 0.018   };
+		_white   = { 0.34567, 0.35850 };
+		break;
+	case fmtcl::PrimariesPreset_APPLE_RGB:
+		_rgb [0] = { 0.625  , 0.340   };
+		_rgb [1] = { 0.280  , 0.595   };
+		_rgb [2] = { 0.155  , 0.070   };
+		_white   = { 0.31271, 0.32902 };
+		break;
+	case fmtcl::PrimariesPreset_ROMM:
+		_rgb [0] = { 0.7347 , 0.2653  };
+		_rgb [1] = { 0.1596 , 0.8404  };
+		_rgb [2] = { 0.0366 , 0.0001  };
+		_white   = { 0.34567, 0.35850 };
+		break;
+	case fmtcl::PrimariesPreset_CIERGB:
+		_rgb [0] = { 0.7347 , 0.2653  };
+		_rgb [1] = { 0.2738 , 0.7174  };
+		_rgb [2] = { 0.1666 , 0.0089  };
+		_white   = { 1.0 / 3, 1.0 / 3 };
+		break;
+	case fmtcl::PrimariesPreset_CIEXYZ:
+		_rgb [0] = { 1.0    , 0.0     };
+		_rgb [1] = { 0.0    , 1.0     };
+		_rgb [2] = { 0.0    , 0.0     };
+		_white   = { 1.0 / 3, 1.0 / 3 };
+		break;
+	default:
+		assert (false);
+		init_flag = false;
+		break;
+	}
+
+	if (init_flag)
+	{
+		for (bool &init_flag : _init_flag_arr)
+		{
+			init_flag = true;
+		}
+	}
+}
+
+
+
 void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0)
 {
 	assert (&filter != 0);
@@ -232,144 +344,13 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 	assert (&out != 0);
 	assert (preset_0 != 0);
 
-	std::string    preset = filter.get_arg_str (in, out, preset_0, "");
-	if (! preset.empty ())
+	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
+	fstb::conv_to_lower_case (preset_str);
+	const fmtcl::PrimariesPreset  preset =
+		conv_string_to_primaries (filter, preset_str, preset_0);
+	if (preset >= 0)
 	{
-		fstb::conv_to_lower_case (preset);
-
-		if (        preset == "709"
-		         || preset == "1361"
-		         || preset == "61966-2-1"
-		         || preset == "61966-2-4"
-		         || preset == "hdtv"
-		         || preset == "srgb")
-		{
-			_rgb [0] = { 0.640 , 0.330  };
-			_rgb [1] = { 0.300 , 0.600  };
-			_rgb [2] = { 0.150 , 0.060  };
-			_white   = { 0.3127, 0.3290 };
-		}
-		else if (   preset == "470m"
-		         || preset == "ntsc")
-		{
-			_rgb [0] = { 0.670 , 0.330  };
-			_rgb [1] = { 0.210 , 0.710  };
-			_rgb [2] = { 0.140 , 0.080  };
-			_white   = { 0.3100, 0.3160 };
-		}
-		else if (   preset == "470m93"
-		         || preset == "ntscj")
-		{
-			_rgb [0] = { 0.670 , 0.330  };
-			_rgb [1] = { 0.210 , 0.710  };
-			_rgb [2] = { 0.140 , 0.080  };
-			_white   = { 0.2848, 0.2932 };
-		}
-		else if (   preset == "470bg"
-		         || preset == "601-625"
-		         || preset == "1358-625"
-		         || preset == "1700-625"
-		         || preset == "pal"
-		         || preset == "secam")
-		{
-			_rgb [0] = { 0.640 , 0.330  };
-			_rgb [1] = { 0.290 , 0.600  };
-			_rgb [2] = { 0.150 , 0.060  };
-			_white   = { 0.3127, 0.3290 };
-		}
-		else if (   preset == "170m"
-		         || preset == "240m"
-		         || preset == "601-525"
-		         || preset == "1358-525"
-		         || preset == "1700-525")
-		{
-			_rgb [0] = { 0.630 , 0.340  };
-			_rgb [1] = { 0.310 , 0.595  };
-			_rgb [2] = { 0.155 , 0.070  };
-			_white   = { 0.3127, 0.3290 };
-		}
-		else if (   preset == "filmc")
-		{
-			_rgb [0] = { 0.681 , 0.319  };
-			_rgb [1] = { 0.243 , 0.692  };
-			_rgb [2] = { 0.145 , 0.049  };
-			_white   = { 0.3100, 0.3160 };
-		}
-		else if (   preset == "2020"
-		         || preset == "hdtv")
-		{
-			_rgb [0] = { 0.708 , 0.292  };
-			_rgb [1] = { 0.170 , 0.797  };
-			_rgb [2] = { 0.131 , 0.046  };
-			_white   = { 0.3127, 0.3290 };
-		}
-		else if (   preset == "61966-2-2"
-		         || preset == "scrgb")
-		{
-			_rgb [0] = { 0.640  , 0.330   };
-			_rgb [1] = { 0.300  , 0.600   };
-			_rgb [2] = { 0.150  , 0.060   };
-			_white   = { 0.31271, 0.32902 };
-		}
-		else if (   preset == "adobe98")
-		{
-			_rgb [0] = { 0.640  , 0.330   };
-			_rgb [1] = { 0.210  , 0.710   };
-			_rgb [2] = { 0.150  , 0.060   };
-			_white   = { 0.31271, 0.32902 };
-		}
-		else if (   preset == "adobewide")
-		{
-			_rgb [0] = { 0.735  , 0.265   };
-			_rgb [1] = { 0.115  , 0.826   };
-			_rgb [2] = { 0.157  , 0.018   };
-			_white   = { 0.34567, 0.35850 };
-		}
-		else if (   preset == "apple")
-		{
-			_rgb [0] = { 0.625  , 0.340   };
-			_rgb [1] = { 0.280  , 0.595   };
-			_rgb [2] = { 0.155  , 0.070   };
-			_white   = { 0.31271, 0.32902 };
-		}
-		else if (   preset == "photopro"
-		         || preset == "romm")
-		{
-			_rgb [0] = { 0.7347 , 0.2653  };
-			_rgb [1] = { 0.1596 , 0.8404  };
-			_rgb [2] = { 0.0366 , 0.0001  };
-			_white   = { 0.34567, 0.35850 };
-		}
-		else if (   preset == "ciergb")
-		{
-			_rgb [0] = { 0.7347 , 0.2653  };
-			_rgb [1] = { 0.2738 , 0.7174  };
-			_rgb [2] = { 0.1666 , 0.0089  };
-			_white   = { 1.0 / 3, 1.0 / 3 };
-		}
-		else if (   preset == "ciexyz")
-		{
-			_rgb [0] = { 1.0    , 0.0     };
-			_rgb [1] = { 0.0    , 1.0     };
-			_rgb [2] = { 0.0    , 0.0     };
-			_white   = { 1.0 / 3, 1.0 / 3 };
-		}
-		else
-		{
-			fstb::snprintf4all (
-				filter._filter_error_msg_0,
-				filter._max_error_buf_len,
-				"%s: unknown preset \"%s\".",
-				preset_0,
-				preset.c_str ()
-			);
-			filter.throw_inval_arg (filter._filter_error_msg_0);
-		}
-
-		for (bool &init_flag : _init_flag_arr)
-		{
-			init_flag = true;
-		}
+		init (preset);
 	}
 }
 
@@ -598,6 +579,111 @@ fmtcl::Vec3	Primaries::conv_xy_to_xyz (const Vec2 &xy)
 	xyz [2] = (1 - xy [0] - xy [1]) / xy [1];
 
 	return xyz;
+}
+
+
+
+// str should be already converted to lower case
+fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const vsutl::FilterBase &flt, const std::string &str, const char *name_0)
+{
+	assert (&str != 0);
+	assert (&flt != 0);
+	assert (name_0 != 0);
+
+	fmtcl::PrimariesPreset  preset = fmtcl::PrimariesPreset_UNDEF;
+
+	if (        str == "709"
+		      || str == "1361"
+		      || str == "61966-2-1"
+		      || str == "61966-2-4"
+		      || str == "hdtv"
+		      || str == "srgb")
+	{
+		preset = fmtcl::PrimariesPreset_BT709;
+	}
+	else if (   str == "470m"
+		      || str == "ntsc")
+	{
+		preset = fmtcl::PrimariesPreset_FCC;
+	}
+	else if (   str == "470m93"
+		      || str == "ntscj")
+	{
+		preset = fmtcl::PrimariesPreset_NTSCJ;
+	}
+	else if (   str == "470bg"
+		      || str == "601-625"
+		      || str == "1358-625"
+		      || str == "1700-625"
+		      || str == "pal"
+		      || str == "secam")
+	{
+		preset = fmtcl::PrimariesPreset_BT470BG;
+	}
+	else if (   str == "170m"
+		      || str == "601-525"
+		      || str == "1358-525"
+		      || str == "1700-525")
+	{
+		preset = fmtcl::PrimariesPreset_SMPTE170M;
+	}
+	else if (   str == "240m")
+	{
+		preset = fmtcl::PrimariesPreset_SMPTE240M;
+	}
+	else if (   str == "filmc")
+	{
+		preset = fmtcl::PrimariesPreset_GENERIC_FILM;
+	}
+	else if (   str == "2020"
+		      || str == "hdtv")
+	{
+		preset = fmtcl::PrimariesPreset_BT2020;
+	}
+	else if (   str == "61966-2-2"
+		      || str == "scrgb")
+	{
+		preset = fmtcl::PrimariesPreset_SCRGB;
+	}
+	else if (   str == "adobe98")
+	{
+		preset = fmtcl::PrimariesPreset_ADOBE_RGB_98;
+	}
+	else if (   str == "adobewide")
+	{
+		preset = fmtcl::PrimariesPreset_ADOBE_RGB_WIDE;
+	}
+	else if (   str == "apple")
+	{
+		preset = fmtcl::PrimariesPreset_APPLE_RGB;
+	}
+	else if (   str == "photopro"
+		      || str == "romm")
+	{
+		preset = fmtcl::PrimariesPreset_ROMM;
+	}
+	else if (   str == "ciergb")
+	{
+		preset = fmtcl::PrimariesPreset_CIERGB;
+	}
+	else if (   str == "ciexyz")
+	{
+		preset = fmtcl::PrimariesPreset_CIEXYZ;
+	}
+
+	if (preset < 0)
+	{
+		fstb::snprintf4all (
+			flt._filter_error_msg_0,
+			flt._max_error_buf_len,
+			"%s: unknown preset \"%s\".",
+			name_0,
+			str.c_str ()
+		);
+		flt.throw_inval_arg (flt._filter_error_msg_0);
+	}
+
+	return preset;
 }
 
 

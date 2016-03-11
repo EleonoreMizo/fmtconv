@@ -28,6 +28,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/MatrixProc.h"
+#include "fmtcl/PrimariesPreset.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
 
@@ -84,6 +85,7 @@ private:
 	{
 	public:
 		               RGBSystem ();
+		void           init (fmtcl::PrimariesPreset preset);
 		void           init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0);
 		void           init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 []);
 		bool           is_ready () const;
@@ -103,6 +105,8 @@ private:
 	               compute_chroma_adapt (const RGBSystem &prim_s, const RGBSystem &prim_d);
 	static fmtcl::Vec3
 	               conv_xy_to_xyz (const Vec2 &xy);
+	static fmtcl::PrimariesPreset
+	               conv_string_to_primaries (const vsutl::FilterBase &flt, const std::string &preset, const char *name_0);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;

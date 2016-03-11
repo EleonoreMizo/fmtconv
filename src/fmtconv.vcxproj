@@ -196,6 +196,7 @@
     <ClInclude Include="fmtcl\MatrixProc_macro.h" />
     <ClInclude Include="fmtcl\MatrixWrap.h" />
     <ClInclude Include="fmtcl\MatrixWrap.hpp" />
+    <ClInclude Include="fmtcl\PrimariesPreset.h" />
     <ClInclude Include="fmtcl\Proxy.h" />
     <ClInclude Include="fmtcl\Proxy.hpp" />
     <ClInclude Include="fmtcl\ProxyRwAvx2.h" />
