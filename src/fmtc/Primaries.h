@@ -29,10 +29,10 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtcl/MatrixProc.h"
 #include "fmtcl/PrimariesPreset.h"
+#include "fmtcl/RgbSystem.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
 
-#include <array>
 #include <memory>
 
 
@@ -72,41 +72,24 @@ private:
 
 	static const int  NBR_PLANES    = 3;
 
-	class Vec2
-	:	public std::array <double, NBR_PLANES - 1>
-	{
-		typedef std::array <double, NBR_PLANES - 1> Inherited;
-	public:
-		               Vec2 () = default;
-		               Vec2 (double c0, double c1);
-	};
-
-	class RGBSystem
+	class RgbSystem
+	:	public fmtcl::RgbSystem
 	{
 	public:
-		               RGBSystem ();
-		void           init (fmtcl::PrimariesPreset preset);
+		               RgbSystem () = default;
 		void           init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0);
 		void           init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 []);
-		bool           is_ready () const;
 		static bool    read_coord_tuple (Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0);
-		std::array <Vec2, NBR_PLANES>       // x,y coordinates for R, G and B
-		               _rgb;
-		Vec2           _white;              // XYZ coordinates for the ref. white
-		std::array <bool, NBR_PLANES + 1>
-		               _init_flag_arr;      // R, G, B, W
-		fmtcl::PrimariesPreset              // If known
-		               _preset;
 	};
 
 	void           check_colorspace (const ::VSFormat &fmt, const char *inout_0) const;
 	fmtcl::Mat3    compute_conversion_matrix () const;
 	static fmtcl::Mat3
-	               compute_rgb2xyz (const RGBSystem &prim);
+	               compute_rgb2xyz (const RgbSystem &prim);
 	static fmtcl::Mat3
-	               compute_chroma_adapt (const RGBSystem &prim_s, const RGBSystem &prim_d);
+	               compute_chroma_adapt (const RgbSystem &prim_s, const RgbSystem &prim_d);
 	static fmtcl::Vec3
-	               conv_xy_to_xyz (const Vec2 &xy);
+	               conv_xy_to_xyz (const RgbSystem::Vec2 &xy);
 	static fmtcl::PrimariesPreset
 	               conv_string_to_primaries (const vsutl::FilterBase &flt, const std::string &preset, const char *name_0);
 
@@ -121,8 +104,8 @@ private:
 	bool           _avx_flag;
 	bool           _avx2_flag;
 
-	RGBSystem      _prim_s;
-	RGBSystem      _prim_d;
+	RgbSystem      _prim_s;
+	RgbSystem      _prim_d;
 
 	fmtcl::Mat4    _mat_main;
 

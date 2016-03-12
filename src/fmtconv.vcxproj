@@ -213,6 +213,7 @@
     <ClInclude Include="fmtcl\ResizeData.h" />
     <ClInclude Include="fmtcl\ResizeData.hpp" />
     <ClInclude Include="fmtcl\ResizeDataFactory.h" />
+    <ClInclude Include="fmtcl\RgbSystem.h" />
     <ClInclude Include="fmtcl\Scaler.h" />
     <ClInclude Include="fmtcl\CoefArrInt.h" />
     <ClInclude Include="fmtcl\CoefArrInt.hpp" />
@@ -369,6 +370,7 @@
     <ClCompile Include="fmtcl\ResampleSpecPlane.cpp" />
     <ClCompile Include="fmtcl\ResizeData.cpp" />
     <ClCompile Include="fmtcl\ResizeDataFactory.cpp" />
+    <ClCompile Include="fmtcl\RgbSystem.cpp" />
     <ClCompile Include="fmtcl\Scaler.cpp" />
     <ClCompile Include="fmtcl\CoefArrInt.cpp" />
     <ClCompile Include="fmtcl\Scaler_avx2.cpp">

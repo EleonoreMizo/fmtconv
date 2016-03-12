@@ -220,138 +220,7 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 
 
 
-Primaries::Vec2::Vec2 (double c0, double c1)
-:	Inherited ({ { c0, c1 } })
-{
-	// Nothing
-}
-
-
-
-Primaries::RGBSystem::RGBSystem ()
-:	_rgb ()
-,	_white ()
-,	_init_flag_arr ({ {false, false, false, false } })
-,	_preset (fmtcl::PrimariesPreset_UNDEF)
-{
-	// Nothing
-}
-
-
-
-void	Primaries::RGBSystem::init (fmtcl::PrimariesPreset preset)
-{
-	assert (   (   preset >= 0
-	            && preset < fmtcl::PrimariesPreset_NBR_ELT)
-	        || (   preset > fmtcl::PrimariesPreset_ISO_RANGE_LAST
-	            && preset < fmtcl::PrimariesPreset_NBR_ELT_CUSTOM));
-
-	bool           init_flag = true;
-	switch (preset)
-	{
-	case fmtcl::PrimariesPreset_BT709:
-		_rgb [0] = { 0.640 , 0.330  };
-		_rgb [1] = { 0.300 , 0.600  };
-		_rgb [2] = { 0.150 , 0.060  };
-		_white   = { 0.3127, 0.3290 };
-		break;
-	case fmtcl::PrimariesPreset_FCC:
-		_rgb [0] = { 0.670 , 0.330  };
-		_rgb [1] = { 0.210 , 0.710  };
-		_rgb [2] = { 0.140 , 0.080  };
-		_white   = { 0.3100, 0.3160 };
-		break;
-	case fmtcl::PrimariesPreset_NTSCJ:
-		_rgb [0] = { 0.670 , 0.330  };
-		_rgb [1] = { 0.210 , 0.710  };
-		_rgb [2] = { 0.140 , 0.080  };
-		_white   = { 0.2848, 0.2932 };
-		break;
-	case fmtcl::PrimariesPreset_BT470BG:
-		_rgb [0] = { 0.640 , 0.330  };
-		_rgb [1] = { 0.290 , 0.600  };
-		_rgb [2] = { 0.150 , 0.060  };
-		_white   = { 0.3127, 0.3290 };
-		break;
-	case fmtcl::PrimariesPreset_SMPTE170M:
-	case fmtcl::PrimariesPreset_SMPTE240M:
-		_rgb [0] = { 0.630 , 0.340  };
-		_rgb [1] = { 0.310 , 0.595  };
-		_rgb [2] = { 0.155 , 0.070  };
-		_white   = { 0.3127, 0.3290 };
-		break;
-	case fmtcl::PrimariesPreset_GENERIC_FILM:
-		_rgb [0] = { 0.681 , 0.319  };
-		_rgb [1] = { 0.243 , 0.692  };
-		_rgb [2] = { 0.145 , 0.049  };
-		_white   = { 0.3100, 0.3160 };
-		break;
-	case fmtcl::PrimariesPreset_BT2020:
-		_rgb [0] = { 0.708 , 0.292  };
-		_rgb [1] = { 0.170 , 0.797  };
-		_rgb [2] = { 0.131 , 0.046  };
-		_white   = { 0.3127, 0.3290 };
-		break;
-	case fmtcl::PrimariesPreset_SCRGB:
-		_rgb [0] = { 0.640  , 0.330   };
-		_rgb [1] = { 0.300  , 0.600   };
-		_rgb [2] = { 0.150  , 0.060   };
-		_white   = { 0.31271, 0.32902 };
-		break;
-	case fmtcl::PrimariesPreset_ADOBE_RGB_98:
-		_rgb [0] = { 0.640  , 0.330   };
-		_rgb [1] = { 0.210  , 0.710   };
-		_rgb [2] = { 0.150  , 0.060   };
-		_white   = { 0.31271, 0.32902 };
-		break;
-	case fmtcl::PrimariesPreset_ADOBE_RGB_WIDE:
-		_rgb [0] = { 0.735  , 0.265   };
-		_rgb [1] = { 0.115  , 0.826   };
-		_rgb [2] = { 0.157  , 0.018   };
-		_white   = { 0.34567, 0.35850 };
-		break;
-	case fmtcl::PrimariesPreset_APPLE_RGB:
-		_rgb [0] = { 0.625  , 0.340   };
-		_rgb [1] = { 0.280  , 0.595   };
-		_rgb [2] = { 0.155  , 0.070   };
-		_white   = { 0.31271, 0.32902 };
-		break;
-	case fmtcl::PrimariesPreset_ROMM:
-		_rgb [0] = { 0.7347 , 0.2653  };
-		_rgb [1] = { 0.1596 , 0.8404  };
-		_rgb [2] = { 0.0366 , 0.0001  };
-		_white   = { 0.34567, 0.35850 };
-		break;
-	case fmtcl::PrimariesPreset_CIERGB:
-		_rgb [0] = { 0.7347 , 0.2653  };
-		_rgb [1] = { 0.2738 , 0.7174  };
-		_rgb [2] = { 0.1666 , 0.0089  };
-		_white   = { 1.0 / 3, 1.0 / 3 };
-		break;
-	case fmtcl::PrimariesPreset_CIEXYZ:
-		_rgb [0] = { 1.0    , 0.0     };
-		_rgb [1] = { 0.0    , 1.0     };
-		_rgb [2] = { 0.0    , 0.0     };
-		_white   = { 1.0 / 3, 1.0 / 3 };
-		break;
-	default:
-		assert (false);
-		init_flag = false;
-		break;
-	}
-
-	if (init_flag)
-	{
-		for (bool &init_flag : _init_flag_arr)
-		{
-			init_flag = true;
-		}
-	}
-}
-
-
-
-void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0)
+void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0)
 {
 	assert (&filter != 0);
 	assert (&in != 0);
@@ -363,13 +232,13 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 	_preset = conv_string_to_primaries (filter, preset_str, preset_0);
 	if (_preset >= 0)
 	{
-		init (_preset);
+		set (_preset);
 	}
 }
 
 
 
-void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 [])
+void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 [])
 {
 	assert (&filter != 0);
 	assert (&in != 0);
@@ -401,21 +270,7 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 
 
 
-bool	Primaries::RGBSystem::is_ready () const
-{
-	for (bool init_flag : _init_flag_arr)
-	{
-		if (! init_flag)
-		{
-			return false;
-		}
-	}
-	return (true);
-}
-
-
-
-bool	Primaries::RGBSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0)
+bool	Primaries::RgbSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0)
 {
 	bool           set_flag = false;
 	typedef std::vector <double> Vect;
@@ -536,7 +391,7 @@ fmtcl::Mat3	Primaries::compute_conversion_matrix () const
 
 
 // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
-fmtcl::Mat3	Primaries::compute_rgb2xyz (const RGBSystem &prim)
+fmtcl::Mat3	Primaries::compute_rgb2xyz (const RgbSystem &prim)
 {
 	const fmtcl::Vec3 white = conv_xy_to_xyz (prim._white);
 
@@ -561,7 +416,7 @@ fmtcl::Mat3	Primaries::compute_rgb2xyz (const RGBSystem &prim)
 
 
 // http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
-fmtcl::Mat3	Primaries::compute_chroma_adapt (const RGBSystem &prim_s, const RGBSystem &prim_d)
+fmtcl::Mat3	Primaries::compute_chroma_adapt (const RgbSystem &prim_s, const RgbSystem &prim_d)
 {
 	fmtcl::Vec3    white_s = conv_xy_to_xyz (prim_s._white);
 	fmtcl::Vec3    white_d = conv_xy_to_xyz (prim_d._white);
@@ -592,7 +447,7 @@ fmtcl::Mat3	Primaries::compute_chroma_adapt (const RGBSystem &prim_s, const RGBS
 // Y is assumed to be 1.0
 // X =      x      / y
 // Z = (1 - x - y) / y
-fmtcl::Vec3	Primaries::conv_xy_to_xyz (const Vec2 &xy)
+fmtcl::Vec3	Primaries::conv_xy_to_xyz (const RgbSystem::Vec2 &xy)
 {
 	fmtcl::Vec3    xyz;
 

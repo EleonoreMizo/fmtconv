@@ -517,6 +517,9 @@
     <ClInclude Include="fmtcl\PrimariesPreset.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\RgbSystem.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">
@@ -725,6 +728,9 @@
     </ClCompile>
     <ClCompile Include="fmtc\Primaries.cpp">
       <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\RgbSystem.cpp">
+      <Filter>fmtcl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
