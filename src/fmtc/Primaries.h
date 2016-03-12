@@ -95,6 +95,8 @@ private:
 		Vec2           _white;              // XYZ coordinates for the ref. white
 		std::array <bool, NBR_PLANES + 1>
 		               _init_flag_arr;      // R, G, B, W
+		fmtcl::PrimariesPreset              // If known
+		               _preset;
 	};
 
 	void           check_colorspace (const ::VSFormat &fmt, const char *inout_0) const;

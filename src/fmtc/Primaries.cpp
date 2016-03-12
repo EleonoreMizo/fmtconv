@@ -192,6 +192,19 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 			src_ptr_arr, src_str_arr,
 			w, h
 		);
+
+		// Output properties
+		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+
+		const fmtcl::PrimariesPreset  preset_d = _prim_d._preset;
+		if (preset_d >= 0 && preset_d < fmtcl::PrimariesPreset_NBR_ELT)
+		{
+			_vsapi.propSetInt (&dst_prop, "_Primaries", int (preset_d), ::paReplace);
+		}
+		else
+		{
+			_vsapi.propDeleteKey (&dst_prop, "_Primaries");
+		}
 	}
 
 	return (dst_ptr);
@@ -219,6 +232,7 @@ Primaries::RGBSystem::RGBSystem ()
 :	_rgb ()
 ,	_white ()
 ,	_init_flag_arr ({ {false, false, false, false } })
+,	_preset (fmtcl::PrimariesPreset_UNDEF)
 {
 	// Nothing
 }
@@ -346,11 +360,10 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 
 	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
 	fstb::conv_to_lower_case (preset_str);
-	const fmtcl::PrimariesPreset  preset =
-		conv_string_to_primaries (filter, preset_str, preset_0);
-	if (preset >= 0)
+	_preset = conv_string_to_primaries (filter, preset_str, preset_0);
+	if (_preset >= 0)
 	{
-		init (preset);
+		init (_preset);
 	}
 }
 
@@ -366,6 +379,10 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 	assert (b_0 != 0);
 	assert (w_0 != 0);
 
+	const bool     ready_old_flag         = is_ready ();
+	std::array <Vec2, NBR_PLANES> rgb_old = _rgb;
+	Vec2                          w_old   = _white;
+
 	const char *   name_0_arr [NBR_PLANES] = { r_0, g_0, b_0 };
 	for (int k = 0; k < NBR_PLANES; ++k)
 	{
@@ -375,6 +392,11 @@ void	Primaries::RGBSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 
 	_init_flag_arr [NBR_PLANES] |=
 		read_coord_tuple (_white, filter, in, out, w_0);
+
+	if (ready_old_flag && is_ready () && (rgb_old != _rgb || w_old != _white))
+	{
+		_preset = fmtcl::PrimariesPreset_UNDEF;
+	}
 }
 
 
