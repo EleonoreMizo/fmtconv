@@ -106,10 +106,10 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_white   = { 0.3100, 0.3160 };
 		break;
 	case PrimariesPreset_BT2020:
-		_rgb [0] = { 0.708 , 0.292  };
-		_rgb [1] = { 0.170 , 0.797  };
-		_rgb [2] = { 0.131 , 0.046  };
-		_white   = { 0.3127, 0.3290 };
+		_rgb [0] = { 0.70792, 0.29203 };
+		_rgb [1] = { 0.17024, 0.79652 };
+		_rgb [2] = { 0.13137, 0.04588 };
+		_white   = { 0.31271, 0.32902 };
 		break;
 	case PrimariesPreset_SCRGB:
 		_rgb [0] = { 0.640  , 0.330   };
@@ -124,9 +124,9 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_white   = { 0.31271, 0.32902 };
 		break;
 	case PrimariesPreset_ADOBE_RGB_WIDE:
-		_rgb [0] = { 0.735  , 0.265   };
-		_rgb [1] = { 0.115  , 0.826   };
-		_rgb [2] = { 0.157  , 0.018   };
+		_rgb [0] = { 0.73469, 0.26531 };
+		_rgb [1] = { 0.11416, 0.82621 };
+		_rgb [2] = { 0.15664, 0.01770 };
 		_white   = { 0.34567, 0.35850 };
 		break;
 	case PrimariesPreset_APPLE_RGB:

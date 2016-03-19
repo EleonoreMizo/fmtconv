@@ -421,9 +421,8 @@ fmtcl::Mat3	Primaries::compute_chroma_adapt (const RgbSystem &prim_s, const RgbS
 	fmtcl::Vec3    white_s = conv_xy_to_xyz (prim_s._white);
 	fmtcl::Vec3    white_d = conv_xy_to_xyz (prim_d._white);
 
-	//	Bradford adaptation
-	const fmtcl::Mat3 ma (
-	{
+	// Bradford adaptation
+	const fmtcl::Mat3 ma ({
 		fmtcl::Vec3 ( 0.8951,  0.2664, -0.1614),
 		fmtcl::Vec3 (-0.7502,  1.7135,  0.0367),
 		fmtcl::Vec3 ( 0.0389, -0.0685,  1.0296)
@@ -470,37 +469,37 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const vsutl::FilterB
 	fmtcl::PrimariesPreset  preset = fmtcl::PrimariesPreset_UNDEF;
 
 	if (        str == "709"
-		      || str == "1361"
-		      || str == "61966-2-1"
-		      || str == "61966-2-4"
-		      || str == "hdtv"
-		      || str == "srgb")
+	         || str == "1361"
+	         || str == "61966-2-1"
+	         || str == "61966-2-4"
+	         || str == "hdtv"
+	         || str == "srgb")
 	{
 		preset = fmtcl::PrimariesPreset_BT709;
 	}
 	else if (   str == "470m"
-		      || str == "ntsc")
+	         || str == "ntsc")
 	{
 		preset = fmtcl::PrimariesPreset_FCC;
 	}
 	else if (   str == "470m93"
-		      || str == "ntscj")
+	         || str == "ntscj")
 	{
 		preset = fmtcl::PrimariesPreset_NTSCJ;
 	}
 	else if (   str == "470bg"
-		      || str == "601-625"
-		      || str == "1358-625"
-		      || str == "1700-625"
-		      || str == "pal"
-		      || str == "secam")
+	         || str == "601-625"
+	         || str == "1358-625"
+	         || str == "1700-625"
+	         || str == "pal"
+	         || str == "secam")
 	{
 		preset = fmtcl::PrimariesPreset_BT470BG;
 	}
 	else if (   str == "170m"
-		      || str == "601-525"
-		      || str == "1358-525"
-		      || str == "1700-525")
+	         || str == "601-525"
+	         || str == "1358-525"
+	         || str == "1700-525")
 	{
 		preset = fmtcl::PrimariesPreset_SMPTE170M;
 	}
@@ -513,12 +512,12 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const vsutl::FilterB
 		preset = fmtcl::PrimariesPreset_GENERIC_FILM;
 	}
 	else if (   str == "2020"
-		      || str == "hdtv")
+	         || str == "hdtv")
 	{
 		preset = fmtcl::PrimariesPreset_BT2020;
 	}
 	else if (   str == "61966-2-2"
-		      || str == "scrgb")
+	         || str == "scrgb")
 	{
 		preset = fmtcl::PrimariesPreset_SCRGB;
 	}
@@ -535,7 +534,7 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const vsutl::FilterB
 		preset = fmtcl::PrimariesPreset_APPLE_RGB;
 	}
 	else if (   str == "photopro"
-		      || str == "romm")
+	         || str == "romm")
 	{
 		preset = fmtcl::PrimariesPreset_ROMM;
 	}
