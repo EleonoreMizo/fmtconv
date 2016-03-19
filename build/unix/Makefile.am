@@ -178,6 +178,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/TransLut.h \
                         ../../src/fmtcl/TransOp2084.cpp \
                         ../../src/fmtcl/TransOp2084.h \
+                        ../../src/fmtcl/TransOpAcesCc.cpp \
+                        ../../src/fmtcl/TransOpAcesCc.h \
                         ../../src/fmtcl/TransOpAffine.cpp \
                         ../../src/fmtcl/TransOpAffine.h \
                         ../../src/fmtcl/TransOpBypass.h \
@@ -187,6 +189,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/TransOpCompose.hpp \
                         ../../src/fmtcl/TransOpContrast.h \
                         ../../src/fmtcl/TransOpContrast.hpp \
+                        ../../src/fmtcl/TransOpErimm.cpp \
+                        ../../src/fmtcl/TransOpErimm.h \
                         ../../src/fmtcl/TransOpFilmStream.cpp \
                         ../../src/fmtcl/TransOpFilmStream.h \
                         ../../src/fmtcl/TransOpInterface.h \
@@ -200,6 +204,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/TransOpPow.h \
                         ../../src/fmtcl/TransOpSLog.cpp \
                         ../../src/fmtcl/TransOpSLog.h \
+                        ../../src/fmtcl/TransOpSLog3.cpp \
+                        ../../src/fmtcl/TransOpSLog3.h \
                         ../../src/fmtcl/Vec3.h \
                         ../../src/fmtcl/Vec3.hpp \
                         ../../src/fmtcl/VoidAndCluster.cpp \

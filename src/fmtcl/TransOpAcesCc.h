@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-        TransOpLogC.h
-        Author: Laurent de Soras, 2015
+        TransOpAcesCc.h
+        Author: Laurent de Soras, 2016
 
 --- Legal stuff ---
 
@@ -16,8 +16,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 #pragma once
-#if ! defined (fmtcl_TransOpLogC_HEADER_INCLUDED)
-#define	fmtcl_TransOpLogC_HEADER_INCLUDED
+#if ! defined (fmtcl_TransOpAcesCc_HEADER_INCLUDED)
+#define	fmtcl_TransOpAcesCc_HEADER_INCLUDED
 
 #if defined (_MSC_VER)
 	#pragma warning (4 : 4250)
@@ -36,7 +36,7 @@ namespace fmtcl
 
 
 
-class TransOpLogC
+class TransOpAcesCc
 :	public TransOpInterface
 {
 
@@ -44,21 +44,12 @@ class TransOpLogC
 
 public:
 
-	enum Type
-	{
-		Type_LOGC_V3 = 0,
-		Type_LOGC_V2,
-		Type_VLOG,
-
-		Type_NBR_ELT
-	};
-
-	explicit       TransOpLogC (bool inv_flag, Type type);
-	virtual        ~TransOpLogC () {}
+	explicit       TransOpAcesCc (bool inv_flag);
+	virtual        ~TransOpAcesCc () {}
 
 	// TransOpInterface
 	virtual double operator () (double x) const;
-	virtual double get_max () const;
+	virtual double get_max () const { return (65504); }
 
 
 
@@ -72,22 +63,7 @@ protected:
 
 private:
 
-	double         compute_direct (double x) const;
-	double         compute_inverse (double x) const;
-
 	const bool     _inv_flag;
-	const double   _cut;
-	const double   _a;
-	const double   _b;
-	const double   _c;
-	const double   _d;
-	const double   _e;
-	const double   _f;
-	const double   _n;
-	const double   _cut_i;
-
-	static const double
-		            _noise_margin;
 
 
 
@@ -95,13 +71,13 @@ private:
 
 private:
 
-	               TransOpLogC ()                               = delete;
-	               TransOpLogC (const TransOpLogC &other)       = delete;
-	TransOpLogC &  operator = (const TransOpLogC &other)        = delete;
-	bool           operator == (const TransOpLogC &other) const = delete;
-	bool           operator != (const TransOpLogC &other) const = delete;
+	               TransOpAcesCc ()                               = delete;
+	               TransOpAcesCc (const TransOpAcesCc &other)     = delete;
+	TransOpAcesCc& operator = (const TransOpAcesCc &other)        = delete;
+	bool           operator == (const TransOpAcesCc &other) const = delete;
+	bool           operator != (const TransOpAcesCc &other) const = delete;
 
-};	// class TransOpLogC
+};	// class TransOpAcesCc
 
 
 
@@ -109,11 +85,11 @@ private:
 
 
 
-//#include "fmtcl/TransOpLogC.hpp"
+//#include "fmtcl/TransOpAcesCc.hpp"
 
 
 
-#endif	// fmtcl_TransOpLogC_HEADER_INCLUDED
+#endif	// fmtcl_TransOpAcesCc_HEADER_INCLUDED
 
 
 

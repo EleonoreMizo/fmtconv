@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-        TransOpSLog.cpp
-        Author: Laurent de Soras, 2015
+        TransOpErimm.cpp
+        Author: Laurent de Soras, 2016
 
 --- Legal stuff ---
 
@@ -24,11 +24,9 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/TransOpSLog.h"
+#include "fmtcl/TransOpErimm.h"
+#include "fstb/def.h"
 
-#include <algorithm>
-
-#include <cassert>
 #include <cmath>
 
 
@@ -42,65 +40,64 @@ namespace fmtcl
 
 
 
-TransOpSLog::TransOpSLog (bool inv_flag, bool slog2_flag)
+TransOpErimm::TransOpErimm (bool inv_flag)
 :	_inv_flag (inv_flag)
-,	_slog2_flag (slog2_flag)
+,	_log10_eclip (2.5)
+,	_eclip (pow (10, _log10_eclip))
+,	_log10_emin (-3)
+,	_et (fstb::EXP1 * 0.001)
+,	_log10_et (log10 (_et))
 {
 	// Nothing
 }
 
 
 
-// 1 lin is reference white, peak white at 10 lin.
-double	TransOpSLog::operator () (double x) const
+double	TransOpErimm::operator () (double x) const
 {
-	static const double  a  = 0.037584;
-	static const double  b  = 0.432699;
-	static const double  c1 = 0.616596;
-	static const double  c2 = 0.03;
-	static const double  c  = c1 + c2;
-	static const double  s2 = 219.0 / 155.0;
-
 	double         y = x;
+
 	if (_inv_flag)
 	{
-		if (x < c2)
-		{
-			y = (x - c2) / 5.0;
-		}
-		else
-		{
-			y = pow (10, (y - c) / b) - a;
-		}
-		if (_slog2_flag)
-		{
-			y *= s2;
-		}
-	}
-	else
-	{
-		if (_slog2_flag)
-		{
-			y /= s2;
-		}
 		if (x < 0)
 		{
-			y = x * 5 + c2;
+			y = 0;
+		}
+		else if (x < (_log10_et - _log10_emin) / (_log10_eclip - _log10_emin))
+		{
+			y = x * ((_log10_eclip - _log10_emin) / (_log10_et - _log10_emin)) * _et;
+		}
+		else if (x < 1)
+		{
+			y = pow (10, x * (_log10_eclip - _log10_emin) + _log10_emin);
+		}
+		else 
+		{
+			y = _eclip;
+		}
+	}
+
+	else
+	{
+		if (x < 0)
+		{
+			y = 0;
+		}
+		else if (x < _et)
+		{
+			y = ((_log10_et - _log10_emin) / (_log10_eclip - _log10_emin)) * (x / _et);
+		}
+		else if (x < _eclip)
+		{
+			y = (log10 (x) - _log10_emin) / (_log10_eclip - _log10_emin);
 		}
 		else
 		{
-			y = b * log10 (x + a) + c;
+			y = 1;
 		}
 	}
 
 	return (y);
-}
-
-
-
-double	TransOpSLog::get_max () const
-{
-	return (_slog2_flag) ? 10.0 * 219 / 155 : 10.0;
 }
 
 

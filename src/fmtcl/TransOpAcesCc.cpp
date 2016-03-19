@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-        TransOpSLog.cpp
-        Author: Laurent de Soras, 2015
+        TransOpAcesCc.cpp
+        Author: Laurent de Soras, 2016
 
 --- Legal stuff ---
 
@@ -24,11 +24,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/TransOpSLog.h"
+#include "fmtcl/TransOpAcesCc.h"
 
-#include <algorithm>
-
-#include <cassert>
 #include <cmath>
 
 
@@ -42,65 +39,55 @@ namespace fmtcl
 
 
 
-TransOpSLog::TransOpSLog (bool inv_flag, bool slog2_flag)
+TransOpAcesCc::TransOpAcesCc (bool inv_flag)
 :	_inv_flag (inv_flag)
-,	_slog2_flag (slog2_flag)
 {
 	// Nothing
 }
 
 
 
-// 1 lin is reference white, peak white at 10 lin.
-double	TransOpSLog::operator () (double x) const
+double	TransOpAcesCc::operator () (double x) const
 {
-	static const double  a  = 0.037584;
-	static const double  b  = 0.432699;
-	static const double  c1 = 0.616596;
-	static const double  c2 = 0.03;
-	static const double  c  = c1 + c2;
-	static const double  s2 = 219.0 / 155.0;
-
 	double         y = x;
+
 	if (_inv_flag)
 	{
-		if (x < c2)
+		x *= 17.52;
+		x -= 9.72;
+		if (x <= 15)
 		{
-			y = (x - c2) / 5.0;
+			y = exp2 (x + 1) - 1.0 / (1 << 15);
+		}
+		else if (x <= log2 (65504))
+		{
+			y = exp2 (x    );
 		}
 		else
 		{
-			y = pow (10, (y - c) / b) - a;
-		}
-		if (_slog2_flag)
-		{
-			y *= s2;
+			y = 65504;
 		}
 	}
+
 	else
 	{
-		if (_slog2_flag)
-		{
-			y /= s2;
-		}
 		if (x < 0)
 		{
-			y = x * 5 + c2;
+			y = -16;
+		}
+		else if (x < 1.0 / (1 << 15))
+		{
+			y = log2 (1.0 / (1 << 15) + x) - 1;
 		}
 		else
 		{
-			y = b * log10 (x + a) + c;
+			y = log2 (                  x);
 		}
+		y += 9.72;
+		y /= 17.52;
 	}
 
 	return (y);
-}
-
-
-
-double	TransOpSLog::get_max () const
-{
-	return (_slog2_flag) ? 10.0 * 219 / 155 : 10.0;
 }
 
 

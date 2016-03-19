@@ -223,6 +223,7 @@
     <ClInclude Include="fmtcl\TransCurve.h" />
     <ClInclude Include="fmtcl\TransLut.h" />
     <ClInclude Include="fmtcl\TransOp2084.h" />
+    <ClInclude Include="fmtcl\TransOpAcesCc.h" />
     <ClInclude Include="fmtcl\TransOpAffine.h" />
     <ClInclude Include="fmtcl\TransOpBypass.h" />
     <ClInclude Include="fmtcl\TransOpCanonLog.h" />
@@ -230,6 +231,7 @@
     <ClInclude Include="fmtcl\TransOpCompose.hpp" />
     <ClInclude Include="fmtcl\TransOpContrast.h" />
     <ClInclude Include="fmtcl\TransOpContrast.hpp" />
+    <ClInclude Include="fmtcl\TransOpErimm.h" />
     <ClInclude Include="fmtcl\TransOpFilmStream.h" />
     <ClInclude Include="fmtcl\TransOpInterface.h" />
     <ClInclude Include="fmtcl\TransOpLinPow.h" />
@@ -237,6 +239,7 @@
     <ClInclude Include="fmtcl\TransOpLogTrunc.h" />
     <ClInclude Include="fmtcl\TransOpPow.h" />
     <ClInclude Include="fmtcl\TransOpSLog.h" />
+    <ClInclude Include="fmtcl\TransOpSLog3.h" />
     <ClInclude Include="fmtcl\Vec3.h" />
     <ClInclude Include="fmtcl\Vec3.hpp" />
     <ClInclude Include="fmtcl\VoidAndCluster.h" />
@@ -381,14 +384,17 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <ClCompile Include="fmtcl\TransOp2084.cpp" />
+    <ClCompile Include="fmtcl\TransOpAcesCc.cpp" />
     <ClCompile Include="fmtcl\TransOpAffine.cpp" />
     <ClCompile Include="fmtcl\TransOpCanonLog.cpp" />
+    <ClCompile Include="fmtcl\TransOpErimm.cpp" />
     <ClCompile Include="fmtcl\TransOpFilmStream.cpp" />
     <ClCompile Include="fmtcl\TransOpLinPow.cpp" />
     <ClCompile Include="fmtcl\TransOpLogC.cpp" />
     <ClCompile Include="fmtcl\TransOpLogTrunc.cpp" />
     <ClCompile Include="fmtcl\TransOpPow.cpp" />
     <ClCompile Include="fmtcl\TransOpSLog.cpp" />
+    <ClCompile Include="fmtcl\TransOpSLog3.cpp" />
     <ClCompile Include="fmtcl\VoidAndCluster.cpp" />
     <ClCompile Include="fmtc\Bitdepth.cpp" />
     <ClCompile Include="fmtc\Convert.cpp" />

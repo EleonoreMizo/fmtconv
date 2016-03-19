@@ -71,7 +71,14 @@ enum TransCurve
 	TransCurve_LOGC3,       // Arri Log C Alexa 3.x (800 EI), linear scene exposure
 	TransCurve_CANONLOG,    // Canon-Log
 	TransCurve_ADOBE_RGB,   // Adobe RGB (1998 and Wide Gamut)
-	TransCurve_ROMM_RGB     // ProPhoto ROMM RGB
+	TransCurve_ROMM_RGB,    // ProPhoto ROMM RGB
+	TransCurve_ACESCC,      // ACEScc
+	TransCurve_ERIMM,       // ERIMM
+	TransCurve_SLOG2,       // Sony S-Log2
+	TransCurve_SLOG3,       // Sony S-Log3
+	TransCurve_VLOG,        // Panasonic VRICAM V-Log
+
+	TransCurve_NBR_ELT_CUSTOM
 };	// enum TransCurve
 
 

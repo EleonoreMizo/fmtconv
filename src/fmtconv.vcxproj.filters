@@ -520,6 +520,15 @@
     <ClInclude Include="fmtcl\RgbSystem.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\TransOpAcesCc.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpErimm.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="fmtcl\TransOpSLog3.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">
@@ -730,6 +739,15 @@
       <Filter>fmtc</Filter>
     </ClCompile>
     <ClCompile Include="fmtcl\RgbSystem.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpAcesCc.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpErimm.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpSLog3.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
   </ItemGroup>

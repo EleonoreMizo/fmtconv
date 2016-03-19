@@ -46,15 +46,16 @@ const double		TransOpLogC::_noise_margin = -8.0 / 65536;
 
 
 
-TransOpLogC::TransOpLogC (bool inv_flag, bool v2_flag)
+TransOpLogC::TransOpLogC (bool inv_flag, Type type)
 :	_inv_flag (inv_flag)
-,	_cut (v2_flag ? 0.000000 : 0.010591)
-,	_a (  v2_flag ? 5.061087 : 5.555556)
-,	_b (  v2_flag ? 0.089004 : 0.052272)
-,	_c (  v2_flag ? 0.247189 : 0.247190)
-,	_d (  v2_flag ? 0.391007 : 0.385537)
-,	_e (  v2_flag ? 4.950469 : 5.367655)
-,	_f (  v2_flag ? 0.131313 : 0.092809)
+,	_cut ((type == Type_VLOG) ? 0.01     : (type == Type_LOGC_V2) ? 0.000000 : 0.010591)
+,	_a (  (type == Type_VLOG) ? 1.0      : (type == Type_LOGC_V2) ? 5.061087 : 5.555556)
+,	_b (  (type == Type_VLOG) ? 0.00873  : (type == Type_LOGC_V2) ? 0.089004 : 0.052272)
+,	_c (  (type == Type_VLOG) ? 0.241514 : (type == Type_LOGC_V2) ? 0.247189 : 0.247190)
+,	_d (  (type == Type_VLOG) ? 0.598206 : (type == Type_LOGC_V2) ? 0.391007 : 0.385537)
+,	_e (  (type == Type_VLOG) ? 5.6      : (type == Type_LOGC_V2) ? 4.950469 : 5.367655)
+,	_f (  (type == Type_VLOG) ? 0.125    : (type == Type_LOGC_V2) ? 0.131313 : 0.092809)
+,	_n (  (type == Type_VLOG) ? 0        : _noise_margin)
 ,	_cut_i (_e * _cut + _f)
 {
 	// Nothing
