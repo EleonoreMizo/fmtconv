@@ -153,6 +153,48 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_rgb [2] = { 0.0    , 0.0     };
 		_white   = { 1.0 / 3, 1.0 / 3 };
 		break;
+	case PrimariesPreset_DCIP3:
+		_rgb [0] = { 0.680 , 0.320  };
+		_rgb [1] = { 0.265 , 0.690  };
+		_rgb [2] = { 0.150 , 0.060  };
+		_white   = { 0.3127, 0.3290 };
+		break;
+	case PrimariesPreset_ACES:
+		_rgb [0] = { 0.7347 , 0.2653  };
+		_rgb [1] = { 0.0    , 1.0     };
+		_rgb [2] = { 0.0001 ,-0.0770  };
+		_white   = { 0.32168, 0.33767 };
+		break;
+	case PrimariesPreset_ACESAP1:
+		_rgb [0] = { 0.713  , 0.293   };
+		_rgb [1] = { 0.165  , 0.830   };
+		_rgb [2] = { 0.128  , 0.044   };
+		_white   = { 0.32168, 0.33767 };
+		break;
+	case PrimariesPreset_SGAMUT:
+		_rgb [0] = { 0.730 , 0.280  };
+		_rgb [1] = { 0.140 , 0.855  };
+		_rgb [2] = { 0.100 ,-0.050  };
+		_white   = { 0.3127, 0.3290 };
+		break;
+	case PrimariesPreset_SGAMUT3CINE:
+		_rgb [0] = { 0.766 , 0.275  };
+		_rgb [1] = { 0.225 , 0.800  };
+		_rgb [2] = { 0.089 ,-0.087  };
+		_white   = { 0.3127, 0.3290 };
+		break;
+	case PrimariesPreset_ALEXA:
+		_rgb [0] = { 0.6840, 0.3130 };
+		_rgb [1] = { 0.2210, 0.8480 };
+		_rgb [2] = { 0.0861,-0.1020 };
+		_white   = { 0.3127, 0.3290 };
+		break;
+	case PrimariesPreset_VGAMUT:
+		_rgb [0] = { 0.730 , 0.280  };
+		_rgb [1] = { 0.165 , 0.840  };
+		_rgb [2] = { 0.100 ,-0.030  };
+		_white   = { 0.3127, 0.3290 };
+		break;
 	default:
 		assert (false);
 		found_flag = false;

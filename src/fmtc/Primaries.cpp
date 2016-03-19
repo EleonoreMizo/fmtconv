@@ -525,6 +525,35 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const vsutl::FilterB
 	{
 		preset = fmtcl::PrimariesPreset_CIEXYZ;
 	}
+	else if (   str == "dcip3")
+	{
+		preset = fmtcl::PrimariesPreset_DCIP3;
+	}
+	else if (   str == "aces")
+	{
+		preset = fmtcl::PrimariesPreset_ACES;
+	}
+	else if (   str == "ap1")
+	{
+		preset = fmtcl::PrimariesPreset_ACESAP1;
+	}
+	else if (   str == "sgamut"
+	         || str == "sgamut3")
+	{
+		preset = fmtcl::PrimariesPreset_SGAMUT;
+	}
+	else if (   str == "sgamut3cine")
+	{
+		preset = fmtcl::PrimariesPreset_SGAMUT3CINE;
+	}
+	else if (   str == "alexa")
+	{
+		preset = fmtcl::PrimariesPreset_ALEXA;
+	}
+	else if (   str == "vgamut")
+	{
+		preset = fmtcl::PrimariesPreset_VGAMUT;
+	}
 
 	if (preset < 0)
 	{

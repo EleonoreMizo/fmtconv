@@ -54,6 +54,13 @@ enum PrimariesPreset
 	PrimariesPreset_APPLE_RGB,
 	PrimariesPreset_ROMM,
 	PrimariesPreset_CIERGB,
+	PrimariesPreset_DCIP3,
+	PrimariesPreset_ACES,
+	PrimariesPreset_ACESAP1,
+	PrimariesPreset_SGAMUT,
+	PrimariesPreset_SGAMUT3CINE,
+	PrimariesPreset_ALEXA,
+	PrimariesPreset_VGAMUT,
 
 	PrimariesPreset_NBR_ELT_CUSTOM
 }; // enum PrimariesPreset
