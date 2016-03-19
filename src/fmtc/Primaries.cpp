@@ -276,8 +276,7 @@ bool	Primaries::RgbSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &f
 	typedef std::vector <double> Vect;
 	Vect           v_def;
 
-	Vect           c_v =
-		filter.get_arg_vflt (in, out, name_0, v_def);
+	Vect           c_v = filter.get_arg_vflt (in, out, name_0, v_def);
 	if (c_v.size () != 0)
 	{
 		if (c_v.size () != c.size ())
@@ -294,16 +293,6 @@ bool	Primaries::RgbSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &f
 		double            sum = 0;
 		for (size_t k = 0; k < c_v.size (); ++k)
 		{
-			if (c_v [k] < 0 || c_v [k] > 1)
-			{
-				fstb::snprintf4all (
-					filter._filter_error_msg_0,
-					filter._max_error_buf_len,
-					"%s: (x, y) coordinates must be in range 0-1.",
-					name_0
-				);
-				filter.throw_inval_arg (filter._filter_error_msg_0);
-			}
 			sum += c_v [k];
 			c [k] = c_v [k];
 		}
@@ -312,17 +301,7 @@ bool	Primaries::RgbSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &f
 			fstb::snprintf4all (
 				filter._filter_error_msg_0,
 				filter._max_error_buf_len,
-				"%s: y coordinates must be greater than 0.",
-				name_0
-			);
-			filter.throw_inval_arg (filter._filter_error_msg_0);
-		}
-		else if (sum > 1)
-		{
-			fstb::snprintf4all (
-				filter._filter_error_msg_0,
-				filter._max_error_buf_len,
-				"%s: sum of (x, y) coordinates must be in range 0-1.",
+				"%s: y coordinate cannot be 0.",
 				name_0
 			);
 			filter.throw_inval_arg (filter._filter_error_msg_0);
