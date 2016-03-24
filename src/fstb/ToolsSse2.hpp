@@ -458,9 +458,6 @@ void	ToolsSse2::add_x16_s32 (__m128i &dst0, __m128i &dst1, __m128i src, __m128i 
 // Multiplies 8 16-bit signed words and puts the result into 8 32-bit signed words.
 void	ToolsSse2::mul_s16_s16_s32 (__m128i &dst0, __m128i &dst1, __m128i src, __m128i coef)
 {
-	assert (&dst0 != 0);
-	assert (&dst1 != 0);
-
 	const __m128i  hi = _mm_mulhi_epi16 (src, coef);
 	const __m128i  lo = _mm_mullo_epi16 (src, coef);
 
@@ -501,9 +498,6 @@ __m128i	ToolsSse2::mul_s32_s15_s16 (__m128i src0, __m128i src1, __m128i coef)
 // Multiplies 8 16-bit signed words and accumulate to 8 32-bit signed words.
 void	ToolsSse2::mac_s16_s16_s32 (__m128i &dst0, __m128i &dst1, __m128i src, __m128i coef)
 {
-	assert (&dst0 != 0);
-	assert (&dst1 != 0);
-
 	const __m128i  hi = _mm_mulhi_epi16 (src, coef);
 	const __m128i  lo = _mm_mullo_epi16 (src, coef);
 

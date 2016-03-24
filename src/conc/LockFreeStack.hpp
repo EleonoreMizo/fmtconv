@@ -22,8 +22,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include <cassert>
-
 
 
 namespace conc
@@ -47,8 +45,6 @@ LockFreeStack <T>::LockFreeStack ()
 template <class T>
 void	LockFreeStack <T>::push (CellType &cell)
 {
-	assert (&cell != 0);
-
 	CellType *     head_ptr;
 	ptrdiff_t      count;
 	do

@@ -57,11 +57,6 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 ,	_to_yuv_flag (false)
 ,	_proc_uptr ()
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&vsapi != 0);
-
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	const bool     sse2_flag = cpu_opt.has_sse2 ();
 	const bool     avx2_flag = cpu_opt.has_avx2 ();
@@ -189,11 +184,6 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 
 void	Matrix2020CL::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&node != 0);
-	assert (&core != 0);
-
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 }
 
@@ -202,9 +192,6 @@ void	Matrix2020CL::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSC
 const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
-	assert (&frame_data_ptr != 0);
-	assert (&frame_ctx != 0);
-	assert (&core != 0);
 
 	::VSFrameRef *    dst_ptr = 0;
 	::VSNodeRef &     node = *_clip_src_sptr;
@@ -289,11 +276,6 @@ const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void
 
 const ::VSFormat &	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&fmt_src != 0);
-
 	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
 	int            col_fam  = fmt_dst_ptr->colorFamily;
 	int            bits     = fmt_dst_ptr->bitsPerSample;

@@ -53,8 +53,6 @@ I. e., the luma sampling point is at the pixel's center.
 
 void	ChromaPlacement_compute_cplace (double &cp_h, double &cp_v, ChromaPlacement cplace, int plane_index, int ss_h, int ss_v, bool rgb_flag, bool interlaced_flag, bool top_flag)
 {
-	assert (&cp_h != 0);
-	assert (&cp_v != 0);
 	assert (cplace >= 0);
 	assert (cplace < ChromaPlacement_NBR_ELT);
 	assert (ss_h >= 0);

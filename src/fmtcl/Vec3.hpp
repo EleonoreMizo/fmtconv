@@ -22,8 +22,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include <cassert>
-
 
 
 namespace fmtcl
@@ -56,8 +54,6 @@ Vec3::Vec3 (const double arr [VECT_SIZE])
 
 bool	Vec3::operator == (const Vec3 &other) const
 {
-	assert (&other != 0);
-
 	for (int x = 0; x < VECT_SIZE; ++x)
 	{
 		if ((*this) [x] != other [x])
@@ -80,8 +76,6 @@ bool	Vec3::operator != (const Vec3 &other) const
 
 Vec3 &	Vec3::operator += (const Vec3 &other)
 {
-	assert (&other != 0);
-
 	for (int x = 0; x < VECT_SIZE; ++x)
 	{
 		(*this) [x] += other [x];
@@ -94,8 +88,6 @@ Vec3 &	Vec3::operator += (const Vec3 &other)
 
 Vec3 &	Vec3::operator -= (const Vec3 &other)
 {
-	assert (&other != 0);
-
 	for (int x = 0; x < VECT_SIZE; ++x)
 	{
 		(*this) [x] -= other [x];
@@ -120,9 +112,6 @@ Vec3 &	Vec3::operator *= (double scalar)
 
 Vec3	operator + (const Vec3 &lhs, const Vec3 &rhs)
 {
-	assert (&lhs != 0);
-	assert (&rhs != 0);
-
 	return Vec3 (lhs) += rhs;
 }
 
@@ -130,9 +119,6 @@ Vec3	operator + (const Vec3 &lhs, const Vec3 &rhs)
 
 Vec3	operator - (const Vec3 &lhs, const Vec3 &rhs)
 {
-	assert (&lhs != 0);
-	assert (&rhs != 0);
-
 	return Vec3 (lhs) -= rhs;
 }
 

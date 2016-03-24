@@ -97,7 +97,6 @@ FilterResize::FilterResize (const ResampleSpecPlane &spec, ContFirInterface &ker
 ,	_buf_size (BUF_SIZE)
 ,	_buffer_flag (false)
 {
-	assert (&spec != 0);
 	assert (spec._src_width > 0);
 	assert (spec._src_height > 0);
 	assert (spec._dst_width > 0);
@@ -106,8 +105,6 @@ FilterResize::FilterResize (const ResampleSpecPlane &spec, ContFirInterface &ker
 	assert (spec._win_h > 0);
 	assert (! fstb::is_null (spec._kernel_scale_h));
 	assert (! fstb::is_null (spec._kernel_scale_v));
-	assert (&kernel_fnc_h != 0);
-	assert (&kernel_fnc_v != 0);
 	assert (! fstb::is_null (gain));
 	assert (dst_type >= 0);
 	assert (dst_type < SplFmt_NBR_ELT);
@@ -631,8 +628,6 @@ void	FilterResize::process_plane_normal (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_
 
 void	FilterResize::process_tile (TaskRszCell &tr_cell)
 {
-	assert (&tr_cell != 0);
-
 #if (fstb_ARCHI == fstb_ARCHI_X86)
  #if ! defined (_WIN64) && ! defined (__64BIT__) && ! defined (__amd64__) && ! defined (__x86_64__)
 	// We can arrive here from any thread and we don't know the state of the
@@ -1327,8 +1322,6 @@ void	FilterResize::compute_req_src_tile_size (int &tw, int &th, int dw, int dh) 
 {
 	assert (_buffer_flag);
 	assert (_nbr_passes > 0);
-	assert (&tw != 0);
-	assert (&th != 0);
 	assert (dw > 0);
 	assert (dh > 0);
 

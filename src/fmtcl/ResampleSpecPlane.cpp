@@ -41,8 +41,6 @@ namespace fmtcl
 
 bool	ResampleSpecPlane::operator < (const ResampleSpecPlane &other) const
 {
-	assert (&other != 0);
-
 	if (_src_width        < other._src_width       ) { return (true ); }
 	if (_src_width        > other._src_width       ) { return (false); }
 

@@ -90,11 +90,6 @@ CpuId::CpuId ()
 
 void	CpuId::call_cpuid (unsigned int fnc_nbr, unsigned int &v_eax, unsigned int &v_ebx, unsigned int &v_ecx, unsigned int &v_edx)
 {
-	assert (&v_eax != 0);
-	assert (&v_ebx != 0);
-	assert (&v_ecx != 0);
-	assert (&v_edx != 0);
-
 #if defined (__GNUC__)
 	
 	long           r_eax;

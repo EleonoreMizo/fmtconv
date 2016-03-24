@@ -44,8 +44,6 @@ namespace fstb
 // Only for ANSI strings.
 void	conv_to_lower_case (std::string &str)
 {
-	assert (&str != 0);
-
 	for (std::string::size_type p = 0; p < str.length (); ++p)
 	{
 		str [p] = tolower (str [p]);

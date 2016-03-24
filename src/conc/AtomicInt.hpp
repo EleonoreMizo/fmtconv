@@ -139,8 +139,6 @@ T	AtomicInt <T>::cas (T other, T comp)
 template <class T>
 AtomicInt <T> &	AtomicInt <T>::operator += (const T &other)
 {
-	assert (&other != 0);
-
 #if (conc_ARCHI == conc_ARCHI_X86)
 	AioAdd <T>	ftor (other);
 	AtomicIntOp::exec (*this, ftor);
@@ -156,8 +154,6 @@ AtomicInt <T> &	AtomicInt <T>::operator += (const T &other)
 template <class T>
 AtomicInt <T> &	AtomicInt <T>::operator -= (const T &other)
 {
-	assert (&other != 0);
-
 #if (conc_ARCHI == conc_ARCHI_X86)
 	AioSub <T>	ftor (other);
 	AtomicIntOp::exec (*this, ftor);

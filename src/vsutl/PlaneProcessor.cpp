@@ -62,9 +62,7 @@ PlaneProcessor::PlaneProcessor (const ::VSAPI &vsapi, PlaneProcCbInterface &cb, 
 ,	_input_flag (false)
 ,	_blank_frame_sptr ()
 {
-	assert (&vsapi != 0);
 	assert (filter_name_0 != 0);
-	assert (&cb != 0);
 }
 
 
@@ -72,9 +70,6 @@ PlaneProcessor::PlaneProcessor (const ::VSAPI &vsapi, PlaneProcCbInterface &cb, 
 // Don't forget to check "out" to see if an error occured.
 void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVideoInfo &vi_out, bool simple_flag, int max_def_planes, const char *prop_name_0, const char *clip_name_0)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&vi_out != 0);
 	assert (max_def_planes > 0);
 	assert (prop_name_0 != 0);
 	assert (clip_name_0 != 0);
@@ -211,7 +206,6 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 const ::VSFrameRef *	PlaneProcessor::try_initial (::VSCore &core)
 {
 	assert (! _manual_flag);
-	assert (&core != 0);
 
 	const ::VSFrameRef * dst_ptr = 0;
 
@@ -256,10 +250,7 @@ const ::VSFrameRef *	PlaneProcessor::try_initial (::VSCore &core)
 // In manual mode, all planes are called for processing.
 int	PlaneProcessor::process_frame (::VSFrameRef &dst, int n, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, NodeRefSPtr src_node1_sptr, NodeRefSPtr src_node2_sptr, NodeRefSPtr src_node3_sptr)
 {
-	assert (&dst != 0);
 	assert (n >= 0);
-	assert (&frame_ctx != 0);
-	assert (&core != 0);
 	assert (_input_flag);
 
 	int            ret_val = 0;
@@ -343,7 +334,6 @@ double	PlaneProcessor::get_mode_val (int plane_index) const
 
 void	PlaneProcessor::fill_plane (::VSFrameRef &dst, double val, int plane_index)
 {
-	assert (&dst != 0);
 	assert (plane_index >= 0);
 	assert (plane_index < _nbr_planes);
 
@@ -395,8 +385,6 @@ void	PlaneProcessor::fill_plane (::VSFrameRef &dst, double val, int plane_index)
 
 void	PlaneProcessor::copy_plane (::VSFrameRef &dst, const ::VSFrameRef &src, int plane_index)
 {
-	assert (&dst != 0);
-	assert (&src != 0);
 	assert (plane_index >= 0);
 	assert (plane_index < _nbr_planes);
 

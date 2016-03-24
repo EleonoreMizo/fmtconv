@@ -187,7 +187,6 @@ AvstpWrapper::AvstpWrapper ()
 template <class T>
 void	AvstpWrapper::resolve_name (T &fnc_ptr, const char *name_0)
 {
-	assert (&fnc_ptr != 0);
 	assert (name_0 != 0);
 	assert (_dll_hnd != 0);
 

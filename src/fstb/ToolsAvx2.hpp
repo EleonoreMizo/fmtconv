@@ -425,9 +425,6 @@ void	ToolsAvx2::store_si256_partial (void *ptr, __m256i val, int len)
 // Important: the 128-bit lane order from the unpack functions is kept.
 void	ToolsAvx2::mac_s16_s16_s32 (__m256i &dst0, __m256i &dst1, __m256i src, __m256i coef)
 {
-	assert (&dst0 != 0);
-	assert (&dst1 != 0);
-
 	const __m256i  hi = _mm256_mulhi_epi16 (src, coef);
 	const __m256i  lo = _mm256_mullo_epi16 (src, coef);
 

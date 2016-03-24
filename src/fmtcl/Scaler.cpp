@@ -128,7 +128,6 @@ fmtcl_Scaler_SPAN_I (fmtcl_Scaler_INIT_I_CPP)
 	assert (dst_height > 0);
 	assert (win_height > 0);
 	assert (kernel_scale > 0);
-	assert (&kernel_fnc != 0);
 	assert (! fstb::is_null (gain));
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
@@ -158,8 +157,6 @@ fmtcl_Scaler_SPAN_I (fmtcl_Scaler_INIT_I_CPP)
 void	Scaler::get_src_boundaries (int &y_src_beg, int &y_src_end, int y_dst_beg, int y_dst_end) const
 {
 	assert (_fir_len > 0);
-	assert (&y_src_beg != 0);
-	assert (&y_src_end != 0);
 	assert (y_dst_beg >= 0);
 	assert (y_dst_beg < y_dst_end);
 	assert (y_dst_end <= _dst_height);
@@ -219,13 +216,10 @@ fmtcl_Scaler_SPAN_I (fmtcl_Scaler_DEFINE_I)
 
 void	Scaler::eval_req_src_area (int &work_top, int &work_height, int src_height, int dst_height, double win_top, double win_height, ContFirInterface &kernel_fnc, double kernel_scale, double center_pos_src, double center_pos_dst)
 {
-	assert (&work_top != 0);
-	assert (&work_height != 0);
 	assert (src_height > 0);
 	assert (dst_height > 0);
 	assert (win_height > 0);
 	assert (kernel_scale > 0);
-	assert (&kernel_fnc != 0);
 
 	const BasicInfo   bi (
 		src_height, dst_height, win_top, win_height,
@@ -255,7 +249,6 @@ int	Scaler::eval_lower_bound_of_dst_tile_height (int tile_height_src, int dst_he
 	assert (win_height > 0);
 //	assert (win_height >= tile_height_src);
 	assert (kernel_scale > 0);
-	assert (&kernel_fnc != 0);
 	assert (src_height > 0);
 
 	int            tile_height_dst = 0;
@@ -290,7 +283,6 @@ int	Scaler::eval_lower_bound_of_src_tile_height (int tile_height_dst, int dst_he
 //	assert (dst_height >= tile_height_dst);
 	assert (win_height > 0);
 	assert (kernel_scale > 0);
-	assert (&kernel_fnc != 0);
 
 	const BasicInfo   bi (
 		fstb::ceil_int (win_height), dst_height, 0, win_height,
@@ -414,8 +406,8 @@ void	Scaler::process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SR
 	// Sign constants: when we have 16-bit data at one end only,
 	// we need to make data signed at the oposite end. This sign
 	// constant is reported on the summing constant.
-	const int      s_in     = (SB < 16) ? -0x8000 << (SHIFT_INT + SB - DB) : 0;
-	const int      s_out    = (DB < 16) ? +0x8000 << (SHIFT_INT + SB - DB) : 0;
+	const int      s_in     = (SB < 16) ? -(0x8000 << (SHIFT_INT + SB - DB)) : 0;
+	const int      s_out    = (DB < 16) ?   0x8000 << (SHIFT_INT + SB - DB)  : 0;
 	const int      s_cst    = s_in + s_out;
 
 	const int      add_cst  = _add_cst_int + s_cst + r_cst;
@@ -688,8 +680,8 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 	const int      s_in     = (DB == 16) ? 0 : (SB < 16) ? -0x8000 >> (16 - (SHIFT_INT + SB - DB)) : 0;
 	const int      s_out    =                  (DB < 16) ? +0x8000 >> (16 - (SHIFT_INT + SB - DB)) : 0;
 #else
-	const int      s_in     = (SB < 16) ? -0x8000 << (SHIFT_INT + SB - DB) : 0;
-	const int      s_out    = (DB < 16) ? +0x8000 << (SHIFT_INT + SB - DB) : 0;
+	const int      s_in     = (SB < 16) ? -(0x8000 << (SHIFT_INT + SB - DB)) : 0;
+	const int      s_out    = (DB < 16) ?   0x8000 << (SHIFT_INT + SB - DB)  : 0;
 #endif
 	const int      s_cst    = s_in + s_out;
 
@@ -977,7 +969,6 @@ Scaler::BasicInfo::BasicInfo (int src_height, int dst_height, double win_top, do
 	assert (dst_height > 0);
 	assert (win_height > 0);
 	assert (kernel_scale > 0);
-	assert (&kernel_fnc != 0);
 
 	// step is the distance between the two source pixels corresponding
 	// to two adjacent destination pixels

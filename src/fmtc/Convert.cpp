@@ -66,12 +66,6 @@ Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore
 ,	_gcors (get_arg_flt (in, out, "gcors", 1))
 ,	_gcord (get_arg_flt (in, out, "gcord", 1))
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&vsapi != 0);
-	assert (&_fmtc != 0);
-
 	const ::VSFormat &   fmt_src = *(_vi_in.format);
 	retrieve_output_colorspace (in, out, core, fmt_src);
 	const ::VSFormat &   fmt_dst = *(_vi_out.format);
@@ -130,11 +124,6 @@ Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore
 
 void	Convert::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&node != 0);
-	assert (&core != 0);
-
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 }
 
@@ -143,9 +132,6 @@ void	Convert::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &
 const ::VSFrameRef *	Convert::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
-	assert (&frame_data_ptr != 0);
-	assert (&frame_ctx != 0);
-	assert (&core != 0);
 
 	::VSFrameRef *    dst_ptr = 0;
 	::VSNodeRef &     node = *_clip_src_sptr;
@@ -176,11 +162,6 @@ const ::VSFrameRef *	Convert::get_frame (int n, int activation_reason, void * &f
 
 void	Convert::retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&fmt_src != 0);
-
 	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
 
 	// Full colorspace
@@ -285,9 +266,6 @@ void	Convert::retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSC
 
 ConvStep::Range	Convert::retrieve_range (const ::VSFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 [])
 {
-	assert (&fmt  != 0);
-	assert (&in   != 0);
-	assert (&out  != 0);
 	assert (arg_0 != 0);
 
 	bool           range_set_flag  = false;
@@ -387,9 +365,6 @@ fmtcl::TransCurve	Convert::retrieve_tcurve (const ::VSFormat &fmt, const ::VSMap
 
 void	Convert::find_conversion_steps (const ::VSMap &in, ::VSMap &out)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-
 	_step_list.clear ();
 
 	// -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -502,9 +477,6 @@ void	Convert::find_conversion_steps (const ::VSMap &in, ::VSMap &out)
 // Set here: _col_fam, _css_h, _css_v, _sample_type, _bitdepth
 void	Convert::fill_conv_step_with_cs (ConvStep &step, const ::VSFormat &fmt)
 {
-	assert (&step != 0);
-	assert (&fmt  != 0);
-
 	step._col_fam = fmt.colorFamily;
 	if (vsutl::has_chroma (fmt))
 	{

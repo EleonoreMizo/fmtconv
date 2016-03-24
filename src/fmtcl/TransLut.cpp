@@ -79,8 +79,6 @@ template <>
 void	TransLut_FindIndexSse2 <TransLut::MapperLin>::find_index (const TransLut::FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
 {
 	assert (val_arr != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
 	
 	const int      offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
 	const __m128   scale     = _mm_set1_ps (1 << LINLUT_RES_L2);
@@ -104,8 +102,6 @@ template <>
 void	TransLut_FindIndexSse2 <TransLut::MapperLog>::find_index (const TransLut::FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
 {
 	assert (val_arr != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
 
 	// Constants
 	static const int      mant_size = 23;
@@ -215,7 +211,6 @@ TransLut::TransLut (const TransOpInterface &curve, bool log_flag, SplFmt src_fmt
 ,	_sse2_flag (sse2_flag)
 ,	_avx2_flag (avx2_flag)
 {
-	assert (&curve != 0);
 	assert (src_fmt >= 0);
 	assert (src_fmt < SplFmt_NBR_ELT);
 	assert (src_fmt != SplFmt_STACK16);
@@ -259,10 +254,6 @@ TransLut::MapperLin::MapperLin (int lut_size, double range_beg, double range_lst
 
 void	TransLut::MapperLin::find_index (const FloatIntMix &val, int &index, float &frac)
 {
-	assert (&val != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
-
 	const float    val_scl   = val._f * (1 << LINLUT_RES_L2);
 	const int      index_raw = fstb::floor_int (val_scl);
 	const int      offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
@@ -281,9 +272,6 @@ double	TransLut::MapperLin::find_val (int index) const
 
 void	TransLut::MapperLog::find_index (const FloatIntMix &val, int &index, float &frac)
 {
-	assert (&val != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
 	static_assert (LOGLUT_MIN_L2 <= 0, "LOGLUT_MIN_L2 must be negative");
 	static_assert (LOGLUT_MAX_L2 >= 0, "LOGLUT_MAX_L2 must be positive");
 
@@ -375,8 +363,6 @@ double	TransLut::MapperLog::find_val (int index) const
 
 void	TransLut::generate_lut (const TransOpInterface &curve)
 {
-	assert (&curve != 0);
-
 	if (_src_fmt == SplFmt_FLOAT)
 	{
 		// When the source is float, the LUT output is always float
@@ -455,7 +441,6 @@ template <class T>
 void	TransLut::generate_lut_int (const TransOpInterface &curve, int lut_size, double range_beg, double range_lst, double mul, double add)
 {
 	assert (_dst_fmt != SplFmt_FLOAT);
-	assert (&curve != 0);
 	assert (lut_size > 1);
 	assert (range_beg < range_lst);
 
@@ -475,9 +460,6 @@ void	TransLut::generate_lut_int (const TransOpInterface &curve, int lut_size, do
 template <class T, class M>
 void	TransLut::generate_lut_flt (const TransOpInterface &curve, const M &mapper)
 {
-	assert (&curve != 0);
-	assert (&mapper != 0);
-
 	const int      lut_size = mapper.get_lut_size ();
 	for (int pos = 0; pos < lut_size; ++pos)
 	{

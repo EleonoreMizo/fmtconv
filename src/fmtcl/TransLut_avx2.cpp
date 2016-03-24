@@ -69,8 +69,6 @@ template <>
 void	TransLut_FindIndexAvx2 <TransLut::MapperLin>::find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
 {
 	assert (val_arr != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
 
 	const __m256   scale     = _mm256_set1_ps (1 << LINLUT_RES_L2);
 	const __m256i  offset    =
@@ -94,8 +92,6 @@ template <>
 void	TransLut_FindIndexAvx2 <TransLut::MapperLog>::find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
 {
 	assert (val_arr != 0);
-	assert (&index != 0);
-	assert (&frac != 0);
 
 	// Constants
 	static const int      mant_size = 23;

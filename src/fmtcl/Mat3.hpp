@@ -22,6 +22,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include <cassert>
+
 
 
 namespace fmtcl
@@ -81,8 +83,6 @@ Mat3::Mat3 (const Vec3 &v0, const Vec3 &v1, const Vec3 &v2)
 
 bool	Mat3::operator == (const Mat3 &other) const
 {
-	assert (&other != 0);
-
 	for (int y = 0; y < VECT_SIZE; ++y)
 	{
 		if ((*this) [y] != other [y])
@@ -105,8 +105,6 @@ bool	Mat3::operator != (const Mat3 &other) const
 
 Mat3 &	Mat3::operator += (const Mat3 &other)
 {
-	assert (&other != 0);
-
 	for (int y = 0; y < VECT_SIZE; ++y)
 	{
 		for (int x = 0; x < VECT_SIZE; ++x)
@@ -122,8 +120,6 @@ Mat3 &	Mat3::operator += (const Mat3 &other)
 
 Mat3 &	Mat3::operator -= (const Mat3 &other)
 {
-	assert (&other != 0);
-
 	for (int y = 0; y < VECT_SIZE; ++y)
 	{
 		for (int x = 0; x < VECT_SIZE; ++x)
@@ -139,8 +135,6 @@ Mat3 &	Mat3::operator -= (const Mat3 &other)
 
 Mat3 &	Mat3::operator *= (const Mat3 &other)
 {
-	assert (&other != 0);
-
 	*this = *this * other;
 
 	return *this;
@@ -195,7 +189,6 @@ Mat3 &	Mat3::set_col (int pos, const Vec3 &other)
 {
 	assert (pos >= 0);
 	assert (pos < VECT_SIZE);
-	assert (&other != 0);
 
 	for (int y = 0; y < VECT_SIZE; ++y)
 	{
@@ -225,8 +218,6 @@ Vec3	Mat3::get_col (int pos) const
 
 Mat3	operator + (const Mat3 &lhs, const Mat3 &rhs)
 {
-	assert (&lhs != 0);
-
 	return (Mat3 (lhs) += rhs);
 }
 
@@ -234,8 +225,6 @@ Mat3	operator + (const Mat3 &lhs, const Mat3 &rhs)
 
 Mat3	operator - (const Mat3 &lhs, const Mat3 &rhs)
 {
-	assert (&lhs != 0);
-
 	return (Mat3 (lhs) -= rhs);
 }
 
@@ -243,9 +232,6 @@ Mat3	operator - (const Mat3 &lhs, const Mat3 &rhs)
 
 Mat3	operator * (const Mat3 &lhs, const Mat3 &rhs)
 {
-	assert (&lhs != 0);
-	assert (&rhs != 0);
-
 	Mat3           tmp;
 	for (int y = 0; y < Mat3::VECT_SIZE; ++y)
 	{
@@ -267,9 +253,6 @@ Mat3	operator * (const Mat3 &lhs, const Mat3 &rhs)
 
 Vec3	operator * (const Mat3 &lhs, const Vec3 &rhs)
 {
-	assert (&lhs != 0);
-	assert (&rhs != 0);
-
 	Vec3           tmp;
 	for (int y = 0; y < Vec3::VECT_SIZE; ++y)
 	{

@@ -59,11 +59,6 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 ,	_mat_main ()
 ,	_proc_uptr ()
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&vsapi != 0);
-
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	_sse_flag  = cpu_opt.has_sse ();
 	_sse2_flag = cpu_opt.has_sse2 ();
@@ -124,11 +119,6 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 
 void	Primaries::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&node != 0);
-	assert (&core != 0);
-
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 }
 
@@ -137,9 +127,6 @@ void	Primaries::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore
 const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
-	assert (&frame_data_ptr != 0);
-	assert (&frame_ctx != 0);
-	assert (&core != 0);
 
 	::VSFrameRef *    dst_ptr = 0;
 	::VSNodeRef &     node = *_clip_src_sptr;
@@ -222,9 +209,6 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 
 void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0)
 {
-	assert (&filter != 0);
-	assert (&in != 0);
-	assert (&out != 0);
 	assert (preset_0 != 0);
 
 	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
@@ -240,9 +224,6 @@ void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 
 void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 [])
 {
-	assert (&filter != 0);
-	assert (&in != 0);
-	assert (&out != 0);
 	assert (r_0 != 0);
 	assert (g_0 != 0);
 	assert (b_0 != 0);
@@ -317,7 +298,6 @@ bool	Primaries::RgbSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &f
 
 void	Primaries::check_colorspace (const ::VSFormat &fmt, const char *inout_0) const
 {
-	assert (&fmt != 0);
 	assert (inout_0 != 0);
 
 	if (fmt.subSamplingW != 0 || fmt.subSamplingH != 0)
@@ -441,8 +421,6 @@ fmtcl::Vec3	Primaries::conv_xy_to_xyz (const RgbSystem::Vec2 &xy)
 // str should be already converted to lower case
 fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const vsutl::FilterBase &flt, const std::string &str, const char *name_0)
 {
-	assert (&str != 0);
-	assert (&flt != 0);
 	assert (name_0 != 0);
 
 	fmtcl::PrimariesPreset  preset = fmtcl::PrimariesPreset_UNDEF;

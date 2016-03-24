@@ -24,8 +24,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "VapourSynth.h"
 
-#include <cassert>
-
 
 
 namespace fmtc
@@ -39,8 +37,6 @@ namespace fmtc
 
 fmtcl::SplFmt	SplFmtUtl::conv_from_vsformat (const ::VSFormat &fmt)
 {
-	assert (&fmt != 0);
-
 	fmtcl::SplFmt  type = fmtcl::SplFmt_ILLEGAL;
 
 	if (fmt.sampleType == ::stFloat && fmt.bitsPerSample == 32)
@@ -66,10 +62,6 @@ fmtcl::SplFmt	SplFmtUtl::conv_from_vsformat (const ::VSFormat &fmt)
 
 void	SplFmtUtl::conv_from_vsformat (fmtcl::SplFmt &type, int &bitdepth, const ::VSFormat &fmt)
 {
-	assert (&type != 0);
-	assert (&bitdepth != 0);
-	assert (&fmt != 0);
-
 	type     = conv_from_vsformat (fmt);
 	bitdepth = fmt.bitsPerSample;
 }

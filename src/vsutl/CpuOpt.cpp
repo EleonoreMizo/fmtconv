@@ -46,9 +46,6 @@ CpuOpt::CpuOpt (FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char 
 		in, out, param_name_0, Level_ANY_AVAILABLE
 	) & 0xFFFF))
 {
-	assert (&filter != 0);
-	assert (&in != 0);
-	assert (&out != 0);
 	assert (param_name_0 != 0);
 }
 

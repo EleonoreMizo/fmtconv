@@ -55,8 +55,6 @@ ObjRefSPtr <T, FC, FF>::ObjRefSPtr (const ObjRefSPtr <T, FC, FF> &other)
 :	_obj_ptr (0)
 ,	_vsapi_ptr (other._vsapi_ptr)
 {
-	assert (&other != 0);
-
 	if (other._obj_ptr != 0)
 	{
 		_obj_ptr = (_vsapi_ptr->*FC) (other._obj_ptr);
@@ -80,8 +78,6 @@ ObjRefSPtr <T, FC, FF>::~ObjRefSPtr ()
 template <class T, T * (VS_CC *::VSAPI::*FC) (T *), void (VS_CC *::VSAPI::*FF) (T *)>
 ObjRefSPtr <T, FC, FF> &	ObjRefSPtr <T, FC, FF>::operator = (const ObjRefSPtr <T, FC, FF> &other)
 {
-	assert (&other != 0);
-
 	if (other._obj_ptr != _obj_ptr)
 	{
 		T *            tmp_ptr = 0;

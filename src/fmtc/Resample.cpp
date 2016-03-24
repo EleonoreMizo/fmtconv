@@ -90,11 +90,6 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_filter_uptr_map ()
 ,	_plane_data_arr ()
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&vsapi != 0);
-
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	_sse2_flag = cpu_opt.has_sse2 ();
 	_avx2_flag = cpu_opt.has_avx2 ();
@@ -432,11 +427,6 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 void	Resample::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&node != 0);
-	assert (&core != 0);
-
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 	_plane_processor.set_filter (in, out, _vi_out);
 }
@@ -446,9 +436,6 @@ void	Resample::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore 
 const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
-	assert (&frame_data_ptr != 0);
-	assert (&frame_ctx != 0);
-	assert (&core != 0);
 
 	::VSFrameRef *    dst_ptr = 0;
 	::VSNodeRef &     node = *_clip_src_sptr;
@@ -648,11 +635,6 @@ int	Resample::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 
 const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&fmt_src != 0);
-
 	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
 
 	// Full colorspace
@@ -709,8 +691,6 @@ const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &
 
 bool	Resample::cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const char name_0 [], int pos) const
 {
-	assert (&in != 0);
-	assert (&out != 0);
 	assert (name_0 != 0);
 
 	if (is_arg_defined (in, name_0))
@@ -726,9 +706,6 @@ bool	Resample::cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const 
 
 void	Resample::get_interlacing_param (bool &itl_flag, bool &top_flag, int field_index, const ::VSFrameRef &src, InterlacingParam interlaced, FieldOrder field_order) const
 {
-	assert (&itl_flag != 0);
-	assert (&top_flag != 0);
-	assert (&src != 0);
 	assert (interlaced >= 0);
 	assert (interlaced < InterlacingParam_NBR_ELT);
 	assert (field_order >= 0);

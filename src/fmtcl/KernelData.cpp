@@ -399,9 +399,6 @@ void	KernelData::hash_val (const T &val)
 
 void	KernelData::conv_to_float_arr (std::vector <double> &coef_arr, const std::string &str)
 {
-	assert (&coef_arr != 0);
-	assert (&str != 0);
-
 	coef_arr.clear ();
 	const char *   cur_0 = str.c_str ();
 	bool           cont_flag = true;
@@ -427,9 +424,6 @@ void	KernelData::conv_to_float_arr (std::vector <double> &coef_arr, const std::s
 template <class W>
 void	KernelData::apply_window (std::vector <double>	&x, double &norm_sum, int taps, int h_len, int h_len_i, double inv_ovr_s)
 {
-	assert (&x != 0);
-	assert (&norm_sum != 0);
-
 	norm_sum = 0;
 	W              win (taps);
 	for (int k = 1; k < h_len_i; ++k)

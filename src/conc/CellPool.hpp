@@ -164,8 +164,6 @@ typename CellPool <T>::CellType *	CellPool <T>::take_cell (bool autogrow_flag)
 template <class T>
 void	CellPool <T>::return_cell (CellType &cell)
 {
-	assert (&cell != 0);
-
 	_cell_stack.push (cell);
 
 	++ _m_ptr->_nbr_avail_cells;

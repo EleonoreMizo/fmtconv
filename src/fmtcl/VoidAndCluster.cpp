@@ -97,8 +97,6 @@ void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 
 void	VoidAndCluster::homogenize_initial_mat (MatrixWrap <uint16_t> &m) const
 {
-	assert (&m != 0);
-
 	int            cx;
 	int            cy;
 	int            vx;
@@ -123,8 +121,6 @@ void	VoidAndCluster::homogenize_initial_mat (MatrixWrap <uint16_t> &m) const
 
 void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &pos_arr, const MatrixWrap <uint16_t> &m, int color, int kw, int kh) const
 {
-	assert (&pos_arr != 0);
-	assert (&m != 0);
 	assert (kw <= _kernel_gauss_uptr->get_w ());
 	assert (kh <= _kernel_gauss_uptr->get_h ());
 
@@ -201,8 +197,6 @@ std::unique_ptr <MatrixWrap <double> >	VoidAndCluster::create_gauss_kernel (int 
 
 void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
 {
-	assert (&m != 0);
-
 	const double   thr = 0.1;
 
 	const int      w = m.get_w ();
@@ -242,8 +236,6 @@ void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
 
 int	VoidAndCluster::count_elt (const MatrixWrap <uint16_t> &m, int val)
 {
-	assert (&m != 0);
-
 	int            total = 0;
 	const int      w     = m.get_w ();
 	const int      h     = m.get_h ();

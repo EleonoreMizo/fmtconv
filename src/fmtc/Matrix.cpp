@@ -71,11 +71,6 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 ,	_plane_out (get_arg_int (in, out, "singleout", -1))
 ,	_proc_uptr ()
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&vsapi != 0);
-
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	_sse_flag  = cpu_opt.has_sse ();
 	_sse2_flag = cpu_opt.has_sse2 ();
@@ -275,11 +270,6 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 
 void	Matrix::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&node != 0);
-	assert (&core != 0);
-
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 }
 
@@ -288,9 +278,6 @@ void	Matrix::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &c
 const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
-	assert (&frame_data_ptr != 0);
-	assert (&frame_ctx != 0);
-	assert (&core != 0);
 
 	::VSFrameRef *    dst_ptr = 0;
 	::VSNodeRef &     node = *_clip_src_sptr;
@@ -372,9 +359,6 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 // Everything should be lower case at this point
 void	Matrix::select_def_mat (std::string &mat, const ::VSFormat &fmt)
 {
-	assert (&mat != 0);
-	assert (&fmt != 0);
-
 	if (mat.empty ())
 	{
 		switch (fmt.colorFamily)
@@ -401,9 +385,6 @@ void	Matrix::select_def_mat (std::string &mat, const ::VSFormat &fmt)
 
 fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (const vsutl::FilterBase &flt, const std::string &mat, bool allow_2020cl_flag)
 {
-	assert (&flt != 0);
-	assert (&mat != 0);
-
 	fmtcl::ColorSpaceH265   cs = fmtcl::ColorSpaceH265_UNSPECIFIED;
 
 	if (mat.empty () || mat == "rgb")
@@ -458,12 +439,6 @@ fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (const vsutl::FilterBase &flt
 
 const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src, int &plane_out, bool &force_col_fam_flag) const
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&fmt_src != 0);
-	assert (&plane_out != 0);
-
 	force_col_fam_flag = false;
 
 	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
@@ -611,9 +586,6 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 
 void	Matrix::make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_rgb_flag) const
 {
-	assert (&m != 0);
-	assert (&mat != 0);
-
 	if (mat.empty () || mat == "rgb")
 	{
 		m[0][0] = 1; m[0][1] = 0; m[0][2] = 0;
@@ -673,7 +645,6 @@ U, V range : [-0.5 ; 0.5]
 
 void	Matrix::make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag)
 {
-	assert (&m != 0);
 	assert (! fstb::is_null (kg));
 	assert (! fstb::is_eq (kb, 1.0));
 	assert (! fstb::is_eq (kr, 1.0));
@@ -720,8 +691,6 @@ to different roundings.
 
 void	Matrix::make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag)
 {
-	assert (&m != 0);
-
 	if (to_rgb_flag)
 	{
 		m[0][0] = 1; m[0][1] = -1; m[0][2] =  1;

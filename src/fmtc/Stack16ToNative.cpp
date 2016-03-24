@@ -49,11 +49,6 @@ Stack16ToNative::Stack16ToNative (const ::VSMap &in, ::VSMap &out, void *user_da
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&vsapi != 0);
-
 	// Checks the input clip
 	if (_vi_in.format == 0)
 	{
@@ -100,9 +95,6 @@ void	Stack16ToNative::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::
 const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
-	assert (&frame_data_ptr != 0);
-	assert (&frame_ctx != 0);
-	assert (&core != 0);
 
 	::VSFrameRef *    dst_ptr = 0;
 	::VSNodeRef &     node = *_clip_src_sptr;

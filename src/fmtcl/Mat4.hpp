@@ -76,8 +76,6 @@ Mat4::Mat4 (const double content [4] [4])
 
 bool	Mat4::operator == (const Mat4 &other) const
 {
-	assert (&other != 0);
-
 	bool           eq_flag = true;
 	for (int y = 0; y < VECT_SIZE && eq_flag; ++y)
 	{
@@ -101,8 +99,6 @@ bool	Mat4::operator != (const Mat4 &other) const
 
 Mat4 &	Mat4::operator += (const Mat4 &other)
 {
-	assert (&other != 0);
-
 	for (int y = 0; y < VECT_SIZE; ++y)
 	{
 		for (int x = 0; x < VECT_SIZE; ++x)
@@ -118,8 +114,6 @@ Mat4 &	Mat4::operator += (const Mat4 &other)
 
 Mat4 &	Mat4::operator -= (const Mat4 &other)
 {
-	assert (&other != 0);
-
 	for (int y = 0; y < VECT_SIZE; ++y)
 	{
 		for (int x = 0; x < VECT_SIZE; ++x)
@@ -135,8 +129,6 @@ Mat4 &	Mat4::operator -= (const Mat4 &other)
 
 Mat4 &	Mat4::operator *= (const Mat4 &other)
 {
-	assert (&other != 0);
-
 	*this = *this * other;
 
 	return (*this);
@@ -191,8 +183,6 @@ Mat4::Row4 &	Mat4::operator [] (long pos)
 
 Mat4	operator + (const Mat4 &lhs, const Mat4 &rhs)
 {
-	assert (&lhs != 0);
-
 	return (Mat4 (lhs) += rhs);
 }
 
@@ -200,8 +190,6 @@ Mat4	operator + (const Mat4 &lhs, const Mat4 &rhs)
 
 Mat4	operator - (const Mat4 &lhs, const Mat4 &rhs)
 {
-	assert (&lhs != 0);
-
 	return (Mat4 (lhs) -= rhs);
 }
 
@@ -209,9 +197,6 @@ Mat4	operator - (const Mat4 &lhs, const Mat4 &rhs)
 
 Mat4	operator * (const Mat4 &lhs, const Mat4 &rhs)
 {
-	assert (&lhs != 0);
-	assert (&rhs != 0);
-
 	Mat4           tmp;
 	for (int y = 0; y < Mat4::VECT_SIZE; ++y)
 	{

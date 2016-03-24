@@ -82,11 +82,6 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_process_seg_int_int_ptr (0)
 ,	_process_seg_flt_int_ptr (0)
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&vsapi != 0);
-
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	_sse2_flag = cpu_opt.has_sse2 ();
 	_avx2_flag = cpu_opt.has_avx2 ();
@@ -278,9 +273,6 @@ void	Bitdepth::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore 
 const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
-	assert (&frame_data_ptr != 0);
-	assert (&frame_ctx != 0);
-	assert (&core != 0);
 
 	::VSFrameRef *    dst_ptr = 0;
 	::VSNodeRef &     node = *_clip_src_sptr;
@@ -410,11 +402,6 @@ int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 
 const ::VSFormat &	Bitdepth::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const
 {
-	assert (&in != 0);
-	assert (&out != 0);
-	assert (&core != 0);
-	assert (&fmt_src != 0);
-
 	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
 
 	const int      undef    = -666666666;
@@ -1156,8 +1143,6 @@ void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&ctx != 0);
-	assert (&ctx._pattern_ptr != 0);
 
 	enum {         DIF_BITS = SRC_BITS - DST_BITS };
 	static_assert (DIF_BITS >= 1, "This function must reduce bidepth.");
@@ -1217,9 +1202,6 @@ void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&ctx != 0);
-	assert (&ctx._pattern_ptr != 0);
-	assert (&ctx._scale_info_ptr != 0);
 
 	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
 	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
@@ -1380,9 +1362,6 @@ void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&ctx != 0);
-	assert (&ctx._pattern_ptr != 0);
-	assert (&ctx._scale_info_ptr != 0);
 	assert (((_mm_getcsr () >> 13) & 3) == 0);   // 00 = Round to nearest (even)
 
 	const PatRow & pattern   = ctx.extract_pattern_row ();
@@ -1485,8 +1464,6 @@ void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&ctx != 0);
-	assert (&ctx._ed_buf_ptr != 0);
 	assert (ctx._y >= 0);
 
 	typedef typename ERRDIF::SrcType SRC_TYPE;
@@ -1572,10 +1549,7 @@ void	Bitdepth::process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
-	assert (&ctx != 0);
-	assert (&ctx._ed_buf_ptr != 0);
 	assert (ctx._y >= 0);
-	assert (&ctx._scale_info_ptr != 0);
 
 	typedef typename ERRDIF::SrcType SRC_TYPE;
 	typedef typename ERRDIF::DstType DST_TYPE;

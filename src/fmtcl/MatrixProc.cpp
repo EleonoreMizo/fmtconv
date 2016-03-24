@@ -73,7 +73,6 @@ MatrixProc::MatrixProc (bool sse_flag, bool sse2_flag, bool avx_flag, bool avx2_
 // plane_out = -1: all planes are processed
 MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt src_fmt, int src_bits, SplFmt dst_fmt, int dst_bits, int plane_out)
 {
-	assert (&m != 0);
 	assert (src_fmt >= 0);
 	assert (src_fmt < SplFmt_NBR_ELT);
 	assert (src_bits >= 8);
@@ -214,7 +213,6 @@ void	MatrixProc::process (uint8_t * const dst_ptr_arr [NBR_PLANES], const int ds
 
 void	MatrixProc::set_matrix_flt (const Mat4 &m, int plane_out)
 {
-	assert (&m != 0);
 	assert (plane_out <= NBR_PLANES);
 
 	const int      plane_beg = (plane_out >= 0) ? plane_out     : 0;
@@ -236,7 +234,6 @@ void	MatrixProc::set_matrix_flt (const Mat4 &m, int plane_out)
 
 MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int src_bits, int dst_bits)
 {
-	assert (&m != 0);
 	assert (plane_out <= NBR_PLANES);
 	assert (src_bits >= 8);
 	assert (src_bits <= 16);

@@ -68,9 +68,6 @@ void	AtomicPtrIntPair <T>::set (T * ptr, ptrdiff_t val)
 template <class T>
 void	AtomicPtrIntPair <T>::get (T * &ptr, ptrdiff_t &val) const
 {
-	assert (&ptr != 0);
-	assert (&val != 0);
-
 #if (conc_ARCHI == conc_ARCHI_X86)
 
 	Combi          res;

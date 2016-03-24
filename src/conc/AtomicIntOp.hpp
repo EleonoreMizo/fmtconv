@@ -22,8 +22,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include <cassert>
-
 
 
 namespace conc
@@ -38,9 +36,6 @@ namespace conc
 template <class T, class F>
 void	AtomicIntOp::exec (AtomicInt <T> &atom, F &ftor)
 {
-	assert (&atom != 0);
-	assert (&ftor != 0);
-
 	T              val_new;
 	T              val_old;
 	exec_both (atom, ftor, val_old, val_new);
@@ -51,9 +46,6 @@ void	AtomicIntOp::exec (AtomicInt <T> &atom, F &ftor)
 template <class T, class F>
 T	AtomicIntOp::exec_old (AtomicInt <T> &atom, F &ftor)
 {
-	assert (&atom != 0);
-	assert (&ftor != 0);
-
 	T              val_new;
 	T              val_old;
 	exec_both (atom, ftor, val_old, val_new);
@@ -66,9 +58,6 @@ T	AtomicIntOp::exec_old (AtomicInt <T> &atom, F &ftor)
 template <class T, class F>
 T	AtomicIntOp::exec_new (AtomicInt <T> &atom, F &ftor)
 {
-	assert (&atom != 0);
-	assert (&ftor != 0);
-
 	T              val_new;
 	T              val_old;
 	exec_both (atom, ftor, val_old, val_new);
@@ -81,9 +70,6 @@ T	AtomicIntOp::exec_new (AtomicInt <T> &atom, F &ftor)
 template <class T, class F>
 void	AtomicIntOp::exec_both (AtomicInt <T> &atom, F &ftor, T &val_old, T &val_new)
 {
-	assert (&atom != 0);
-	assert (&ftor != 0);
-
 	T              val_cur;
 	do
 	{

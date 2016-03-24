@@ -247,8 +247,8 @@ void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 	// Sign constants: when we have 16-bit data at one end only,
 	// we need to make data signed at the oposite end. This sign
 	// constant is reported on the summing constant.
-	const int      s_in     = (SB < 16) ? -0x8000 << (SHIFT_INT + SB - DB) : 0;
-	const int      s_out    = (DB < 16) ? +0x8000 << (SHIFT_INT + SB - DB) : 0;
+	const int      s_in     = (SB < 16) ? -(0x8000 << (SHIFT_INT + SB - DB)) : 0;
+	const int      s_out    = (DB < 16) ?   0x8000 << (SHIFT_INT + SB - DB)  : 0;
 	const int      s_cst    = s_in + s_out;
 
 	const __m256i  zero     = _mm256_setzero_si256 ();
