@@ -5,7 +5,7 @@ compiler:
 
 before_script:
   - cd ./build/unix
-  - ./autogen
+  - ./autogen.sh
 
 script: "./configure && make"
 
