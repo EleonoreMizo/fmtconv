@@ -86,7 +86,7 @@ double	TransOpLogC::get_max () const
 
 double	TransOpLogC::compute_direct (double x) const
 {
-	x = std::max (x, _noise_margin);
+	x = std::max (x, _n);
 	double         y =
 		  (x > _cut  )
 		? _c * log10 (_a * x + _b) + _d
@@ -103,7 +103,7 @@ double	TransOpLogC::compute_inverse (double x) const
 		  (x > _cut_i)
 		? (pow (10, (x - _d) / _c) - _b) / _a
 		: (x - _f) / _e;
-	y = std::max (y, _noise_margin);
+	y = std::max (y, _n);
 
 	return (y);
 }
