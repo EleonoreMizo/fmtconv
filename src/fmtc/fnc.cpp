@@ -48,8 +48,6 @@ namespace fmtc
 	
 static void	override_fmt_with_csp (::VSFormat &fmt, fmtcl::ColorSpaceH265 csp_out, int plane_out)
 {
-	assert (&fmt != 0);
-
 	if (plane_out >= 0)
 	{
 		fmt.numPlanes = 3;
@@ -75,9 +73,6 @@ static void	override_fmt_with_csp (::VSFormat &fmt, fmtcl::ColorSpaceH265 csp_ou
 // U, V, Cg, Co : [-0.5 ; 0.5]
 static void	make_mat_flt_int (fmtcl::Mat4 &m, bool to_flt_flag, const ::VSFormat &fmt, bool full_flag)
 {
-	assert (&m != 0);
-	assert (&fmt != 0);
-
 	::VSFormat     fmt2 (fmt);
 	fmt2.sampleType = ::stFloat;
 

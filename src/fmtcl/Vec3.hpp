@@ -126,8 +126,6 @@ Vec3	operator - (const Vec3 &lhs, const Vec3 &rhs)
 
 Vec3	operator * (const Vec3 &lhs, double rhs)
 {
-	assert (&lhs != 0);
-
 	return Vec3 (lhs) *= rhs;
 }
 
