@@ -1,6 +1,11 @@
+os:
+  - linux
+  - osx
+
 language: cpp
 
 compiler:
+  - gcc
   - clang
 
 before_script:
