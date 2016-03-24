@@ -13,8 +13,17 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-5
-      env: COMPILER=g++-5
+            - g++-4.8
+      env: COMPILER=g++-4.8
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5.3
+      env: COMPILER=g++-5.3
     - os: linux
       compiler: clang
       addons:
