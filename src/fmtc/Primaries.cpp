@@ -213,7 +213,7 @@ void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 
 	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
 	fstb::conv_to_lower_case (preset_str);
-	_preset = conv_string_to_primaries (filter, preset_str, preset_0);
+	_preset = conv_string_to_primaries (preset_str, preset_0);
 	if (_preset >= 0)
 	{
 		set (_preset);
@@ -419,7 +419,7 @@ fmtcl::Vec3	Primaries::conv_xy_to_xyz (const RgbSystem::Vec2 &xy)
 
 
 // str should be already converted to lower case
-fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const vsutl::FilterBase &flt, const std::string &str, const char *name_0)
+fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const std::string &str, const char *name_0)
 {
 	assert (name_0 != 0);
 
@@ -531,18 +531,6 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const vsutl::FilterB
 	else if (   str == "vgamut")
 	{
 		preset = fmtcl::PrimariesPreset_VGAMUT;
-	}
-
-	if (preset < 0)
-	{
-		fstb::snprintf4all (
-			flt._filter_error_msg_0,
-			flt._max_error_buf_len,
-			"%s: unknown preset \"%s\".",
-			name_0,
-			str.c_str ()
-		);
-		flt.throw_inval_arg (flt._filter_error_msg_0);
 	}
 
 	return preset;

@@ -91,7 +91,7 @@ private:
 	static fmtcl::Vec3
 	               conv_xy_to_xyz (const RgbSystem::Vec2 &xy);
 	static fmtcl::PrimariesPreset
-	               conv_string_to_primaries (const vsutl::FilterBase &flt, const std::string &preset, const char *name_0);
+	               conv_string_to_primaries (const std::string &preset, const char *name_0);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
