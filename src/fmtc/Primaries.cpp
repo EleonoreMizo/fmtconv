@@ -344,7 +344,7 @@ fmtcl::Mat3	Primaries::compute_conversion_matrix () const
 	fmtcl::Mat3    xyz2rgb = compute_rgb2xyz (_prim_d).invert ();
 	fmtcl::Mat3    adapt   = compute_chroma_adapt (_prim_s, _prim_d);
 
-	return rgb2xyz * adapt * xyz2rgb;
+	return xyz2rgb * adapt * rgb2xyz;
 }
 
 
