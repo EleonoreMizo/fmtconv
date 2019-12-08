@@ -336,9 +336,13 @@ void	Transfer::init_table ()
 		    || _curve_d == fmtcl::TransCurve_1886
 		    || _curve_d == fmtcl::TransCurve_1886A
 		    || _curve_d == fmtcl::TransCurve_SLOG
+		    || _curve_d == fmtcl::TransCurve_SLOG2
+		    || _curve_d == fmtcl::TransCurve_SLOG3
 		    || _curve_d == fmtcl::TransCurve_LOGC2
 		    || _curve_d == fmtcl::TransCurve_LOGC3
-		    || _curve_d == fmtcl::TransCurve_CANONLOG)
+		    || _curve_d == fmtcl::TransCurve_CANONLOG
+		    || _curve_d == fmtcl::TransCurve_ACESCC
+		    || _curve_d == fmtcl::TransCurve_ERIMM)
 		{
 			_loglut_flag = true;
 		}

@@ -49,7 +49,7 @@ public:
 
 	// TransOpInterface
 	virtual double operator () (double x) const;
-	virtual double get_max () const { return (38.330934337202536904496058731147); }
+	virtual double get_max () const { return (38.420934337202536904496058731147); }
 
 
 

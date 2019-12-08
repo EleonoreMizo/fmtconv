@@ -50,7 +50,6 @@ TransOpSLog3::TransOpSLog3 (bool inv_flag)
 
 
 
-// 1 lin is reference white, peak white at 10 lin.
 double	TransOpSLog3::operator () (double x) const
 {
 	x = std::max (x, 0.0);
