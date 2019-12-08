@@ -54,6 +54,16 @@ public:
 		Range_NBR_ELT
 	};
 
+	enum Prim
+	{
+		Prim_UNDEF = -1,
+
+		Prim_SRC = 0,
+		Prim_DST,
+
+		Prim_NBR_ELT
+	};
+
 	               ConvStep ()                        = default;
 	               ConvStep (const ConvStep &other)   = default;
 	virtual        ~ConvStep ()                       = default;
@@ -73,6 +83,8 @@ public:
 
 	int            _sample_type  = -1;  // ::VSSampleType (int or float), negative if unspecified
 	int            _bitdepth     = -1;  // Pixel bitdepth, negative if unspecified
+
+	Prim           _primaries    = Prim_UNDEF;   // Primaries.
 
 
 

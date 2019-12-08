@@ -568,6 +568,18 @@ void	Convert::fill_conv_step_with_gcor (ConvStep &step, const ::VSMap &in, ::VSM
 
 
 
+void	Convert::fill_conv_step_with_prim (ConvStep &step, const ::VSMap &in, ::VSMap &out)
+{
+	/*** To be called ***/
+
+
+	/*** To do ***/
+
+
+}
+
+
+
 }	// namespace fmtc
 
 

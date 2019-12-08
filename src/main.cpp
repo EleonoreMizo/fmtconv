@@ -645,6 +645,18 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"transd:data[]:opt;"
 		"gcor:float:opt;"
 		"cont:float:opt;"
+		"blacklvl:float:opt;"
+		"rs:float[]:opt;"
+		"gs:float[]:opt;"
+		"bs:float[]:opt;"
+		"ws:float[]:opt;"
+		"rd:float[]:opt;"
+		"gd:float[]:opt;"
+		"bd:float[]:opt;"
+		"wd:float[]:opt;"
+		"prims:data:opt;"
+		"primd:data:opt;"
+		"ingoreprim:int:opt;"
 		"cpuopt:int:opt;"
 		, &vsutl::Redirect <fmtc::Convert>::create, 0, plugin_ptr
 	);

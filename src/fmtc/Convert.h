@@ -85,6 +85,7 @@ private:
 	void           fill_conv_step_with_cs (ConvStep &step, const ::VSFormat &fmt);
 	bool           fill_conv_step_with_curve (ConvStep &step, const ::VSFormat &fmt, fmtcl::TransCurve tcurve, fmtcl::ColorSpaceH265 mat);
 	void           fill_conv_step_with_gcor (ConvStep &step, const ::VSMap &in, ::VSMap &out, const char arg_0 []);
+	void           fill_conv_step_with_prim (ConvStep &step, const ::VSMap &in, ::VSMap &out);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
