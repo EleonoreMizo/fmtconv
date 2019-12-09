@@ -34,7 +34,7 @@ namespace fmtcl
 
 
 
-// ITU-T H.265, High efficiency video coding, 2014-10, p. 352
+// ITU-T H.265, High efficiency video coding, 2019-06, p. 415
 enum ColorSpaceH265
 {
 	ColorSpaceH265_UNDEF = -1,
@@ -50,6 +50,10 @@ enum ColorSpaceH265
 	ColorSpaceH265_YCGCO,
 	ColorSpaceH265_BT2020NCL,
 	ColorSpaceH265_BT2020CL,
+	ColorSpaceH265_YDZDX,
+	ColorSpaceH265_CHRODERNCL,
+	ColorSpaceH265_CHRODERCL,
+	ColorSpaceH265_ICTCP,         // This matrix depends on the transfer characteristic
 
 	ColorSpaceH265_NBR_ELT,
 

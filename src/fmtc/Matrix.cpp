@@ -421,6 +421,10 @@ fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (const vsutl::FilterBase &flt
 	{
 		cs = fmtcl::ColorSpaceH265_BT2020CL;
 	}
+	else if (mat == "ydzdx")
+	{
+		cs = fmtcl::ColorSpaceH265_YDZDX;
+	}
 	else
 	{
 		flt.throw_inval_arg ("unknown matrix identifier.");
@@ -532,6 +536,10 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 	case fmtcl::ColorSpaceH265_SMPTE240M:
 	case fmtcl::ColorSpaceH265_BT2020NCL:
 	case fmtcl::ColorSpaceH265_BT2020CL:
+	case fmtcl::ColorSpaceH265_YDZDX:
+	case fmtcl::ColorSpaceH265_CHRODERNCL:
+	case fmtcl::ColorSpaceH265_CHRODERCL:
+	case fmtcl::ColorSpaceH265_ICTCP:
 		alt_cf = ::cmYUV;
 		break;
 
@@ -619,6 +627,10 @@ void	Matrix::make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_
 	{
 		make_mat_yuv (m, 0.2627, 0.678, 0.0593, to_rgb_flag);
 	}
+	else if (mat == "ydzdx")
+	{
+		make_mat_ydzdx (m, to_rgb_flag);
+	}
 	else
 	{
 		throw_inval_arg ("unknown matrix identifier.");
@@ -628,7 +640,7 @@ void	Matrix::make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_
 
 
 /*
-kr/kg/kb matrix (Rec. ITU-T H.264 03/2010, p. 379):
+kr/kg/kb matrix (Rec. ITU-T H.265 2019-06, p. 413):
 
 R = Y                  + V*(1-Kr)
 G = Y - U*(1-Kb)*Kb/Kg - V*(1-Kr)*Kr/Kg
@@ -673,7 +685,7 @@ void	Matrix::make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool
 
 
 /*
-YCgCo matrix (Rec. ITU-T H.264 03/2010, p. 379):
+YCgCo matrix (Rec. ITU-T H.265 2019-06, p. 413):
 
 R  = Y - Cg + Co
 G  = Y + Cg
@@ -706,6 +718,36 @@ void	Matrix::make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag)
 		m[2][0] =  0.5 ; m[2][1] = 0  ; m[2][2] = -0.5 ;
 	}
 
+	m.clean3 (1);
+}
+
+
+
+/*
+YDzDx transform (Rec. ITU-T H.265 2019-06, p. 414)
+
+Y  = G
+Dz = 0.5 * (0.986566 * B - Y)
+Dx = 0.5 * (R - 0.991902 * Y)
+
+Y  =                      G
+Dz =         - 0.5      * G + 0.493283 * B
+Dx = 0.5 * R - 0.495951 * G
+*/
+
+void	Matrix::make_mat_ydzdx (fmtcl::Mat4 &m, bool to_rgb_flag)
+{
+	fmtcl::Mat3    m3;
+	m3[0][0] = 0  ; m3[0][1] =  1       ; m3[0][2] = 0;
+	m3[1][0] = 0  ; m3[1][1] = -0.5     ; m3[1][2] = 0.493283;
+	m3[2][0] = 0.5; m3[2][1] = -0.495951; m3[2][2] = 0;
+
+	if (to_rgb_flag)
+	{
+		m3.invert ();
+	}
+
+	m.insert3 (m3);
 	m.clean3 (1);
 }
 

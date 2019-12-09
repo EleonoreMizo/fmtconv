@@ -159,6 +159,7 @@ double	Mat3::det () const
 Mat3	Mat3::compute_inverse () const
 {
 	const double   d3 = det ();
+	assert (d3 != 0);
 	const Mat3 &   m = *this;
 	Mat3           r;
 	r [0] [0] = (m [1] [1] * m [2] [2] - m [1] [2] * m [2] [1]) / d3;
