@@ -352,21 +352,30 @@ fmtcl::Mat3	Primaries::compute_conversion_matrix () const
 // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
 fmtcl::Mat3	Primaries::compute_rgb2xyz (const RgbSystem &prim)
 {
-	const fmtcl::Vec3 white = conv_xy_to_xyz (prim._white);
+	fmtcl::Mat3    m;
 
-	fmtcl::Mat3    xyzrgb;
-	for (int k = 0; k < NBR_PLANES; ++k)
+	if (prim._preset == fmtcl::PrimariesPreset_CIEXYZ)
 	{
-		fmtcl::Vec3    comp_xyz = conv_xy_to_xyz (prim._rgb [k]);
-		xyzrgb.set_col (k, comp_xyz);
+		m = fmtcl::Mat3 (1, fmtcl::Mat3::Preset_DIAGONAL);
 	}
 
-	fmtcl::Vec3    s = xyzrgb.compute_inverse () * white;
-
-	fmtcl::Mat3    m;
-	for (int u = 0; u < NBR_PLANES; ++u)
+	else
 	{
-		m.set_col (u, xyzrgb.get_col (u) * s [u]);
+		const fmtcl::Vec3 white = conv_xy_to_xyz (prim._white);
+
+		fmtcl::Mat3    xyzrgb;
+		for (int k = 0; k < NBR_PLANES; ++k)
+		{
+			fmtcl::Vec3    comp_xyz = conv_xy_to_xyz (prim._rgb [k]);
+			xyzrgb.set_col (k, comp_xyz);
+		}
+
+		fmtcl::Vec3    s = xyzrgb.compute_inverse () * white;
+
+		for (int u = 0; u < NBR_PLANES; ++u)
+		{
+			m.set_col (u, xyzrgb.get_col (u) * s [u]);
+		}
 	}
 
 	return m;
@@ -405,13 +414,24 @@ fmtcl::Mat3	Primaries::compute_chroma_adapt (const RgbSystem &prim_s, const RgbS
 // Y is assumed to be 1.0
 // X =      x      / y
 // Z = (1 - x - y) / y
+// http://www.brucelindbloom.com/index.html?Eqn_xyY_to_XYZ.html
 fmtcl::Vec3	Primaries::conv_xy_to_xyz (const RgbSystem::Vec2 &xy)
 {
 	fmtcl::Vec3    xyz;
 
-	xyz [0] =      xy [0]           / xy [1];
-	xyz [1] = 1;
-	xyz [2] = (1 - xy [0] - xy [1]) / xy [1];
+	// When y is null, X = Y = Z = 0.
+	if (fstb::is_null (xy [1]))
+	{
+		xyz [0] = 0;
+		xyz [1] = 0;
+		xyz [2] = 0;
+	}
+	else
+	{
+		xyz [0] =      xy [0]           / xy [1];
+		xyz [1] = 1;
+		xyz [2] = (1 - xy [0] - xy [1]) / xy [1];
+	}
 
 	return xyz;
 }
