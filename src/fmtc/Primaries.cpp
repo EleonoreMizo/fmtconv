@@ -561,6 +561,10 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const std::string &s
 	{
 		preset = fmtcl::PrimariesPreset_P3D60;
 	}
+	else if (   str == "3213")
+	{
+		preset = fmtcl::PrimariesPreset_EBU3213E;
+	}
 
 	return preset;
 }

@@ -45,6 +45,8 @@ enum PrimariesPreset
 	PrimariesPreset_P3DCI,
 	PrimariesPreset_P3D65,
 
+	PrimariesPreset_EBU3213E = 22,
+
 	PrimariesPreset_NBR_ELT,
 
 	PrimariesPreset_ISO_RANGE_LAST = 255,

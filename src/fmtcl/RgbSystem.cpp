@@ -123,6 +123,12 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_rgb [2] = { 0.150 , 0.060  };
 		_white   = { 0.3127, 0.3290 };
 		break;
+	case PrimariesPreset_EBU3213E:
+		_rgb [0] = { 0.630 , 0.340  };
+		_rgb [1] = { 0.295 , 0.605  };
+		_rgb [2] = { 0.155 , 0.077  };
+		_white   = { 0.3127, 0.3290 };
+		break;
 	case PrimariesPreset_SCRGB:
 		_rgb [0] = { 0.640  , 0.330   };
 		_rgb [1] = { 0.300  , 0.600   };
