@@ -523,9 +523,10 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const std::string &s
 	{
 		preset = fmtcl::PrimariesPreset_CIEXYZ;
 	}
-	else if (   str == "dcip3")
+	else if (   str == "p3d65"
+	         || str == "dcip3")
 	{
-		preset = fmtcl::PrimariesPreset_DCIP3;
+		preset = fmtcl::PrimariesPreset_P3D65;
 	}
 	else if (   str == "aces")
 	{
@@ -551,6 +552,14 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const std::string &s
 	else if (   str == "vgamut")
 	{
 		preset = fmtcl::PrimariesPreset_VGAMUT;
+	}
+	else if (   str == "p3dci")
+	{
+		preset = fmtcl::PrimariesPreset_P3DCI;
+	}
+	else if (   str == "p3d60")
+	{
+		preset = fmtcl::PrimariesPreset_P3D60;
 	}
 
 	return preset;

@@ -26,7 +26,7 @@ namespace fmtcl
 
 
 
-// ITU-T H.265, High efficiency video coding, 2014-10, p. 347
+// ITU-T H.265, High efficiency video coding, 2016-06, p. 408
 enum PrimariesPreset
 {
 	PrimariesPreset_UNDEF = -1,
@@ -42,6 +42,8 @@ enum PrimariesPreset
 	PrimariesPreset_GENERIC_FILM,
 	PrimariesPreset_BT2020,
 	PrimariesPreset_CIEXYZ,
+	PrimariesPreset_P3DCI,
+	PrimariesPreset_P3D65,
 
 	PrimariesPreset_NBR_ELT,
 
@@ -54,13 +56,13 @@ enum PrimariesPreset
 	PrimariesPreset_APPLE_RGB,
 	PrimariesPreset_ROMM,
 	PrimariesPreset_CIERGB,
-	PrimariesPreset_DCIP3,
 	PrimariesPreset_ACES,
 	PrimariesPreset_ACESAP1,
 	PrimariesPreset_SGAMUT,
 	PrimariesPreset_SGAMUT3CINE,
 	PrimariesPreset_ALEXA,
 	PrimariesPreset_VGAMUT,
+	PrimariesPreset_P3D60,
 
 	PrimariesPreset_NBR_ELT_CUSTOM
 }; // enum PrimariesPreset
