@@ -489,7 +489,7 @@ fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const std::string &s
 		preset = fmtcl::PrimariesPreset_GENERIC_FILM;
 	}
 	else if (   str == "2020"
-	         || str == "hdtv")
+	         || str == "uhdtv")
 	{
 		preset = fmtcl::PrimariesPreset_BT2020;
 	}
