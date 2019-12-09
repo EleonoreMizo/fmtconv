@@ -136,6 +136,21 @@ Mat4 &	Mat4::operator *= (const Mat4 &other)
 
 
 
+Mat4 &	Mat4::operator *= (double scale)
+{
+	for (int y = 0; y < VECT_SIZE; ++y)
+	{
+		for (int x = 0; x < VECT_SIZE; ++x)
+		{
+			_data [y] [x] *= scale;
+		}
+	}
+
+	return (*this);
+}
+
+
+
 void	Mat4::insert3 (const Mat3 &other)
 {
 	for (int y = 0; y < Mat3::VECT_SIZE; ++y)
@@ -212,6 +227,13 @@ Mat4	operator * (const Mat4 &lhs, const Mat4 &rhs)
 	}
 
 	return (tmp);
+}
+
+
+
+Mat4	operator * (const Mat4 &lhs, double rhs)
+{
+	return (Mat4 (lhs) *= rhs);
 }
 
 

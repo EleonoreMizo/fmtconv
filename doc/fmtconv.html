@@ -190,6 +190,17 @@ c = core.fmtc.matrix (clip=c, mat="709", col_fam=vs.RGB)
 c = core.fmtc.transfer (clip=c, transs="1886", transd="srgb")
 c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 
+<p>Displaying a UHDTV HDR content encoded with BT.2100 ICtCp-PQ on a standard
+computer display:</p>
+
+<pre class="src">c = core.fmtc.resample (clip=c, css="444")
+c = core.fmtc.matrix (clip=c, mats="ICtCp_PQ", matd="rgb")
+c = core.fmtc.transfer (clip=c, transs="2084", transd="linear")
+c = core.fmtc.matrix (clip=c, mats="lms", matd="rgb")
+c = core.fmtc.primaries (clip=c, prims="2100", primd="srgb")
+c = core.fmtc.transfer (clip=c, transs="linear", transd="srgb")
+c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+
 <h3><a id="compiling"></a>Compiling from the source code</h3>
 
 <h4>Visual C++</h4>
@@ -563,7 +574,21 @@ Possible values are:</p>
 <p class="var">mats, matd</p>
 <p>Source and destinations matrices for YUV.
 Use both when you want to do a conversion between BT.601 and BT.709.
-Values are the same as <var>mat</var>.</p>
+Values are the same as <var>mat</var>, with the addition of:</p>
+<table>
+<tr><td><b><code>"LMS"</code></b></td><td>Intermediate colorspace for IC<sub>T</sub>C<sub>P</sub> transforms. The LMS colorspace is conveyed on RGB planes.</td></tr>
+<tr><td><b><code>"ICtCp_PQ"</code></b></td><td>ITU-R BT.2100-2 IC<sub>T</sub>C<sub>P</sub> with perceptual quantization (PQ).</td></tr>
+<tr><td><b><code>"ICtCp_HLG"</code></b></td><td>ITU-R BT.2100-2 IC<sub>T</sub>C<sub>P</sub> with hybrid log-gamma transfer function (HLG).</td></tr>
+</table>
+<p>When using one of these additional values, make sure to set the other <var>mats</var> or <var>matd</var> with <code>"rgb"</code> to clarify the conversion direction.
+IC<sub>T</sub>C<sub>P</sub> transforms from R’G’B’ require the following steps:</p>
+<ul>
+<li>Convert from R’G’B’ to linear BT.2100 RGB with <code>transfer</code> then possibly <code>primaries</code>.</li>
+<li>Convert from linear BT.2100 RGB to linear LMS using <code>matrix</code> with <code>"LMS"</code>.</li>
+<li>Convert from linear LMS to L’M’S’ using <code>transfer</code> with <code>"2084"</code> or <code>"hlg"</code>.</li>
+<li>Convert from L’M’S’ to IC<sub>T</sub>C<sub>P</sub> using <code>matrix</code> with <code>"ICtCp_PQ"</code> or <code>"ICtCp_HLG"</code>, respectively.</li>
+</ul>
+<p>For the inverse conversion, reverse the steps.</p>
 
 <p class="var">fulls, fulld</p>
 <p>Indicates if the clip is full-range (True) or TV-range (False).

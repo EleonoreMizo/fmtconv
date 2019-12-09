@@ -59,7 +59,12 @@ enum ColorSpaceH265
 
 	ColorSpaceH265_ISO_RANGE_LAST = 255,
 
-	ColorSpaceH265_CUSTOM = 1000
+	ColorSpaceH265_CUSTOM = 1000,
+
+	ColorSpaceH265_LMS,
+	ColorSpaceH265_ICTCP_PQ,
+	ColorSpaceH265_ICTCP_HLG
+
 };	// enum ColorSpaceH265
 
 

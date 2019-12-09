@@ -142,6 +142,21 @@ Mat3 &	Mat3::operator *= (const Mat3 &other)
 
 
 
+Mat3 &	Mat3::operator *= (double scale)
+{
+	for (int y = 0; y < VECT_SIZE; ++y)
+	{
+		for (int x = 0; x < VECT_SIZE; ++x)
+		{
+			(*this) [y] [x] *= scale;
+		}
+	}
+
+	return *this;
+}
+
+
+
 double	Mat3::det () const
 {
 	const Mat3 &   m = *this;
@@ -266,6 +281,13 @@ Vec3	operator * (const Mat3 &lhs, const Vec3 &rhs)
 	}
 
 	return tmp;
+}
+
+
+
+Mat3	operator * (const Mat3 &lhs, double rhs)
+{
+	return (Mat3 (lhs) *= rhs);
 }
 
 

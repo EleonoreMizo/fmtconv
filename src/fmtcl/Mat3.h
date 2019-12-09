@@ -73,6 +73,7 @@ public:
 	inline Mat3 &  operator += (const Mat3 &other);
 	inline Mat3 &  operator -= (const Mat3 &other);
 	inline Mat3 &  operator *= (const Mat3 &other);
+	inline Mat3 &  operator *= (double scale);
 
 	inline double  det () const;
 	inline Mat3    compute_inverse () const;
@@ -108,6 +109,7 @@ inline Mat3	operator + (const Mat3 &lhs, const Mat3 &rhs);
 inline Mat3	operator - (const Mat3 &lhs, const Mat3 &rhs);
 inline Mat3	operator * (const Mat3 &lhs, const Mat3 &rhs);
 inline Vec3	operator * (const Mat3 &lhs, const Vec3 &rhs);
+inline Mat3	operator * (const Mat3 &lhs, double rhs);
 
 
 

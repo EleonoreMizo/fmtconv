@@ -254,6 +254,21 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		);
 	}
 
+	// Fixes the output colorspace to a valid H265 colorspace
+	switch (_csp_out)
+	{
+	case fmtcl::ColorSpaceH265_LMS:
+		_csp_out = fmtcl::ColorSpaceH265_RGB;
+		break;
+	case fmtcl::ColorSpaceH265_ICTCP_PQ:
+	case fmtcl::ColorSpaceH265_ICTCP_HLG:
+		_csp_out = fmtcl::ColorSpaceH265_ICTCP;
+		break;
+	default:
+		// Nothing to do
+		break;
+	}
+
 	prepare_matrix_coef (
 		*this, *_proc_uptr, _mat_main,
 		fmt_dst, _full_range_dst_flag,
@@ -425,6 +440,18 @@ fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (const vsutl::FilterBase &flt
 	{
 		cs = fmtcl::ColorSpaceH265_YDZDX;
 	}
+	else if (mat == "lms")
+	{
+		cs = fmtcl::ColorSpaceH265_LMS;
+	}
+	else if (mat == "ictcp_pq")
+	{
+		cs = fmtcl::ColorSpaceH265_ICTCP_PQ;
+	}
+	else if (mat == "ictcp_hlg")
+	{
+		cs = fmtcl::ColorSpaceH265_ICTCP_HLG;
+	}
 	else
 	{
 		flt.throw_inval_arg ("unknown matrix identifier.");
@@ -540,11 +567,17 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 	case fmtcl::ColorSpaceH265_CHRODERNCL:
 	case fmtcl::ColorSpaceH265_CHRODERCL:
 	case fmtcl::ColorSpaceH265_ICTCP:
+	case fmtcl::ColorSpaceH265_ICTCP_PQ:
+	case fmtcl::ColorSpaceH265_ICTCP_HLG:
 		alt_cf = ::cmYUV;
 		break;
 
 	case fmtcl::ColorSpaceH265_YCGCO:
 		alt_cf = ::cmYCoCg;
+		break;
+
+	case fmtcl::ColorSpaceH265_LMS:
+		alt_cf = ::cmRGB;
 		break;
 
 	default:
@@ -630,6 +663,18 @@ void	Matrix::make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_
 	else if (mat == "ydzdx")
 	{
 		make_mat_ydzdx (m, to_rgb_flag);
+	}
+	else if (mat == "lms")
+	{
+		make_mat_lms (m, to_rgb_flag);
+	}
+	else if (mat == "ictcp_pq")
+	{
+		make_mat_ictcp (m, false, to_rgb_flag);
+	}
+	else if (mat == "ictcp_hlg")
+	{
+		make_mat_ictcp (m, true, to_rgb_flag);
 	}
 	else
 	{
@@ -743,6 +788,66 @@ void	Matrix::make_mat_ydzdx (fmtcl::Mat4 &m, bool to_rgb_flag)
 	m3[2][0] = 0.5; m3[2][1] = -0.495951; m3[2][2] = 0;
 
 	if (to_rgb_flag)
+	{
+		m3.invert ();
+	}
+
+	m.insert3 (m3);
+	m.clean3 (1);
+}
+
+
+
+/*
+LMS transform (Rec. ITU-T H.265 2019-06, p. 411)
+
+LMS is an intermediate colorspace for ICtCp transforms.
+LMS data are conveyed on RGB planes.
+Here, to_rgb_flag indicates real RGB target.
+*/
+
+void	Matrix::make_mat_lms (fmtcl::Mat4 &m, bool to_rgb_flag)
+{
+	fmtcl::Mat3    m3;
+	m3[0][0] = 1688; m3[0][1] = 2146; m3[0][2] =  262;
+	m3[1][0] =  683; m3[1][1] = 2951; m3[1][2] =  462;
+	m3[2][0] =   99; m3[2][1] =  309; m3[2][2] = 3688;
+	m3 *= 1.0 / 4096;
+
+	if (to_rgb_flag)
+	{
+		m3.invert ();
+	}
+
+	m.insert3 (m3);
+	m.clean3 (1);
+}
+
+
+
+/*
+ICtCp transfrom from and to LMS (Rec. ITU-T H.265 2019-06, p. 414)
+
+LMS data are conveyed on RGB planes.
+*/
+
+void	Matrix::make_mat_ictcp (fmtcl::Mat4 &m, bool hlg_flag, bool to_lms_flag)
+{
+	fmtcl::Mat3    m3;
+	m3[0][0] =  2048; m3[0][1] =   2048; m3[0][2] =    0;
+	if (hlg_flag)
+	{
+		m3[1][0] =  3625; m3[1][1] =  -7465; m3[1][2] = 3840;
+		m3[2][0] =  9500; m3[2][1] =  -9212; m3[2][2] = -288;
+	}
+	else
+	{
+		m3[1][0] =  6610; m3[1][1] = -13613; m3[1][2] = 7003;
+		m3[2][0] = 17933; m3[2][1] = -17390; m3[2][2] = -543;
+	}
+	m3 *= 1.0 / 4096;
+
+	if (to_lms_flag)
 	{
 		m3.invert ();
 	}

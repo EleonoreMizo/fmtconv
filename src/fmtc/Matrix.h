@@ -112,6 +112,8 @@ private:
 	static void    make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag);
 	static void    make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag);
 	static void    make_mat_ydzdx (fmtcl::Mat4 &m, bool to_rgb_flag);
+	static void    make_mat_lms (fmtcl::Mat4 &m, bool to_rgb_flag);
+	static void    make_mat_ictcp (fmtcl::Mat4 &m, bool hlg_flag, bool to_lms_flag);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;

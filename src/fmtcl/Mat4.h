@@ -71,6 +71,7 @@ public:
 	inline Mat4 &  operator += (const Mat4 &other);
 	inline Mat4 &  operator -= (const Mat4 &other);
 	inline Mat4 &  operator *= (const Mat4 &other);
+	inline Mat4 &  operator *= (double scale);
 
 	inline void    insert3 (const Mat3 &other);
 	inline Mat4 &  clean3 (double diag = 0);
@@ -109,6 +110,7 @@ private:
 inline Mat4	operator + (const Mat4 &lhs, const Mat4 &rhs);
 inline Mat4	operator - (const Mat4 &lhs, const Mat4 &rhs);
 inline Mat4	operator * (const Mat4 &lhs, const Mat4 &rhs);
+inline Mat4	operator * (const Mat4 &lhs, double rhs);
 
 
 
