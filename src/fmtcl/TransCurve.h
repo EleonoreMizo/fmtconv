@@ -38,7 +38,7 @@ enum TransCurve
 {
 	TransCurve_UNDEF = -1,
 
-	// ITU-T H.265, High efficiency video coding, 2014-10, p. 348
+	// ITU-T H.265, High efficiency video coding, 2019-06, p. 409-410
 	TransCurve_RESERVED1 = 0,
 	TransCurve_709,         // ITU-R BT.709
 	TransCurve_UNSPECIFIED,
@@ -57,6 +57,7 @@ enum TransCurve
 	TransCurve_2020_12,     // ITU-R BT.2020 12 bits
 	TransCurve_2084,        // SMPTE ST 2084
 	TransCurve_428,         // SMPTE ST 428
+	TransCurve_HLG,         // ARIB STD-B67, BT.2100-2 Hybrid Log-Gamma
 
 	TransCurve_NBR_ELT,
 

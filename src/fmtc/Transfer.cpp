@@ -37,6 +37,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/TransOpContrast.h"
 #include "fmtcl/TransOpErimm.h"
 #include "fmtcl/TransOpFilmStream.h"
+#include "fmtcl/TransOpHlg.h"
 #include "fmtcl/TransOpLinPow.h"
 #include "fmtcl/TransOpLogC.h"
 #include "fmtcl/TransOpLogTrunc.h"
@@ -333,6 +334,7 @@ void	Transfer::init_table ()
 		    || _curve_d == fmtcl::TransCurve_61966_2_4
 		    || _curve_d == fmtcl::TransCurve_2084
 		    || _curve_d == fmtcl::TransCurve_428
+		    || _curve_d == fmtcl::TransCurve_HLG
 		    || _curve_d == fmtcl::TransCurve_1886
 		    || _curve_d == fmtcl::TransCurve_1886A
 		    || _curve_d == fmtcl::TransCurve_SLOG
@@ -490,6 +492,10 @@ fmtcl::TransCurve	Transfer::conv_string_to_curve (const vsutl::FilterBase &flt, 
 	{
 		c = fmtcl::TransCurve_428;
 	}
+	else if (str == "hlg")
+	{
+		c = fmtcl::TransCurve_HLG;
+	}
 	else if (str == "1886")
 	{
 		c = fmtcl::TransCurve_1886;
@@ -603,6 +609,9 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 		break;
 	case fmtcl::TransCurve_428:
 		ptr = OpSPtr (new fmtcl::TransOpPow (inv_flag, 2.6, 48.0 / 52.37));
+		break;
+	case fmtcl::TransCurve_HLG:
+		ptr = OpSPtr (new fmtcl::TransOpHlg (inv_flag));
 		break;
 	case fmtcl::TransCurve_1886:
 		ptr = OpSPtr (new fmtcl::TransOpPow (inv_flag, 2.4));

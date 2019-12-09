@@ -193,6 +193,8 @@ libfmtconv_la_SOURCES = ../../src/avstp.h \
                         ../../src/fmtcl/TransOpErimm.h \
                         ../../src/fmtcl/TransOpFilmStream.cpp \
                         ../../src/fmtcl/TransOpFilmStream.h \
+                        ../../src/fmtcl/TransOpHlg.cpp \
+                        ../../src/fmtcl/TransOpHlg.h \
                         ../../src/fmtcl/TransOpInterface.h \
                         ../../src/fmtcl/TransOpLinPow.cpp \
                         ../../src/fmtcl/TransOpLinPow.h \

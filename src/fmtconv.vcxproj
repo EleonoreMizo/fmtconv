@@ -233,6 +233,7 @@
     <ClInclude Include="fmtcl\TransOpContrast.hpp" />
     <ClInclude Include="fmtcl\TransOpErimm.h" />
     <ClInclude Include="fmtcl\TransOpFilmStream.h" />
+    <ClInclude Include="fmtcl\TransOpHlg.h" />
     <ClInclude Include="fmtcl\TransOpInterface.h" />
     <ClInclude Include="fmtcl\TransOpLinPow.h" />
     <ClInclude Include="fmtcl\TransOpLogC.h" />
@@ -389,6 +390,7 @@
     <ClCompile Include="fmtcl\TransOpCanonLog.cpp" />
     <ClCompile Include="fmtcl\TransOpErimm.cpp" />
     <ClCompile Include="fmtcl\TransOpFilmStream.cpp" />
+    <ClCompile Include="fmtcl\TransOpHlg.cpp" />
     <ClCompile Include="fmtcl\TransOpLinPow.cpp" />
     <ClCompile Include="fmtcl\TransOpLogC.cpp" />
     <ClCompile Include="fmtcl\TransOpLogTrunc.cpp" />

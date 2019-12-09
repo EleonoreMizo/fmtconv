@@ -529,6 +529,9 @@
     <ClInclude Include="fmtcl\TransOpSLog3.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="fmtcl\TransOpHlg.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fmtc\Bitdepth.cpp">
@@ -748,6 +751,9 @@
       <Filter>fmtcl</Filter>
     </ClCompile>
     <ClCompile Include="fmtcl\TransOpSLog3.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="fmtcl\TransOpHlg.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
   </ItemGroup>
