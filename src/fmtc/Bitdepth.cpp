@@ -160,7 +160,8 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	if (   (   fmt_src.sampleType == ::stInteger
 	        && (    fmt_dst.sampleType == ::stFloat
 	            || (   fmt_src.bitsPerSample <= fmt_dst.bitsPerSample
-	                && _full_range_in_flag == _full_range_out_flag)))
+	                && ! _full_range_in_flag
+	                && ! _full_range_out_flag)))
 	    || (   fmt_src.sampleType == ::stFloat
 	        && fmt_dst.sampleType == ::stFloat))
 	{
