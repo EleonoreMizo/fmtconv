@@ -159,6 +159,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 			std::string    tmp_mat (get_arg_str (in, out, "mat", ""));
 			tmp_mat = get_arg_str (in, out, "mats", tmp_mat);
 			tmp_mat = get_arg_str (in, out, "matd", tmp_mat);
+			fstb::conv_to_lower_case (tmp_mat);
 
 			fmtcl::ColorSpaceH265   tmp_csp =
 				find_cs_from_mat_str (*this, tmp_mat, false);
@@ -383,6 +384,7 @@ void	Matrix::select_def_mat (std::string &mat, const ::VSFormat &fmt)
 
 
 
+// mat should be already converted to lower case
 fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (const vsutl::FilterBase &flt, const std::string &mat, bool allow_2020cl_flag)
 {
 	fmtcl::ColorSpaceH265   cs = fmtcl::ColorSpaceH265_UNSPECIFIED;
@@ -415,7 +417,7 @@ fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (const vsutl::FilterBase &flt
 	{
 		cs = fmtcl::ColorSpaceH265_BT2020NCL;
 	}
-	else if (mat == "2020CL" && allow_2020cl_flag)
+	else if (mat == "2020cl" && allow_2020cl_flag)
 	{
 		cs = fmtcl::ColorSpaceH265_BT2020CL;
 	}
