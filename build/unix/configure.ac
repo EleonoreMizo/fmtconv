@@ -57,6 +57,13 @@ AS_IF(
       [test "x$ARM" = "xtrue"],
       [
        MFLAGS="-ftree-vectorize"
+       WARNPSABI=`( $CXX --help=warnings 2>/dev/null ) | grep -c Wpsabi`
+       AS_IF(
+           [test "x$WARNPSABI" != "x0"],
+           [
+             MFLAGS="$MFLAGS -Wno-psabi"
+           ]
+       )
        AC_SUBST([MFLAGS])
       ]
 )
