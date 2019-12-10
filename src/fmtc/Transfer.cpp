@@ -602,7 +602,7 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.055, 0.04045 / 12.92, 1.0 / 2.4, 12.92));
 		break;
 	case fmtcl::TransCurve_2020_12:
-		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.0993, 0.0181, 0.45, 4.5));
+		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.09929682680944, 0.018053968510807, 0.45, 4.5));
 		break;
 	case fmtcl::TransCurve_2084:
 		ptr = OpSPtr (new fmtcl::TransOp2084 (inv_flag));
