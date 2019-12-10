@@ -618,12 +618,13 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 		break;
 	case fmtcl::TransCurve_1886A:
 		{
-			const double   p1    = 2.6;
-			const double   p2    = 3.0;
+			const double   a1    = 2.6;
+			const double   a2    = 3.0;
 			const double   k0    = 0.35;
-			const double   slope = pow (k0, p1 - p2);
+			const double   slope = pow (k0, a2 - a1);
+			const double   beta  = pow (k0, a1);
 			ptr = OpSPtr (new fmtcl::TransOpLinPow (
-				inv_flag, 1, k0 / slope, 1.0 / p1, slope, 0, 1, 1, 1.0 / p2
+				inv_flag, 1, beta, 1.0 / a1, slope, 0, 1, 1, 1.0 / a2
 			));
 		}
 		break;
