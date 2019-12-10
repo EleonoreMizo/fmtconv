@@ -61,27 +61,31 @@ double	TransOp2084::operator () (double x) const
 	static const double  m  = 128.0  * 2523 / 4096;
 	static const double  n  =   0.25 * 2610 / 4096;
 
-	if (_inv_flag)
+	// Makes sure that f(0) = 0
+	if (x > 0)
 	{
-		// Inverse formula from:
-		// Scott Miller, Mahdi Nezamabadi, Scott Daly
-		// Perceptual Signal Coding for More Efficient Usage of Bit Codes, p. 5
-		// Presentation for 2012 SMPTE Annual Technical Conference & Exhibition
-		const double   xp = pow (x, 1 / m);
-		const double   r  = (xp - c1) / (c2 - c3 * xp);
-		if (r < 0)
+		if (_inv_flag)
 		{
-			y = 0;
+			// Inverse formula from:
+			// Scott Miller, Mahdi Nezamabadi, Scott Daly
+			// Perceptual Signal Coding for More Efficient Usage of Bit Codes, p. 5
+			// Presentation for 2012 SMPTE Annual Technical Conference & Exhibition
+			const double   xp = pow (x, 1 / m);
+			const double   r  = (xp - c1) / (c2 - c3 * xp);
+			if (r < 0)
+			{
+				y = 0;
+			}
+			else
+			{
+				y = pow (r, 1 / n);
+			}
 		}
 		else
 		{
-			y = pow (r, 1 / n);
+			const double   xp = pow (x, n);
+			y = pow ((c1 + c2 * xp) / (1 + c3 * xp), m);
 		}
-	}
-	else
-	{
-		const double   xp = pow (x, n);
-		y = pow ((c1 + c2 * xp) / (1 + c3 * xp), m);
 	}
 
 	return (y);
