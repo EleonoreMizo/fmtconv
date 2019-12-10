@@ -538,6 +538,7 @@ bool	Convert::fill_conv_step_with_curve (ConvStep &step, const ::VSFormat &fmt, 
 			case fmtcl::ColorSpaceH265_BT2020NCL:
 			case fmtcl::ColorSpaceH265_BT2020CL:
 				step._tcurve = fmtcl::TransCurve_2020_12;
+				break;
 			case fmtcl::ColorSpaceH265_UNSPECIFIED:
 			case fmtcl::ColorSpaceH265_RESERVED:
 				// Should not happen

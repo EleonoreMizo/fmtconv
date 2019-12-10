@@ -21,7 +21,8 @@ AS_CASE(
         [i?86],   [BITS="32" X86="true"],
         [x86_64], [BITS="64" X86="true"],
         [powerpc*], [PPC="true"],
-        [arm*], [ARM="true"] # Maybe doesn't work for all arm systems?
+        [arm*], [BITS="32" ARM="true"],
+	[aarch64*], [BITS="64" ARM="true"]
 )
 
 AS_CASE(
@@ -51,6 +52,18 @@ AS_IF(
        AC_SUBST([MFLAGS])
       ]
 )
+
+AS_IF(
+      [test "x$ARM" = "xtrue"],
+      [
+       MFLAGS="-ftree-vectorize"
+       AC_SUBST([MFLAGS])
+      ]
+)
+
+
+AM_CONDITIONAL([X86], [test "x$X86" = "xtrue"])
+AM_CONDITIONAL([ARM], [test "x$ARM" = "xtrue"])
 
 
 AC_CONFIG_FILES([Makefile])

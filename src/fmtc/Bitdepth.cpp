@@ -617,8 +617,6 @@ void	Bitdepth::build_next_dither_pat ()
 
 void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle)
 {
-	assert (dst != 0);
-	assert (src != 0);
 	assert (angle >= 0);
 	assert (angle < 4);
 

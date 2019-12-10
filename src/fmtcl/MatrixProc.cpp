@@ -63,7 +63,9 @@ MatrixProc::MatrixProc (bool sse_flag, bool sse2_flag, bool avx_flag, bool avx2_
 ,	_proc_ptr (0)
 ,	_coef_flt_arr ()
 ,	_coef_int_arr ()
+#if (fstb_ARCHI == fstb_ARCHI_X86)
 ,	_coef_simd_arr ()
+#endif // fstb_ARCHI_X86
 {
 	// Nothing
 }
@@ -359,6 +361,10 @@ MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int sr
 
 
 
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+
+
+
 void	MatrixProc::setup_fnc_sse (bool int_proc_flag, SplFmt src_fmt, int src_bits, SplFmt dst_fmt, int dst_bits, bool single_plane_flag)
 {
 	if (! int_proc_flag)
@@ -412,6 +418,10 @@ void	MatrixProc::setup_fnc_sse2 (bool int_proc_flag, SplFmt src_fmt, int src_bit
 #undef fmtcl_MatrixProc_CASE_INT
 	}
 }
+
+
+
+#endif // fstb_ARCHI_X86
 
 
 
