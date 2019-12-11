@@ -15,7 +15,7 @@
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r21</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r22</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
 <tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a></td></tr>
@@ -207,7 +207,7 @@ c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 
 <p>Visual Studio 2013 or later is required, previous versions are
 not supported anymore.
-Just load <code>fmtconv.sln</code> and run the compiler.</p>
+Just load <code>build/win/fmtconv.sln</code> and run the compiler.</p>
 
 <p>You can also import all the <code>*.cpp</code>, <code>*.h</code> and
 <code>*.hpp</code> files located in the <code>src</code> directory and its
@@ -221,9 +221,20 @@ subfolders. Then:
 <li>Enable optimizations maximizing speed and “any suitable” functions for inlining.</li>
 </ul>
 
+<h4>GNU/Linux and other Unix-like systems</h4>
+
+<p>On Linux and similar GNU-based systems, the <code>build</code> directory
+contains autotools settings:</p>
+<pre class="src">cd build/unix
+./autogen.sh
+./configure
+make
+make install</pre>
+
 <h4>GCC</h4>
 
-<p>From the <code>src</code> directory, compile and link all these files with
+<p>Here are the steps needed to compile without the autotools.
+From the <code>src</code> directory, compile and link all these files with
 <code>g++</code>:</p>
 
 <pre class="src">main.cpp
@@ -237,7 +248,8 @@ vsutl/*.cpp</pre>
 Use the following options (on a single line):</p>
 
 <pre class="src">-std=c++11 -shared -fabi-version=6 -msse2 -mcx16 -O3 -DNDEBUG -I.
--Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow</pre>
+-Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow
+-Wno-unused-private-field</pre>
 
 <p>You’ll need to replace <code>-msse2</code> with <code>-mavx2</code> for all
 the <code>*.cpp</code> files containing <code>avx2</code> in their name.
@@ -261,12 +273,11 @@ for some reason.</p>
 <p>To compile a debug version, replace <code>-O3 -DNDEBUG</code> with
 <code>-g</code>.</p>
 
+<p>Link with <code>-latomic -lpthread</code>.</p>
+
 <p>With MinGW, it seems you will need a specific MinGW-64 build supporting
 C++11 threading (not tested here yet, please report if you find something
 useful).</p>
-
-<p>On Linux and similar GNU-based systems, the <code>build</code> directory
-contains autotools settings.</p>
 
 <h2><a id="description"></a>III) Filters description</h2>
 
@@ -1507,15 +1518,34 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="troubleshooting"></a>IV) Troubleshooting</h2>
 
-<p>I’m waiting for your complaints.</p>
+<p>I’m <a href="https://forum.doom9.org/showthread.php?t=166504">waiting</a> for your complaints.</p>
 
 
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
+<p><b>r22, 2019.12.11</b></p>
+<ul>
+<li><code>bitdepth</code>: upconversions for full range data now scale to the maximum value instead of shifting bits. Thanks to Z4ST1N for the report.</li>
+<li><code>matrix</code>: added support for the YDzDx, ICtCp-PQ and ICtCp-HLG colorspaces.</li>
+<li><code>matrix</code>: fixed a case issue for matrix identifiers.</li>
+<li><code>primaries</code>: added support for P3-DCI, P3-D65 and P3-D60. The old DCI-P3 was actually P3-D65. The code "dcip3" remains for backward compatibility but is deprecated.</li>
+<li><code>primaries</code>: added support for the EBU 3213-E colorspace.</li>
+<li><code>primaries</code>: added a "2100" alias for the BT.2020/BT.2100 colorspace.</li>
+<li><code>primaries</code>: fixed a divide-by-0 crash when using CIEXYZ as destination colorspace</li>
+<li><code>primaries</code>: fixed a bug preventing to use the "uhdtv" string for BT.2020 primaries</li>
+<li><code>transfer</code>: added support for hybrid log-gamma (HLG) curves.</li>
+<li><code>transfer</code>: for the SMPTE SM 2084 curve, the specific value of 0 now gives a true 0 in both directions (minor change).</li>
+<li><code>transfer</code>: BT.2020 curve for 12-bit data now uses exact values giving a continuous derivative (minor change).
+<li><code>transfer</code>: now uses more accurate constants for the sRGB curve, giving a better derivative continuity (minor change).</li>
+<li><code>transfer</code>: fixed a bug with the alternate formula for BT.1886 curve.</li>
+<li>Should now build correctly on FreeBSD (patch by jbeich)</li>
+<li>Fixed compilation for Linux on ARM or aarch64. Binaries not tested yet.</li>
+</ul>
+
 <p><b>r21, 2019.12.08</b></p>
 <ul>
-<li><code>transfer</code>: fixed highlight clipping for several high dynamic range transfer curves.</li>
+<li><code>transfer</code>: fixed highlight clipping for several high dynamic range transfer curves, thanks to groucho86 for the report.</li>
 </ul>
 
 <p><b>r20, 2016.03.25</b></p>

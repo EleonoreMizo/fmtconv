@@ -35,6 +35,7 @@ p         { margin-left: 2em; margin-right: 0em; text-align: justify; }
 
 ul        { margin-left: 2em; margin-right: 0em; text-align: justify; list-style-type: square; }
 .n { margin-left: 2em; margin-right: 0em; text-align: justify; list-style-type: none; }
+ul li ul { margin-left: 0em; }
 
 li.tcont  { margin-top: 0.5em; }
 
