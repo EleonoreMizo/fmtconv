@@ -28,6 +28,7 @@
 @copy     "build\win\ReleaseWin32\fmtconv.dll" "reltmp\win32"
 @copy     "build\win\Releasex64\fmtconv.dll"   "reltmp\win64"
 @copy     "*.md"                               "reltmp"
+@copy     "COPYING"                            "reltmp"
 
 @cd reltmp
 @echo fmtconv - Format conversion tools for Vapoursynth. | "C:\Program Files (x86)\Infozip\zip.exe" -r -o -9 -z "..\releases\fmtconv-rnew.zip" "*.*"
