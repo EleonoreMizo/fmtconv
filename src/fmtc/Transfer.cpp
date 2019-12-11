@@ -599,7 +599,22 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 		break;
 	case fmtcl::TransCurve_470M:	// Assumed display gamma 2.2, almost like sRGB.
 	case fmtcl::TransCurve_SRGB:
+#if 1
+		{
+			// More exact formula giving C1 continuity
+			// https://en.wikipedia.org/wiki/SRGB#Theory_of_the_transformation
+			const double   gamma = 2.4;
+			const double   alpha = 1.055;
+			const double   k0    = (alpha - 1) / (gamma - 1);
+			const double   phi   =
+				  (pow (alpha, gamma) * pow (gamma - 1, gamma - 1))
+				/ (pow (alpha - 1, gamma - 1) * pow (gamma, gamma));
+			ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, alpha, k0 / phi, 1.0 / gamma, phi));
+		}
+#else
+		// Rounded constants used in IEC 61966-2-1
 		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.055, 0.04045 / 12.92, 1.0 / 2.4, 12.92));
+#endif
 		break;
 	case fmtcl::TransCurve_2020_12:
 		ptr = OpSPtr (new fmtcl::TransOpLinPow (inv_flag, 1.09929682680944, 0.018053968510807, 0.45, 4.5));
