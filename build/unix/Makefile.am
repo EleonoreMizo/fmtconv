@@ -1,8 +1,10 @@
-warningflags = -Wall -Wextra -Wno-unused-parameter -Wno-expansion-to-defined -Wno-missing-field-initializers -Wshadow -Wno-unused-private-field
+ACLOCAL_AMFLAGS = -I m4
+
+warningflags = -Wall -Wextra -Wshadow -Wno-expansion-to-defined -Wno-missing-field-initializers
 includeflags = -I$(srcdir)/../../src
-commonflags = -O3 $(MFLAGS) $(warningflags) $(includeflags)
-AM_CXXFLAGS = -std=c++11 $(commonflags)
-AM_LDFLAGS  = -latomic -lpthread $(PLUGINLDFLAGS)
+commonflags = $(DEBUGCFLAGS) $(MFLAGS) $(warningflags) $(includeflags)
+AM_CXXFLAGS = -std=$(CXXSTD) $(commonflags)
+AM_LDFLAGS  = $(PLUGINLDFLAGS)
 
 lib_LTLIBRARIES = libfmtconv.la
 
