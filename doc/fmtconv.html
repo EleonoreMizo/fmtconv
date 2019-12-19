@@ -1073,10 +1073,10 @@ Possible values are:</p>
 <tr><td><b><code>"lanczos"</code></b></td><td>Sinc function windowed by the central lobe of a sinc. Use <var>taps</var> to specify its impulse length. Same as <code>LanczosResize</code>.</td></tr>
 <tr><td><b><code>"blackman"</code></b></td><td>Blackman-Harris windowed sinc. Use <var>taps</var> to control its length. Same as <code>BlackmanResize</code>.</td></tr>
 <tr><td><b><code>"blackmanminlobe"</code></b></td><td>Another kind of Blackman windowed sinc, with a bit less ringing. Use <var>taps</var> for you know what.</td></tr>
-<tr><td><b><code>"spline16"</code></b></td><td>Cubic spline based kernel, 4 sample points. Same as <code>Spline16Resize</code>.</td></tr>
+<tr><td><b><code>"spline16"</code></b></td><td>Standard cubic spline based kernel, 4 sample points. Same as <code>Spline16Resize</code>.</td></tr>
 <tr><td><b><code>"spline36"</code></b></td><td>Spline, 6 sample points. Same as <code>Spline36Resize</code>.</td></tr>
 <tr><td><b><code>"spline64"</code></b></td><td>Spline, 8 sample points. Same as <code>Spline64Resize</code>.</td></tr>
-<tr><td><b><code>"spline"</code></b></td><td>Generic splines, number of sample points is twice the <var>taps</var> parameter, so you can use <var>taps&nbsp;= 6</var> to get a <code>Spline144Resize</code> equivalent.</td></tr>
+<tr><td><b><code>"spline"</code></b></td><td>Generic <i>natural</i> cubic splines, number of sample points is twice the <var>taps</var> parameter, so you can use <var>taps&nbsp;= 6</var> to get a more or less <code>Spline144Resize</code> equivalent.</td></tr>
 <tr><td><b><code>"gauss"</code></b> or<br /><b><code>"gaussian"</code></b></td><td>Gaussian kernel. The p parameter is mapped on <var>a1</var> and controls the curve width. The higher p, the sharper. It is set to 30 by default. This resizer is the same as <code>GaussResize</code>, but <var>taps</var> offers a control on the filter impulse length. For low p values (soft and blurry), it’s better to increase the number of taps to avoid truncating the gaussian curve too early and creating artifacts.</td></tr>
 <tr><td><b><code>"sinc"</code></b></td><td>Truncated sinc function. Use <var>taps</var> to control its length. Same as <code>SincResize</code>.</td></tr>
 </table>
@@ -1369,10 +1369,10 @@ If it’s not the case, floating point operations are silently used as fallback.
 video signal to convert between linear and gamma-corrected modes.</p>
 <p>The function offers four conversions in a row; all are optional:</p>
 <ul>
-<li>an electro-optical transfer converting the signal to linear,</li>
+<li>an electro-optical transfer function (EOTF) or an inverse opto-electrical transfer function (OETF<sup>&minus;1</sup>) converting the signal to linear,</li>
 <li>a contrast adjustement,</li>
 <li>a gamma correction operating on the linear signal,</li>
-<li>and an opto-electrical transfer to encode the signal back to a non-linear
+<li>and an opto-electrical transfer function (OETF) or an inverse electro-optical transfer function (EOTF<sup>&minus;1</sup>) to encode the signal back to a non-linear
 domain.</li>
 </ul>
 <p>As input, the function accepts only RGB and grayscale colorspaces.</p>
@@ -1421,7 +1421,7 @@ much higher.</p>
 <tr><td><b><code>&quot;2084&quot;      </code></b></td><td>0&hellip;1</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;428&quot;       </code></b></td><td>0&hellip;1</td><td>SMPTE ST 428-1<br />Linear 1.0 is peak white and corresponds to a display luminance level of 48 cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>ITU-R BT.2100 hybrid log-gamma, ARIB STD-B67</td></tr>
-<tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>ITU-R BT.1886</td></tr>
+<tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>ITU-R BT.1886. This is an EOTF for display mimicing CRTs.</td></tr>
 <tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>ITU-R BT.1886, alternative approximation</td></tr>
 <tr><td><b><code>&quot;filmstream&quot;</code></b></td><td>0&hellip;1</td><td>Thomson FilmStream<br />Linear 1.0 is the sensor clipping level, corresponding to 3840 on a linear 12-bit scale.</td></tr>
 <tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
