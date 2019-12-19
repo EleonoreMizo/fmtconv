@@ -142,6 +142,8 @@ fmtcl_Scaler_SPAN_I (fmtcl_Scaler_INIT_I_CPP)
 			setup_avx2 ();
 		}
 	}
+#else
+	fstb::unused (sse2_flag, avx2_flag);
 #endif
 
 	build_scale_data ();
