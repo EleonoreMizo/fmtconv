@@ -24,6 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
@@ -70,6 +71,7 @@ PlaneProcessor::PlaneProcessor (const ::VSAPI &vsapi, PlaneProcCbInterface &cb, 
 // Don't forget to check "out" to see if an error occured.
 void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVideoInfo &vi_out, bool simple_flag, int max_def_planes, const char *prop_name_0, const char *clip_name_0)
 {
+	fstb::unused (clip_name_0);
 	assert (max_def_planes > 0);
 	assert (prop_name_0 != 0);
 	assert (clip_name_0 != 0);

@@ -22,6 +22,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/def.h"
 #include "fstb/ToolsAvx2.h"
 
 
@@ -155,6 +156,8 @@ void	ProxyRwAvx2 <SplFmt_INT8>::write_i16_partial (const Ptr::Type &ptr, const _
 template <bool CLIP_FLAG, bool SIGN_FLAG>
 __m256i	ProxyRwAvx2 <SplFmt_INT8>::S16 <CLIP_FLAG, SIGN_FLAG>::read (const PtrConst::Type &ptr, const __m256i &zero, const __m256i &sign_bit)
 {
+	fstb::unused (zero, sign_bit);
+
 	return (fstb::ToolsAvx2::load_16_16l (ptr));
 }
 
@@ -162,6 +165,8 @@ __m256i	ProxyRwAvx2 <SplFmt_INT8>::S16 <CLIP_FLAG, SIGN_FLAG>::read (const PtrCo
 template <bool CLIP_FLAG, bool SIGN_FLAG>
 __m256i	ProxyRwAvx2 <SplFmt_INT8>::S16 <CLIP_FLAG, SIGN_FLAG>::read_partial (const PtrConst::Type &ptr, const __m256i &zero, const __m256i &sign_bit, int len)
 {
+	fstb::unused (zero, sign_bit);
+
 	return (fstb::ToolsAvx2::load_16_16l_partial (ptr, len));
 }
 

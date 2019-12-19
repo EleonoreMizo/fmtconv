@@ -32,6 +32,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/Matrix.h"
 #include "fmtc/Resample.h"
 #include "fmtc/version.h"
+#include "fstb/def.h"
 #include "vsutl/fnc.h"
 
 #include <cassert>
@@ -66,6 +67,8 @@ Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore
 ,	_gcors (get_arg_flt (in, out, "gcors", 1))
 ,	_gcord (get_arg_flt (in, out, "gcord", 1))
 {
+	fstb::unused (user_data_ptr);
+
 	const ::VSFormat &   fmt_src = *(_vi_in.format);
 	retrieve_output_colorspace (in, out, core, fmt_src);
 	const ::VSFormat &   fmt_dst = *(_vi_out.format);
@@ -124,6 +127,8 @@ Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore
 
 void	Convert::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
+	fstb::unused (in, out, core);
+
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 }
 
@@ -131,6 +136,8 @@ void	Convert::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &
 
 const ::VSFrameRef *	Convert::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
+	fstb::unused (frame_data_ptr, core);
+
 	assert (n >= 0);
 
 	::VSFrameRef *    dst_ptr = 0;
@@ -286,6 +293,8 @@ ConvStep::Range	Convert::retrieve_range (const ::VSFormat &fmt, const ::VSMap &i
 
 fmtcl::TransCurve	Convert::retrieve_tcurve (const ::VSFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 [], const char def_0 [])
 {
+	fstb::unused (fmt);
+
 	fmtcl::TransCurve tcurve = fmtcl::TransCurve_UNDEF;
 
 	bool           curve_flag = false;
@@ -365,6 +374,8 @@ fmtcl::TransCurve	Convert::retrieve_tcurve (const ::VSFormat &fmt, const ::VSMap
 
 void	Convert::find_conversion_steps (const ::VSMap &in, ::VSMap &out)
 {
+	fstb::unused (in, out);
+
 	_step_list.clear ();
 
 	// -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -

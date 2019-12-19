@@ -120,7 +120,7 @@ void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 	const __m256i  zero     = _mm256_setzero_si256 ();
 	const __m256i  mask_lsb = _mm256_set1_epi16 (0x00FF);
 	const __m256i  sign_bit = _mm256_set1_epi16 (-0x8000);
-	const __m256i  ma       = _mm256_set1_epi16 (int16_t ((1 << DB) - 1));
+	const __m256i  ma       = _mm256_set1_epi16 (int16_t (uint16_t ((1 << DB) - 1)));
 
 	const __m256i* coef_ptr = reinterpret_cast <const __m256i *> (
 		_coef_simd_arr.use_vect_avx2 (0)

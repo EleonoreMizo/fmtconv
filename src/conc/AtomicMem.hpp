@@ -23,7 +23,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "conc/def.h"
-#include "conc/Interlocked.h"
 
 
 
@@ -70,7 +69,7 @@ AtomicMem <3>::DataType	AtomicMem <3>::cas (volatile DataType &dest, DataType ex
 
 
 
-#if defined (ohm_archi_HAS_CAS_128)
+#if defined (fstb_HAS_CAS_128)
 
 
 
@@ -109,7 +108,7 @@ AtomicMem <4>::DataType	AtomicMem <4>::cas (volatile DataType &dest, DataType ex
 
 
 
-#endif	// ohm_archi_HAS_CAS_128
+#endif	// fstb_HAS_CAS_128
 
 
 

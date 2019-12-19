@@ -280,8 +280,8 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 
 	#elif defined (_MSC_VER)
 
-		const int64_t  excg_lo = ((const int64_t *) &excg) [0];
-		const int64_t  excg_hi = ((const int64_t *) &excg) [1];
+		const int64_t  excg_lo = excg._data [0];
+		const int64_t  excg_hi = excg._data [1];
 
 		old = comp;
 
@@ -291,6 +291,10 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 			excg_lo,
 			reinterpret_cast <int64_t *> (&old)
 		);
+
+	#elif defined (__GNUC__)
+
+		old = __sync_val_compare_and_swap (&dest, comp, excg);
 
 	#else
 

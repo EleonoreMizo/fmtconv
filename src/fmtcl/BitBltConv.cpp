@@ -255,6 +255,8 @@ void	BitBltConv::bitblt_int_to_flt (uint8_t *dst_ptr, int dst_stride, fmtcl::Spl
 
 void	BitBltConv::bitblt_flt_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
+	fstb::unused (dst_res);
+
 	const Proxy::PtrStack16::Type dst_s16_ptr (dst_ptr, dst_lsb_ptr);
 	const Proxy::PtrInt16::Type   dst_i16_ptr (
 		reinterpret_cast <uint16_t *> (dst_ptr)
@@ -299,6 +301,8 @@ void	BitBltConv::bitblt_flt_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t 
 
 void	BitBltConv::bitblt_int_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
+	fstb::unused (scale_info_ptr);
+
 	const uint8_t *                    src_i08_ptr (src_ptr);
 	const Proxy::PtrStack16Const::Type src_s16_ptr (src_ptr, src_lsb_ptr);
 	const Proxy::PtrInt16Const::Type   src_i16_ptr (

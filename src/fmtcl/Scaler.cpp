@@ -688,7 +688,7 @@ void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 	const __m128i  zero     = _mm_setzero_si128 ();
 	const __m128i  mask_lsb = _mm_set1_epi16 (0x00FF);
 	const __m128i  sign_bit = _mm_set1_epi16 (-0x8000);
-	const __m128i  ma       = _mm_set1_epi16 (int16_t ((1 << DB) - 1));
+	const __m128i  ma       = _mm_set1_epi16 (int16_t (uint16_t ((1 << DB) - 1)));
 #if defined (fmtcl_Scaler_SSE2_16BITS)
 	const __m128i  add_cst  = _mm_set1_epi16 (_add_cst_int + s_cst        );
 #else
@@ -965,6 +965,7 @@ void	Scaler::push_back_int_coef (double coef)
 
 Scaler::BasicInfo::BasicInfo (int src_height, int dst_height, double win_top, double win_height, ContFirInterface &kernel_fnc, double kernel_scale, double center_pos_src, double center_pos_dst)
 {
+	fstb::unused (src_height);
 	assert (src_height > 0);
 	assert (dst_height > 0);
 	assert (win_height > 0);

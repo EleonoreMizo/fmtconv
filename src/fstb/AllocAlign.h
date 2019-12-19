@@ -46,7 +46,7 @@ class AllocAlign
 
 public:
 
-	enum {         ALIGNMENT = ALIG };
+	static const long ALIGNMENT = ALIG;
 
 	typedef	T	value_type;
 	typedef	value_type *	pointer;
@@ -59,7 +59,7 @@ public:
 	               AllocAlign ()                                  = default;
 	               AllocAlign (AllocAlign <T, ALIG> const &other) = default;
 	template <typename U>
-	               AllocAlign (AllocAlign <U, ALIG> const &other) {}
+	               AllocAlign (AllocAlign <U, ALIG> const &/*other*/) {}
 	               ~AllocAlign ()                                 = default;
 
 	// Address

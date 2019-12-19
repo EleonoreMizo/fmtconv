@@ -3,6 +3,7 @@
         ContFirSpline.cpp
         Author: Laurent de Soras, 2012
 
+Natural cubic splines
 Coefficient calculation taken from SplineResize 0.2 by Wilbert Dijkhof
 
 --- Legal stuff ---

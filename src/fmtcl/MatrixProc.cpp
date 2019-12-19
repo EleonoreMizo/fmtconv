@@ -367,6 +367,8 @@ MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int sr
 
 void	MatrixProc::setup_fnc_sse (bool int_proc_flag, SplFmt src_fmt, int src_bits, SplFmt dst_fmt, int dst_bits, bool single_plane_flag)
 {
+	fstb::unused (src_fmt, src_bits, dst_fmt, dst_bits);
+
 	if (! int_proc_flag)
 	{
 		if (single_plane_flag)
@@ -727,7 +729,7 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 	const __m128i  zero     = _mm_setzero_si128 ();
 	const __m128i  mask_lsb = _mm_set1_epi16 (0x00FF);
 	const __m128i  sign_bit = _mm_set1_epi16 (-0x8000);
-	const __m128i  ma       = _mm_set1_epi16 (int16_t ((1 << DB) - 1));
+	const __m128i  ma       = _mm_set1_epi16 (int16_t (uint16_t ((1 << DB) - 1)));
 
 	const __m128i* coef_ptr = reinterpret_cast <const __m128i *> (
 		_coef_simd_arr.use_vect_sse2 (0)

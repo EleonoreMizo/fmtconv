@@ -28,6 +28,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/MatrixProc.h"
+#include "fstb/def.h"
 
 #include <immintrin.h>
 
@@ -52,6 +53,8 @@ namespace fmtcl
 
 void	MatrixProc::setup_fnc_avx (bool int_proc_flag, SplFmt src_fmt, int src_bits, SplFmt dst_fmt, int dst_bits, bool single_plane_flag)
 {
+	fstb::unused (src_fmt, src_bits, dst_fmt, dst_bits);
+
 	if (! int_proc_flag)
 	{
 		if (single_plane_flag)

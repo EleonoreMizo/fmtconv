@@ -56,7 +56,7 @@ T &	ArrayMultiType::use (int pos)
 	assert (pos >= 0);
 	assert (pos < int (_length));
 
-	return ((reinterpret_cast <      T *> (&_arr [0])) [pos]);
+	return (reinterpret_cast <      T *> (&_arr [0])) [pos];
 }
 
 
@@ -67,9 +67,9 @@ const T &	ArrayMultiType::use (int pos) const
 	assert (_data_len > 0);
 	assert (sizeof (T) == _data_len);
 	assert (pos >= 0);
-	assert (pos < _length);
+	assert (pos < int (_length));
 
-	return ((reinterpret_cast <const T *> (&_arr [0])) [pos]);
+	return (reinterpret_cast <const T *> (&_arr [0])) [pos];
 }
 
 
@@ -78,8 +78,8 @@ size_t	ArrayMultiType::get_size () const
 {
 	assert (_data_len >= 0);
 
-	return (_length);
-};
+	return _length;
+}
 
 
 

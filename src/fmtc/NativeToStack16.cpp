@@ -25,6 +25,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtc/NativeToStack16.h"
+#include "fstb/def.h"
 #include "vsutl/FrameRefSPtr.h"
 
 #include <stdexcept>
@@ -49,6 +50,8 @@ NativeToStack16::NativeToStack16 (const ::VSMap &in, ::VSMap &out, void *user_da
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 {
+	fstb::unused (out, user_data_ptr);
+
 	// Checks the input clip
 	if (_vi_in.format == 0)
 	{
@@ -80,6 +83,8 @@ NativeToStack16::NativeToStack16 (const ::VSMap &in, ::VSMap &out, void *user_da
 
 void	NativeToStack16::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
+	fstb::unused (in, out, core);
+
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 }
 
@@ -87,6 +92,7 @@ void	NativeToStack16::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::
 
 const ::VSFrameRef *	NativeToStack16::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
+	fstb::unused (frame_data_ptr);
 	assert (n >= 0);
 
 	::VSFrameRef *    dst_ptr = 0;

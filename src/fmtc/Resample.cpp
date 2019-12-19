@@ -26,6 +26,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtc/Resample.h"
 #include "fmtc/SplFmtUtl.h"
+#include "fstb/def.h"
 #include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
@@ -85,11 +86,20 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_cplace_d (fmtcl::ChromaPlacement_MPEG2)
 ,	_sse2_flag (false)
 ,	_avx2_flag (false)
+#if defined (_MSC_VER)
+#pragma warning (push)
+#pragma warning (disable : 4355)
+#endif // 'this': used in base member initializer list
 ,	_plane_processor (vsapi, *this, "resample", true)
+#if defined (_MSC_VER)
+#pragma warning (pop)
+#endif
 ,	_filter_mutex ()
 ,	_filter_uptr_map ()
 ,	_plane_data_arr ()
 {
+	fstb::unused (user_data_ptr);
+
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	_sse2_flag = cpu_opt.has_sse2 ();
 	_avx2_flag = cpu_opt.has_avx2 ();
@@ -427,6 +437,8 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 void	Resample::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
+	fstb::unused (core);
+
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 	_plane_processor.set_filter (in, out, _vi_out);
 }
@@ -594,6 +606,7 @@ void	Resample::conv_str_to_chroma_subspl (const vsutl::FilterBase &flt, int &ssh
 
 int	Resample::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
 {
+	fstb::unused (src_node2_sptr, src_node3_sptr);
 	assert (src_node1_sptr.get () != 0);
 	assert (frame_data_ptr != 0);
 
@@ -779,6 +792,8 @@ void	Resample::get_interlacing_param (bool &itl_flag, bool &top_flag, int field_
 
 int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr)
 {
+	fstb::unused (core);
+
 	int            ret_val = 0;
 
 	vsutl::FrameRefSPtr	src_sptr (
@@ -837,6 +852,8 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, voi
 
 int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr)
 {
+	fstb::unused (frame_data_ptr, core);
+
 	int            ret_val = 0;
 
 	vsutl::FrameRefSPtr	src_sptr (

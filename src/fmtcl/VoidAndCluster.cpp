@@ -65,7 +65,7 @@ void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 			const int      x = c_arr [0].first;
 			const int      y = c_arr [0].second;
 			mat (x, y) = 0;
-			vnc (x, y) = rank;
+			vnc (x, y) = uint16_t (rank);
 		}
 	}
 
@@ -79,7 +79,7 @@ void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 			const int      x = v_arr [0].first;
 			const int      y = v_arr [0].second;
 			mat (x, y) = 1;
-			vnc (x, y) = rank;
+			vnc (x, y) = uint16_t (rank);
 			++ rank;
 		}
 	}
@@ -217,7 +217,7 @@ void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
 				const double   val = thr + err;
 				const int      qnt = fstb::round_int (val);
 				assert (qnt >= 0 && qnt <= 1);
-				m (x, y) = qnt;
+				m (x, y) = uint16_t (qnt);
 				err = val - double (qnt);
 				// Filter-Lite error diffusion
 				const double   e2 = err * 0.5;

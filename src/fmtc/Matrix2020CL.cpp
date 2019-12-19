@@ -27,6 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/ColorSpaceH265.h"
 #include "fmtc/fnc.h"
 #include "fmtc/Matrix2020CL.h"
+#include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
@@ -57,6 +58,8 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 ,	_to_yuv_flag (false)
 ,	_proc_uptr ()
 {
+	fstb::unused (user_data_ptr);
+
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	const bool     sse2_flag = cpu_opt.has_sse2 ();
 	const bool     avx2_flag = cpu_opt.has_avx2 ();
@@ -184,6 +187,8 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 
 void	Matrix2020CL::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
+	fstb::unused (in, out, core);
+
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 }
 
@@ -191,6 +196,8 @@ void	Matrix2020CL::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSC
 
 const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
+	fstb::unused (frame_data_ptr);
+
 	assert (n >= 0);
 
 	::VSFrameRef *    dst_ptr = 0;

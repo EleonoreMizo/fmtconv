@@ -24,6 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/def.h"
 #include "fmtcl/ContFirSnh.h"
 
 
@@ -50,6 +51,8 @@ double	ContFirSnh::do_get_support () const
 
 double	ContFirSnh::do_get_val (double pos) const
 {
+	fstb::unused (pos);
+
 	return (1);
 }
 

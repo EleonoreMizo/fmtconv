@@ -27,6 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/fnc.h"
 #include "fmtc/Primaries.h"
 #include "fmtcl/Mat3.h"
+#include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/CpuOpt.h"
 #include "vsutl/FrameRefSPtr.h"
@@ -59,6 +60,8 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 ,	_mat_main ()
 ,	_proc_uptr ()
 {
+	fstb::unused (user_data_ptr, core);
+
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	_sse_flag  = cpu_opt.has_sse ();
 	_sse2_flag = cpu_opt.has_sse2 ();
@@ -119,6 +122,8 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 
 void	Primaries::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
+	fstb::unused (in, out, core);
+
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 }
 
@@ -126,6 +131,7 @@ void	Primaries::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore
 
 const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
+	fstb::unused (frame_data_ptr);
 	assert (n >= 0);
 
 	::VSFrameRef *    dst_ptr = 0;
@@ -213,7 +219,7 @@ void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap 
 
 	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
 	fstb::conv_to_lower_case (preset_str);
-	_preset = conv_string_to_primaries (preset_str, preset_0);
+	_preset = conv_string_to_primaries (preset_str);
 	if (_preset >= 0)
 	{
 		set (_preset);
@@ -439,10 +445,8 @@ fmtcl::Vec3	Primaries::conv_xy_to_xyz (const RgbSystem::Vec2 &xy)
 
 
 // str should be already converted to lower case
-fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const std::string &str, const char *name_0)
+fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const std::string &str)
 {
-	assert (name_0 != 0);
-
 	fmtcl::PrimariesPreset  preset = fmtcl::PrimariesPreset_UNDEF;
 
 	if (        str == "709"

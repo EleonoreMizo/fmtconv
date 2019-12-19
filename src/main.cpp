@@ -27,6 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/Stack16ToNative.h"
 #include "fmtc/Transfer.h"
 #include "fmtc/version.h"
+#include "fstb/def.h"
 #include "vsutl/Redirect.h"
 #include "VapourSynth.h"
 
@@ -66,6 +67,8 @@ public:
 	,	_full_flag (get_arg_int (in, out, "full", 0) != 0)
 	,	_amp (std::max (get_arg_int (in, out, "amp", 16), 1))
 	{
+		fstb::unused (user_data_ptr, core);
+
 		if (! vsutl::is_constant_format (_vi_in))
 		{
 			throw_inval_arg ("only constant formats are supported.");
@@ -85,11 +88,15 @@ public:
 	// vsutl::FilterBase
 	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 	{
+		fstb::unused (in, out, core);
+
 		_vsapi.setVideoInfo (&_vi_out, 1, &node);
 	}
 
 	virtual const ::VSFrameRef *	get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 	{
+		fstb::unused (frame_data_ptr);
+
 		::VSFrameRef *    dst_ptr = 0;
 		::VSNodeRef &     node = *_clip_src_sptr;
 
@@ -130,7 +137,7 @@ public:
 						{
 							int            v = reinterpret_cast <const uint16_t *> (data_src_ptr) [x];
 							v = mi + (rpa - std::abs ((v - mi_in) % (rpa * 2) - rpa)) * _amp;
-							reinterpret_cast <uint16_t *> (data_dst_ptr) [x] = v;
+							reinterpret_cast <uint16_t *> (data_dst_ptr) [x] = uint16_t (v);
 						}
 					}
 					else
@@ -139,7 +146,7 @@ public:
 						{
 							int            v = data_src_ptr [x];
 							v = mi + (rpa - std::abs ((v - mi_in) % (rpa * 2) - rpa)) * _amp;
-							data_dst_ptr [x] = v;
+							data_dst_ptr [x] = uint8_t (v);
 						}
 					}
 

@@ -22,7 +22,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "def.h"
+#include "fstb/def.h"
 
 #include <type_traits>
 
@@ -409,13 +409,24 @@ bool	is_eq_rel (T v1, T v2, T tol)
 
 
 
+/*
+==============================================================================
+Name: get_prev_pow2
+Description:
+	Computes the exponent of the power of two equal to or immediately lower
+	than the parameter. It is the base-2 log rounded toward minus infinity.
+Input parameters:
+	- x: Number which we want to compute the base-2 log.
+Returns: The exponent
+Throws: Nothing
+==============================================================================
+*/
+
 int	get_prev_pow_2 (uint32_t x)
 {
 	assert (x > 0);
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-
- #if defined (_MSC_VER)
+#if (fstb_ARCHI == fstb_ARCHI_X86) && defined (_MSC_VER)
 
   #if ((_MSC_VER / 100) < 14)
 
@@ -434,33 +445,29 @@ int	get_prev_pow_2 (uint32_t x)
 
   #endif
 
-	return (int (p));
+#else
 
- #endif
+	int            p = -1;
+
+	while ((x & ~(uint32_t (0xFFFF))) != 0)
+	{
+		p += 16;
+		x >>= 16;
+	}
+	while ((x & ~(uint32_t (0xF))) != 0)
+	{
+		p += 4;
+		x >>= 4;
+	}
+	while (x > 0)
+	{
+		++p;
+		x >>= 1;
+	}
 
 #endif
 
-	{
-		int            p = -1;
-
-		while ((x & ~(uint32_t (0xFFFF))) != 0)
-		{
-			p += 16;
-			x >>= 16;
-		}
-		while ((x & ~(uint32_t (0xF))) != 0)
-		{
-			p += 4;
-			x >>= 4;
-		}
-		while (x > 0)
-		{
-			++p;
-			x >>= 1;
-		}
-
-		return (int (p));
-	}
+	return (int (p));
 }
 
 

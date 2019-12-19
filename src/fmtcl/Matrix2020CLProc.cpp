@@ -264,13 +264,13 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_rgb_2_ycbcr ()
 		const double   coef_a_cr0 = coef_a_c / _coef_cr_pos;
 		const double   coef_a_cr1 = coef_a_c / _coef_cr_neg;
 		const double   coef_b_c   = ofs_grey + cst_r;
-		_coef_yg_a_int     = fstb::round_int (coef_a_y  );
-		_coef_yg_b_int     = fstb::round_int (coef_b_y  );
-		_coef_cb_a_int [0] = fstb::round_int (coef_a_cb0);
-		_coef_cb_a_int [1] = fstb::round_int (coef_a_cb1);
-		_coef_cr_a_int [0] = fstb::round_int (coef_a_cr0);
-		_coef_cr_a_int [1] = fstb::round_int (coef_a_cr1);
-		_coef_cbcr_b_int   = fstb::round_int (coef_b_c  );
+		_coef_yg_a_int     = uint16_t (fstb::round_int (coef_a_y  ));
+		_coef_yg_b_int     = int32_t ( fstb::round_int (coef_b_y  ));
+		_coef_cb_a_int [0] = uint16_t (fstb::round_int (coef_a_cb0));
+		_coef_cb_a_int [1] = uint16_t (fstb::round_int (coef_a_cb1));
+		_coef_cr_a_int [0] = uint16_t (fstb::round_int (coef_a_cr0));
+		_coef_cr_a_int [1] = uint16_t (fstb::round_int (coef_a_cr1));
+		_coef_cbcr_b_int   = int32_t ( fstb::round_int (coef_b_c  ));
 	}
 
 	return (ret_val);
@@ -379,13 +379,13 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_ycbcr_2_rgb ()
 		const double   coef_a_cr0 = coef_a_c * _coef_cr_pos;
 		const double   coef_a_cr1 = coef_a_c * _coef_cr_neg;
 		const double   coef_b_c   = cst_r;
-		_coef_yg_a_int     = fstb::round_int (coef_a_y  );
-		_coef_yg_b_int     = fstb::round_int (coef_b_y  );
-		_coef_cb_a_int [0] = fstb::round_int (coef_a_cb0);
-		_coef_cb_a_int [1] = fstb::round_int (coef_a_cb1);
-		_coef_cr_a_int [0] = fstb::round_int (coef_a_cr0);
-		_coef_cr_a_int [1] = fstb::round_int (coef_a_cr1);
-		_coef_cbcr_b_int   = fstb::round_int (coef_b_c  );
+		_coef_yg_a_int     = uint16_t (fstb::round_int (coef_a_y  ));
+		_coef_yg_b_int     = int32_t ( fstb::round_int (coef_b_y  ));
+		_coef_cb_a_int [0] = uint16_t (fstb::round_int (coef_a_cb0));
+		_coef_cb_a_int [1] = uint16_t (fstb::round_int (coef_a_cb1));
+		_coef_cr_a_int [0] = uint16_t (fstb::round_int (coef_a_cr0));
+		_coef_cr_a_int [1] = uint16_t (fstb::round_int (coef_a_cr1));
+		_coef_cbcr_b_int   = int32_t ( fstb::round_int (coef_b_c  ));
 	}
 
 	return (ret_val);

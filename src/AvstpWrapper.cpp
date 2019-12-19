@@ -184,6 +184,11 @@ AvstpWrapper::AvstpWrapper ()
 
 
 
+template <typename... T>
+inline void AvstpWrapper_unused (T &&...) { }
+
+
+
 template <class T>
 void	AvstpWrapper::resolve_name (T &fnc_ptr, const char *name_0)
 {
@@ -200,6 +205,8 @@ void	AvstpWrapper::resolve_name (T &fnc_ptr, const char *name_0)
 		_dll_hnd = 0;
 		throw std::runtime_error ("Function missing in avstp.dll.");
 	}
+#else
+	AvstpWrapper_unused (fnc_ptr, name_0);
 #endif
 }
 
@@ -243,9 +250,15 @@ avstp_TaskDispatcher *	AvstpWrapper::fallback_create_dispatcher_ptr ()
 
 
 
-void	AvstpWrapper::fallback_destroy_dispatcher_ptr (avstp_TaskDispatcher *td_ptr)
+void	AvstpWrapper::fallback_destroy_dispatcher_ptr (avstp_TaskDispatcher *
+#if ! defined (NDEBUG)
+	td_ptr
+#endif
+)
 {
+#if ! defined (NDEBUG)
 	assert (td_ptr == (avstp_TaskDispatcher *) (&_dummy_dispatcher));
+#endif
 }
 
 

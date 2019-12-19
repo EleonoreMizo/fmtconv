@@ -41,6 +41,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/ContFirSpline36.h"
 #include "fmtcl/ContFirSpline64.h"
 #include "fmtcl/DiscreteFirCustom.h"
+#include "fstb/def.h"
 #include "fstb/fnc.h"
 
 #include <stdexcept>
@@ -92,6 +93,8 @@ void	KernelData::create_kernel (std::string kernel_fnc, std::vector <double> &co
 
 void	KernelData::create_kernel_base (std::string kernel_fnc, std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl)
 {
+	fstb::unused (a3, a3_flag);
+
 	fstb::conv_to_lower_case (kernel_fnc);
 	const std::string::size_type	name_end = kernel_fnc.find (' ');
 	const std::string name = kernel_fnc.substr (0, name_end);

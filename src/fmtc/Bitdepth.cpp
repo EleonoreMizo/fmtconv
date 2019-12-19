@@ -24,13 +24,13 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fstb/def.h"
 #include "fmtc/Bitdepth.h"
 #include "fmtc/SplFmtUtl.h"
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/ProxyRwSse2.h"
 #endif
 #include "fmtcl/VoidAndCluster.h"
+#include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
@@ -55,7 +55,14 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
+#if defined (_MSC_VER)
+#pragma warning (push)
+#pragma warning (disable : 4355)
+#endif // 'this': used in base member initializer list
 ,	_plane_processor (vsapi, *this, "bitdepth", true)
+#if defined (_MSC_VER)
+#pragma warning (pop)
+#endif
 ,	_splfmt_src (fmtcl::SplFmt_ILLEGAL)
 ,	_splfmt_dst (fmtcl::SplFmt_ILLEGAL)
 ,	_scale_info_arr ()
@@ -82,6 +89,8 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_process_seg_int_int_ptr (0)
 ,	_process_seg_flt_int_ptr (0)
 {
+	fstb::unused (user_data_ptr);
+
 	vsutl::CpuOpt  cpu_opt (*this, in, out);
 	_sse2_flag = cpu_opt.has_sse2 ();
 	_avx2_flag = cpu_opt.has_avx2 ();
@@ -265,6 +274,8 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 void	Bitdepth::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
+	fstb::unused (core);
+
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 	_plane_processor.set_filter (in, out, _vi_out, true);
 }
@@ -316,6 +327,7 @@ const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &
 
 int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
 {
+	fstb::unused (frame_data_ptr, core, src_node2_sptr, src_node3_sptr);
 	assert (src_node1_sptr.get () != 0);
 
 	int            ret_val = 0;
@@ -927,6 +939,7 @@ void	Bitdepth::init_fnc_errdiff ()
 
 void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const fmtcl::BitBltConv::ScaleInfo &scale_info, const PatData &pattern, uint32_t rnd_state)
 {
+	fstb::unused (dst_fmt);
 	assert (dst_fmt >= 0);
 	assert (dst_fmt < fmtcl::SplFmt_NBR_ELT);
 	assert (dst_res >= 8);
@@ -1280,8 +1293,8 @@ void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	const __m128i  rcst      = _mm_set1_epi16 (1 << (DIF_BITS - 1));
 	const __m128i  vmax      = _mm_set1_epi16 ((1 << DST_BITS) - 1);
 
-	const __m128i  ampo_i    = _mm_set1_epi16 (_ampo_i);  // 8 ?16 [0 ; 255]
-	const __m128i  ampn_i    = _mm_set1_epi16 (_ampn_i);  // 8 ?16 [0 ; 255]
+	const __m128i  ampo_i    = _mm_set1_epi16 (int16_t (_ampo_i)); // 8 ?16 [0 ; 255]
+	const __m128i  ampn_i    = _mm_set1_epi16 (int16_t (_ampn_i)); // 8 ?16 [0 ; 255]
 
 	for (int pos = 0; pos < w; pos += 8)
 	{
@@ -1385,8 +1398,8 @@ void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	const __m128i  mask_lsb  = _mm_set1_epi16 (0x00FF);
 	const __m128i  sign_bit  = _mm_set1_epi16 (-0x8000);
 
-	const __m128i  ampo_i    = _mm_set1_epi16 (_ampo_i);  // 8 ?16 [0 ; 255]
-	const __m128i  ampn_i    = _mm_set1_epi16 (_ampn_i);  // 8 ?16 [0 ; 255]
+	const __m128i  ampo_i    = _mm_set1_epi16 (int16_t (_ampo_i)); // 8 ?16 [0 ; 255]
+	const __m128i  ampn_i    = _mm_set1_epi16 (int16_t (_ampn_i)); // 8 ?16 [0 ; 255]
 
 	for (int pos = 0; pos < w; pos += 8)
 	{
@@ -1531,8 +1544,8 @@ void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 		ERRDIF::prepare_next_line (err1_ptr - 1);
 	}
 
-	ed_buf.use_mem <int16_t> (0) = err_nxt0;
-	ed_buf.use_mem <int16_t> (1) = err_nxt1;
+	ed_buf.use_mem <int16_t> (0) = int16_t (err_nxt0);
+	ed_buf.use_mem <int16_t> (1) = int16_t (err_nxt1);
 
 	if (! S_FLAG)
 	{
@@ -1715,11 +1728,15 @@ void	Bitdepth::quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC
 template <class SRC_TYPE>
 static inline SRC_TYPE	Bitdepth_extract_src (SRC_TYPE src_read, float src)
 {
+	fstb::unused (src);
+
 	return (src_read);
 }
 
 static inline float	Bitdepth_extract_src (float src_read, float src)
 {
+	fstb::unused (src_read);
+
 	return (src);
 }
 
@@ -1770,6 +1787,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (err_nxt1, err1_ptr, src_raw);
+
 #if defined (fmtc_Bitdepth_FS_OPTIMIZED_SERPENTINE_COEF)
 	const int      e1 = 0;
 	const int      e3 = (err * 4 + 8) >> 4;
@@ -1786,6 +1805,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (err_nxt1, err1_ptr, src_raw);
+
 #if defined (fmtc_Bitdepth_FS_OPTIMIZED_SERPENTINE_COEF)
 	const float    e1 = 0;
 	const float    e3 = err * (4.0f / 16);
@@ -1803,16 +1824,17 @@ template <typename EB>
 void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::prepare_next_line (EB *err_ptr)
 {
 	// Nothing
+	fstb::unused (err_ptr);
 }
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR, typename ET, typename EB>
 void	Bitdepth::DiffuseFloydSteinberg <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET e3, ET e5, ET e7, ET &err_nxt0, EB *err0_ptr)
 {
-	err_nxt0 = err0_ptr [DIR];
-	err0_ptr [-DIR] += e3;
-	err0_ptr [   0] += e5;
-	err0_ptr [ DIR]  = e1;
+	err_nxt0         = err0_ptr [DIR];
+	err0_ptr [-DIR] += EB (e3);
+	err0_ptr [   0] += EB (e5);
+	err0_ptr [ DIR]  = EB (e1);
 	err_nxt0        += e7;
 }
 
@@ -1822,6 +1844,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (err_nxt1, err1_ptr, src_raw);
+
 	const int      e1 = (err + 2) >> 2;
 	const int      e2 = err - 2 * e1;
 	spread_error <DIR> (e1, e2, err_nxt0, err0_ptr);
@@ -1831,6 +1855,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (err_nxt1, err1_ptr, src_raw);
+
 	const float    e1 = err * (1.0f / 4);
 	const float    e2 = err * (2.0f / 4);
 	spread_error <DIR> (e1, e2, err_nxt0, err0_ptr);
@@ -1847,9 +1873,9 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR, typename ET, typename EB>
 void	Bitdepth::DiffuseFilterLite <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET e2, ET &err_nxt0, EB *err0_ptr)
 {
-	err_nxt0 = err0_ptr [DIR];
-	err0_ptr [-DIR] += e1;
-	err0_ptr [   0]  = e1;
+	err_nxt0         = err0_ptr [DIR];
+	err0_ptr [-DIR] += EB (e1);
+	err0_ptr [   0]  = EB (e1);
 	err_nxt0        += e2;
 }
 
@@ -1859,6 +1885,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (src_raw);
+
 	const int      m  = (err << 4) / 42;
 	const int      e1 = (m + 8) >> 4;
 	const int      e2 = (m + 4) >> 3;
@@ -1873,6 +1901,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (src_raw);
+
 	const float    e1 = err * (1.0f / 42);
 	const float    e2 = err * (2.0f / 42);
 	const float    e4 = err * (4.0f / 42);
@@ -1885,24 +1915,25 @@ template <typename EB>
 void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::prepare_next_line (EB *err_ptr)
 {
 	// Nothing
+	fstb::unused (err_ptr);
 }
 
 template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR, typename ET, typename EB>
 void	Bitdepth::DiffuseStucki <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET e2, ET e4, ET e8, ET &err_nxt0, ET &err_nxt1, EB *err0_ptr, EB *err1_ptr)
 {
-	err_nxt0 = err_nxt1 + e8;
-	err_nxt1 = err1_ptr [DIR * 2] + e4;
-	err0_ptr [-DIR * 2] += e2;
-	err0_ptr [-DIR    ] += e4;
-	err0_ptr [   0    ] += e8;
-	err0_ptr [ DIR    ] += e4;
-	err0_ptr [ DIR * 2] += e2;
-	err1_ptr [-DIR * 2] += e1;
-	err1_ptr [-DIR    ] += e2;
-	err1_ptr [   0    ] += e4;
-	err1_ptr [ DIR    ] += e2;
-	err1_ptr [ DIR * 2]  = e1;
+	err_nxt0             = err_nxt1 + e8;
+	err_nxt1             = err1_ptr [DIR * 2] + e4;
+	err0_ptr [-DIR * 2] += EB (e2);
+	err0_ptr [-DIR    ] += EB (e4);
+	err0_ptr [   0    ] += EB (e8);
+	err0_ptr [ DIR    ] += EB (e4);
+	err0_ptr [ DIR * 2] += EB (e2);
+	err1_ptr [-DIR * 2] += EB (e1);
+	err1_ptr [-DIR    ] += EB (e2);
+	err1_ptr [   0    ] += EB (e4);
+	err1_ptr [ DIR    ] += EB (e2);
+	err1_ptr [ DIR * 2]  = EB (e1);
 }
 
 
@@ -1911,6 +1942,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (src_raw);
+
 	const int      e1 = (err + 4) >> 3;
 	spread_error <DIR> (e1, err_nxt0, err_nxt1, err0_ptr, err1_ptr);
 }
@@ -1919,6 +1952,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (src_raw);
+
 	const float    e1 = err * (1.0f / 8);
 	spread_error <DIR> (e1, err_nxt0, err_nxt1, err0_ptr, err1_ptr);
 }
@@ -1934,12 +1969,12 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR, typename ET, typename EB>
 void	Bitdepth::DiffuseAtkinson <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET &err_nxt0, ET &err_nxt1, EB *err0_ptr, EB *err1_ptr)
 {
-	err_nxt0 = err_nxt1           + e1;
-	err_nxt1 = err1_ptr [2 * DIR] + e1;
-	err0_ptr [-DIR] += e1;
-	err0_ptr [   0] += e1;
-	err0_ptr [+DIR] += e1;
-	err1_ptr [   0]  = e1;
+	err_nxt0         = err_nxt1           + e1;
+	err_nxt1         = err1_ptr [2 * DIR] + e1;
+	err0_ptr [-DIR] += EB (e1);
+	err0_ptr [   0] += EB (e1);
+	err0_ptr [+DIR] += EB (e1);
+	err1_ptr [   0]  = EB (e1);
 }
 
 
@@ -1953,6 +1988,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (err_nxt1, err1_ptr);
+
 	enum {         DIF_BITS = SRC_BITS - DST_BITS };
 
 	const int      index    = fstb::sshift_l <
@@ -1993,6 +2030,8 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR>
 void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw)
 {
+	fstb::unused (err_nxt1, err1_ptr);
+
 	const int      index    = DiffuseOstromoukhov::get_index (src_raw);
 	const typename DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::TableEntry &   te =
 		DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::_table [index];
@@ -2016,9 +2055,9 @@ template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 template <int DIR, typename ET, typename EB>
 void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::spread_error (ET e1, ET e2, ET e3, ET &err_nxt0, EB *err0_ptr)
 {
-	err_nxt0 = err0_ptr [DIR];
-	err0_ptr [-DIR] += e2;
-	err0_ptr [   0]  = e3;
+	err_nxt0         = err0_ptr [DIR];
+	err0_ptr [-DIR] += EB (e2);
+	err0_ptr [   0]  = EB (e3);
 	err_nxt0        += e1;
 }
 

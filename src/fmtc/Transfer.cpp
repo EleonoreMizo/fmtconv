@@ -81,7 +81,14 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 ,	_curve_s (fmtcl::TransCurve_UNDEF)
 ,	_curve_d (fmtcl::TransCurve_UNDEF)
 ,	_loglut_flag (false)
+#if defined (_MSC_VER)
+#pragma warning (push)
+#pragma warning (disable : 4355)
+#endif // 'this': used in base member initializer list
 ,	_plane_processor (vsapi, *this, "transfer", true)
+#if defined (_MSC_VER)
+#pragma warning (pop)
+#endif
 ,	_lut_uptr ()
 {
 	fstb::conv_to_lower_case (_transs);
@@ -135,6 +142,8 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 
 void	Transfer::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
+	fstb::unused (core);
+
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
 	_plane_processor.set_filter (in, out, _vi_out);
 }
@@ -203,6 +212,7 @@ const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &
 
 int	Transfer::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
 {
+	fstb::unused (frame_data_ptr, core, src_node2_sptr, src_node3_sptr);
 	assert (src_node1_sptr.get () != 0);
 
 	int            ret_val = 0;

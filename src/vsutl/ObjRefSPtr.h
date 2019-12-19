@@ -45,7 +45,7 @@ namespace vsutl
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *), void (VS_CC *::VSAPI::*FF) (T *)>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
 class ObjRefSPtr
 {
 

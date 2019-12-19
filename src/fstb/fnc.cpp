@@ -46,7 +46,7 @@ void	conv_to_lower_case (std::string &str)
 {
 	for (std::string::size_type p = 0; p < str.length (); ++p)
 	{
-		str [p] = tolower (str [p]);
+		str [p] = char (tolower (str [p]));
 	}
 }
 
@@ -71,7 +71,7 @@ int	snprintf4all (char *out_0, size_t size, const char *format_0, ...)
 
 #else
 
-	cnt = snprintf (out_0, size, format_0, ap);
+	cnt = vsnprintf (out_0, size, format_0, ap);
 
 #endif
 

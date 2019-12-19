@@ -22,6 +22,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/def.h"
 #include "fstb/ToolsSse2.h"
 
 
@@ -145,6 +146,8 @@ void	ProxyRwSse2 <SplFmt_INT8>::write_i16_partial (const Ptr::Type &ptr, const _
 template <bool CLIP_FLAG, bool SIGN_FLAG>
 __m128i	ProxyRwSse2 <SplFmt_INT8>::S16 <CLIP_FLAG, SIGN_FLAG>::read (const PtrConst::Type &ptr, const __m128i &zero, const __m128i &sign_bit)
 {
+	fstb::unused (sign_bit);
+
 	return (fstb::ToolsSse2::load_8_16l (ptr, zero));
 }
 
@@ -152,6 +155,8 @@ __m128i	ProxyRwSse2 <SplFmt_INT8>::S16 <CLIP_FLAG, SIGN_FLAG>::read (const PtrCo
 template <bool CLIP_FLAG, bool SIGN_FLAG>
 __m128i	ProxyRwSse2 <SplFmt_INT8>::S16 <CLIP_FLAG, SIGN_FLAG>::read_partial (const PtrConst::Type &ptr, const __m128i &zero, const __m128i &sign_bit, int len)
 {
+	fstb::unused (sign_bit);
+
 	return (fstb::ToolsSse2::load_8_16l_partial (ptr, zero, len));
 }
 

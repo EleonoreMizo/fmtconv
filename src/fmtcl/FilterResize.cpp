@@ -470,6 +470,8 @@ void	FilterResize::process_plane (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, co
 
 void	FilterResize::process_plane_bypass (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, const uint8_t *src_msb_ptr, const uint8_t *src_lsb_ptr, int stride_dst, int stride_src, bool chroma_flag)
 {
+	fstb::unused (chroma_flag);
+
 	assert (_nbr_passes <= 0);
 	assert (dst_msb_ptr != 0);
 	assert (src_msb_ptr != 0);
@@ -1366,6 +1368,8 @@ void	FilterResize::compute_req_src_tile_size (int &tw, int &th, int dw, int dh) 
 
 void	FilterResize::redirect_task_resize (avstp_TaskDispatcher *dispatcher_ptr, void *data_ptr)
 {
+	fstb::unused (dispatcher_ptr);
+
 	TaskRszCell *  trc_ptr = reinterpret_cast <TaskRszCell *> (data_ptr);
 	FilterResize * this_ptr = trc_ptr->_val._glob_data_ptr->_this_ptr;
 

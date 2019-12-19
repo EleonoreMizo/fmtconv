@@ -42,10 +42,12 @@ class ScalerCopy
 public:
 	static fstb_FORCEINLINE bool can_copy (bool copy_flag)
 	{
+		fstb::unused (copy_flag);
 		return (false);
 	}
 	static fstb_FORCEINLINE void copy (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int width)
 	{
+		fstb::unused (dst_ptr, src_ptr, width);
 		assert (false);
 	}
 };

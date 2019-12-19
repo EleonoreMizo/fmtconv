@@ -22,6 +22,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/def.h"
+
 #include <stdexcept>
 
 #include <cassert>
@@ -101,6 +103,7 @@ void VS_CC	Redirect <T>::create (const ::VSMap *in, ::VSMap *out, void *userData
 template <class T>
 void VS_CC	Redirect <T>::init_filter (::VSMap *in, ::VSMap *out, void **instanceData, ::VSNode *node, ::VSCore *core, const ::VSAPI *vsapi)
 {
+	fstb::unused (vsapi);
 	assert (in != 0);
 	assert (out != 0);
 	assert (instanceData != 0);
@@ -118,6 +121,7 @@ void VS_CC	Redirect <T>::init_filter (::VSMap *in, ::VSMap *out, void **instance
 template <class T>
 const ::VSFrameRef * VS_CC	Redirect <T>::get_frame (int n, int activationReason, void **instanceData, void **frameData, ::VSFrameContext *frameCtx, ::VSCore *core, const ::VSAPI *vsapi)
 {
+	fstb::unused (vsapi);
 	assert (n >= 0);
 	assert (instanceData != 0);
 	assert (*instanceData != 0);
@@ -143,6 +147,7 @@ const ::VSFrameRef * VS_CC	Redirect <T>::get_frame (int n, int activationReason,
 template <class T>
 void VS_CC	Redirect <T>::free_filter (void *instanceData, ::VSCore *core, const ::VSAPI *vsapi)
 {
+	fstb::unused (core, vsapi);
 	assert (instanceData != 0);
 	assert (core != 0);
 	assert (vsapi != 0);

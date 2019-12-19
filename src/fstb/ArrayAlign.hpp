@@ -22,6 +22,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/def.h"
+
 #include <new>
 
 #include <cassert>
@@ -55,6 +57,7 @@ public:
 	               destroy_elt (T *ptr)
 	{
 		// Nothing
+		fstb::unused (ptr);
 	}
 };
 
