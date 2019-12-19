@@ -40,12 +40,20 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
+#if (__cplusplus >= 201703L)
+	#define vsutl_ObjRefSPtr_VS_NOEXCEPT VS_NOEXCEPT
+#else
+	#define vsutl_ObjRefSPtr_VS_NOEXCEPT
+#endif
+
+
+
 namespace vsutl
 {
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 class ObjRefSPtr
 {
 

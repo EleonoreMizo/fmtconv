@@ -40,7 +40,7 @@ namespace vsutl
 
 
 // Does not increase the reference count.
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 ObjRefSPtr <T, FC, FF>::ObjRefSPtr (T *ptr, const ::VSAPI &vsapi)
 :	_obj_ptr (ptr)
 ,	_vsapi_ptr (&vsapi)
@@ -50,7 +50,7 @@ ObjRefSPtr <T, FC, FF>::ObjRefSPtr (T *ptr, const ::VSAPI &vsapi)
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 ObjRefSPtr <T, FC, FF>::ObjRefSPtr (const ObjRefSPtr <T, FC, FF> &other)
 :	_obj_ptr (0)
 ,	_vsapi_ptr (other._vsapi_ptr)
@@ -67,7 +67,7 @@ ObjRefSPtr <T, FC, FF>::ObjRefSPtr (const ObjRefSPtr <T, FC, FF> &other)
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 ObjRefSPtr <T, FC, FF>::~ObjRefSPtr ()
 {
 	release_resource ();
@@ -75,7 +75,7 @@ ObjRefSPtr <T, FC, FF>::~ObjRefSPtr ()
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 ObjRefSPtr <T, FC, FF> &	ObjRefSPtr <T, FC, FF>::operator = (const ObjRefSPtr <T, FC, FF> &other)
 {
 	if (other._obj_ptr != _obj_ptr)
@@ -107,7 +107,7 @@ ObjRefSPtr <T, FC, FF> &	ObjRefSPtr <T, FC, FF>::operator = (const ObjRefSPtr <T
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 T *	ObjRefSPtr <T, FC, FF>::operator -> () const
 {
 	return (_obj_ptr);
@@ -115,7 +115,7 @@ T *	ObjRefSPtr <T, FC, FF>::operator -> () const
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 T &	ObjRefSPtr <T, FC, FF>::operator * () const
 {
 	return (*_obj_ptr);
@@ -123,7 +123,7 @@ T &	ObjRefSPtr <T, FC, FF>::operator * () const
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 T *	ObjRefSPtr <T, FC, FF>::get () const
 {
 	return (_obj_ptr);
@@ -131,7 +131,7 @@ T *	ObjRefSPtr <T, FC, FF>::get () const
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 T *	ObjRefSPtr <T, FC, FF>::dup () const
 {
 	assert (_obj_ptr != 0);
@@ -144,7 +144,7 @@ T *	ObjRefSPtr <T, FC, FF>::dup () const
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 void	ObjRefSPtr <T, FC, FF>::clear ()
 {
 	release_resource ();
@@ -160,7 +160,7 @@ void	ObjRefSPtr <T, FC, FF>::clear ()
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) VS_NOEXCEPT>
+template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
 void	ObjRefSPtr <T, FC, FF>::release_resource ()
 {
 	if (_obj_ptr != 0)
