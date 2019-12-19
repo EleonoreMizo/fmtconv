@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2012-2016 Fredrik Mellbin
+* Copyright (c) 2012-2017 Fredrik Mellbin
 *
 * This file is part of VapourSynth.
 *
@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 #define VAPOURSYNTH_API_MAJOR 3
-#define VAPOURSYNTH_API_MINOR 4
+#define VAPOURSYNTH_API_MINOR 6
 #define VAPOURSYNTH_API_VERSION ((VAPOURSYNTH_API_MAJOR << 16) | (VAPOURSYNTH_API_MINOR))
 
 /* Convenience for C++ users. */
@@ -120,6 +120,14 @@ typedef enum VSPresetFormat {
 
     pfYUV444PH,
     pfYUV444PS,
+
+    pfYUV420P12,
+    pfYUV422P12,
+    pfYUV444P12,
+
+    pfYUV420P14,
+    pfYUV422P14,
+    pfYUV444P14,
 
     pfRGB24 = cmRGB + 10,
     pfRGB27,
@@ -519,6 +527,8 @@ typedef void (VS_CC *VSFrameDoneCallback)(void *userData, const VSFrameRef *f, i
 
 typedef void (VS_CC *VSMessageHandler)(int msgType, const char *msg, void *userData);
 
+typedef void (VS_CC *VSMessageHandlerFree)(void *userData);
+
 struct VSAPI {
 
 /*
@@ -573,7 +583,7 @@ Returns: A pointer to a structure describing the core. Its lifetime is the
 ==============================================================================
 */
 
-    const VSCoreInfo *(VS_CC *getCoreInfo)(VSCore *core) VS_NOEXCEPT;
+    const VSCoreInfo *(VS_CC *getCoreInfo)(VSCore *core) VS_NOEXCEPT; /* deprecated as of api 3.6, use getCoreInfo2 instead */
 
 
 
@@ -1512,7 +1522,7 @@ Returns:
 */
 
     VSFrameRef *(VS_CC *newVideoFrame2)(const VSFormat *format, int width, int height, const VSFrameRef **planeSrc, const int *planes, const VSFrameRef *propSrc, VSCore *core) VS_NOEXCEPT;
-    void (VS_CC *setMessageHandler)(VSMessageHandler handler, void *userData) VS_NOEXCEPT;
+    void (VS_CC *setMessageHandler)(VSMessageHandler handler, void *userData) VS_NOEXCEPT; /* deprecated as of api 3.6, use addMessageHandler and removeMessageHandler instead */
     int (VS_CC *setThreadCount)(int threads, VSCore *core) VS_NOEXCEPT;
 
     const char *(VS_CC *getPluginPath)(const VSPlugin *plugin) VS_NOEXCEPT;
@@ -1526,6 +1536,11 @@ Returns:
 
     /* api 3.4 */
     void (VS_CC *logMessage)(int msgType, const char *msg) VS_NOEXCEPT;
+
+    /* api 3.6 */
+    int (VS_CC *addMessageHandler)(VSMessageHandler handler, VSMessageHandlerFree free, void *userData) VS_NOEXCEPT;
+    int (VS_CC *removeMessageHandler)(int id) VS_NOEXCEPT;
+    void (VS_CC *getCoreInfo2)(VSCore *core, VSCoreInfo *info) VS_NOEXCEPT;
 };
 
 VS_API(const VSAPI *) getVapourSynthAPI(int version) VS_NOEXCEPT;
