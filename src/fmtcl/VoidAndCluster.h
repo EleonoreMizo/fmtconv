@@ -3,6 +3,18 @@
         VoidAndCluster.h
         Author: Laurent de Soras, 2015
 
+Reference:
+Robert Ulichney,
+The Void-And-Cluster Method for Dither Array Generation
+Proc. SPIE, Human Vision, Visual Processing, and Digital Display IV,
+vol. 1913, pp. 332-343, Feb. 1-4, 1993
+
+*** TO DO: implement:
+Hakan Ancin, Anoop K. Bhattacharjya, Joseph Shou-Pyng Shu,
+New void-and-cluster method for improved halftone uniformity,
+Journal of Electronic Imaging 8(1), January 1999,
+https://doi.org/10.1117/1.482701 ***
+
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to
