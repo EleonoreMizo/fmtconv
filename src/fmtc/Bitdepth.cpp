@@ -71,6 +71,7 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_avx2_flag (false)
 ,	_full_range_in_flag (false)
 ,	_full_range_out_flag (false)
+,	_range_def_flag (false)
 ,	_dmode (get_arg_int (in, out, "dmode", DMode_FILTERLITE))
 ,	_ampo (get_arg_flt (in, out, "ampo", 1.0))
 ,	_ampn (get_arg_flt (in, out, "ampn", 0.0))
@@ -158,12 +159,17 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	_splfmt_dst = SplFmtUtl::conv_from_vsformat (fmt_dst);
 
 	// Conversion-related things
+	bool           range_def_src_flag = false;
 	_full_range_in_flag  = (get_arg_int (
-		in, out, "fulls" , vsutl::is_full_range_default (fmt_src) ? 1 : 0
+		in, out, "fulls" , vsutl::is_full_range_default (fmt_src) ? 1 : 0,
+		0, &range_def_src_flag
 	) != 0);
+	bool           range_def_dst_flag = false;
 	_full_range_out_flag = (get_arg_int (
-		in, out, "fulld", (_full_range_in_flag) ? 1 : 0
+		in, out, "fulld", (_full_range_in_flag) ? 1 : 0,
+		0, &range_def_dst_flag
 	) != 0);
+	_range_def_flag = (range_def_src_flag || range_def_dst_flag);
 
 	// No dithering required
 	if (   (   fmt_src.sampleType == ::stInteger
@@ -302,8 +308,8 @@ const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &
 		);
 		const ::VSFrameRef & src = *src_sptr;
 
-		const int         w = _vsapi.getFrameWidth (&src, 0);
-		const int         h = _vsapi.getFrameHeight (&src, 0);
+		const int      w = _vsapi.getFrameWidth (&src, 0);
+		const int      h = _vsapi.getFrameHeight (&src, 0);
 		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
 
 		const int      ret_val = _plane_processor.process_frame (
@@ -313,6 +319,14 @@ const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &
 		{
 			_vsapi.freeFrame (dst_ptr);
 			dst_ptr = 0;
+		}
+
+		// Output frame properties
+		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+		if (_range_def_flag)
+		{
+			const int      cr_val = (_full_range_out_flag) ? 0 : 1;
+			_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
 		}
 	}
 

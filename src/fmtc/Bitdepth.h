@@ -352,6 +352,7 @@ private:
 	bool           _avx2_flag;
 	bool           _full_range_in_flag;
 	bool           _full_range_out_flag;
+	bool           _range_def_flag;
 
 	int            _dmode;
 	double         _ampo;
