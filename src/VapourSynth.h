@@ -461,10 +461,6 @@ typedef const VSFrameRef *(VS_CC *VSFilterGetFrame)(int n, int activationReason,
 
 
 
-typedef int (VS_CC *VSGetOutputIndex)(VSFrameContext *frameCtx);
-
-
-
 /*
 ==============================================================================
 Name: *VSFilterFree
