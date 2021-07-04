@@ -177,12 +177,6 @@
     <ClInclude Include="..\..\src\ffft\def.h">
       <Filter>ffft</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\ffft\DynArray.h">
-      <Filter>ffft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\ffft\DynArray.hpp">
-      <Filter>ffft</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\ffft\FFTReal.h">
       <Filter>ffft</Filter>
     </ClInclude>
@@ -561,7 +555,7 @@
     <ClCompile Include="..\..\src\vsutl\PlaneProcessor.cpp">
       <Filter>vsutl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\fstb\fnc.cpp">
+    <ClCompile Include="..\..\src\fstb\fnc_fstb.cpp">
       <Filter>fstb</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\AvstpFinder.cpp" />
@@ -756,5 +750,9 @@
     <ClCompile Include="..\..\src\fmtcl\TransOpHlg.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\unix\configure.ac" />
+    <None Include="..\unix\Makefile.am" />
   </ItemGroup>
 </Project>

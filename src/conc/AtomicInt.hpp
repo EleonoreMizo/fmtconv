@@ -52,7 +52,7 @@ namespace conc
 
 
 template <class T>
-AtomicInt <T>::AtomicInt ()
+AtomicInt <T>::AtomicInt () noexcept
 :	_val ()
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
@@ -63,7 +63,7 @@ AtomicInt <T>::AtomicInt ()
 
 
 template <class T>
-AtomicInt <T>::AtomicInt (T val)
+AtomicInt <T>::AtomicInt (T val) noexcept
 :	_val (val)
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
@@ -74,19 +74,18 @@ AtomicInt <T>::AtomicInt (T val)
 
 
 template <class T>
-AtomicInt <T>::AtomicInt (const AtomicInt <T> &other)
+AtomicInt <T>::AtomicInt (const AtomicInt <T> &other) noexcept
 :	_val (T (other))
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	assert (is_ptr_aligned_nz ((const void *) (&_val), sizeof (_val)));
 #endif // conc_ARCHI
-	assert (&other != 0);
 }
 
 
 
 template <class T>
-AtomicInt <T> &	AtomicInt <T>::operator = (T other)
+AtomicInt <T> &	AtomicInt <T>::operator = (T other) noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	StoredTypeWrapper::swap (_val, other);
@@ -100,7 +99,7 @@ AtomicInt <T> &	AtomicInt <T>::operator = (T other)
 
 
 template <class T>
-AtomicInt <T>::operator T () const
+AtomicInt <T>::operator T () const noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	return (T (_val));
@@ -112,7 +111,7 @@ AtomicInt <T>::operator T () const
 
 
 template <class T>
-T	AtomicInt <T>::swap (T other)
+T	AtomicInt <T>::swap (T other) noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	return (T (StoredTypeWrapper::swap (_val, other)));
@@ -124,12 +123,14 @@ T	AtomicInt <T>::swap (T other)
 
 
 template <class T>
-T	AtomicInt <T>::cas (T other, T comp)
+T	AtomicInt <T>::cas (T other, T comp) noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	return (T (StoredTypeWrapper::cas (_val, other, comp)));
 #else  // conc_ARCHI
-	_val.compare_exchange_weak (comp, other);
+	// Some algorithms do something specific upon failure, so we need to
+	// use the strong version.
+	_val.compare_exchange_strong (comp, other);
 	return (comp);
 #endif // conc_ARCHI
 }
@@ -137,7 +138,7 @@ T	AtomicInt <T>::cas (T other, T comp)
 
 
 template <class T>
-AtomicInt <T> &	AtomicInt <T>::operator += (const T &other)
+AtomicInt <T> &	AtomicInt <T>::operator += (const T &other) noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	AioAdd <T>	ftor (other);
@@ -152,7 +153,7 @@ AtomicInt <T> &	AtomicInt <T>::operator += (const T &other)
 
 
 template <class T>
-AtomicInt <T> &	AtomicInt <T>::operator -= (const T &other)
+AtomicInt <T> &	AtomicInt <T>::operator -= (const T &other) noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	AioSub <T>	ftor (other);
@@ -167,7 +168,7 @@ AtomicInt <T> &	AtomicInt <T>::operator -= (const T &other)
 
 
 template <class T>
-AtomicInt <T> &	AtomicInt <T>::operator ++ ()
+AtomicInt <T> &	AtomicInt <T>::operator ++ () noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	return ((*this) += 1);
@@ -180,7 +181,7 @@ AtomicInt <T> &	AtomicInt <T>::operator ++ ()
 
 
 template <class T>
-T	AtomicInt <T>::operator ++ (int)
+T	AtomicInt <T>::operator ++ (int) noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	const T        prev = _val;
@@ -194,7 +195,7 @@ T	AtomicInt <T>::operator ++ (int)
 
 
 template <class T>
-AtomicInt <T> &	AtomicInt <T>::operator -- ()
+AtomicInt <T> &	AtomicInt <T>::operator -- () noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	return ((*this) -= 1);
@@ -207,7 +208,7 @@ AtomicInt <T> &	AtomicInt <T>::operator -- ()
 
 
 template <class T>
-T	AtomicInt <T>::operator -- (int)
+T	AtomicInt <T>::operator -- (int) noexcept
 {
 #if (conc_ARCHI == conc_ARCHI_X86)
 	const T        prev = _val;

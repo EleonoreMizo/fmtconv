@@ -22,8 +22,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fstb/def.h"
-
 #include <new>
 
 #include <cassert>
@@ -54,10 +52,9 @@ class DestroyAux <true>
 public:
 	template <typename T>
 	static inline void
-	               destroy_elt (T *ptr)
+	               destroy_elt (T * /*ptr*/)
 	{
 		// Nothing
-		fstb::unused (ptr);
 	}
 };
 
@@ -89,8 +86,6 @@ ArrayAlign <T, LEN, AL>::ArrayAlign (const ArrayAlign <T, LEN, AL> &other)
 :/*	_data ()
 ,*/	_data_ptr (0)
 {
-	assert (&other != 0);
-
 	_data_ptr = reinterpret_cast <Element *> (
 		reinterpret_cast <ptrdiff_t> (&_data [ALIGNMENT - 1]) & -ALIGNMENT
 	);
@@ -122,8 +117,6 @@ ArrayAlign <T, LEN, AL>::~ArrayAlign ()
 template <typename T, long LEN, long AL>
 ArrayAlign <T, LEN, AL> &	ArrayAlign <T, LEN, AL>::operator = (const ArrayAlign <T, LEN, AL> &other)
 {
-	assert (&other != 0);
-
 	if (this != &other)
 	{
 		for (long pos = 0; pos < NBR_ELT; ++pos)
@@ -132,55 +125,75 @@ ArrayAlign <T, LEN, AL> &	ArrayAlign <T, LEN, AL>::operator = (const ArrayAlign 
 		}
 	}
 
-	return (*this);
+	return *this;
 }
 
 
 
 template <typename T, long LEN, long AL>
-const typename ArrayAlign <T, LEN, AL>::Element &	ArrayAlign <T, LEN, AL>::operator [] (long pos) const
+const typename ArrayAlign <T, LEN, AL>::Element &	ArrayAlign <T, LEN, AL>::operator [] (long pos) const noexcept
 {
 	assert (_data_ptr != 0);
 	assert (pos >= 0);
 	assert (pos < NBR_ELT);
 
-	return (_data_ptr [pos]);
+	return _data_ptr [pos];
 }
 
 
 
 template <typename T, long LEN, long AL>
-typename ArrayAlign <T, LEN, AL>::Element &	ArrayAlign <T, LEN, AL>::operator [] (long pos)
+typename ArrayAlign <T, LEN, AL>::Element &	ArrayAlign <T, LEN, AL>::operator [] (long pos) noexcept
 {
 	assert (_data_ptr != 0);
 	assert (pos >= 0);
 	assert (pos < NBR_ELT);
 
-	return (_data_ptr [pos]);
+	return _data_ptr [pos];
 }
 
 
 
 template <typename T, long LEN, long AL>
-long	ArrayAlign <T, LEN, AL>::size ()
+const typename ArrayAlign <T, LEN, AL>::Element *	ArrayAlign <T, LEN, AL>::data () const noexcept
 {
-	return (NBR_ELT);
+	assert (_data_ptr != 0);
+
+	return _data_ptr;
 }
 
 
 
 template <typename T, long LEN, long AL>
-long	ArrayAlign <T, LEN, AL>::length ()
+typename ArrayAlign <T, LEN, AL>::Element *	ArrayAlign <T, LEN, AL>::data () noexcept
 {
-	return (NBR_ELT);
+	assert (_data_ptr != 0);
+
+	return _data_ptr;
 }
 
 
 
 template <typename T, long LEN, long AL>
-long	ArrayAlign <T, LEN, AL>::get_alignment ()
+long	ArrayAlign <T, LEN, AL>::size () noexcept
 {
-	return (ALIGNMENT);
+	return NBR_ELT;
+}
+
+
+
+template <typename T, long LEN, long AL>
+long	ArrayAlign <T, LEN, AL>::length () noexcept
+{
+	return NBR_ELT;
+}
+
+
+
+template <typename T, long LEN, long AL>
+long	ArrayAlign <T, LEN, AL>::get_alignment () noexcept
+{
+	return ALIGNMENT;
 }
 
 

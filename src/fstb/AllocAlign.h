@@ -30,6 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include <memory>
 
 #include <cstddef>
+#include <cstdint>
 
 
 
@@ -46,7 +47,7 @@ class AllocAlign
 
 public:
 
-	static const long ALIGNMENT = ALIG;
+	static constexpr long ALIGNMENT = ALIG;
 
 	typedef	T	value_type;
 	typedef	value_type *	pointer;
@@ -56,31 +57,36 @@ public:
 	typedef	size_t	size_type;
 	typedef	ptrdiff_t	difference_type;
 
-	               AllocAlign ()                                  = default;
-	               AllocAlign (AllocAlign <T, ALIG> const &other) = default;
+	               AllocAlign ()                                   = default;
+	               AllocAlign (AllocAlign <T, ALIG> const &other)  = default;
 	template <typename U>
 	               AllocAlign (AllocAlign <U, ALIG> const &/*other*/) {}
-	               ~AllocAlign ()                                 = default;
+	               ~AllocAlign ()                                  = default;
 
 	// Address
-	inline pointer address (reference r);
-	inline const_pointer
-	               address (const_reference r);
+	[[deprecated]] inline pointer
+	               address (reference r) noexcept;
+	[[deprecated]] inline const_pointer
+	               address (const_reference r) noexcept;
 
 	// Memory allocation
-	inline pointer allocate (size_type n, typename std::allocator <void>::const_pointer ptr = 0);
-	inline void    deallocate (pointer p, size_type n);
+	[[deprecated]] inline pointer
+	               allocate (size_type n, const void *ptr);
+	inline pointer allocate (size_type n);
+	inline void    deallocate (pointer p, size_type n) noexcept;
 
 	// Size
-	inline size_type
-	               max_size() const;
+	[[deprecated]] inline size_type
+	               max_size () const noexcept;
 
 	// Construction/destruction
-	inline void    construct (pointer ptr, const T & t);
-	inline void    destroy (pointer ptr);
+	[[deprecated]] inline void
+	               construct (pointer ptr, const T & t);
+	[[deprecated]] inline void
+	               destroy (pointer ptr);
 
-	inline bool    operator == (AllocAlign <T, ALIG> const &other);
-	inline bool    operator != (AllocAlign <T, ALIG> const &other);
+	inline bool    operator == (AllocAlign <T, ALIG> const &other) noexcept;
+	inline bool    operator != (AllocAlign <T, ALIG> const &other) noexcept;
 
 	template <typename U>
 	struct rebind

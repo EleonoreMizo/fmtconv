@@ -40,25 +40,25 @@ namespace vsutl
 
 
 // Does not increase the reference count.
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-ObjRefSPtr <T, FC, FF>::ObjRefSPtr (T *ptr, const ::VSAPI &vsapi)
+template <typename T, typename FW>
+ObjRefSPtr <T, FW>::ObjRefSPtr (T *ptr, const ::VSAPI &vsapi)
 :	_obj_ptr (ptr)
 ,	_vsapi_ptr (&vsapi)
 {
-	assert (_obj_ptr == 0 || _vsapi_ptr != 0);
+	assert (_obj_ptr == nullptr || _vsapi_ptr != nullptr);
 }
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-ObjRefSPtr <T, FC, FF>::ObjRefSPtr (const ObjRefSPtr <T, FC, FF> &other)
-:	_obj_ptr (0)
+template <typename T, typename FW>
+ObjRefSPtr <T, FW>::ObjRefSPtr (const ObjRefSPtr <T, FW> &other)
+:	_obj_ptr (nullptr)
 ,	_vsapi_ptr (other._vsapi_ptr)
 {
-	if (other._obj_ptr != 0)
+	if (other._obj_ptr != nullptr)
 	{
-		_obj_ptr = (_vsapi_ptr->*FC) (other._obj_ptr);
-		if (_obj_ptr == 0)
+		_obj_ptr = FW::clone (*_vsapi_ptr, other._obj_ptr);
+		if (_obj_ptr == nullptr)
 		{
 			throw std::runtime_error ("Cannot clone VS object reference.");
 		}
@@ -67,31 +67,41 @@ ObjRefSPtr <T, FC, FF>::ObjRefSPtr (const ObjRefSPtr <T, FC, FF> &other)
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-ObjRefSPtr <T, FC, FF>::~ObjRefSPtr ()
+template <typename T, typename FW>
+ObjRefSPtr <T, FW>::ObjRefSPtr (ObjRefSPtr <T, FW> &&other)
+:	_obj_ptr (other._obj_ptr)
+,	_vsapi_ptr (other._vsapi_ptr)
+{
+	other._obj_ptr = nullptr;
+}
+
+
+
+template <typename T, typename FW>
+ObjRefSPtr <T, FW>::~ObjRefSPtr ()
 {
 	release_resource ();
 }
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-ObjRefSPtr <T, FC, FF> &	ObjRefSPtr <T, FC, FF>::operator = (const ObjRefSPtr <T, FC, FF> &other)
+template <typename T, typename FW>
+ObjRefSPtr <T, FW> &	ObjRefSPtr <T, FW>::operator = (const ObjRefSPtr <T, FW> &other)
 {
 	if (other._obj_ptr != _obj_ptr)
 	{
-		T *            tmp_ptr = 0;
+		T *            tmp_ptr = nullptr;
 
-		if (other._obj_ptr != 0)
+		if (other._obj_ptr != nullptr)
 		{
-			if (_vsapi_ptr == 0)
+			if (_vsapi_ptr == nullptr)
 			{
-				assert (other._vsapi_ptr != 0);
+				assert (other._vsapi_ptr != nullptr);
 				_vsapi_ptr = other._vsapi_ptr;
 			}
 
-			tmp_ptr = (_vsapi_ptr->*FC) (other._obj_ptr);
-			if (tmp_ptr == 0)
+			tmp_ptr = FW::clone (*_vsapi_ptr, other._obj_ptr);
+			if (tmp_ptr == nullptr)
 			{
 				throw std::runtime_error ("Cannot clone VS object reference.");
 			}
@@ -102,50 +112,65 @@ ObjRefSPtr <T, FC, FF> &	ObjRefSPtr <T, FC, FF>::operator = (const ObjRefSPtr <T
 		_obj_ptr = tmp_ptr;
 	}
 
-	return (*this);
+	return *this;
 }
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-T *	ObjRefSPtr <T, FC, FF>::operator -> () const
+template <typename T, typename FW>
+ObjRefSPtr <T, FW> &	ObjRefSPtr <T, FW>::operator = (ObjRefSPtr <T, FW> &&other)
 {
-	return (_obj_ptr);
+	if (other._obj_ptr != _obj_ptr)
+	{
+		_obj_ptr   = other._obj_ptr;
+		_vsapi_ptr = other._vsapi_ptr;
+		other._obj_ptr = nullptr;
+	}
+
+	return *this;
 }
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-T &	ObjRefSPtr <T, FC, FF>::operator * () const
+template <typename T, typename FW>
+T *	ObjRefSPtr <T, FW>::operator -> () const
 {
-	return (*_obj_ptr);
+	return _obj_ptr;
 }
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-T *	ObjRefSPtr <T, FC, FF>::get () const
+template <typename T, typename FW>
+T &	ObjRefSPtr <T, FW>::operator * () const
 {
-	return (_obj_ptr);
+	return *_obj_ptr;
 }
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-T *	ObjRefSPtr <T, FC, FF>::dup () const
+template <typename T, typename FW>
+T *	ObjRefSPtr <T, FW>::get () const
 {
-	assert (_obj_ptr != 0);
-	assert (_vsapi_ptr != 0);
-
-	T *            tmp_ptr = (_vsapi_ptr->*FC) (_obj_ptr);
-
-	return (tmp_ptr);
+	return _obj_ptr;
 }
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-void	ObjRefSPtr <T, FC, FF>::clear ()
+template <typename T, typename FW>
+T *	ObjRefSPtr <T, FW>::dup () const
+{
+	assert (_obj_ptr != nullptr);
+	assert (_vsapi_ptr != nullptr);
+
+	T *            tmp_ptr = FW::clone (*_vsapi_ptr, _obj_ptr);
+
+	return tmp_ptr;
+}
+
+
+
+template <typename T, typename FW>
+void	ObjRefSPtr <T, FW>::clear ()
 {
 	release_resource ();
 }
@@ -160,14 +185,14 @@ void	ObjRefSPtr <T, FC, FF>::clear ()
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
-void	ObjRefSPtr <T, FC, FF>::release_resource ()
+template <typename T, typename FW>
+void	ObjRefSPtr <T, FW>::release_resource ()
 {
-	if (_obj_ptr != 0)
+	if (_obj_ptr != nullptr)
 	{
-		assert (_vsapi_ptr != 0);
-		(_vsapi_ptr->*FF) (_obj_ptr);
-		_obj_ptr = 0;
+		assert (_vsapi_ptr != nullptr);
+		FW::free (*_vsapi_ptr, _obj_ptr);
+		_obj_ptr = nullptr;
 	}
 }
 

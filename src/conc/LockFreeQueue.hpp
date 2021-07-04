@@ -39,7 +39,7 @@ template <class T>
 LockFreeQueue <T>::LockFreeQueue ()
 :	_m_ptr ()
 {
-	_m_ptr->_dummy._next_ptr = 0;
+	_m_ptr->_dummy._next_ptr = nullptr;
 	_m_ptr->_head.set (&_m_ptr->_dummy, 0);
 	_m_ptr->_tail.set (&_m_ptr->_dummy, 0);
 }
@@ -47,23 +47,24 @@ LockFreeQueue <T>::LockFreeQueue ()
 
 
 template <class T>
-void	LockFreeQueue <T>::enqueue (CellType &cell)
+void	LockFreeQueue <T>::enqueue (CellType &cell) noexcept
 {
-	cell._next_ptr = 0;	// set the cell next pointer to NULL
+	cell._next_ptr = nullptr;  // set the cell next pointer to NULL
 
-	CellType *     tail_ptr;
-	ptrdiff_t      icount;
+	CellType *     tail_ptr = nullptr;
+	intptr_t       icount   = 0;
 
 	bool           cont_flag = true;
 	do	// try until enqueue is done
 	{
-		icount   = _m_ptr->_tail.get_val ();	// read the tail modification count
-		tail_ptr = _m_ptr->_tail.get_ptr ();	// read the tail cell
+		// read the tail modification count
+		// read the tail cell
+		_m_ptr->_tail.get (tail_ptr, icount);
 
 		// try to link the cell to the tail cell
-		void *         old_ptr = tail_ptr->_next_ptr.cas (&cell, 0);
+		void *         old_ptr = tail_ptr->_next_ptr.cas (&cell, nullptr);
 
-		if (old_ptr == 0)
+		if (old_ptr == nullptr)
 		{
 			cont_flag = false;	// enqueue is done, exit the loop
 		}
@@ -82,32 +83,36 @@ void	LockFreeQueue <T>::enqueue (CellType &cell)
 
 // Returns 0 if the queue is empty.
 template <class T>
-typename LockFreeQueue <T>::CellType *	LockFreeQueue <T>::dequeue ()
+typename LockFreeQueue <T>::CellType *	LockFreeQueue <T>::dequeue () noexcept
 {
-	ptrdiff_t      ocount;
-	ptrdiff_t      icount;
-	CellType *     head_ptr;
-	CellType *     next_ptr;
+	constexpr int  max_loop = 100;
+	int            loop_cnt = 0;
+	intptr_t       ocount   = 0;
+	intptr_t       icount   = 0;
+	CellType *     head_ptr = nullptr;
+	CellType *     next_ptr = nullptr;
 
 	do	// try until dequeue is done
 	{
-		ocount   = _m_ptr->_head.get_val ();   // read the head modification count
+		// read the head modification count
+		// read the head cell
+		_m_ptr->_head.get (head_ptr, ocount);
 		icount   = _m_ptr->_tail.get_val ();   // read the tail modification count
-		head_ptr = _m_ptr->_head.get_ptr ();   // read the head cell
 		next_ptr = head_ptr->_next_ptr;        // read the next cell
 
-		if (ocount == _m_ptr->_head.get_val ())  // ensures that next is a valid pointer to avoid failure when reading next value
+		const intptr_t ocount_tst = _m_ptr->_head.get_val ();
+		if (ocount == ocount_tst)  // ensures that next is a valid pointer to avoid failure when reading next value
 		{
 			if (head_ptr == _m_ptr->_tail.get_ptr ())   // is queue empty or tail falling behind ?
 			{
-				if (next_ptr == 0)   // is queue empty ?
+				if (next_ptr == nullptr)   // is queue empty ?
 				{
-					return (0); // queue is empty: return NULL
+					return nullptr; // queue is empty: return NULL
 				}
 				// tail is pointing to head in a non empty queue, try to set tail to the next cell
 				_m_ptr->_tail.cas2 (next_ptr, icount + 1, head_ptr, icount);
 			}
-			else if (next_ptr != 0) // if we are not competing on the dummy next
+			else if (next_ptr != nullptr) // if we are not competing on the dummy next
 			{
 				// try to set tail to the next cell
 				if (_m_ptr->_head.cas2 (next_ptr, ocount + 1, head_ptr, ocount))
@@ -115,6 +120,16 @@ typename LockFreeQueue <T>::CellType *	LockFreeQueue <T>::dequeue ()
 					break;   // dequeue done, exit the loop
 				}
 			}
+		}
+
+		++ loop_cnt;
+		if (loop_cnt >= max_loop)
+		{
+			// This could indicate that the queue is:
+			// - corrupted
+			// - or in heavy contention
+			assert (false);
+			return nullptr;
 		}
 	}
 	while (true);

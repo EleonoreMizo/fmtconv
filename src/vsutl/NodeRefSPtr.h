@@ -37,10 +37,22 @@ namespace vsutl
 
 
 
+class NodeRefSPtr_FncWrapper
+{
+public:
+	static inline ::VSNodeRef * clone (const ::VSAPI &vsapi, ::VSNodeRef *node) VS_NOEXCEPT
+	{
+		return (*vsapi.cloneNodeRef) (node);
+	}
+	static inline void free (const ::VSAPI &vsapi, ::VSNodeRef *node) VS_NOEXCEPT
+	{
+		(*vsapi.freeNode) (node);
+	}
+};
+
 typedef	ObjRefSPtr <
 	::VSNodeRef,
-	&VSAPI::cloneNodeRef,
-	&VSAPI::freeNode
+	NodeRefSPtr_FncWrapper
 >	NodeRefSPtr;
 
 

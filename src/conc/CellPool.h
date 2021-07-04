@@ -65,7 +65,7 @@ public:
 
 	inline CellType *
 	               take_cell (bool autogrow_flag = false);
-	inline void    return_cell (CellType &cell);
+	inline void    return_cell (CellType &cell) noexcept;
 
 
 
@@ -126,7 +126,9 @@ private:
 private:
 
 	               CellPool (const CellPool <T> &other)          = delete;
+	               CellPool (CellPool <T> &&other)               = delete;
 	CellPool <T> & operator = (const CellPool <T> &other)        = delete;
+	CellPool <T> & operator = (CellPool <T> &&other)             = delete;
 	bool           operator == (const CellPool <T> &other) const = delete;
 	bool           operator != (const CellPool <T> &other) const = delete;
 

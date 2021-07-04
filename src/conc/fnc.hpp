@@ -23,7 +23,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include <cassert>
-#include <cstddef>
+#include <cstdint>
 
 
 
@@ -33,25 +33,25 @@ namespace conc
 
 
 template <class T>
-bool	is_ptr_aligned (const T *ptr, int align)
+bool	is_ptr_aligned (const T *ptr, int align) noexcept
 {
 	assert (align > 0);
 	assert ((align & -align) == align);
 
-	return ((reinterpret_cast <ptrdiff_t> (ptr) & (align - 1)) == 0);
+	return ((reinterpret_cast <intptr_t> (ptr) & (align - 1)) == 0);
 }
 
 template <class T>
-bool	is_ptr_aligned_nz (const T *ptr, int align)
+bool	is_ptr_aligned_nz (const T *ptr, int align) noexcept
 {
 	assert (align > 0);
 	assert ((align & -align) == align);
 
-	return (ptr != 0 && is_ptr_aligned (ptr, align));
+	return (ptr != nullptr && is_ptr_aligned (ptr, align));
 }
 
 template <class T>
-bool	is_ptr_aligned_nz (const T *ptr)
+bool	is_ptr_aligned_nz (const T *ptr) noexcept
 {
 	return (is_ptr_aligned_nz (ptr, sizeof (T)));
 }

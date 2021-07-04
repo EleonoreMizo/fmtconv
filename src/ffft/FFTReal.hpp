@@ -27,8 +27,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include <cassert>
-#include <cmath>
+#include	<cassert>
+#include	<cmath>
 
 
 
@@ -37,7 +37,15 @@ namespace ffft
 
 
 
-static inline bool	FFTReal_is_pow2 (long x)
+#if (__cplusplus >= 201402L)
+	#define ffft_CONSTEXPR14 constexpr
+#else
+	#define ffft_CONSTEXPR14
+#endif
+
+
+
+static inline ffft_CONSTEXPR14 bool	FFTReal_is_pow2 (long x) noexcept
 {
 	assert (x > 0);
 
@@ -46,11 +54,11 @@ static inline bool	FFTReal_is_pow2 (long x)
 
 
 
-static inline int	FFTReal_get_next_pow2 (long x)
+static inline ffft_CONSTEXPR14 int	FFTReal_get_next_pow2 (long x) noexcept
 {
 	--x;
 
-	int            p = 0;
+	int				p = 0;
 	while ((x & ~0xFFFFL) != 0)
 	{
 		p += 16;
@@ -116,9 +124,9 @@ Throws: Nothing
 */
 
 template <class DT>
-long	FFTReal <DT>::get_length () const
+long	FFTReal <DT>::get_length () const noexcept
 {
-	return (_length);
+	return _length;
 }
 
 
@@ -140,11 +148,11 @@ Throws: Nothing
 */
 
 template <class DT>
-void	FFTReal <DT>::do_fft (DataType f [], const DataType x []) const
+void	FFTReal <DT>::do_fft (DataType f [], const DataType x []) const noexcept
 {
-	assert (f != 0);
+	assert (f != nullptr);
 	assert (f != use_buffer ());
-	assert (x != 0);
+	assert (x != nullptr);
 	assert (x != use_buffer ());
 	assert (x != f);
 
@@ -160,8 +168,8 @@ void	FFTReal <DT>::do_fft (DataType f [], const DataType x []) const
 		f [1] = x [0] - x [2];
 		f [3] = x [1] - x [3];
 
-		const DataType b_0 = x [0] + x [2];
-		const DataType b_2 = x [1] + x [3];
+		const DataType	b_0 = x [0] + x [2];
+		const DataType	b_2 = x [1] + x [3];
 		
 		f [0] = b_0 + b_2;
 		f [2] = b_0 - b_2;
@@ -201,11 +209,11 @@ Throws: Nothing
 */
 
 template <class DT>
-void	FFTReal <DT>::do_ifft (const DataType f [], DataType x []) const
+void	FFTReal <DT>::do_ifft (const DataType f [], DataType x []) const noexcept
 {
-	assert (f != 0);
+	assert (f != nullptr);
 	assert (f != use_buffer ());
-	assert (x != 0);
+	assert (x != nullptr);
 	assert (x != use_buffer ());
 	assert (x != f);
 
@@ -218,8 +226,8 @@ void	FFTReal <DT>::do_ifft (const DataType f [], DataType x []) const
 	// 4-point IFFT
 	else if (_nbr_bits == 2)
 	{
-		const DataType b_0 = f [0] + f [2];
-		const DataType b_2 = f [0] - f [2];
+		const DataType	b_0 = f [0] + f [2];
+		const DataType	b_2 = f [0] - f [2];
 
 		x [0] = b_0 + f [1] * 2;
 		x [2] = b_0 - f [1] * 2;
@@ -256,13 +264,13 @@ Throws: Nothing
 */
 
 template <class DT>
-void	FFTReal <DT>::rescale (DataType x []) const
+void	FFTReal <DT>::rescale (DataType x []) const noexcept
 {
 	const DataType	mul = DataType (1.0 / _length);
 
 	if (_length < 4)
 	{
-		long           i = _length - 1;
+		long				i = _length - 1;
 		do
 		{
 			x [i] *= mul;
@@ -276,7 +284,7 @@ void	FFTReal <DT>::rescale (DataType x []) const
 		assert ((_length & 3) == 0);
 
 		// Could be optimized with SIMD instruction sets (needs alignment check)
-		long           i = _length - 4;
+		long				i = _length - 4;
 		do
 		{
 			x [i + 0] *= mul;
@@ -307,10 +315,15 @@ Throws: Nothing
 */
 
 template <class DT>
-typename FFTReal <DT>::DataType *	FFTReal <DT>::use_buffer () const
+typename FFTReal <DT>::DataType *	FFTReal <DT>::use_buffer () const noexcept
 {
-	return (&_buffer [0]);
+	return _buffer.data ();
 }
+
+
+
+template <class DT>
+constexpr int	FFTReal <DT>::MAX_BIT_DEPTH;
 
 
 
@@ -325,15 +338,15 @@ typename FFTReal <DT>::DataType *	FFTReal <DT>::use_buffer () const
 template <class DT>
 void	FFTReal <DT>::init_br_lut ()
 {
-	const long     length = 1L << _nbr_bits;
+	const long		length = 1L << _nbr_bits;
 	_br_lut.resize (length);
 
 	_br_lut [0] = 0;
-	long           br_index = 0;
+	long				br_index = 0;
 	for (long cnt = 1; cnt < length; ++cnt)
 	{
 		// ++br_index (bit reversed)
-		long           bit = length >> 1;
+		long				bit = length >> 1;
 		while (((br_index ^= bit) & bit) == 0)
 		{
 			bit >>= 1;
@@ -348,19 +361,17 @@ void	FFTReal <DT>::init_br_lut ()
 template <class DT>
 void	FFTReal <DT>::init_trigo_lut ()
 {
-	using namespace std;
-
 	if (_nbr_bits > 3)
 	{
-		const long     total_len = (1L << (_nbr_bits - 1)) - 4;
+		const long		total_len = (1L << (_nbr_bits - 1)) - 4;
 		_trigo_lut.resize (total_len);
 
 		for (int level = 3; level < _nbr_bits; ++level)
 		{
-			const long     level_len = 1L << (level - 1);
-			DataType	* const  level_ptr =
+			const long		level_len = 1L << (level - 1);
+			DataType	* const	level_ptr =
 				&_trigo_lut [get_trigo_level_index (level)];
-			const double   mul = PI / (level_len << 1);
+			const double	mul = PI / (level_len << 1);
 
 			for (long i = 0; i < level_len; ++ i)
 			{
@@ -375,17 +386,17 @@ void	FFTReal <DT>::init_trigo_lut ()
 template <class DT>
 void	FFTReal <DT>::init_trigo_osc ()
 {
-	const int      nbr_osc = _nbr_bits - TRIGO_BD_LIMIT;
+	const int		nbr_osc = _nbr_bits - TRIGO_BD_LIMIT;
 	if (nbr_osc > 0)
 	{
 		_trigo_osc.resize (nbr_osc);
 
 		for (int osc_cnt = 0; osc_cnt < nbr_osc; ++osc_cnt)
 		{
-			OscType &      osc = _trigo_osc [osc_cnt];
+			OscType &		osc = _trigo_osc [osc_cnt];
 
-			const long     len = 1L << (TRIGO_BD_LIMIT + osc_cnt);
-			const double   mul = (0.5 * PI) / len;
+			const long		len = 1L << (TRIGO_BD_LIMIT + osc_cnt);
+			const double	mul = (0.5 * PI) / len;
 			osc.set_step (mul);
 		}
 	}
@@ -394,7 +405,7 @@ void	FFTReal <DT>::init_trigo_osc ()
 
 
 template <class DT>
-const long *	FFTReal <DT>::get_br_ptr () const
+const long *	FFTReal <DT>::get_br_ptr () const noexcept
 {
 	return (&_br_lut [0]);
 }
@@ -402,7 +413,7 @@ const long *	FFTReal <DT>::get_br_ptr () const
 
 
 template <class DT>
-const typename FFTReal <DT>::DataType *	FFTReal <DT>::get_trigo_ptr (int level) const
+const typename FFTReal <DT>::DataType *	FFTReal <DT>::get_trigo_ptr (int level) const noexcept
 {
 	assert (level >= 3);
 
@@ -412,7 +423,7 @@ const typename FFTReal <DT>::DataType *	FFTReal <DT>::get_trigo_ptr (int level) 
 
 
 template <class DT>
-long	FFTReal <DT>::get_trigo_level_index (int level) const
+long	FFTReal <DT>::get_trigo_level_index (int level) const noexcept
 {
 	assert (level >= 3);
 
@@ -423,16 +434,16 @@ long	FFTReal <DT>::get_trigo_level_index (int level) const
 
 // Transform in several passes
 template <class DT>
-void	FFTReal <DT>::compute_fft_general (DataType f [], const DataType x []) const
+void	FFTReal <DT>::compute_fft_general (DataType f [], const DataType x []) const noexcept
 {
-	assert (f != 0);
+	assert (f != nullptr);
 	assert (f != use_buffer ());
-	assert (x != 0);
+	assert (x != nullptr);
 	assert (x != use_buffer ());
 	assert (x != f);
 
-	DataType *     sf;
-	DataType *     df;
+	DataType *		sf;
+	DataType *		df;
 
 	if ((_nbr_bits & 1) != 0)
 	{
@@ -452,7 +463,7 @@ void	FFTReal <DT>::compute_fft_general (DataType f [], const DataType x []) cons
 	{
 		compute_direct_pass_n (df, sf, pass);
 
-		DataType * const  temp_ptr = df;
+		DataType * const	temp_ptr = df;
 		df = sf;
 		sf = temp_ptr;
 	}
@@ -461,27 +472,27 @@ void	FFTReal <DT>::compute_fft_general (DataType f [], const DataType x []) cons
 
 
 template <class DT>
-void	FFTReal <DT>::compute_direct_pass_1_2 (DataType df [], const DataType x []) const
+void	FFTReal <DT>::compute_direct_pass_1_2 (DataType df [], const DataType x []) const noexcept
 {
-	assert (df != 0);
-	assert (x != 0);
+	assert (df != nullptr);
+	assert (x  != nullptr);
 	assert (df != x);
 
-	const long* const bit_rev_lut_ptr = get_br_ptr ();
-	long              coef_index      = 0;
+	const long * const	bit_rev_lut_ptr = get_br_ptr ();
+	long				coef_index = 0;
 	do
 	{
-		const long     rev_index_0 = bit_rev_lut_ptr [coef_index    ];
-		const long     rev_index_1 = bit_rev_lut_ptr [coef_index + 1];
-		const long     rev_index_2 = bit_rev_lut_ptr [coef_index + 2];
-		const long     rev_index_3 = bit_rev_lut_ptr [coef_index + 3];
+		const long		rev_index_0 = bit_rev_lut_ptr [coef_index];
+		const long		rev_index_1 = bit_rev_lut_ptr [coef_index + 1];
+		const long		rev_index_2 = bit_rev_lut_ptr [coef_index + 2];
+		const long		rev_index_3 = bit_rev_lut_ptr [coef_index + 3];
 
 		DataType	* const	df2 = df + coef_index;
 		df2 [1] = x [rev_index_0] - x [rev_index_1];
 		df2 [3] = x [rev_index_2] - x [rev_index_3];
 
-		const DataType sf_0 = x [rev_index_0] + x [rev_index_1];
-		const DataType sf_2 = x [rev_index_2] + x [rev_index_3];
+		const DataType	sf_0 = x [rev_index_0] + x [rev_index_1];
+		const DataType	sf_2 = x [rev_index_2] + x [rev_index_3];
 
 		df2 [0] = sf_0 + sf_2;
 		df2 [2] = sf_0 - sf_2;
@@ -494,20 +505,20 @@ void	FFTReal <DT>::compute_direct_pass_1_2 (DataType df [], const DataType x [])
 
 
 template <class DT>
-void	FFTReal <DT>::compute_direct_pass_3 (DataType df [], const DataType sf []) const
+void	FFTReal <DT>::compute_direct_pass_3 (DataType df [], const DataType sf []) const noexcept
 {
-	assert (df != 0);
-	assert (sf != 0);
+	assert (df != nullptr);
+	assert (sf != nullptr);
 	assert (df != sf);
 
-	const DataType sqrt2_2    = DataType (SQRT2 * 0.5);
-	long           coef_index = 0;
+	const DataType	sqrt2_2 = DataType (SQRT2 * 0.5);
+	long				coef_index = 0;
 	do
 	{
-		DataType       v;
+		DataType			v;
 
-		df [coef_index]     = sf [coef_index    ] + sf [coef_index + 4];
-		df [coef_index + 4] = sf [coef_index    ] - sf [coef_index + 4];
+		df [coef_index] = sf [coef_index] + sf [coef_index + 4];
+		df [coef_index + 4] = sf [coef_index] - sf [coef_index + 4];
 		df [coef_index + 2] = sf [coef_index + 2];
 		df [coef_index + 6] = sf [coef_index + 6];
 
@@ -527,10 +538,10 @@ void	FFTReal <DT>::compute_direct_pass_3 (DataType df [], const DataType sf []) 
 
 
 template <class DT>
-void	FFTReal <DT>::compute_direct_pass_n (DataType df [], const DataType sf [], int pass) const
+void	FFTReal <DT>::compute_direct_pass_n (DataType df [], const DataType sf [], int pass) const noexcept
 {
-	assert (df != 0);
-	assert (sf != 0);
+	assert (df != nullptr);
+	assert (sf != nullptr);
 	assert (df != sf);
 	assert (pass >= 3);
 	assert (pass < _nbr_bits);
@@ -548,25 +559,25 @@ void	FFTReal <DT>::compute_direct_pass_n (DataType df [], const DataType sf [], 
 
 
 template <class DT>
-void	FFTReal <DT>::compute_direct_pass_n_lut (DataType df [], const DataType sf [], int pass) const
+void	FFTReal <DT>::compute_direct_pass_n_lut (DataType df [], const DataType sf [], int pass) const noexcept
 {
-	assert (df != 0);
-	assert (sf != 0);
+	assert (df != nullptr);
+	assert (sf != nullptr);
 	assert (df != sf);
 	assert (pass >= 3);
 	assert (pass < _nbr_bits);
 
-	const long     nbr_coef   = 1 << pass;
-	const long     h_nbr_coef = nbr_coef >> 1;
-	const long     d_nbr_coef = nbr_coef << 1;
-	long           coef_index = 0;
+	const long		nbr_coef = 1 << pass;
+	const long		h_nbr_coef = nbr_coef >> 1;
+	const long		d_nbr_coef = nbr_coef << 1;
+	long				coef_index = 0;
 	const DataType	* const	cos_ptr = get_trigo_ptr (pass);
 	do
 	{
-		const DataType * const  sf1r = sf + coef_index;
-		const DataType * const  sf2r = sf1r + nbr_coef;
-		DataType       * const  dfr  = df + coef_index;
-		DataType       * const  dfi  = dfr + nbr_coef;
+		const DataType	* const	sf1r = sf + coef_index;
+		const DataType	* const	sf2r = sf1r + nbr_coef;
+		DataType			* const	dfr = df + coef_index;
+		DataType			* const	dfi = dfr + nbr_coef;
 
 		// Extreme coefficients are always real
 		dfr [0] = sf1r [0] + sf2r [0];
@@ -575,20 +586,20 @@ void	FFTReal <DT>::compute_direct_pass_n_lut (DataType df [], const DataType sf 
 		dfi [h_nbr_coef] = sf2r [h_nbr_coef];
 
 		// Others are conjugate complex numbers
-		const DataType * const  sf1i = sf1r + h_nbr_coef;
-		const DataType * const  sf2i = sf1i + nbr_coef;
+		const DataType * const	sf1i = sf1r + h_nbr_coef;
+		const DataType * const	sf2i = sf1i + nbr_coef;
 		for (long i = 1; i < h_nbr_coef; ++ i)
 		{
-			const DataType c = cos_ptr [             i]; // cos (i*PI/nbr_coef);
-			const DataType s = cos_ptr [h_nbr_coef - i]; // sin (i*PI/nbr_coef);
-			DataType       v;
+			const DataType	c = cos_ptr [i];					// cos (i*PI/nbr_coef);
+			const DataType	s = cos_ptr [h_nbr_coef - i];	// sin (i*PI/nbr_coef);
+			DataType	 		v;
 
 			v = sf2r [i] * c - sf2i [i] * s;
-			dfr [ i] = sf1r [i] + v;
+			dfr [i] = sf1r [i] + v;
 			dfi [-i] = sf1r [i] - v;	// dfr [nbr_coef - i] =
 
 			v = sf2r [i] * s + sf2i [i] * c;
-			dfi [           i] = v + sf1i [i];
+			dfi [i] = v + sf1i [i];
 			dfi [nbr_coef - i] = v - sf1i [i];
 		}
 
@@ -600,25 +611,25 @@ void	FFTReal <DT>::compute_direct_pass_n_lut (DataType df [], const DataType sf 
 
 
 template <class DT>
-void	FFTReal <DT>::compute_direct_pass_n_osc (DataType df [], const DataType sf [], int pass) const
+void	FFTReal <DT>::compute_direct_pass_n_osc (DataType df [], const DataType sf [], int pass) const noexcept
 {
-	assert (df != 0);
-	assert (sf != 0);
+	assert (df != nullptr);
+	assert (sf != nullptr);
 	assert (df != sf);
 	assert (pass > TRIGO_BD_LIMIT);
 	assert (pass < _nbr_bits);
 
-	const long     nbr_coef    = 1 << pass;
-	const long     h_nbr_coef = nbr_coef >> 1;
-	const long     d_nbr_coef = nbr_coef << 1;
-	long           coef_index = 0;
-	OscType &      osc = _trigo_osc [pass - (TRIGO_BD_LIMIT + 1)];
+	const long		nbr_coef = 1 << pass;
+	const long		h_nbr_coef = nbr_coef >> 1;
+	const long		d_nbr_coef = nbr_coef << 1;
+	long				coef_index = 0;
+	OscType &		osc = _trigo_osc [pass - (TRIGO_BD_LIMIT + 1)];
 	do
 	{
-		const DataType * const  sf1r = sf   + coef_index;
-		const DataType * const  sf2r = sf1r + nbr_coef;
-		DataType       * const  dfr  = df   + coef_index;
-		DataType       * const  dfi  = dfr  + nbr_coef;
+		const DataType	* const	sf1r = sf + coef_index;
+		const DataType	* const	sf2r = sf1r + nbr_coef;
+		DataType			* const	dfr = df + coef_index;
+		DataType			* const	dfi = dfr + nbr_coef;
 
 		osc.clear_buffers ();
 
@@ -629,21 +640,21 @@ void	FFTReal <DT>::compute_direct_pass_n_osc (DataType df [], const DataType sf 
 		dfi [h_nbr_coef] = sf2r [h_nbr_coef];
 
 		// Others are conjugate complex numbers
-		const DataType * const  sf1i = sf1r + h_nbr_coef;
-		const DataType * const  sf2i = sf1i + nbr_coef;
+		const DataType * const	sf1i = sf1r + h_nbr_coef;
+		const DataType * const	sf2i = sf1i + nbr_coef;
 		for (long i = 1; i < h_nbr_coef; ++ i)
 		{
 			osc.step ();
-			const DataType c = osc.get_cos ();
-			const DataType s = osc.get_sin ();
-			DataType       v;
+			const DataType	c = osc.get_cos ();
+			const DataType	s = osc.get_sin ();
+			DataType	 		v;
 
 			v = sf2r [i] * c - sf2i [i] * s;
-			dfr [ i] = sf1r [i] + v;
+			dfr [i] = sf1r [i] + v;
 			dfi [-i] = sf1r [i] - v;	// dfr [nbr_coef - i] =
 
 			v = sf2r [i] * s + sf2i [i] * c;
-			dfi [           i] = v + sf1i [i];
+			dfi [i] = v + sf1i [i];
 			dfi [nbr_coef - i] = v - sf1i [i];
 		}
 
@@ -656,26 +667,26 @@ void	FFTReal <DT>::compute_direct_pass_n_osc (DataType df [], const DataType sf 
 
 // Transform in several pass
 template <class DT>
-void	FFTReal <DT>::compute_ifft_general (const DataType f [], DataType x []) const
+void	FFTReal <DT>::compute_ifft_general (const DataType f [], DataType x []) const noexcept
 {
-	assert (f != 0);
+	assert (f != nullptr);
 	assert (f != use_buffer ());
-	assert (x != 0);
+	assert (x != nullptr);
 	assert (x != use_buffer ());
 	assert (x != f);
 
-	DataType *     sf = const_cast <DataType *> (f);
-	DataType *     df;
-	DataType *     df_temp;
+	DataType *		sf = const_cast <DataType *> (f);
+	DataType *		df;
+	DataType *		df_temp;
 
 	if (_nbr_bits & 1)
 	{
-		df      = use_buffer ();
+		df = use_buffer ();
 		df_temp = x;
 	}
 	else
 	{
-		df      = x;
+		df = x;
 		df_temp = use_buffer ();
 	}
 
@@ -685,7 +696,7 @@ void	FFTReal <DT>::compute_ifft_general (const DataType f [], DataType x []) con
 
 		if (pass < _nbr_bits - 1)
 		{
-			DataType	* const  temp_ptr = df;
+			DataType	* const	temp_ptr = df;
 			df = sf;
 			sf = temp_ptr;
 		}
@@ -703,10 +714,10 @@ void	FFTReal <DT>::compute_ifft_general (const DataType f [], DataType x []) con
 
 
 template <class DT>
-void	FFTReal <DT>::compute_inverse_pass_n (DataType df [], const DataType sf [], int pass) const
+void	FFTReal <DT>::compute_inverse_pass_n (DataType df [], const DataType sf [], int pass) const noexcept
 {
-	assert (df != 0);
-	assert (sf != 0);
+	assert (df != nullptr);
+	assert (sf != nullptr);
 	assert (df != sf);
 	assert (pass >= 3);
 	assert (pass < _nbr_bits);
@@ -724,25 +735,25 @@ void	FFTReal <DT>::compute_inverse_pass_n (DataType df [], const DataType sf [],
 
 
 template <class DT>
-void	FFTReal <DT>::compute_inverse_pass_n_lut (DataType df [], const DataType sf [], int pass) const
+void	FFTReal <DT>::compute_inverse_pass_n_lut (DataType df [], const DataType sf [], int pass) const noexcept
 {
-	assert (df != 0);
-	assert (sf != 0);
+	assert (df != nullptr);
+	assert (sf != nullptr);
 	assert (df != sf);
 	assert (pass >= 3);
 	assert (pass < _nbr_bits);
 
-	const long     nbr_coef   = 1 << pass;
-	const long     h_nbr_coef = nbr_coef >> 1;
-	const long     d_nbr_coef = nbr_coef << 1;
-	long           coef_index = 0;
+	const long		nbr_coef = 1 << pass;
+	const long		h_nbr_coef = nbr_coef >> 1;
+	const long		d_nbr_coef = nbr_coef << 1;
+	long				coef_index = 0;
 	const DataType * const	cos_ptr = get_trigo_ptr (pass);
 	do
 	{
-		const DataType * const  sfr  = sf   + coef_index;
-		const DataType * const  sfi  = sfr  + nbr_coef;
-		DataType       * const  df1r = df   + coef_index;
-		DataType       * const  df2r = df1r + nbr_coef;
+		const DataType	* const	sfr = sf + coef_index;
+		const DataType	* const	sfi = sfr + nbr_coef;
+		DataType			* const	df1r = df + coef_index;
+		DataType			* const	df2r = df1r + nbr_coef;
 
 		// Extreme coefficients are always real
 		df1r [0] = sfr [0] + sfi [0];		// + sfr [nbr_coef]
@@ -751,16 +762,16 @@ void	FFTReal <DT>::compute_inverse_pass_n_lut (DataType df [], const DataType sf
 		df2r [h_nbr_coef] = sfi [h_nbr_coef] * 2;
 
 		// Others are conjugate complex numbers
-		DataType * const  df1i = df1r + h_nbr_coef;
-		DataType * const  df2i = df1i + nbr_coef;
+		DataType * const	df1i = df1r + h_nbr_coef;
+		DataType * const	df2i = df1i + nbr_coef;
 		for (long i = 1; i < h_nbr_coef; ++ i)
 		{
-			df1r [i] = sfr [i] + sfi [          -i];     // + sfr [nbr_coef - i]
+			df1r [i] = sfr [i] + sfi [-i];		// + sfr [nbr_coef - i]
 			df1i [i] = sfi [i] - sfi [nbr_coef - i];
 
-			const DataType	c = cos_ptr [i             ]; // cos (i*PI/nbr_coef);
-			const DataType	s = cos_ptr [h_nbr_coef - i]; // sin (i*PI/nbr_coef);
-			const DataType	vr = sfr [i] - sfi [          -i]; // - sfr [nbr_coef - i]
+			const DataType	c = cos_ptr [i];					// cos (i*PI/nbr_coef);
+			const DataType	s = cos_ptr [h_nbr_coef - i];	// sin (i*PI/nbr_coef);
+			const DataType	vr = sfr [i] - sfi [-i];		// - sfr [nbr_coef - i]
 			const DataType	vi = sfi [i] + sfi [nbr_coef - i];
 
 			df2r [i] = vr * c + vi * s;
@@ -775,25 +786,25 @@ void	FFTReal <DT>::compute_inverse_pass_n_lut (DataType df [], const DataType sf
 
 
 template <class DT>
-void	FFTReal <DT>::compute_inverse_pass_n_osc (DataType df [], const DataType sf [], int pass) const
+void	FFTReal <DT>::compute_inverse_pass_n_osc (DataType df [], const DataType sf [], int pass) const noexcept
 {
-	assert (df != 0);
-	assert (sf != 0);
+	assert (df != nullptr);
+	assert (sf != nullptr);
 	assert (df != sf);
 	assert (pass > TRIGO_BD_LIMIT);
 	assert (pass < _nbr_bits);
 
-	const long     nbr_coef   = 1 << pass;
-	const long     h_nbr_coef = nbr_coef >> 1;
-	const long     d_nbr_coef = nbr_coef << 1;
-	long           coef_index = 0;
-	OscType &      osc = _trigo_osc [pass - (TRIGO_BD_LIMIT + 1)];
+	const long		nbr_coef = 1 << pass;
+	const long		h_nbr_coef = nbr_coef >> 1;
+	const long		d_nbr_coef = nbr_coef << 1;
+	long				coef_index = 0;
+	OscType &		osc = _trigo_osc [pass - (TRIGO_BD_LIMIT + 1)];
 	do
 	{
-		const DataType * const  sfr  = sf   + coef_index;
-		const DataType * const  sfi  = sfr  + nbr_coef;
-		DataType       * const  df1r = df   + coef_index;
-		DataType       * const  df2r = df1r + nbr_coef;
+		const DataType	* const	sfr = sf + coef_index;
+		const DataType	* const	sfi = sfr + nbr_coef;
+		DataType			* const	df1r = df + coef_index;
+		DataType			* const	df2r = df1r + nbr_coef;
 
 		osc.clear_buffers ();
 
@@ -808,13 +819,13 @@ void	FFTReal <DT>::compute_inverse_pass_n_osc (DataType df [], const DataType sf
 		DataType * const	df2i = df1i + nbr_coef;
 		for (long i = 1; i < h_nbr_coef; ++ i)
 		{
-			df1r [i] = sfr [i] + sfi [          -i];     // + sfr [nbr_coef - i]
+			df1r [i] = sfr [i] + sfi [-i];		// + sfr [nbr_coef - i]
 			df1i [i] = sfi [i] - sfi [nbr_coef - i];
 
 			osc.step ();
 			const DataType	c = osc.get_cos ();
 			const DataType	s = osc.get_sin ();
-			const DataType	vr = sfr [i] - sfi [          -i]; // - sfr [nbr_coef - i]
+			const DataType	vr = sfr [i] - sfi [-i];		// - sfr [nbr_coef - i]
 			const DataType	vi = sfi [i] + sfi [nbr_coef - i];
 
 			df2r [i] = vr * c + vi * s;
@@ -829,26 +840,26 @@ void	FFTReal <DT>::compute_inverse_pass_n_osc (DataType df [], const DataType sf
 
 
 template <class DT>
-void	FFTReal <DT>::compute_inverse_pass_3 (DataType df [], const DataType sf []) const
+void	FFTReal <DT>::compute_inverse_pass_3 (DataType df [], const DataType sf []) const noexcept
 {
-	assert (df != 0);
-	assert (sf != 0);
+	assert (df != nullptr);
+	assert (sf != nullptr);
 	assert (df != sf);
 
-	const DataType sqrt2_2    = DataType (SQRT2 * 0.5);
-	long           coef_index = 0;
+	const DataType	sqrt2_2 = DataType (SQRT2 * 0.5);
+	long				coef_index = 0;
 	do
 	{
-		df [coef_index    ] = sf [coef_index    ] + sf [coef_index + 4];
-		df [coef_index + 4] = sf [coef_index    ] - sf [coef_index + 4];
+		df [coef_index] = sf [coef_index] + sf [coef_index + 4];
+		df [coef_index + 4] = sf [coef_index] - sf [coef_index + 4];
 		df [coef_index + 2] = sf [coef_index + 2] * 2;
 		df [coef_index + 6] = sf [coef_index + 6] * 2;
 
 		df [coef_index + 1] = sf [coef_index + 1] + sf [coef_index + 3];
 		df [coef_index + 3] = sf [coef_index + 5] - sf [coef_index + 7];
 
-		const DataType vr   = sf [coef_index + 1] - sf [coef_index + 3];
-		const DataType vi   = sf [coef_index + 5] + sf [coef_index + 7];
+		const DataType	vr = sf [coef_index + 1] - sf [coef_index + 3];
+		const DataType	vi = sf [coef_index + 5] + sf [coef_index + 7];
 
 		df [coef_index + 5] = (vr + vi) * sqrt2_2;
 		df [coef_index + 7] = (vi - vr) * sqrt2_2;
@@ -861,22 +872,22 @@ void	FFTReal <DT>::compute_inverse_pass_3 (DataType df [], const DataType sf [])
 
 
 template <class DT>
-void	FFTReal <DT>::compute_inverse_pass_1_2 (DataType x [], const DataType sf []) const
+void	FFTReal <DT>::compute_inverse_pass_1_2 (DataType x [], const DataType sf []) const noexcept
 {
-	assert (x != 0);
-	assert (sf != 0);
-	assert (x != sf);
+	assert (x  != nullptr);
+	assert (sf != nullptr);
+	assert (x  != sf);
 
-	const long *   bit_rev_lut_ptr = get_br_ptr ();
-	const DataType *  sf2 = sf;
-	long           coef_index = 0;
+	const long *	bit_rev_lut_ptr = get_br_ptr ();
+	const DataType *	sf2 = sf;
+	long				coef_index = 0;
 	do
 	{
 		{
-			const DataType b_0 = sf2 [0] + sf2 [2];
-			const DataType b_2 = sf2 [0] - sf2 [2];
-			const DataType b_1 = sf2 [1] * 2;
-			const DataType b_3 = sf2 [3] * 2;
+			const DataType	b_0 = sf2 [0] + sf2 [2];
+			const DataType	b_2 = sf2 [0] - sf2 [2];
+			const DataType	b_1 = sf2 [1] * 2;
+			const DataType	b_3 = sf2 [3] * 2;
 
 			x [bit_rev_lut_ptr [0]] = b_0 + b_1;
 			x [bit_rev_lut_ptr [1]] = b_0 - b_1;
@@ -884,10 +895,10 @@ void	FFTReal <DT>::compute_inverse_pass_1_2 (DataType x [], const DataType sf []
 			x [bit_rev_lut_ptr [3]] = b_2 - b_3;
 		}
 		{
-			const DataType b_0 = sf2 [4] + sf2 [6];
-			const DataType b_2 = sf2 [4] - sf2 [6];
-			const DataType b_1 = sf2 [5] * 2;
-			const DataType b_3 = sf2 [7] * 2;
+			const DataType	b_0 = sf2 [4] + sf2 [6];
+			const DataType	b_2 = sf2 [4] - sf2 [6];
+			const DataType	b_1 = sf2 [5] * 2;
+			const DataType	b_3 = sf2 [7] * 2;
 
 			x [bit_rev_lut_ptr [4]] = b_0 + b_1;
 			x [bit_rev_lut_ptr [5]] = b_0 - b_1;
@@ -895,12 +906,17 @@ void	FFTReal <DT>::compute_inverse_pass_1_2 (DataType x [], const DataType sf []
 			x [bit_rev_lut_ptr [7]] = b_2 - b_3;
 		}
 
-		sf2             += 8;
-		coef_index      += 8;
+		sf2 += 8;
+		coef_index += 8;
 		bit_rev_lut_ptr += 8;
 	}
 	while (coef_index < _length);
 }
+
+
+
+template <class DT>
+constexpr int	FFTReal <DT>::TRIGO_BD_LIMIT;
 
 
 

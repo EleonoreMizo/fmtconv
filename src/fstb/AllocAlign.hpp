@@ -41,39 +41,46 @@ namespace fstb
 
 
 template <class T, long ALIG>
-typename AllocAlign <T, ALIG>::pointer	AllocAlign <T, ALIG>::address (reference r)
+typename AllocAlign <T, ALIG>::pointer	AllocAlign <T, ALIG>::address (reference r) noexcept
 {
-	return (&r);
+	return &r;
 }
 
 
 
 template <class T, long ALIG>
-typename AllocAlign <T, ALIG>::const_pointer	AllocAlign <T, ALIG>::address (const_reference r)
+typename AllocAlign <T, ALIG>::const_pointer	AllocAlign <T, ALIG>::address (const_reference r) noexcept
 {
-	return (&r);
+	return &r;
 }
 
 
 
 template <class T, long ALIG>
-typename AllocAlign <T, ALIG>::pointer	AllocAlign <T, ALIG>::allocate (size_type n, typename std::allocator <void>::const_pointer /*ptr*/)
+typename AllocAlign <T, ALIG>::pointer	AllocAlign <T, ALIG>::allocate (size_type n, const void *ptr)
 {
-	static_assert ((sizeof (ptrdiff_t) >= sizeof (void *)), "");
+	fstb::unused (ptr);
+	return allocate (n);
+}
 
-	assert (n >= 0);
 
+
+template <class T, long ALIG>
+typename AllocAlign <T, ALIG>::pointer	AllocAlign <T, ALIG>::allocate (size_type n)
+{
 	const size_t   nbr_bytes = sizeof (T) * n;
 
 #if defined (_MSC_VER)
 
-	pointer        zone_ptr = reinterpret_cast <pointer> (
+	pointer        zone_ptr = static_cast <pointer> (
 		_aligned_malloc (nbr_bytes, ALIG)
 	);
 
-#elif ! defined (__MINGW32__) && ! defined (__MINGW64__) && ! defined (__CYGWIN__)
+//#elif ! defined (__MINGW32__) && ! defined (__MINGW64__) && ! defined (__CYGWIN__)
+#elif (defined (_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L) \
+	&& ! defined (STM32H750xx)
 
-	pointer        zone_ptr = 0;
+	pointer        zone_ptr = nullptr;
 	void *         tmp_ptr;
 	if (posix_memalign (&tmp_ptr, ALIG, nbr_bytes) == 0)
 	{
@@ -82,16 +89,16 @@ typename AllocAlign <T, ALIG>::pointer	AllocAlign <T, ALIG>::allocate (size_type
 
 #else // Platform-independent implementation
 
-	const size_t   ptr_size = sizeof (void *);
-	const size_t   offset = ptr_size + ALIG - 1;
+	const size_t   ptr_size    = sizeof (void *);
+	const size_t   offset      = ptr_size + ALIG - 1;
 	const size_t   alloc_bytes = offset + nbr_bytes;
-	void *         alloc_ptr = new char [alloc_bytes];
-	pointer        zone_ptr = 0;
-	if (alloc_ptr != 0)
+	void *         alloc_ptr   = new char [alloc_bytes];
+	pointer        zone_ptr    = nullptr;
+	if (alloc_ptr != nullptr)
 	{
-		const ptrdiff_t   alloc_l = reinterpret_cast <ptrdiff_t> (alloc_ptr);
-		const ptrdiff_t   zone_l = (alloc_l + offset) & (-ALIG);
-		assert (zone_l >= ptrdiff_t (alloc_l + ptr_size));
+		const intptr_t    alloc_l = reinterpret_cast <intptr_t> (alloc_ptr);
+		const intptr_t    zone_l  = (alloc_l + offset) & (-ALIG);
+		assert (zone_l >= intptr_t (alloc_l + ptr_size));
 		void **        ptr_ptr = reinterpret_cast <void **> (zone_l - ptr_size);
 		*ptr_ptr = alloc_ptr;
 		zone_ptr = reinterpret_cast <pointer> (zone_l);
@@ -99,9 +106,11 @@ typename AllocAlign <T, ALIG>::pointer	AllocAlign <T, ALIG>::allocate (size_type
 
 #endif
 
-	if (zone_ptr == 0)
+	if (zone_ptr == nullptr)
 	{
+#if defined (__cpp_exceptions) || ! defined (__GNUC__)
 		throw std::bad_alloc ();
+#endif
 	}
 
 	return (zone_ptr);
@@ -110,27 +119,38 @@ typename AllocAlign <T, ALIG>::pointer	AllocAlign <T, ALIG>::allocate (size_type
 
 
 template <class T, long ALIG>
-void	AllocAlign <T, ALIG>::deallocate (pointer ptr, size_type /*n*/)
+void	AllocAlign <T, ALIG>::deallocate (pointer ptr, size_type n) noexcept
 {
-	if (ptr != 0)
+	fstb::unused (n);
+
+	if (ptr != nullptr)
 	{
 
 #if defined (_MSC_VER)
 
-		_aligned_free (ptr);
+		try
+		{
+			_aligned_free (ptr);
+		}
+		catch (...)
+		{
+			assert (false);
+		}
 
-#elif ! defined (__MINGW32__) && ! defined (__MINGW64__) && ! defined (__CYGWIN__)
+//#elif ! defined (__MINGW32__) && ! defined (__MINGW64__) && ! defined (__CYGWIN__)
+#elif (defined (_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L) \
+	&& ! defined (STM32H750xx)
 
 		free (ptr);
 
 #else // Platform-independent implementation
 
-		const size_t   ptr_size = sizeof (void *);
-		const ptrdiff_t   zone_l = reinterpret_cast <ptrdiff_t> (ptr);
-		void **			ptr_ptr = reinterpret_cast <void **> (zone_l - ptr_size);
+		const size_t   ptr_size  = sizeof (void *);
+		const intptr_t zone_l    = reinterpret_cast <intptr_t> (ptr);
+		void **			ptr_ptr   = reinterpret_cast <void **> (zone_l - ptr_size);
 		void *			alloc_ptr = *ptr_ptr;
-		assert (alloc_ptr != 0);
-		assert (reinterpret_cast <ptrdiff_t> (alloc_ptr) < zone_l);
+		assert (alloc_ptr != nullptr);
+		assert (reinterpret_cast <intptr_t> (alloc_ptr) < zone_l);
 
 		delete [] reinterpret_cast <char *> (alloc_ptr);
 
@@ -141,7 +161,7 @@ void	AllocAlign <T, ALIG>::deallocate (pointer ptr, size_type /*n*/)
 
 
 template <class T, long ALIG>
-typename AllocAlign <T, ALIG>::size_type	AllocAlign <T, ALIG>::max_size () const
+typename AllocAlign <T, ALIG>::size_type	AllocAlign <T, ALIG>::max_size () const noexcept
 {
 	static_assert ((static_cast <size_type> (-1) > 0), "");
 
@@ -153,7 +173,7 @@ typename AllocAlign <T, ALIG>::size_type	AllocAlign <T, ALIG>::max_size () const
 template <class T, long ALIG>
 void	AllocAlign <T, ALIG>::construct (pointer ptr, const T &t)
 {
-	assert (ptr != 0);
+	assert (ptr != nullptr);
 
 	new (ptr) T (t);
 }
@@ -163,7 +183,7 @@ void	AllocAlign <T, ALIG>::construct (pointer ptr, const T &t)
 template <class T, long ALIG>
 void	AllocAlign <T, ALIG>::destroy (pointer ptr)
 {
-	assert (ptr != 0);
+	assert (ptr != nullptr);
 
 	ptr->~T ();
 }
@@ -171,17 +191,17 @@ void	AllocAlign <T, ALIG>::destroy (pointer ptr)
 
 
 template <class T, long ALIG>
-bool	AllocAlign <T, ALIG>::operator == (AllocAlign <T, ALIG> const &other)
+bool	AllocAlign <T, ALIG>::operator == (AllocAlign <T, ALIG> const &other) noexcept
 {
 	fstb::unused (other);
 
-	return (true);
+	return true;
 }
 
 
 
 template <class T, long ALIG>
-bool	AllocAlign <T, ALIG>::operator != (AllocAlign <T, ALIG> const &other)
+bool	AllocAlign <T, ALIG>::operator != (AllocAlign <T, ALIG> const &other) noexcept
 {
 	return (! operator == (other));
 }

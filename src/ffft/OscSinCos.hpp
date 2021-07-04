@@ -27,7 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include <cmath>
+#include	<cmath>
 
 namespace std { }
 
@@ -43,22 +43,8 @@ namespace ffft
 
 
 template <class T>
-OscSinCos <T>::OscSinCos ()
-:	_pos_cos (1)
-,	_pos_sin (0)
-,	_step_cos (1)
-,	_step_sin (0)
+void	OscSinCos <T>::set_step (double angle_rad) noexcept
 {
-	// Nothing
-}
-
-
-
-template <class T>
-void	OscSinCos <T>::set_step (double angle_rad)
-{
-	using namespace std;
-
 	_step_cos = static_cast <DataType> (cos (angle_rad));
 	_step_sin = static_cast <DataType> (sin (angle_rad));
 }
@@ -66,7 +52,7 @@ void	OscSinCos <T>::set_step (double angle_rad)
 
 
 template <class T>
-typename OscSinCos <T>::DataType	OscSinCos <T>::get_cos () const
+typename OscSinCos <T>::DataType	OscSinCos <T>::get_cos () const noexcept
 {
 	return (_pos_cos);
 }
@@ -74,7 +60,7 @@ typename OscSinCos <T>::DataType	OscSinCos <T>::get_cos () const
 
 
 template <class T>
-typename OscSinCos <T>::DataType	OscSinCos <T>::get_sin () const
+typename OscSinCos <T>::DataType	OscSinCos <T>::get_sin () const noexcept
 {
 	return (_pos_sin);
 }
@@ -82,10 +68,10 @@ typename OscSinCos <T>::DataType	OscSinCos <T>::get_sin () const
 
 
 template <class T>
-void	OscSinCos <T>::step ()
+void	OscSinCos <T>::step () noexcept
 {
-	const DataType old_cos = _pos_cos;
-	const DataType old_sin = _pos_sin;
+	const DataType	old_cos = _pos_cos;
+	const DataType	old_sin = _pos_sin;
 
 	_pos_cos = old_cos * _step_cos - old_sin * _step_sin;
 	_pos_sin = old_cos * _step_sin + old_sin * _step_cos;
@@ -94,7 +80,7 @@ void	OscSinCos <T>::step ()
 
 
 template <class T>
-void	OscSinCos <T>::clear_buffers ()
+void	OscSinCos <T>::clear_buffers () noexcept
 {
 	_pos_cos = static_cast <DataType> (1);
 	_pos_sin = static_cast <DataType> (0);

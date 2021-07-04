@@ -25,9 +25,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fstb/CpuId.h"
-#include "fstb/def.h"
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
+#if fstb_ARCHI == fstb_ARCHI_X86
 	#if defined (__GNUC__)
 		#include <cpuid.h>
 	#elif defined (_MSC_VER)
@@ -48,10 +47,9 @@ namespace fstb
 
 
 
-// https://en.wikipedia.org/wiki/CPUID
 CpuId::CpuId ()
 {
-#if (fstb_ARCHI == fstb_ARCHI_X86)
+#if fstb_ARCHI == fstb_ARCHI_X86
 
 	unsigned int   eax;
 	unsigned int   ebx;
@@ -66,6 +64,7 @@ CpuId::CpuId ()
 	call_cpuid (0x00000001, 0, eax, ebx, ecx, edx);
 
 	_mmx_flag     = ((edx & (1L << 23)) != 0);
+	_fxsr_flag    = ((edx & (1L << 24)) != 0);
 	_sse_flag     = ((edx & (1L << 25)) != 0);
 	_sse2_flag    = ((edx & (1L << 26)) != 0);
 	_sse3_flag    = ((ecx & (1L <<  0)) != 0);
@@ -74,6 +73,7 @@ CpuId::CpuId ()
 	_fma3_flag    = ((ecx & (1L << 16)) != 0);
 	_sse41_flag   = ((ecx & (1L << 19)) != 0);
 	_sse42_flag   = ((ecx & (1L << 20)) != 0);
+	_abm_flag     = ((ecx & (1L << 23)) != 0);
 	_avx_flag     = ((ecx & (1L << 28)) != 0);
 	_f16c_flag    = ((ecx & (1L << 29)) != 0);
 
@@ -81,7 +81,9 @@ CpuId::CpuId ()
 	{
 		// Extended Features
 		call_cpuid (0x00000007, 0, eax, ebx, ecx, edx);
+		_bmi1_flag    = ((ebx & (1L <<  3)) != 0);
 		_avx2_flag    = ((ebx & (1L <<  5)) != 0);
+		_bmi2_flag    = ((ebx & (1L <<  8)) != 0);
 		_avx512f_flag = ((ebx & (1L << 16)) != 0);
 	}
 
@@ -94,6 +96,7 @@ CpuId::CpuId ()
 		_isse_flag    = ((edx & (1L << 22)) != 0) || _sse_flag;
 		_sse4a_flag   = ((ecx & (1L <<  6)) != 0);
 		_fma4_flag    = ((ecx & (1L << 16)) != 0);
+		_3dnow_flag   = ((ecx & (1L << 31)) != 0);
 	}
 
 #endif
@@ -101,7 +104,7 @@ CpuId::CpuId ()
 
 
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
+#if fstb_ARCHI == fstb_ARCHI_X86
 
 void	CpuId::call_cpuid (unsigned int fnc_nbr, unsigned int subfnc_nbr, unsigned int &v_eax, unsigned int &v_ebx, unsigned int &v_ecx, unsigned int &v_edx)
 {
@@ -110,11 +113,10 @@ void	CpuId::call_cpuid (unsigned int fnc_nbr, unsigned int subfnc_nbr, unsigned 
 	#if defined (__x86_64__)
 	__cpuid_count (fnc_nbr, subfnc_nbr, v_eax, v_ebx, v_ecx, v_edx);
 	#else
-	fstb::unused (subfnc_nbr);
 	__cpuid (fnc_nbr, v_eax, v_ebx, v_ecx, v_edx);
 	#endif
 
-#elif (_MSC_VER)
+#elif defined (_MSC_VER)
 
 	int            cpu_info [4];
 	__cpuidex (cpu_info, fnc_nbr, subfnc_nbr);

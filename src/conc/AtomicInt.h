@@ -41,6 +41,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "conc/def.h"
 
+#include <type_traits>
+
 #include <cstdint>
 
 #if (conc_ARCHI == conc_ARCHI_X86)
@@ -59,6 +61,14 @@ namespace conc
 template <class T>
 class AtomicInt
 {
+	static_assert (
+		(   std::is_trivially_copyable <T>::value
+		&&  std::is_copy_constructible <T>::value
+		&&  std::is_move_constructible <T>::value
+		&&  std::is_copy_assignable <T>::value
+		&&  std::is_move_assignable <T>::value),
+		"Requirements on T"
+	);
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
@@ -66,30 +76,30 @@ public:
 
 	typedef	T	DataType;
 
-	inline			AtomicInt ();
+	inline			AtomicInt () noexcept;
 	inline explicit
-						AtomicInt (T val);
-	inline			AtomicInt (const AtomicInt <T> &other);
+						AtomicInt (T val) noexcept;
+	inline			AtomicInt (const AtomicInt <T> &other) noexcept;
 	inline AtomicInt <T> &
-						operator = (T other);
+						operator = (T other) noexcept;
 
-	inline			operator T () const;
+	inline			operator T () const noexcept;
 
-	inline T			swap (T other);
-	inline T			cas (T other, T comp);
+	inline T			swap (T other) noexcept;
+	inline T			cas (T other, T comp) noexcept;
 
 	// Beware while using the result of these operators, modification and
 	// read is not atomic. Use directly the AtomicIntOp instead.
 	inline AtomicInt <T> &
-						operator += (const T &other);
+						operator += (const T &other) noexcept;
 	inline AtomicInt <T> &
-						operator -= (const T &other);
+						operator -= (const T &other) noexcept;
 	inline AtomicInt <T> &
-						operator ++ ();
-	inline T			operator ++ (int);
+						operator ++ () noexcept;
+	inline T			operator ++ (int) noexcept;
 	inline AtomicInt <T> &
-						operator -- ();
-	inline T			operator -- (int);
+						operator -- () noexcept;
+	inline T			operator -- (int) noexcept;
 
 
 
@@ -105,13 +115,14 @@ private:
 
 #if (conc_ARCHI == conc_ARCHI_X86)
 
-	enum {			SZ  = sizeof (T)	};
-	enum {			SL2 =    (SZ > 16) ? -1
-						      : ((SZ >  8) ?  4
-						      : ((SZ >  4) ?  3
-						      : ((SZ >  2) ?  2
-						      : ((SZ >  1) ?  1
-						      :               0))))	};
+	static constexpr int SZ  = int (sizeof (T));
+	static constexpr int SL2 =
+		   (SZ > 16) ? -1
+		: ((SZ >  8) ?  4
+		: ((SZ >  4) ?  3
+		: ((SZ >  2) ?  2
+		: ((SZ >  1) ?  1
+		:               0))));
 
 	typedef	AtomicMem <SL2>	StoredTypeWrapper;
 	typedef	typename StoredTypeWrapper::DataType	StoredType;

@@ -60,13 +60,13 @@ class AtomicPtrIntPair
 
 public:
 
-	               AtomicPtrIntPair ();
+	               AtomicPtrIntPair () noexcept;
 
-	void           set (T * ptr, ptrdiff_t val);
-	void           get (T * &ptr, ptrdiff_t &val) const;
-	T *            get_ptr () const;
-	ptrdiff_t      get_val () const;
-	bool           cas2 (T *new_ptr, ptrdiff_t new_val, T *comp_ptr, ptrdiff_t comp_val);
+	void           set (T * ptr, intptr_t val) noexcept;
+	void           get (T * &ptr, intptr_t &val) const noexcept;
+	T *            get_ptr () const noexcept;
+	intptr_t       get_val () const noexcept;
+	bool           cas2 (T *new_ptr, intptr_t new_val, T *comp_ptr, intptr_t comp_val) noexcept;
 
 
 
@@ -101,9 +101,8 @@ private:
 	class RealContent
 	{
 	public:
-		T * volatile   _ptr;
-		volatile intptr_t
-		               _val;
+		T *            _ptr;
+		intptr_t       _val;
 	};
 	static_assert (sizeof (RealContent) <= sizeof (DataType), "");
 
@@ -113,7 +112,7 @@ private:
 		RealContent    _content;
 	};
 
-	static void    cas_combi (Combi &old, Combi &dest, const Combi &excg, const Combi &comp);
+	static void    cas_combi (Combi &old, Combi &dest, const Combi &excg, const Combi &comp) noexcept;
 
 	Combi          _data;
 

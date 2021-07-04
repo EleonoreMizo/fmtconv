@@ -37,10 +37,22 @@ namespace vsutl
 
 
 
+class FrameRefSPtr_FncWrapper
+{
+public:
+	static inline const ::VSFrameRef * clone (const ::VSAPI &vsapi, const ::VSFrameRef *f) VS_NOEXCEPT
+	{
+		return (*vsapi.cloneFrameRef) (f);
+	}
+	static inline void free (const ::VSAPI &vsapi, const ::VSFrameRef *f) VS_NOEXCEPT
+	{
+		(*vsapi.freeFrame) (f);
+	}
+};
+
 typedef	ObjRefSPtr <
 	const ::VSFrameRef,
-	&VSAPI::cloneFrameRef,
-	&VSAPI::freeFrame
+	FrameRefSPtr_FncWrapper
 >	FrameRefSPtr;
 
 

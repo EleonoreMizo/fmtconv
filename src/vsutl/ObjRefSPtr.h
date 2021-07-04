@@ -9,8 +9,10 @@ Template parameters:
 
 - T: The type of the object possibly with const, but without pointer
 	(currently ::VSNodeRef, const ::VSFrameRef or const ::VSFuncRef).
-- FC: VSAPI member pointer to the function for cloning const T *.
-- FF: VSAPI member pointer to the function for freeing const T *.
+
+- FW: Wrapper class for clone and free functions. Requires:
+	static inline T * FW::clone (const ::VSAPI &, T *) VS_NOEXCEPT;
+	static inline void FW::free (const ::VSAPI &, T *) VS_NOEXCEPT;
 
 --- Legal stuff ---
 
@@ -40,20 +42,12 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-#if (__cplusplus >= 201703L)
-	#define vsutl_ObjRefSPtr_VS_NOEXCEPT VS_NOEXCEPT
-#else
-	#define vsutl_ObjRefSPtr_VS_NOEXCEPT
-#endif
-
-
-
 namespace vsutl
 {
 
 
 
-template <class T, T * (VS_CC *::VSAPI::*FC) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT, void (VS_CC *::VSAPI::*FF) (T *) vsutl_ObjRefSPtr_VS_NOEXCEPT>
+template <typename T, typename FW>
 class ObjRefSPtr
 {
 
@@ -63,11 +57,14 @@ public:
 
 	               ObjRefSPtr () = default;
 	               ObjRefSPtr (T *ptr, const ::VSAPI &vsapi);
-	               ObjRefSPtr (const ObjRefSPtr <T, FC, FF> &other);
+	               ObjRefSPtr (const ObjRefSPtr <T, FW> &other);
+	               ObjRefSPtr (ObjRefSPtr <T, FW> &&other);
 	virtual        ~ObjRefSPtr ();
 
-	ObjRefSPtr <T, FC, FF> &
-	               operator = (const ObjRefSPtr <T, FC, FF> &other);
+	ObjRefSPtr <T, FW> &
+	               operator = (const ObjRefSPtr <T, FW> &other);
+	ObjRefSPtr <T, FW> &
+	               operator = (ObjRefSPtr <T, FW> &&other);
 
 	T *            operator -> () const;
 	T &            operator * () const;
@@ -89,8 +86,8 @@ private:
 
 	void           release_resource ();
 
-	T *            _obj_ptr   = 0;
-	const ::VSAPI* _vsapi_ptr = 0;      // Can be 0 only if _obj_ptr is 0 too.
+	T *            _obj_ptr   = nullptr;
+	const ::VSAPI* _vsapi_ptr = nullptr;   // Can be 0 only if _obj_ptr is 0 too.
 
 
 
@@ -98,8 +95,8 @@ private:
 
 private:
 
-	bool           operator == (const ObjRefSPtr <T, FC, FF> &other) const;
-	bool           operator != (const ObjRefSPtr <T, FC, FF> &other) const;
+	bool           operator == (const ObjRefSPtr <T, FW> &other) const;
+	bool           operator != (const ObjRefSPtr <T, FW> &other) const;
 
 };	// class ObjRefSPtr
 

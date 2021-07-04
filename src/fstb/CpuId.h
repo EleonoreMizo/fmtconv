@@ -45,15 +45,16 @@ public:
 
 	               CpuId ();
 	               CpuId (const CpuId &other)      = default;
-	virtual        ~CpuId ()                       = default;
 
 	CpuId &        operator = (const CpuId &other) = default;
 
-#if (fstb_ARCHI == fstb_ARCHI_X86)
+#if fstb_ARCHI == fstb_ARCHI_X86
 	static void		call_cpuid (unsigned int fnc_nbr, unsigned int subfnc_nbr, unsigned int &v_eax, unsigned int &v_ebx, unsigned int &v_ecx, unsigned int &v_edx);
 #endif
 
 	bool           _mmx_flag     = false;
+	bool           _fxsr_flag    = false;  // FXSAVE, FXRESTOR, CR4 bit 9
+	bool           _3dnow_flag   = false;
 	bool           _isse_flag    = false;
 	bool           _sse_flag     = false;
 	bool           _sse2_flag    = false;
@@ -69,6 +70,9 @@ public:
 	bool           _avx512f_flag = false;
 	bool           _f16c_flag    = false;  // Half-precision FP
 	bool           _cx16_flag    = false;  // CMPXCHG16B
+	bool           _abm_flag     = false;  // POPCNT + LZCNT
+	bool           _bmi1_flag    = false;  // Bit Manipulation Instruction Set
+	bool           _bmi2_flag    = false;
 
 
 

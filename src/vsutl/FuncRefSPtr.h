@@ -37,10 +37,22 @@ namespace vsutl
 
 
 
+class FuncRefSPtr_FncWrapper
+{
+public:
+	static inline ::VSFuncRef * clone (const ::VSAPI &vsapi, ::VSFuncRef *func) VS_NOEXCEPT
+	{
+		return (*vsapi.cloneFuncRef) (func);
+	}
+	static inline void free (const ::VSAPI &vsapi, ::VSFuncRef *func) VS_NOEXCEPT
+	{
+		(*vsapi.freeFunc) (func);
+	}
+};
+
 typedef	ObjRefSPtr <
 	::VSFuncRef,
-	&VSAPI::cloneFuncRef,
-	&VSAPI::freeFunc
+	FuncRefSPtr_FncWrapper
 >	FuncRefSPtr;
 
 

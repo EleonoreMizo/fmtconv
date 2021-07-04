@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-warningflags = -Wall -Wextra -Wshadow -Wno-expansion-to-defined -Wno-missing-field-initializers
+warningflags = -Wall -Wextra -Wshadow -Wno-missing-field-initializers
 includeflags = -I$(srcdir)/../../src
 commonflags = $(DEBUGCFLAGS) $(MFLAGS) $(warningflags) $(includeflags)
 AM_CXXFLAGS = -std=$(CXXSTD) $(commonflags)
@@ -52,8 +52,6 @@ libfmtconv_la_SOURCES =  \
         ../../src/conc/ObjPool.h \
         ../../src/conc/ObjPool.hpp \
         ../../src/ffft/def.h \
-        ../../src/ffft/DynArray.h \
-        ../../src/ffft/DynArray.hpp \
         ../../src/ffft/FFTReal.h \
         ../../src/ffft/FFTReal.hpp \
         ../../src/ffft/OscSinCos.h \
@@ -223,7 +221,7 @@ libfmtconv_la_SOURCES =  \
         ../../src/fstb/CpuId.cpp \
         ../../src/fstb/CpuId.h \
         ../../src/fstb/def.h \
-        ../../src/fstb/fnc.cpp \
+        ../../src/fstb/fnc_fstb.cpp \
         ../../src/fstb/fnc.h \
         ../../src/fstb/fnc.hpp \
         ../../src/fstb/SingleObj.h \
