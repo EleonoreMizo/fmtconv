@@ -485,9 +485,12 @@ const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &ou
 	if (csp_dst != ::pfNone)
 	{
 		fmt_dst_ptr = _vsapi.getFormatPreset (csp_dst, &core);
-		if (fmt_dst_ptr == 0)
+		if (fmt_dst_ptr == nullptr)
 		{
 			throw_inval_arg ("unknown output colorspace.");
+			// The following return statement is never reached, it just prevents
+			// false positive when compiling with -Wnull-dereference
+			return &fmt_src;
 		}
 		else
 		{
@@ -538,17 +541,17 @@ const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &ou
 	}
 	catch (...)
 	{
-		fmt_dst_ptr = 0;
+		fmt_dst_ptr = nullptr;
 	}
 
-	if (fmt_dst_ptr == 0)
+	if (fmt_dst_ptr == nullptr)
 	{
 		throw_rt_err (
 			"couldn\'t get a pixel format identifier for the output clip."
 		);
 	}
 
-	return (fmt_dst_ptr);
+	return fmt_dst_ptr;
 }
 
 

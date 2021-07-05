@@ -1,10 +1,56 @@
 ACLOCAL_AMFLAGS = -I m4
 
-warningflags = -Wall -Wextra -Wshadow -Wno-missing-field-initializers
+warningflags = \
+        -Wall \
+        -Wextra \
+        -Wshadow \
+        -Wunused \
+        -Wmisleading-indentation \
+        -Wnull-dereference \
+        -Wvla \
+        -Wstrict-aliasing \
+        -Wuninitialized \
+        -Wunused-parameter \
+        -Wreorder \
+        -Wsign-compare \
+        -Wunreachable-code \
+        -Wconversion \
+        -Wno-sign-conversion \
+         $(COMPWARNFLAGS)
+
+if CLG
+
+# Clang
+warningflags += \
+        -Wshadow-all \
+        -Wshorten-64-to-32 \
+        -Wint-conversion \
+        -Wconditional-uninitialized \
+        -Wconstant-conversion \
+        -Wunused-private-field \
+        -Wbool-conversion \
+        -Wextra-semi \
+        -Wnullable-to-nonnull-conversion \
+        -Wno-implicit-int-float-conversion \
+        -Wno-unused-private-field \
+        -Wno-unused-command-line-argument
+# -Wzero-as-null-pointer-constant
+
+else
+
+# GCC
+warningflags += \
+        -Wredundant-decls \
+        -Wno-ignored-attributes \
+        -Wno-expansion-to-defined
+
+endif
+
+warnflagscpp =
 includeflags = -I$(srcdir)/../../src
-commonflags = $(DEBUGCFLAGS) $(MFLAGS) $(warningflags) $(includeflags)
-AM_CXXFLAGS = -std=$(CXXSTD) $(commonflags)
-AM_LDFLAGS  = $(PLUGINLDFLAGS)
+commoncflags = $(DEBUGCFLAGS) $(MFLAGS) $(warningflags) $(includeflags) $(STACKREALIGN)
+AM_CXXFLAGS  = -std=$(CXXSTD) $(commoncflags) $(warnflagscpp) $(EXTRA_CXXFLAGS)
+AM_LDFLAGS   = $(PLUGINLDFLAGS)
 
 lib_LTLIBRARIES = libfmtconv.la
 

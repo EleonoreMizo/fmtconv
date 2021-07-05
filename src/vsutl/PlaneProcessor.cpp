@@ -174,7 +174,7 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 						_vsapi.setError (&out, err_msg.c_str ());
 						ok_flag = false;
 					}
-					else if (   plane_content >= PlaneProcMode_NBR_ELT
+					else if (   plane_content >= double (PlaneProcMode_NBR_ELT)
 								|| (int_flag && -plane_content >= max_val))
 					{
 						const std::string err_msg =
@@ -229,7 +229,7 @@ const ::VSFrameRef *	PlaneProcessor::try_initial (::VSCore &core)
 			for (int plane_index = 0; plane_index < _nbr_planes; ++plane_index)
 			{
 				const double		val = _proc_mode_arr [plane_index];
-				if (val < PlaneProcMode_COPY1)
+				if (val < double (PlaneProcMode_COPY1))
 				{
 					fill_plane (
 						const_cast < ::VSFrameRef &> (*_blank_frame_sptr),
@@ -294,7 +294,7 @@ int	PlaneProcessor::process_frame (::VSFrameRef &dst, int n, void *frame_data_pt
 				copy_plane (dst, *src_sptr, plane_index);
 			}
 		}
-		else if (mode < PlaneProcMode_COPY1)
+		else if (mode_i < PlaneProcMode_COPY1)
 		{
 			fill_plane (dst, -mode, plane_index);
 		}

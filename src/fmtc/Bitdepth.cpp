@@ -1257,12 +1257,12 @@ void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 		float          dither;
 		if (S_FLAG)
 		{
-			dither = dith_o * qt;
+			dither = float (dith_o) * qt;
 		}
 		else
 		{
 			const int      dith_n = int8_t (rnd_state >> 24);			// s8
-			dither = (dith_o * ao + dith_n * an) * qt;
+			dither = float (dith_o * ao + dith_n * an) * qt;
 		}
 		const float    sum    = s + dither;
 		const int      quant  = fstb::round_int (sum);
@@ -1770,7 +1770,7 @@ void	Bitdepth::quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC
 		generate_rnd (rnd_state);
 		const int32_t  rnd_val = int32_t (rnd_state);   // Signed
 		const float    err_add = (err < 0) ? -ampe_f : (err > 0) ? ampe_f : 0;
-		const float    noise   = rnd_val * ampn_f + err_add;
+		const float    noise   = float (rnd_val) * ampn_f + err_add;
 
 		sum += noise;
 	}
@@ -2051,8 +2051,8 @@ void	Bitdepth::DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::dif
 		DiffuseOstromoukhov <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS>::_table [index];
 	const float    invd     = te._inv_sum;
 
-	const float    e1 = err * te._c0 * invd;
-	const float    e2 = err * te._c1 * invd;
+	const float    e1 = err * float (te._c0) * invd;
+	const float    e2 = err * float (te._c1) * invd;
 	const float    e3 = err - e1 - e2;
 
 	spread_error <DIR> (e1, e2, e3, err_nxt0, err0_ptr);

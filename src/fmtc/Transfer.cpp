@@ -405,26 +405,28 @@ void	Transfer::init_table ()
 		const double   vmax =  lwg;
 		const double   a    = (lwg - lbg) / vmax;
 		const double   b    =        lbg;
-		OpSPtr         op_a (new fmtcl::TransOpAffine (a, b));
-		op_s = OpSPtr (new fmtcl::TransOpCompose (op_a, op_s));
+		auto           op_a = std::make_shared <fmtcl::TransOpAffine> (a, b);
+		op_s = std::make_shared <fmtcl::TransOpCompose> (op_a, op_s);
 	}
 
 	// Gamma correction
 	if (! fstb::is_eq (_gcor, 1.0))
 	{
-		OpSPtr         op_g (new fmtcl::TransOpPow (true, _gcor, 1, 1e6));
-		op_d = OpSPtr (new fmtcl::TransOpCompose (op_g, op_d));
+		auto           op_g =
+			std::make_shared <fmtcl::TransOpPow> (true, _gcor, 1, 1e6);
+		op_d = std::make_shared <fmtcl::TransOpCompose> (op_g, op_d);
 	}
 
 	// Contrast
 	if (! fstb::is_eq (_contrast, 1.0))
 	{
-		OpSPtr         op_c (new fmtcl::TransOpContrast (_contrast));
-		op_d = OpSPtr (new fmtcl::TransOpCompose (op_c, op_d));
+		auto           op_c =
+			std::make_shared <fmtcl::TransOpContrast> (_contrast);
+		op_d = std::make_shared <fmtcl::TransOpCompose> (op_c, op_d);
 	}
 
 	// LUTify
-	OpSPtr         op_f (new fmtcl::TransOpCompose (op_s, op_d));
+	auto           op_f = std::make_shared <fmtcl::TransOpCompose> (op_s, op_d);
 
 	const fmtcl::SplFmt  src_fmt = conv_vsfmt_to_splfmt (*_vi_in.format);
 	const fmtcl::SplFmt  dst_fmt = conv_vsfmt_to_splfmt (*_vi_out.format);

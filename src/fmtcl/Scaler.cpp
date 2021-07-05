@@ -932,7 +932,7 @@ void	Scaler::build_scale_data ()
 		const float    thr_1_flt = 1e-5f;
 		if (info._kernel_size == 1)
 		{
-			const float    d_flt = fabs (_coef_flt_arr [info._coef_index] - 1.0f);
+			const float    d_flt = fabsf (_coef_flt_arr [info._coef_index] - 1.0f);
 			info._copy_flt_flag = (d_flt <= thr_1_flt);
 
 			if (_can_int_flag)

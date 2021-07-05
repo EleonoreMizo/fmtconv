@@ -284,7 +284,7 @@ void	TransLut::MapperLog::find_index (const FloatIntMix &val, int &index, float 
 	static const uint32_t frac_mask = (1 << frac_size) - 1;
 
 	const uint32_t val_u = val._i & 0x7FFFFFFF;
-	const float    val_a = fabs (val._f);
+	const float    val_a = fabsf (val._f);
 
 	// index is set relatively to the x=0 index...
 	if (val_a < val_min)
@@ -300,7 +300,7 @@ void	TransLut::MapperLog::find_index (const FloatIntMix &val, int &index, float 
 	else
 	{
 		index = ((val_u - base) >> frac_size) + 1;
-		frac  = (val_u & frac_mask) * (1.0f / (1 << frac_size));
+		frac  = float (val_u & frac_mask) * (1.0f / (1 << frac_size));
 	}
 
 	// ...and shifted or mirrored depending on the sign
@@ -328,8 +328,8 @@ double	TransLut::MapperLog::find_val (int index) const
 	assert (index >= 0);
 	assert (index < LOGLUT_SIZE);
 
-	static const float    val_min  = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-	static const int      seg_size = 1 << LOGLUT_RES_L2;
+	static constexpr float   val_min  = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
+	static constexpr int     seg_size = 1 << LOGLUT_RES_L2;
 
 	// float is OK because the values are exactly represented in float.
 	float          val   = 0;
@@ -339,7 +339,7 @@ double	TransLut::MapperLog::find_val (int index) const
 		const int      ind_3     = std::abs (ind_2) - 1;
 		const int      log2_part = ind_3 >> LOGLUT_RES_L2;
 		const int      seg_part  = ind_3 & (seg_size - 1);
-		const float    lerp      = seg_part * (1.0f / seg_size);
+		const float    lerp      = float (seg_part) * (1.0f / seg_size);
 		const float    v0        = (int64_t (1) << log2_part) * val_min;
 		val = v0 * (1 + lerp);
 		if (ind_2 < 0)
