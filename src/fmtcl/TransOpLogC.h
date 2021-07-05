@@ -3,6 +3,11 @@
         TransOpLogC.h
         Author: Laurent de Soras, 2015
 
+Source:
+Harald Brendel,
+ALEXA Log C Curve Usage in VFX,
+ARRI, 2011-10-05
+
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to
@@ -29,6 +34,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtcl/TransOpInterface.h"
 
+#include <array>
+
 
 
 namespace fmtcl
@@ -53,7 +60,25 @@ public:
 		Type_NBR_ELT
 	};
 
-	explicit       TransOpLogC (bool inv_flag, Type type);
+	// Exposure Index (EI)
+	enum ExpIdx
+	{
+		ExpIdx_160 = 0,
+		ExpIdx_200,
+		ExpIdx_250,
+		ExpIdx_320,
+		ExpIdx_400,
+		ExpIdx_500,
+		ExpIdx_640,
+		ExpIdx_800,
+		ExpIdx_1000,
+		ExpIdx_1280,
+		ExpIdx_1600,
+
+		ExpIdx_NBR_ELT
+	};
+
+	explicit       TransOpLogC (bool inv_flag, Type type, ExpIdx ei = ExpIdx_800);
 	virtual        ~TransOpLogC () {}
 
 	// TransOpInterface
@@ -72,22 +97,35 @@ protected:
 
 private:
 
+	class CurveData
+	{
+	public:
+		double         _cut;
+		double         _a;
+		double         _b;
+		double         _c;
+		double         _d;
+		double         _e;
+		double         _f;
+		double         _cut_i; // _e * _cut + _f
+	};
+
 	double         compute_direct (double x) const;
 	double         compute_inverse (double x) const;
 
 	const bool     _inv_flag;
-	const double   _cut;
-	const double   _a;
-	const double   _b;
-	const double   _c;
-	const double   _d;
-	const double   _e;
-	const double   _f;
 	const double   _n;
-	const double   _cut_i;
+	const CurveData
+	               _curve;
 
 	static const double
 		            _noise_margin;
+	static const CurveData
+	               _vlog;
+	static const std::array <CurveData, ExpIdx_NBR_ELT>
+	               _v2_table;
+	static const std::array <CurveData, ExpIdx_NBR_ELT>
+	               _v3_table;
 
 
 

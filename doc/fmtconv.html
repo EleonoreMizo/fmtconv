@@ -502,7 +502,7 @@ The only valid values are 4, 8, 16 and 32.</p>
 	cplaced    : data   : opt; (cplace)
 	matd       : data   : opt;
 
-	# Transfert curve parameters
+	# Transfer curve parameters
 	transs     : data[] : opt;
 	transd     : data[] : opt;
 	cont       : float  : opt;
@@ -1361,6 +1361,8 @@ If it’s not the case, floating point operations are silently used as fallback.
 	flt        : int    : opt;
 	fulls      : int    : opt; (True)
 	fulld      : int    : opt; (True)
+	logceis    : int    : opt; (800)
+	logceid    : int    : opt; (800)
 	cpuopt     : int    : opt; (-1)
 	blacklvl   : float  : opt; (0)
 )</pre>
@@ -1427,8 +1429,8 @@ much higher.</p>
 <tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
 <tr><td><b><code>&quot;slog2&quot;      </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
 <tr><td><b><code>&quot;slog3&quot;     </code></b></td><td>0&hellip;38.421</td><td>Sony S-Log3.</td></tr>
-<tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 2.x (800 EI), linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise.</td></tr>
-<tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 3.x (800 EI), linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise.</td></tr>
+<tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 2.x, linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
+<tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 3.x, linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
 <tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
 <tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td>Adobe RGB (1998 and Wide Gamut)</td></tr>
 <tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td>ProPhoto, ROMM</td></tr>
@@ -1467,6 +1469,11 @@ Reference black and white have different values depending on the range.
 In 8 bits, pixel values scale from 0 to 255 in full range, and 16 to 235
 in TV-range (16 to 240 for the Y’Cb’Cr’ chroma planes).
 This value has no meaning for float data.</p>
+
+<p class="var">logceis, logceid</p>
+<p>Exposure index (EI) for the Arri Log C Alexa 2.x and 3.x curves.
+Allowed values are:
+160, 200, 250, 320, 400, 500, 640, 800 (default), 1000, 1280 and 1600.<p>
 
 <p class="var">cpuopt</p>
 <p>Limits the CPU instruction set.

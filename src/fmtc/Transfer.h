@@ -32,6 +32,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/TransCurve.h"
 #include "fmtcl/TransLut.h"
 #include "fmtcl/TransOpInterface.h"
+#include "fmtcl/TransOpLogC.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
 #include "vsutl/PlaneProcCbInterface.h"
@@ -83,18 +84,20 @@ private:
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
+	fmtcl::TransOpLogC::ExpIdx
+	               conv_logc_ei (int val_raw) const;
 
 	void           init_table ();
 
 	static fmtcl::TransCurve
 	               conv_string_to_curve (const vsutl::FilterBase &flt, const std::string &str);
-	static OpSPtr  conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag);
+	static OpSPtr  conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag, fmtcl::TransOpLogC::ExpIdx logc_ei);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
 	const ::VSVideoInfo             
-	               _vi_in;          // Input. Must be declared after _clip_src_sptr because of initialisation order.
-	::VSVideoInfo  _vi_out;         // Output. Must be declared after _vi_in.
+	               _vi_in;     // Input. Must be declared after _clip_src_sptr because of initialisation order.
+	::VSVideoInfo  _vi_out;    // Output. Must be declared after _vi_in.
 
 	bool           _sse2_flag;
 	bool           _avx2_flag;
@@ -109,6 +112,10 @@ private:
 	               _curve_s;
 	fmtcl::TransCurve
 	               _curve_d;
+	fmtcl::TransOpLogC::ExpIdx // Exposure Index for the Arri Log C curves
+	               _logc_ei_s;
+	fmtcl::TransOpLogC::ExpIdx
+	               _logc_ei_d;
 	bool           _loglut_flag;
 
 	vsutl::PlaneProcessor

@@ -80,6 +80,8 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 ,	_full_range_dst_flag (get_arg_int (in, out, "fulld", 1) != 0)
 ,	_curve_s (fmtcl::TransCurve_UNDEF)
 ,	_curve_d (fmtcl::TransCurve_UNDEF)
+,	_logc_ei_s (fmtcl::TransOpLogC::ExpIdx_800)
+,	_logc_ei_d (fmtcl::TransOpLogC::ExpIdx_800)
 ,	_loglut_flag (false)
 #if defined (_MSC_VER)
 #pragma warning (push)
@@ -135,6 +137,13 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 	// Output format is validated.
 	_vi_out.format = &fmt_dst;
 
+	// Other parameters
+	const int      logc_ei_raw_s = get_arg_int (in, out, "logceis", 800);
+	const int      logc_ei_raw_d = get_arg_int (in, out, "logceid", 800);
+	_logc_ei_s = conv_logc_ei (logc_ei_raw_s);
+	_logc_ei_d = conv_logc_ei (logc_ei_raw_d);
+
+	// Finally...
 	init_table ();
 }
 
@@ -323,12 +332,39 @@ const ::VSFormat &	Transfer::get_output_colorspace (const ::VSMap &in, ::VSMap &
 
 
 
+fmtcl::TransOpLogC::ExpIdx	Transfer::conv_logc_ei (int val_raw) const
+{
+	fmtcl::TransOpLogC::ExpIdx ei = fmtcl::TransOpLogC::ExpIdx_800;
+
+	switch (val_raw)
+	{
+	case  160: ei = fmtcl::TransOpLogC::ExpIdx_160;  break;
+	case  200: ei = fmtcl::TransOpLogC::ExpIdx_200;  break;
+	case  250: ei = fmtcl::TransOpLogC::ExpIdx_250;  break;
+	case  320: ei = fmtcl::TransOpLogC::ExpIdx_320;  break;
+	case  400: ei = fmtcl::TransOpLogC::ExpIdx_400;  break;
+	case  500: ei = fmtcl::TransOpLogC::ExpIdx_500;  break;
+	case  640: ei = fmtcl::TransOpLogC::ExpIdx_640;  break;
+	case  800: ei = fmtcl::TransOpLogC::ExpIdx_800;  break;
+	case 1000: ei = fmtcl::TransOpLogC::ExpIdx_1000; break;
+	case 1280: ei = fmtcl::TransOpLogC::ExpIdx_1280; break;
+	case 1600: ei = fmtcl::TransOpLogC::ExpIdx_1600; break;
+	default:
+		throw_inval_arg ("invalid logc_ei value.");
+		break;
+	}
+
+	return ei;
+}
+
+
+
 void	Transfer::init_table ()
 {
 	_curve_s = conv_string_to_curve (*this, _transs);
 	_curve_d = conv_string_to_curve (*this, _transd);
-	OpSPtr         op_s = conv_curve_to_op (_curve_s, true );
-	OpSPtr         op_d = conv_curve_to_op (_curve_d, false);
+	OpSPtr         op_s = conv_curve_to_op (_curve_s, true , _logc_ei_s);
+	OpSPtr         op_d = conv_curve_to_op (_curve_d, false, _logc_ei_d);
 
 	// Linear or log LUT?
 	_loglut_flag = false;
@@ -399,7 +435,7 @@ void	Transfer::init_table ()
 			b =           f (Lb)
 			a = (f (Lw) - f (Lb)) / Vmax
 		*/
-		OpSPtr         oetf = conv_curve_to_op (_curve_s, false);
+		auto           oetf = conv_curve_to_op (_curve_s, false, _logc_ei_s);
 		const double   lwg  = (*oetf) (lw        );
 		const double   lbg  = (*oetf) (_lvl_black);
 		const double   vmax =  lwg;
@@ -575,7 +611,7 @@ fmtcl::TransCurve	Transfer::conv_string_to_curve (const vsutl::FilterBase &flt, 
 
 
 
-Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
+Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag, fmtcl::TransOpLogC::ExpIdx logc_ei)
 {
 	assert (c >= 0);
 
@@ -662,10 +698,14 @@ Transfer::OpSPtr	Transfer::conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag)
 		ptr = OpSPtr (new fmtcl::TransOpSLog (inv_flag, false));
 		break;
 	case fmtcl::TransCurve_LOGC2:
-		ptr = OpSPtr (new fmtcl::TransOpLogC (inv_flag, fmtcl::TransOpLogC::Type_LOGC_V2));
+		ptr = OpSPtr (new fmtcl::TransOpLogC (
+			inv_flag, fmtcl::TransOpLogC::Type_LOGC_V2, logc_ei
+		));
 		break;
 	case fmtcl::TransCurve_LOGC3:
-		ptr = OpSPtr (new fmtcl::TransOpLogC (inv_flag, fmtcl::TransOpLogC::Type_LOGC_V3));
+		ptr = OpSPtr (new fmtcl::TransOpLogC (
+			inv_flag, fmtcl::TransOpLogC::Type_LOGC_V3, logc_ei
+		));
 		break;
 	case fmtcl::TransCurve_CANONLOG:
 		ptr = OpSPtr (new fmtcl::TransOpCanonLog (inv_flag));
