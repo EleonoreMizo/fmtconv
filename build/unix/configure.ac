@@ -111,6 +111,10 @@ AS_IF(
     ]
 )
 
+AX_CHECK_COMPILE_FLAG([-Wmisleading-indentation]          , [COMPWARNFLAGS="$COMPWARNFLAGS -Wmisleading-indentation"]          , , [-Werror])
+# Clang only
+AX_CHECK_COMPILE_FLAG([-Wno-implicit-int-float-conversion], [COMPWARNFLAGS="$COMPWARNFLAGS -Wno-implicit-int-float-conversion"], , [-Werror])
+
 AC_SUBST([CXXSTD])
 AC_SUBST([EXTRA_CXXFLAGS])
 AC_SUBST([LDFLAGS])

@@ -5,7 +5,6 @@ warningflags = \
         -Wextra \
         -Wshadow \
         -Wunused \
-        -Wmisleading-indentation \
         -Wnull-dereference \
         -Wvla \
         -Wstrict-aliasing \
@@ -31,7 +30,6 @@ warningflags += \
         -Wbool-conversion \
         -Wextra-semi \
         -Wnullable-to-nonnull-conversion \
-        -Wno-implicit-int-float-conversion \
         -Wno-unused-private-field \
         -Wno-unused-command-line-argument
 # -Wzero-as-null-pointer-constant
