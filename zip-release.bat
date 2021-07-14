@@ -13,6 +13,7 @@
 @mkdir "reltmp\win64"
 @xcopy /I "doc"                                "reltmp\doc"
 @xcopy /I "build\unix"                         "reltmp\build\unix"
+@xcopy /I "build\unix\m4"                      "reltmp\build\unix\m4"
 @xcopy /I "src\conc"                           "reltmp\src\conc"
 @xcopy /I "src\ffft"                           "reltmp\src\ffft"
 @xcopy /I "src\fmtc"                           "reltmp\src\fmtc"
