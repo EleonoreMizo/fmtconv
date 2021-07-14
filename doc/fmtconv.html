@@ -15,7 +15,7 @@
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r22</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r23</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
 <tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a></td></tr>
@@ -205,7 +205,7 @@ c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 
 <h4>Visual C++</h4>
 
-<p>Visual Studio 2013 or later is required, previous versions are
+<p>Visual Studio 2019 or later is required, previous versions are
 not supported anymore.
 Just load <code>build/win/fmtconv.sln</code> and run the compiler.</p>
 
@@ -215,7 +215,6 @@ subfolders. Then:
 
 <ul>
 <li>Add <code>.</code> (the <code>src</code> directory) as include path.</li>
-<li>Use the <code>v120_xp</code> toolset for the 32-bit version.</li>
 <li>For the whole project, enable the SS2 instruction set.</li>
 <li>Enable the AVX2 instruction set for the <code>*.cpp</code> files containing <code>avx2</code> in their name, and the AVX set for the <code>avx</code> files.</li>
 <li>Enable optimizations maximizing speed and “any suitable” functions for inlining.</li>
@@ -223,13 +222,18 @@ subfolders. Then:
 
 <h4>GNU/Linux and other Unix-like systems</h4>
 
-<p>On Linux and similar GNU-based systems, the <code>build</code> directory
-contains autotools settings:</p>
+<p>On Linux and similar GNU-based systems (including MSYS2 and Cygwin), the
+<code>build</code> directory contains autotools settings:</p>
 <pre class="src">cd build/unix
 ./autogen.sh
 ./configure
 make
 make install</pre>
+<p>You can add some options to the <code>configure</code> command:</p>
+<ul>
+<li><code>--enable-debug</code> to activate debugging code</li>
+<li><code>--enable-clang</code> to use Clang instead of the default compiler, usually GCC</li>
+</ul>
 
 <h4>GCC</h4>
 
@@ -247,7 +251,7 @@ vsutl/*.cpp</pre>
 <p>Add <code>AvstpFinder.cpp</code> on Windows.
 Use the following options (on a single line):</p>
 
-<pre class="src">-std=c++11 -shared -fabi-version=6 -msse2 -mcx16 -O3 -DNDEBUG -I.
+<pre class="src">-std=c++14 -shared -fabi-version=6 -msse2 -mcx16 -O3 -DNDEBUG -I.
 -Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow
 -Wno-unused-private-field</pre>
 
@@ -276,7 +280,7 @@ for some reason.</p>
 <p>Link with <code>-latomic -lpthread</code>.</p>
 
 <p>With MinGW, it seems you will need a specific MinGW-64 build supporting
-C++11 threading (not tested here yet, please report if you find something
+C++14 threading (not tested here yet, please report if you find something
 useful).</p>
 
 <h2><a id="description"></a>III) Filters description</h2>
@@ -1531,7 +1535,16 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
-<p><b>r22, 2019.12.11</b></p>
+<p><b>r23, 2021-07-14</b></p>
+<ul>
+<li><code>transfer</code>: added an Exposure Index (EI) parameter for the Arri Log C Alexa 2.x and 3.x curves.</li>
+<li><code>bitdepth</code>: properly sets the <code>_ColorRange<code> attribute.</li>
+<li>Doesn’t output a debug message when AVSTP is not found.</li>
+<li>Fixed a concurrency issue by using a more recent toolkit when compiling with MSVC.</li>
+<li>Windows XP is not supported any more.</li>
+</ul>
+
+<p><b>r22, 2019-12-11</b></p>
 <ul>
 <li><code>bitdepth</code>: upconversions for full range data now scale to the maximum value instead of shifting bits. Thanks to Z4ST1N for the report.</li>
 <li><code>matrix</code>: added support for the YDzDx, ICtCp-PQ and ICtCp-HLG colorspaces.</li>
@@ -1550,25 +1563,25 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li>Fixed compilation for Linux on ARM or aarch64. Binaries not tested yet.</li>
 </ul>
 
-<p><b>r21, 2019.12.08</b></p>
+<p><b>r21, 2019-12-08</b></p>
 <ul>
 <li><code>transfer</code>: fixed highlight clipping for several high dynamic range transfer curves, thanks to groucho86 for the report.</li>
 </ul>
 
-<p><b>r20, 2016.03.25</b></p>
+<p><b>r20, 2016-03-25</b></p>
 <ul>
 <li><code>primaries</code>: fixed a bug preventing to set all primaries individually without specifying any preset.</li>
 <li><code>primaries</code>: fixed a bug in the color conversion, thanks to J1Man for having spotted it.</li>
 </ul>
 
-<p><b>r19, 2016.03.19</b></p>
+<p><b>r19, 2016-03-19</b></p>
 <ul>
 <li><code>primaries</code>: refined the values for the Adobe Wide gamut and BT.2020 primaries.</li>
 <li><code>primaries</code>: added DCI-P3, ACES AP0/AP1, S-Gamut, S-Gamut3.Cine, ALEXA and V-Gamut presets.</li>
 <li><code>transfer</code>: added ACEScc, ERIMM, S-Log2, S-Log3 and V-Log curves.</li>
 </ul>
 
-<p><b>r18, 2016.03.08</b></p>
+<p><b>r18, 2016-03-08</b></p>
 <ul>
 <li>Added the <code>primaries</code> function to convert between gamuts.</li>
 <li>The “full” range is now closer to what is specified in the standards.</li>
@@ -1576,7 +1589,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>transfer</code>: added the Adobe RGB and ProPhoto / ROMM curves.</li>
 </ul>
 
-<p><b>r17, 2015.07.08</b></p>
+<p><b>r17, 2015-07-08</b></p>
 <ul>
 <li><code>bitdepth</code>: added “Void and cluster” dithering method and its <var>patsize</var> parameter.</li>
 <li><code>bitdepth</code>: added floating point implementation for the Ostromoukhov dithering</li>
@@ -1584,7 +1597,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>bitdepth</code>: fixed incorrect conversion from float to 8-bit integer using the “fast” modes with SSE2 instruction set.</li>
 </ul>
 
-<p><b>r16, 2015.07.01</b></p>
+<p><b>r16, 2015-07-01</b></p>
 <ul>
 <li><code>bitdepth</code>: added support for 11-bit and 14-bit integer input.</li>
 <li><code>bitdepth</code>: fixed a slight plane inconsistency when dithering grey multi-plane pictures using an error diffusion algorithm.</li>
@@ -1593,18 +1606,18 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>transfer</code>: added the <var>blacklvl</var> parameter.</li>
 </ul>
 
-<p><b>r15, 2015.05.22</b></p>
+<p><b>r15, 2015-05-22</b></p>
 <ul>
 <li><code>resample</code> and <code>bitdepth</code>: fixed a bug creating dark lines or weird patterns. Was introduced in r13 while trying to fix the buffer overflow problem. Thanks to feisty2 for spotting it.</li>
 <li><code>resample</code>: fixed the non-SIMD code path, causing crashes.</li>
 </ul>
 
-<p><b>r14, 2015.05.20</b></p>
+<p><b>r14, 2015-05-20</b></p>
 <ul>
 <li><code>matrix</code>: fixed a bug introducing wrong offsets in custom matrix coefficients, thanks to mawen1250 for the report.</li>
 </ul>
 
-<p><b>r13, 2015.05.18</b></p>
+<p><b>r13, 2015-05-18</b></p>
 <ul>
 <li><code>matrix</code>: optimized the SSE2 and AVX2 paths for integer data.</li>
 <li>Added <var>cpuopt</var> to some functions, to manually limit the instruction set optimizations.</li>
@@ -1613,23 +1626,23 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li>Removed the <code>int16tofloat</code> and <code>floattoint16</code> temporary functions.</li>
 </ul>
 
-<p><b>r12, 2015.05.08</b></p>
+<p><b>r12, 2015-05-08</b></p>
 <ul>
 <li><code>resample</code>: fixed a crash in the AVX2 code path, thanks to HolyWu for spotting it.</li>
 </ul>
 
-<p><b>r11, 2015.05.07</b></p>
+<p><b>r11, 2015-05-07</b></p>
 <ul>
 <li><code>transfer</code>: fixed a bug in the SSE2 code path.</li>
 </ul>
 
-<p><b>r10, 2015.05.06</b></p>
+<p><b>r10, 2015-05-06</b></p>
 <ul>
 <li>fmtconv is compatible with the older Vapoursynth versions again until API 3.2 is out.</li>
 <li>Source code: fixed compilation problems.</li>
 </ul>
 
-<p><b>r9, 2015.05.06</b></p>
+<p><b>r9, 2015-05-06</b></p>
 <ul>
 <li>Added the <code>transfer</code> function.</li>
 <li><code>resample</code>: Most kernel-related parameters are now arrays, allowing to specify different values for each plane.</li>
@@ -1639,25 +1652,25 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>bitdepth</code>: SSE2 optimizations for the “fast” algorithm.</li>
 </ul>
 
-<p><b>r8, 2013.11.30</b></p>
+<p><b>r8, 2013-11-30</b></p>
 <ul>
 	<li><code>resample</code>: Fixed bugs introduced in r7.</li>
 	<li>Fixed a range conversion issue in “plane copy” modes with source and destination formats are the same.</li>
 </ul>
 
-<p><b>r7, 2013.11.27</b></p>
+<p><b>r7, 2013-11-27</b></p>
 <ul>
 <li>64-bit windows version.</li>
 <li><code>resample</code>: A few optimizations for special cases.</li>
 <li><code>resample</code>: fixed the coefficients used in integer resizing, whose sum was sometimes off by a few units.</li>
 </ul>
 
-<p><b>r6, 2013.08.24</b></p>
+<p><b>r6, 2013-08-24</b></p>
 <ul>
 	<li><code>matrix</code>: single-plane output now works correctly.</li>
 </ul>
 
-<p><b>r5, 2013.08.18</b></p>
+<p><b>r5, 2013-08-18</b></p>
 <ul>
 <li>Added 12-bit support for all the functions.</li>
 <li>Added <code>matrix2020cl</code> to convert between linear RGB and Y’Cb’Cr’ colorspaces using the BT.2020 constant luminance matrix.</li>
@@ -1667,7 +1680,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>resample</code>: added SSE2 integer calculations for slight speed improvement. Activated by default, use <var>flt=1</var> to compute everything in float (previous operating mode).</li>
 </ul>
 
-<p><b>r4, 2012.12.09</b></p>
+<p><b>r4, 2012-12-09</b></p>
 <ul>
 <li>Added a documentation.</li>
 <li>Filters now write some frame properties when known.</li>
@@ -1684,7 +1697,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li>Added <code>nativetostack16</code>.</li>
 </ul>
 
-<p><b>r3, 2012.11.23</b></p>
+<p><b>r3, 2012-11-23</b></p>
 <ul>
 <li><code>bitdepth</code>: changed the <var>bitdepth</var> parameter to <var>bits</var>.</li>
 <li><code>bitdepth</code>: added SSE2 optimizations for upconversions.</li>
@@ -1693,7 +1706,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>resample</code>: fixed the <var>planes</var> parameter previously interpreted as 0 (black or green screen).</li>
 </ul>
 
-<p><b>r2, 2012.11.18</b></p>
+<p><b>r2, 2012-11-18</b></p>
 <ul>
 <li><code>bitdepth</code>: implemented fast dither mode (but not in SSE2 yet).</li>
 <li><code>bitdepth</code>: optimized float-to-integer path.</li>
@@ -1703,7 +1716,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>resample</code>: fixed white/magenta screen with 8-bit input and float output.</li>
 </ul>
 
-<p><b>r1, 2012.11.16</b></p>
+<p><b>r1, 2012-11-16</b></p>
 <ul>
 <li>Initial release.</li>
 </ul>
