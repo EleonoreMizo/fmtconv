@@ -1014,7 +1014,7 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 
 	const bool     sc_flag =
 		(   src_fmt == fmtcl::SplFmt_FLOAT
-		 || ! fstb::is_eq (scale_info._gain * ((uint64_t (1)) << (src_res - dst_res)), 1.0, 1e-6)
+		 || ! fstb::is_eq (scale_info._gain * double ((uint64_t (1)) << (src_res - dst_res)), 1.0, 1e-6)
 		 || ! fstb::is_null (scale_info._add_cst, 1e-6));
 
 	void (ThisType::* process_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const =

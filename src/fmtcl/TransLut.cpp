@@ -340,7 +340,7 @@ double	TransLut::MapperLog::find_val (int index) const
 		const int      log2_part = ind_3 >> LOGLUT_RES_L2;
 		const int      seg_part  = ind_3 & (seg_size - 1);
 		const float    lerp      = float (seg_part) * (1.0f / seg_size);
-		const float    v0        = (int64_t (1) << log2_part) * val_min;
+		const float    v0        = float (int64_t (1) << log2_part) * val_min;
 		val = v0 * (1 + lerp);
 		if (ind_2 < 0)
 		{
