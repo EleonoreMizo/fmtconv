@@ -389,6 +389,7 @@ formats.</p>
 <tr><td><b>6</b></td><td>Floyd-Steinberg error diffusion. Classic.</td></tr>
 <tr><td><b>7</b></td><td><a href="http://www.iro.umontreal.ca/~ostrom/publications/publications_abstracts.html#SIGGRAPH01_VarcoeffED">Ostromoukhov error diffusion</a>. Slow, available only for integer input at the moment. Avoids usual F-S artefacts.</td></tr>
 <tr><td><b>8</b></td><td>Void and cluster halftone dithering. Better visual aspect than ordered dithering.</td></tr>
+<tr><td><b>9</b></td><td>Dither using <a href="http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/">quasirandom sequences</a>.</td></tr>
 </table>
 
 <p>When using error-diffusion dithering on interlaced content, you should
@@ -1535,10 +1536,15 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
+<p><b>r24, 202?-??-??</b></p>
+<ul>
+<li><code>bitdepth</code>: added dithering <code>mode</code> 9: quasirandom sequences.</li>
+</ul>
+
 <p><b>r23, 2021-07-14</b></p>
 <ul>
 <li><code>transfer</code>: added an Exposure Index (EI) parameter for the Arri Log C Alexa 2.x and 3.x curves.</li>
-<li><code>bitdepth</code>: properly sets the <code>_ColorRange<code> attribute.</li>
+<li><code>bitdepth</code>: properly sets the <code>_ColorRange</code> attribute.</li>
 <li>Doesn’t output a debug message when AVSTP is not found.</li>
 <li>Fixed a concurrency issue by using a more recent toolkit when compiling with MSVC.</li>
 <li>Windows XP is not supported any more.</li>

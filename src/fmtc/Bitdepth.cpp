@@ -266,6 +266,10 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	{
 		init_fnc_errdiff ();
 	}
+	else if (_dmode == DMode_QUASIRND)
+	{
+		init_fnc_quasirandom ();
+	}
 	else if (_dmode == DMode_FAST)
 	{
 		init_fnc_fast ();
@@ -527,26 +531,30 @@ void	Bitdepth::build_dither_pat ()
 
 	switch (_dmode)
 	{
-	case	DMode_BAYER:
+	case DMode_BAYER:
 		build_dither_pat_bayer ();
 		break;
 
-	case	DMode_FILTERLITE:
-	case	DMode_STUCKI:
-	case	DMode_ATKINSON:
-	case	DMode_FLOYD:
-	case	DMode_OSTRO:
+	case DMode_FILTERLITE:
+	case DMode_STUCKI:
+	case DMode_ATKINSON:
+	case DMode_FLOYD:
+	case DMode_OSTRO:
 		_errdif_flag = true;
 		break;
 
-	case	DMode_ROUND:
-	case	DMode_FAST:
+	case DMode_ROUND:
+	case DMode_FAST:
 	default:
 		build_dither_pat_round ();
 		break;
 
-	case	DMode_VOIDCLUST:
+	case DMode_VOIDCLUST:
 		build_dither_pat_void_and_cluster (_pat_size);
+		break;
+
+	case DMode_QUASIRND:
+		// Nothing
 		break;
 	}
 }
@@ -870,6 +878,41 @@ void	Bitdepth::init_fnc_ordered ()
 
 
 
+void	Bitdepth::init_fnc_quasirandom ()
+{
+	assert (! _errdif_flag);
+
+	const fmtcl::SplFmt  dst_fmt = _splfmt_dst;
+	const int            dst_res = _vi_out.format->bitsPerSample;
+	const fmtcl::SplFmt  src_fmt = _splfmt_src;
+	const int            src_res = _vi_in.format->bitsPerSample;
+
+	fmtc_Bitdepth_SPAN_INT (
+		fmtc_Bitdepth_SET_FNC_INT, qrs, qrs, _simple_flag,
+		dst_res, dst_fmt, src_res, src_fmt
+	)
+	fmtc_Bitdepth_SPAN_FLT (
+		fmtc_Bitdepth_SET_FNC_FLT, qrs, qrs, _simple_flag,
+		dst_res, dst_fmt, src_res, src_fmt
+	)
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+	if (_sse2_flag)
+	{
+		fmtc_Bitdepth_SPAN_INT (
+			fmtc_Bitdepth_SET_FNC_INT_SSE2, qrs, qrs, _simple_flag,
+			dst_res, dst_fmt, src_res, src_fmt
+		)
+		fmtc_Bitdepth_SPAN_FLT (
+			fmtc_Bitdepth_SET_FNC_FLT_SSE2, qrs, qrs, _simple_flag,
+			dst_res, dst_fmt, src_res, src_fmt
+		)
+	}
+#endif
+}
+
+
+
 void	Bitdepth::init_fnc_errdiff ()
 {
 	assert (_errdif_flag);
@@ -1000,6 +1043,7 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 		break;
 
 	case	DMode_FAST:
+	case  DMode_QUASIRND:
 		// Nothing
 		break;
 
@@ -1166,6 +1210,262 @@ void	Bitdepth::process_seg_fast_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *s
 template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
+	const PatRow & pattern = ctx.extract_pattern_row ();
+
+	process_seg_common_int_int_cpp <
+		S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
+	> (dst_ptr, src_ptr, w, ctx,
+		[&] (int pos)
+		{
+			return pattern [pos & (PAT_WIDTH - 1)];
+		}
+	);
+}
+
+
+
+template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	const PatRow & pattern = ctx.extract_pattern_row ();
+
+	process_seg_common_flt_int_cpp <
+		S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE
+	> (dst_ptr, src_ptr, w, ctx,
+		[&] (int pos)
+		{
+			return pattern [pos & (PAT_WIDTH - 1)];
+		}
+	);
+}
+
+
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+
+
+
+template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	const PatRow & pattern = ctx.extract_pattern_row ();
+
+	process_seg_common_int_int_sse2 <
+		S_FLAG, DST_FMT, DST_BITS, SRC_FMT, SRC_BITS
+	> (dst_ptr, src_ptr, w, ctx,
+		[&] (int pos)
+		{
+			return _mm_load_si128 (reinterpret_cast <const __m128i *> (
+				&pattern [pos & (PAT_WIDTH - 1)]
+			)); // 8 s16 [-128 ; +127]
+		}
+	);
+}
+
+
+
+template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	const PatRow & pattern = ctx.extract_pattern_row ();
+
+	process_seg_common_flt_int_sse2 <
+		S_FLAG, DST_FMT, DST_BITS, SRC_FMT
+	> (dst_ptr, src_ptr, w, ctx,
+		[&] (int pos)
+		{
+			return _mm_load_si128 (reinterpret_cast <const __m128i *> (
+				&pattern [pos & (PAT_WIDTH - 1)]
+			)); // 8 s16 [-128 ; +127]
+		}
+	);
+}
+
+
+
+#endif   // fstb_ARCHI_X86
+
+
+
+template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+void	Bitdepth::process_seg_qrs_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	// alpha1 = 1 / x, with x real solution of: x^3 - x - 1 = 0
+	// Also:
+	// alpha1 =   (curt (2) * sq (curt (3)))
+	//          / (curt (9 - sqrt (69)) + curt (9 + sqrt (69)))
+	constexpr float   alpha1  = float (1.0 / 1.3247179572447460259609088544781);
+	constexpr float   alpha2  = alpha1 * alpha1;
+	constexpr int     sc_l2   = 16; // 16 bits of fractional values
+	constexpr float   sc_mul  = float (1 << sc_l2);
+	constexpr int     qrs_shf = sc_l2 - 9;
+	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
+	uint32_t          qrs_cnt =
+		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
+
+	process_seg_common_int_int_cpp <
+		S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
+	> (dst_ptr, src_ptr, w, ctx,
+		[&] (int /*pos*/)
+		{
+			const int      p      = (qrs_cnt >> qrs_shf) & 0x1FF;
+			const int      dith_o = (p > 255) ? 512 - 128 - p : p - 128; // s8
+			qrs_cnt += qrs_inc;
+
+			return dith_o;
+		}
+	);
+}
+
+
+
+template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+void	Bitdepth::process_seg_qrs_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	// alpha1 = 1 / x, with x real solution of: x^3 - x - 1 = 0
+	// Also:
+	// alpha1 =   (curt (2) * sq (curt (3)))
+	//          / (curt (9 - sqrt (69)) + curt (9 + sqrt (69)))
+	constexpr float   alpha1  = float (1.0 / 1.3247179572447460259609088544781);
+	constexpr float   alpha2  = alpha1 * alpha1;
+	constexpr int     sc_l2   = 16; // 16 bits of fractional values
+	constexpr float   sc_mul  = float (1 << sc_l2);
+	constexpr int     qrs_shf = sc_l2 - 9;
+	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
+	uint32_t          qrs_cnt =
+		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
+
+	process_seg_common_flt_int_cpp <
+		S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE
+	> (dst_ptr, src_ptr, w, ctx,
+		[&] (int /*pos*/)
+		{
+			const int      p      = (qrs_cnt >> qrs_shf) & 0x1FF;
+			const int      dith_o = (p > 255) ? 512 - 128 - p : p - 128; // s8
+			qrs_cnt += qrs_inc;
+
+			return dith_o;
+		}
+	);
+}
+
+
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+
+
+
+template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+void	Bitdepth::process_seg_qrs_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	// alpha1 = 1 / x, with x real solution of: x^3 - x - 1 = 0
+	// Also:
+	// alpha1 =   (curt (2) * sq (curt (3)))
+	//          / (curt (9 - sqrt (69)) + curt (9 + sqrt (69)))
+	constexpr float   alpha1  = float (1.0 / 1.3247179572447460259609088544781);
+	constexpr float   alpha2  = alpha1 * alpha1;
+	constexpr int     sc_l2   = 16; // 16 bits of fractional values
+	constexpr float   sc_mul  = float (1 << sc_l2);
+	constexpr int     qrs_shf = sc_l2 - 9;
+	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
+	uint32_t          qrs_cnt =
+		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
+
+	const __m128i     qrs_inc_4 = _mm_set1_epi32 (4 * qrs_inc);
+	__m128i           qrs_cnt_4 = _mm_set1_epi32 (qrs_cnt);
+	const __m128i     qrs_ofs   = _mm_set_epi32 (qrs_inc * 3, qrs_inc * 2, qrs_inc, 0);
+	qrs_cnt_4 = _mm_add_epi32 (qrs_cnt_4, qrs_ofs);
+	const __m128i     qrs_msk   = _mm_set1_epi32 (0x1FF);
+	const __m128i     c128      = _mm_set1_epi16 (128);
+	const __m128i     c256      = _mm_set1_epi16 (256);
+	const __m128i     c384      = _mm_set1_epi16 (384);
+
+	process_seg_common_int_int_sse2 <
+		S_FLAG, DST_FMT, DST_BITS, SRC_FMT, SRC_BITS
+	> (dst_ptr, src_ptr, w, ctx,
+		[&] (int /*pos*/)
+		{
+			auto           p03    = _mm_srli_epi32 (qrs_cnt_4, qrs_shf);
+			p03 = _mm_and_si128 (p03, qrs_msk);
+			qrs_cnt_4 = _mm_add_epi32 (qrs_cnt_4, qrs_inc_4);
+			auto           p47    = _mm_srli_epi32 (qrs_cnt_4, qrs_shf);
+			p47 = _mm_and_si128 (p47, qrs_msk);
+			qrs_cnt_4 = _mm_add_epi32 (qrs_cnt_4, qrs_inc_4);
+			const auto     p      = _mm_packs_epi32 (p03, p47);
+			const auto     tri_a  = _mm_sub_epi16 (p, c128);
+			const auto     tri_d  = _mm_sub_epi16 (c384, p);
+			const auto     cond   = _mm_cmplt_epi16 (p, c256);
+			auto           dith_o = _mm_or_si128 (
+				_mm_and_si128 (cond, tri_a),
+				_mm_andnot_si128 (cond, tri_d)
+			);
+
+			return dith_o; // 8 s16 [-128 ; +127]
+		}
+	);
+}
+
+
+
+template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+void	Bitdepth::process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+{
+	// alpha1 = 1 / x, with x real solution of: x^3 - x - 1 = 0
+	// Also:
+	// alpha1 =   (curt (2) * sq (curt (3)))
+	//          / (curt (9 - sqrt (69)) + curt (9 + sqrt (69)))
+	constexpr float   alpha1  = float (1.0 / 1.3247179572447460259609088544781);
+	constexpr float   alpha2  = alpha1 * alpha1;
+	constexpr int     sc_l2   = 16; // 16 bits of fractional values
+	constexpr float   sc_mul  = float (1 << sc_l2);
+	constexpr int     qrs_shf = sc_l2 - 9;
+	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
+	uint32_t          qrs_cnt =
+		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
+
+	const __m128i     qrs_inc_4 = _mm_set1_epi32 (4 * qrs_inc);
+	__m128i           qrs_cnt_4 = _mm_set1_epi32 (qrs_cnt);
+	const __m128i     qrs_ofs   = _mm_set_epi32 (qrs_inc * 3, qrs_inc * 2, qrs_inc, 0);
+	qrs_cnt_4 = _mm_add_epi32 (qrs_cnt_4, qrs_ofs);
+	const __m128i     qrs_msk   = _mm_set1_epi32 (0x1FF);
+	const __m128i     c128      = _mm_set1_epi16 (128);
+	const __m128i     c256      = _mm_set1_epi16 (256);
+	const __m128i     c384      = _mm_set1_epi16 (384);
+
+	process_seg_common_flt_int_sse2 <
+		S_FLAG, DST_FMT, DST_BITS, SRC_FMT
+	> (dst_ptr, src_ptr, w, ctx,
+		[&] (int /*pos*/)
+		{
+			auto           p03    = _mm_srli_epi32 (qrs_cnt_4, qrs_shf);
+			p03 = _mm_and_si128 (p03, qrs_msk);
+			qrs_cnt_4 = _mm_add_epi32 (qrs_cnt_4, qrs_inc_4);
+			auto           p47    = _mm_srli_epi32 (qrs_cnt_4, qrs_shf);
+			p47 = _mm_and_si128 (p47, qrs_msk);
+			qrs_cnt_4 = _mm_add_epi32 (qrs_cnt_4, qrs_inc_4);
+			const auto     p      = _mm_packs_epi32 (p03, p47);
+			const auto     tri_a  = _mm_sub_epi16 (p, c128);
+			const auto     tri_d  = _mm_sub_epi16 (c384, p);
+			const auto     cond   = _mm_cmplt_epi16 (p, c256);
+			auto           dith_o = _mm_or_si128 (
+				_mm_and_si128 (cond, tri_a),
+				_mm_andnot_si128 (cond, tri_d)
+			);
+
+			return dith_o; // 8 s16 [-128 ; +127]
+		}
+	);
+}
+
+
+
+#endif   // fstb_ARCHI_X86
+
+
+
+template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS, typename DFNC>
+void	Bitdepth::process_seg_common_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const
+{
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
@@ -1173,7 +1473,6 @@ void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 	enum {         DIF_BITS = SRC_BITS - DST_BITS };
 	static_assert (DIF_BITS >= 1, "This function must reduce bidepth.");
 
-	const PatRow & pattern   = ctx.extract_pattern_row ();
 	uint32_t &     rnd_state = ctx._rnd_state;
 
 	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
@@ -1194,7 +1493,7 @@ void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 
 		const int      s = src_n_ptr [pos];
 
-		const int      dith_o = pattern [pos & (PAT_WIDTH - 1)];	// s8
+		const int      dith_o = dither_fnc (pos); // s8
 		int            dither;
 		if (S_FLAG)
 		{
@@ -1222,8 +1521,9 @@ void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 }
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+
+template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, typename DFNC>
+void	Bitdepth::process_seg_common_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
@@ -1232,7 +1532,6 @@ void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 	const SRC_TYPE *  src_n_ptr = reinterpret_cast <const SRC_TYPE *> (src_ptr);
 	DST_TYPE *        dst_n_ptr = reinterpret_cast <      DST_TYPE *> (dst_ptr);
 
-	const PatRow & pattern   = ctx.extract_pattern_row ();
 	uint32_t &     rnd_state = ctx._rnd_state;
 
 	const int      ao = _ampo_i;				// s8
@@ -1253,7 +1552,8 @@ void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 		float          s = float (src_n_ptr [pos]);
 		s = s * mul + add;
 
-		const int      dith_o = pattern [pos & (PAT_WIDTH - 1)];	// s8
+		const int      dith_o = dither_fnc (pos); // s8
+
 		float          dither;
 		if (S_FLAG)
 		{
@@ -1283,8 +1583,8 @@ void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
-void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS, typename DFNC>
+void	Bitdepth::process_seg_common_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
@@ -1293,7 +1593,6 @@ void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	enum {         DIF_BITS = SRC_BITS - DST_BITS };
 	static_assert (DIF_BITS >= 0, "This function cannot increase bidepth.");
 
-	const PatRow & pattern   = ctx.extract_pattern_row ();
 	uint32_t &     rnd_state = ctx._rnd_state;
 
 	typedef typename  fmtcl::ProxyRwSse2 <SRC_FMT>::PtrConst::Type SrcPtr;
@@ -1315,11 +1614,7 @@ void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 		const __m128i  s =	// 8 u16
 			fmtcl::ProxyRwSse2 <SRC_FMT>::read_i16 (src_n_ptr + pos, zero);
 
-		__m128i        dith_o = 
-			_mm_load_si128 (reinterpret_cast <const __m128i *> (
-				&pattern [pos & (PAT_WIDTH - 1)]
-			)
-		);
+		__m128i        dith_o = dither_fnc (pos); // 8 s16 [-128 ; +127]
 
 		__m128i        dither;
 		if (S_FLAG)
@@ -1382,15 +1677,14 @@ void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
-void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
+template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, typename DFNC>
+void	Bitdepth::process_seg_common_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
 	assert (((_mm_getcsr () >> 13) & 3) == 0);   // 00 = Round to nearest (even)
 
-	const PatRow & pattern   = ctx.extract_pattern_row ();
 	uint32_t &     rnd_state = ctx._rnd_state;
 
 	const float    qt_cst    = 1.0f / (
@@ -1425,11 +1719,7 @@ void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 		s0 = _mm_add_ps (_mm_mul_ps (s0, mul), add);
 		s1 = _mm_add_ps (_mm_mul_ps (s1, mul), add);
 
-		__m128i        dith_o = 
-			_mm_load_si128 (reinterpret_cast <const __m128i *> (
-				&pattern [pos & (PAT_WIDTH - 1)]
-			)
-		);
+		__m128i        dith_o = dither_fnc (pos); // 8 s16 [-128 ; +127]
 
 		__m128i        dither;
 		if (S_FLAG)
@@ -1480,7 +1770,7 @@ void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 
 
 
-#endif   // fstb_ARCHI_X86
+#endif
 
 
 

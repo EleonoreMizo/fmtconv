@@ -32,6 +32,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/ErrDifBuf.h"
 #include "fmtcl/ErrDifBufFactory.h"
 #include "fmtcl/SplFmt.h"
+#include "fstb/def.h"
 #include "fstb/ArrayAlign.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
@@ -103,6 +104,7 @@ private:
 		DMode_FLOYD,      // 6
 		DMode_OSTRO,      // 7
 		DMode_VOIDCLUST,  // 8
+		DMode_QUASIRND,   // 9
 
 		DMode_NBR_ELT
 	};
@@ -146,6 +148,7 @@ private:
 	void           copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle);
 	void           init_fnc_fast ();
 	void           init_fnc_ordered ();
+	void           init_fnc_quasirandom ();
 	void           init_fnc_errdiff ();
 
 	void           dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const fmtcl::BitBltConv::ScaleInfo &scale_info, const PatData &pattern, uint32_t rnd_state);
@@ -172,6 +175,34 @@ private:
 	void           process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
 	void           process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+#endif
+
+	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+	void           process_seg_qrs_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+	void           process_seg_qrs_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+	void           process_seg_qrs_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+	void           process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+#endif
+
+	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS, typename DFNC>
+	fstb_FORCEINLINE void
+	               process_seg_common_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const;
+	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, typename DFNC>
+	fstb_FORCEINLINE void
+	               process_seg_common_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const;
+
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS, typename DFNC>
+	fstb_FORCEINLINE void
+	               process_seg_common_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const;
+	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, typename DFNC>
+	fstb_FORCEINLINE void
+	               process_seg_common_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const;
 #endif
 
 	template <bool S_FLAG, class ERRDIF>
