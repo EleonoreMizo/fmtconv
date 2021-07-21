@@ -135,6 +135,7 @@ private:
 		fmtcl::ErrDifBuf *                     // Error diffusion
 		               _ed_buf_ptr;
 		int            _y;                     // Ordered dithering and error diffusion
+		uint32_t       _qrs_seed;              // For the quasirandom sequences
 	};
 
 	const ::VSFormat &
@@ -151,7 +152,7 @@ private:
 	void           init_fnc_quasirandom ();
 	void           init_fnc_errdiff ();
 
-	void           dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const fmtcl::BitBltConv::ScaleInfo &scale_info, const PatData &pattern, uint32_t rnd_state);
+	void           dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const fmtcl::BitBltConv::ScaleInfo &scale_info, int frame_index, int plane_index);
 
 	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	void           process_seg_fast_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const;

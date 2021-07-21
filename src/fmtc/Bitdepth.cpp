@@ -398,19 +398,6 @@ int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 			}
 			else
 			{
-				uint32_t       rnd_state = plane_index << 16;
-				if (_static_noise_flag)
-				{
-					rnd_state += 55555;
-				}
-				else
-				{
-					rnd_state += n;
-				}
-
-				const int      pat_index = (n + plane_index) & (PAT_PERIOD - 1);
-				const PatData& pattern = _dither_pat_arr [pat_index];
-
 				dither_plane (
 					_splfmt_dst, _vi_out.format->bitsPerSample,
 					data_dst_ptr, stride_dst,
@@ -418,7 +405,7 @@ int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 					data_src_ptr, stride_src,
 					w, h,
 					_scale_info_arr [plane_index]._info,
-					pattern, rnd_state
+					n, plane_index
 				);
 			}
 		}
@@ -1152,7 +1139,7 @@ void	Bitdepth::init_fnc_errdiff ()
 
 
 
-void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const fmtcl::BitBltConv::ScaleInfo &scale_info, const PatData &pattern, uint32_t rnd_state)
+void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const fmtcl::BitBltConv::ScaleInfo &scale_info, int frame_index, int plane_index)
 {
 	fstb::unused (dst_fmt);
 	assert (dst_fmt >= 0);
@@ -1167,8 +1154,18 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 	assert (h > 0);
 
 	SegContext     ctx;
-	ctx._rnd_state      = rnd_state;
 	ctx._scale_info_ptr = &scale_info;
+
+	uint32_t       rnd_state = plane_index << 16;
+	if (_static_noise_flag)
+	{
+		rnd_state += 55555;
+	}
+	else
+	{
+		rnd_state += frame_index;
+	}
+	ctx._rnd_state = rnd_state;
 
 	const bool     sc_flag =
 		(   src_fmt == fmtcl::SplFmt_FLOAT
@@ -1197,12 +1194,27 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 	case	DMode_BAYER:
 	case	DMode_ROUND:
 	case	DMode_VOIDCLUST:
-		ctx._pattern_ptr = &pattern;
+		{
+			constexpr int  pat_mask  = PAT_PERIOD - 1;
+			const int      pat_index = (frame_index + plane_index) & pat_mask;
+			const PatData& pattern   = _dither_pat_arr [pat_index];
+			ctx._pattern_ptr = &pattern;
+		}
 		break;
 
 	case	DMode_FAST:
-	case  DMode_QUASIRND:
 		// Nothing
+		break;
+
+	case  DMode_QUASIRND:
+		if (_dyn_flag)
+		{
+			ctx._qrs_seed = uint32_t ((frame_index * 73) + (plane_index * 263));
+		}
+		else
+		{
+			ctx._qrs_seed = 0;
+		}
 		break;
 
 	case	DMode_FILTERLITE:
@@ -1452,14 +1464,15 @@ void	Bitdepth::process_seg_qrs_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 	// Also:
 	// alpha1 =   (curt (2) * sq (curt (3)))
 	//          / (curt (9 - sqrt (69)) + curt (9 + sqrt (69)))
-	constexpr float   alpha1  = float (1.0 / 1.3247179572447460259609088544781);
-	constexpr float   alpha2  = alpha1 * alpha1;
+	constexpr double  alpha1  = 1.0 / 1.3247179572447460259609088544781;
+	constexpr double  alpha2  = alpha1 * alpha1;
 	constexpr int     sc_l2   = 16; // 16 bits of fractional values
 	constexpr float   sc_mul  = float (1 << sc_l2);
 	constexpr int     qrs_shf = sc_l2 - 9;
 	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
-	uint32_t          qrs_cnt =
-		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
+	uint32_t          qrs_cnt = uint32_t (std::llrint (
+		(alpha2 * double (ctx._y + ctx._qrs_seed)) * sc_mul
+	));
 
 	process_seg_common_int_int_cpp <
 		S_FLAG, TN_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
@@ -1489,14 +1502,15 @@ void	Bitdepth::process_seg_qrs_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 	// Also:
 	// alpha1 =   (curt (2) * sq (curt (3)))
 	//          / (curt (9 - sqrt (69)) + curt (9 + sqrt (69)))
-	constexpr float   alpha1  = float (1.0 / 1.3247179572447460259609088544781);
-	constexpr float   alpha2  = alpha1 * alpha1;
+	constexpr double  alpha1  = 1.0 / 1.3247179572447460259609088544781;
+	constexpr double  alpha2  = alpha1 * alpha1;
 	constexpr int     sc_l2   = 16; // 16 bits of fractional values
 	constexpr float   sc_mul  = float (1 << sc_l2);
 	constexpr int     qrs_shf = sc_l2 - 9;
 	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
-	uint32_t          qrs_cnt =
-		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
+	uint32_t          qrs_cnt = uint32_t (std::llrint (
+		(alpha2 * double (ctx._y + ctx._qrs_seed)) * sc_mul
+	));
 
 	process_seg_common_flt_int_cpp <
 		S_FLAG, TN_FLAG, DST_TYPE, DST_BITS, SRC_TYPE
@@ -1523,21 +1537,23 @@ void	Bitdepth::process_seg_qrs_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
 void	Bitdepth::process_seg_qrs_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	// alpha1 = 1 / x, with x real solution of: x^3 - x - 1 = 0
 	// Also:
 	// alpha1 =   (curt (2) * sq (curt (3)))
 	//          / (curt (9 - sqrt (69)) + curt (9 + sqrt (69)))
-	constexpr float   alpha1  = float (1.0 / 1.3247179572447460259609088544781);
-	constexpr float   alpha2  = alpha1 * alpha1;
+	constexpr double  alpha1  = 1.0 / 1.3247179572447460259609088544781;
+	constexpr double  alpha2  = alpha1 * alpha1;
 	constexpr int     sc_l2   = 16; // 16 bits of fractional values
 	constexpr float   sc_mul  = float (1 << sc_l2);
 	constexpr int     qrs_shf = sc_l2 - 9;
 	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
-	uint32_t          qrs_cnt =
-		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
+	constexpr uint32_t qrs_sm = uint32_t (1) << (31 - sc_l2);
+	uint32_t          qrs_cnt = uint32_t (std::llrint (
+		(alpha2 * double (ctx._y + ctx._qrs_seed)) * sc_mul
+	));
 
 	const __m128i     qrs_inc_4 = _mm_set1_epi32 (4 * qrs_inc);
 	__m128i           qrs_cnt_4 = _mm_set1_epi32 (qrs_cnt);
@@ -1587,14 +1603,16 @@ void	Bitdepth::process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	// Also:
 	// alpha1 =   (curt (2) * sq (curt (3)))
 	//          / (curt (9 - sqrt (69)) + curt (9 + sqrt (69)))
-	constexpr float   alpha1  = float (1.0 / 1.3247179572447460259609088544781);
-	constexpr float   alpha2  = alpha1 * alpha1;
+	constexpr double  alpha1  = 1.0 / 1.3247179572447460259609088544781;
+	constexpr double  alpha2  = alpha1 * alpha1;
 	constexpr int     sc_l2   = 16; // 16 bits of fractional values
 	constexpr float   sc_mul  = float (1 << sc_l2);
 	constexpr int     qrs_shf = sc_l2 - 9;
 	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
-	uint32_t          qrs_cnt =
-		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
+	constexpr uint32_t qrs_sm = uint32_t (1) << (31 - sc_l2);
+	uint32_t          qrs_cnt = uint32_t (std::llrint (
+		(alpha2 * double (ctx._y + ctx._qrs_seed)) * sc_mul
+	));
 
 	const __m128i     qrs_inc_4 = _mm_set1_epi32 (4 * qrs_inc);
 	__m128i           qrs_cnt_4 = _mm_set1_epi32 (qrs_cnt);
