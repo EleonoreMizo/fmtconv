@@ -304,6 +304,7 @@ useful).</p>
 	patsize    : int  : opt; (32)
 	tpdfo      : int  : opt; (0)
 	tpdfn      : int  : opt; (0)
+	corplane   : int  : opt; (0)
 )
 </pre>
 
@@ -446,6 +447,12 @@ TPDF noise looks more natural than RPDF noise, and is a crude approximation of
 a gaussian noise, with a bounded amplitude.
 Maximum noise amplitude is multiplied by 1.414 at constant <var>ampn</var>,
 so the introduced noise power is kept approximately constant.</p>
+
+<p class="var">corplane</p>
+<p>Set it to 1 to keep the dither and noise patterns correlated for all the
+planes.
+When processing a RGB picture, it helps to prevent colored noise on grey
+features.</p>
 
 
 
@@ -1557,6 +1564,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>bitdepth</code>: added dithering <var>mode</var> 9: quasirandom sequences.</li>
 <li><code>bitdepth</code>: added a triangular probability distribution function (TPDF) for the dithering patterns and noises, along with the associated parameters <var>tpdfo</var> and <var>tpdfn</var>.</li>
+<li><code>bitdepth</code>: added <var>corplane</var> parameter to prevent colored noise in RGB processing.</li>
 </ul>
 
 <p><b>r23, 2021-07-14</b></p>

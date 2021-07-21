@@ -402,6 +402,7 @@ private:
 	double         _ampn;
 	bool           _dyn_flag;
 	bool           _static_noise_flag;
+	bool           _correlated_planes_flag;
 	bool           _tpdfo_flag;
 	bool           _tpdfn_flag;
 

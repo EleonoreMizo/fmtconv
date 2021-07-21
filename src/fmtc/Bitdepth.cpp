@@ -80,6 +80,7 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_ampn (get_arg_flt (in, out, "ampn", 0.0))
 ,	_dyn_flag (get_arg_int (in, out, "dyn", 0) != 0)
 ,	_static_noise_flag (get_arg_int (in, out, "staticnoise", 0) != 0)
+,	_correlated_planes_flag (get_arg_int (in, out, "corplane", 0) != 0)
 ,	_tpdfo_flag (get_arg_int (in, out, "tpdfo", 0) != 0)
 ,	_tpdfn_flag (get_arg_int (in, out, "tpdfn", 0) != 0)
 ,	_ampo_i (0)
@@ -1158,7 +1159,11 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 	SegContext     ctx;
 	ctx._scale_info_ptr = &scale_info;
 
-	uint32_t       rnd_state = plane_index << 16;
+	uint32_t       rnd_state = 0;
+	if (! _correlated_planes_flag)
+	{
+		rnd_state += plane_index << 16;
+	}
 	if (_static_noise_flag)
 	{
 		rnd_state += 55555;
@@ -1197,8 +1202,16 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 	case	DMode_ROUND:
 	case	DMode_VOIDCLUST:
 		{
-			constexpr int  pat_mask  = PAT_PERIOD - 1;
-			const int      pat_index = (frame_index + plane_index) & pat_mask;
+			int            pat_index = 0;
+			if (! _correlated_planes_flag)
+			{
+				pat_index += plane_index;
+			}
+			if (_dyn_flag)
+			{
+				pat_index += frame_index;
+			}
+			pat_index &= PAT_PERIOD - 1;
 			const PatData& pattern   = _dither_pat_arr [pat_index];
 			ctx._pattern_ptr = &pattern;
 		}
@@ -1209,13 +1222,14 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 		break;
 
 	case  DMode_QUASIRND:
+		ctx._qrs_seed = 0;
 		if (_dyn_flag)
 		{
-			ctx._qrs_seed = uint32_t ((frame_index * 73) + (plane_index * 263));
+			ctx._qrs_seed += uint32_t (frame_index * 73);
 		}
-		else
+		if (! _correlated_planes_flag)
 		{
-			ctx._qrs_seed = 0;
+			ctx._qrs_seed += uint32_t (plane_index * 263);
 		}
 		break;
 

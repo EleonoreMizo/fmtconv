@@ -557,6 +557,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"patsize:int:opt;"
 		"tpdfo:int:opt;"
 		"tpdfn:int:opt;"
+		"corplane:int:opt;"
 		, &vsutl::Redirect <fmtc::Bitdepth>::create, 0, plugin_ptr
 	);
 
