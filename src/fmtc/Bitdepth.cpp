@@ -767,177 +767,65 @@ void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int ang
 	SETP (NAMP, NAMF, fmtcl::SplFmt_INT16, uint16_t, 16, fmtcl::SplFmt_FLOAT, float   , 32) \
 	}
 
+
+
+#define fmtc_Bitdepth_SET_FNC_MULTI(FCASE, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	FCASE (false, false, false, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	FCASE (false, false, true , NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	FCASE (false, true , false, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	FCASE (false, true , true , NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	FCASE (true , false, false, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	FCASE (true , false, true , NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	FCASE (true , true , false, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	FCASE (true , true , true , NAMP, NAMF, DF, DT, DP, SF, ST, SP)
+
+#define fmtc_Bitdepth_SET_FNC_INT_CASE(simple_flag, tpdfo_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	case   (simple_flag << 7) + (tpdfn_flag << 22) + (tpdfo_flag << 23) \
+	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = &ThisType::process_seg_##NAMF##_int_int_cpp < \
+			simple_flag, tpdfo_flag, tpdfn_flag, DT, DP, ST, SP \
+		>; \
+		break;
+
 #define fmtc_Bitdepth_SET_FNC_INT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <false, false, false, DT, DP, ST, SP>; \
-		break; \
-	case (true  << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <true , false, false, DT, DP, ST, SP>; \
-		break; \
-	case (false << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <false, false, true , DT, DP, ST, SP>; \
-		break; \
-	case (true  << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <true , false, true , DT, DP, ST, SP>; \
-		break; \
-	case (false << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <false, true , false, DT, DP, ST, SP>; \
-		break; \
-	case (true  << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <true , true , false, DT, DP, ST, SP>; \
-		break; \
-	case (false << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <false, true , true , DT, DP, ST, SP>; \
-		break; \
-	case (true  << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <true , true , true , DT, DP, ST, SP>; \
+	fmtc_Bitdepth_SET_FNC_MULTI (fmtc_Bitdepth_SET_FNC_INT_CASE, \
+		NAMP, NAMF, DF, DT, DP, SF, ST, SP)
+
+#define fmtc_Bitdepth_SET_FNC_FLT_CASE(simple_flag, tpdfo_flag, tpdfn_flag,NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	case   (simple_flag << 7) + (tpdfn_flag << 22) + (tpdfo_flag << 23) \
+	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = &ThisType::process_seg_##NAMF##_flt_int_cpp < \
+			simple_flag, tpdfo_flag, tpdfn_flag, DT, DP, ST \
+		>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_FLT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, false, false, DT, DP, ST>; \
-		break; \
-	case (true  << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <true , false, false, DT, DP, ST>; \
-		break; \
-	case (false << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, false, true , DT, DP, ST>; \
-		break; \
-	case (true  << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <true , false, true , DT, DP, ST>; \
-		break; \
-	case (false << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, true , false, DT, DP, ST>; \
-		break; \
-	case (true  << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <true , true , false, DT, DP, ST>; \
-		break; \
-	case (false << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, true , true , DT, DP, ST>; \
-		break; \
-	case (true  << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <true , true , true , DT, DP, ST>; \
+	fmtc_Bitdepth_SET_FNC_MULTI (fmtc_Bitdepth_SET_FNC_FLT_CASE, \
+		NAMP, NAMF, DF, DT, DP, SF, ST, SP)
+
+#define fmtc_Bitdepth_SET_FNC_INT_SSE2_CASE(simple_flag, tpdfo_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	case   (simple_flag << 7) + (tpdfn_flag << 22) + (tpdfo_flag << 23) \
+	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = &ThisType::process_seg_##NAMF##_int_int_sse2 < \
+			simple_flag, tpdfo_flag, tpdfn_flag, DF, DP, SF, SP \
+		>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_INT_SSE2(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, false, false, DF, DP, SF, SP>; \
-		break; \
-	case (true  << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <true , false, false, DF, DP, SF, SP>; \
-		break; \
-	case (false << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, false, true , DF, DP, SF, SP>; \
-		break; \
-	case (true  << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <true , false, true , DF, DP, SF, SP>; \
-		break; \
-	case (false << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, true , false, DF, DP, SF, SP>; \
-		break; \
-	case (true  << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <true , true , false, DF, DP, SF, SP>; \
-		break; \
-	case (false << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, true , true , DF, DP, SF, SP>; \
-		break; \
-	case (true  << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <true , true , true , DF, DP, SF, SP>; \
+	fmtc_Bitdepth_SET_FNC_MULTI (fmtc_Bitdepth_SET_FNC_INT_SSE2_CASE, \
+		NAMP, NAMF, DF, DT, DP, SF, ST, SP)
+
+#define fmtc_Bitdepth_SET_FNC_FLT_SSE2_CASE(simple_flag, tpdfo_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	case   (simple_flag << 7) + (tpdfn_flag << 22) + (tpdfo_flag << 23) \
+	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = &ThisType::process_seg_##NAMF##_flt_int_sse2 < \
+			simple_flag, tpdfo_flag, tpdfn_flag, DF, DP, SF \
+		>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_FLT_SSE2(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, false, false, DF, DP, SF>; \
-		break; \
-	case (true  << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true , false, false, DF, DP, SF>; \
-		break; \
-	case (false << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, false, true , DF, DP, SF>; \
-		break; \
-	case (true  << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true , false, true , DF, DP, SF>; \
-		break; \
-	case (false << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, true , false, DF, DP, SF>; \
-		break; \
-	case (true  << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true , true , false, DF, DP, SF>; \
-		break; \
-	case (false << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, true , true , DF, DP, SF>; \
-		break; \
-	case (true  << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true , true , true , DF, DP, SF>; \
-		break;
-
-#define fmtc_Bitdepth_SET_FNC_ERRDIF_INT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 7) + (false << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_errdif_int_int_cpp <false, false, Diffuse##NAMF <DT, DP, ST, SP> >; \
-		break; \
-	case (true  << 7) + (false << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_errdif_int_int_cpp <true , false, Diffuse##NAMF <DT, DP, ST, SP> >; \
-		break; \
-	case (false << 7) + (true  << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_errdif_int_int_cpp <false, true , Diffuse##NAMF <DT, DP, ST, SP> >; \
-		break; \
-	case (true  << 7) + (true  << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_errdif_int_int_cpp <true , true , Diffuse##NAMF <DT, DP, ST, SP> >; \
-		break;
-
-#define fmtc_Bitdepth_SET_FNC_ERRDIF_FLT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 7) + (false << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_errdif_flt_int_cpp <false, false, Diffuse##NAMF <DT, DP, ST, SP> >; \
-		break; \
-	case (true  << 7) + (false << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_errdif_flt_int_cpp <true , false, Diffuse##NAMF <DT, DP, ST, SP> >; \
-		break; \
-	case (false << 7) + (true  << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_errdif_flt_int_cpp <false, true , Diffuse##NAMF <DT, DP, ST, SP> >; \
-		break; \
-	case (true  << 7) + (true  << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
-		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_errdif_flt_int_cpp <true , true , Diffuse##NAMF <DT, DP, ST, SP> >; \
-		break;
+	fmtc_Bitdepth_SET_FNC_MULTI (fmtc_Bitdepth_SET_FNC_FLT_SSE2_CASE, \
+		NAMP, NAMF, DF, DT, DP, SF, ST, SP)
 
 
 
@@ -1052,6 +940,48 @@ void	Bitdepth::init_fnc_quasirandom ()
 
 
 
+#undef fmtc_Bitdepth_SET_FNC_MULTI
+#undef fmtc_Bitdepth_SET_FNC_INT_CASE
+#undef fmtc_Bitdepth_SET_FNC_INT
+#undef fmtc_Bitdepth_SET_FNC_FLT_CASE
+#undef fmtc_Bitdepth_SET_FNC_FLT
+#undef fmtc_Bitdepth_SET_FNC_INT_SSE2_CASE
+#undef fmtc_Bitdepth_SET_FNC_INT_SSE2
+#undef fmtc_Bitdepth_SET_FNC_FLT_SSE2_CASE
+#undef fmtc_Bitdepth_SET_FNC_FLT_SSE2
+
+
+
+#define fmtc_Bitdepth_SET_FNC_ERRDIF_INT_CASE(simple_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	case   (simple_flag << 7) + (tpdfn_flag << 22) \
+	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = &ThisType::process_seg_errdif_int_int_cpp < \
+			simple_flag, tpdfn_flag, Diffuse##NAMF <DT, DP, ST, SP> \
+		>; \
+		break;
+
+#define fmtc_Bitdepth_SET_FNC_ERRDIF_INT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	fmtc_Bitdepth_SET_FNC_ERRDIF_INT_CASE (false, false, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	fmtc_Bitdepth_SET_FNC_ERRDIF_INT_CASE (false, true , NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	fmtc_Bitdepth_SET_FNC_ERRDIF_INT_CASE (true , false, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	fmtc_Bitdepth_SET_FNC_ERRDIF_INT_CASE (true , true , NAMP, NAMF, DF, DT, DP, SF, ST, SP)
+
+#define fmtc_Bitdepth_SET_FNC_ERRDIF_FLT_CASE(simple_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	case   (simple_flag << 7) + (tpdfn_flag << 22) \
+	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = &ThisType::process_seg_errdif_flt_int_cpp < \
+			simple_flag, tpdfn_flag, Diffuse##NAMF <DT, DP, ST, SP> \
+		>; \
+		break;
+
+#define fmtc_Bitdepth_SET_FNC_ERRDIF_FLT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	fmtc_Bitdepth_SET_FNC_ERRDIF_FLT_CASE (false, false, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	fmtc_Bitdepth_SET_FNC_ERRDIF_FLT_CASE (false, true , NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	fmtc_Bitdepth_SET_FNC_ERRDIF_FLT_CASE (true , false, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
+	fmtc_Bitdepth_SET_FNC_ERRDIF_FLT_CASE (true , true , NAMP, NAMF, DF, DT, DP, SF, ST, SP)
+
+
+
 void	Bitdepth::init_fnc_errdiff ()
 {
 	assert (_errdif_flag);
@@ -1063,7 +993,7 @@ void	Bitdepth::init_fnc_errdiff ()
 
 	switch (_dmode)
 	{
-	case	DMode_FILTERLITE:
+	case DMode_FILTERLITE:
 		fmtc_Bitdepth_SPAN_INT (
 			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
 			errdif, FilterLite, _simple_flag, false, _tpdfn_flag,
@@ -1076,7 +1006,7 @@ void	Bitdepth::init_fnc_errdiff ()
 		)
 		break;
 
-	case	DMode_STUCKI:
+	case DMode_STUCKI:
 		fmtc_Bitdepth_SPAN_INT (
 			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
 			errdif, Stucki, _simple_flag, false, _tpdfn_flag,
@@ -1089,7 +1019,7 @@ void	Bitdepth::init_fnc_errdiff ()
 		)
 		break;
 
-	case	DMode_ATKINSON:
+	case DMode_ATKINSON:
 		fmtc_Bitdepth_SPAN_INT (
 			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
 			errdif, Atkinson, _simple_flag, false, _tpdfn_flag,
@@ -1102,7 +1032,7 @@ void	Bitdepth::init_fnc_errdiff ()
 		)
 		break;
 
-	case	DMode_FLOYD:
+	case DMode_FLOYD:
 		fmtc_Bitdepth_SPAN_INT (
 			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
 			errdif, FloydSteinberg, _simple_flag, false, _tpdfn_flag,
@@ -1115,7 +1045,7 @@ void	Bitdepth::init_fnc_errdiff ()
 		)
 		break;
 
-	case	DMode_OSTRO:
+	case DMode_OSTRO:
 		fmtc_Bitdepth_SPAN_INT (
 			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
 			errdif, Ostromoukhov, _simple_flag, false, _tpdfn_flag,
@@ -1135,8 +1065,13 @@ void	Bitdepth::init_fnc_errdiff ()
 
 
 
-#undef fmtc_Bitdepth_SET_FNC_INT
-#undef fmtc_Bitdepth_SET_FNC_FLT
+#undef fmtc_Bitdepth_SET_FNC_ERRDIF_INT_CASE
+#undef fmtc_Bitdepth_SET_FNC_ERRDIF_INT
+#undef fmtc_Bitdepth_SET_FNC_ERRDIF_FLT_CASE
+#undef fmtc_Bitdepth_SET_FNC_ERRDIF_FLT
+
+
+
 #undef fmtc_Bitdepth_SPAN_INT
 #undef fmtc_Bitdepth_SPAN_FLT
 
@@ -1198,9 +1133,9 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 
 	switch (_dmode)
 	{
-	case	DMode_BAYER:
-	case	DMode_ROUND:
-	case	DMode_VOIDCLUST:
+	case DMode_BAYER:
+	case DMode_ROUND:
+	case DMode_VOIDCLUST:
 		{
 			int            pat_index = 0;
 			if (! _correlated_planes_flag)
@@ -1217,11 +1152,11 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 		}
 		break;
 
-	case	DMode_FAST:
+	case DMode_FAST:
 		// Nothing
 		break;
 
-	case  DMode_QUASIRND:
+	case DMode_QUASIRND:
 		ctx._qrs_seed = 0;
 		if (_dyn_flag)
 		{
@@ -1233,11 +1168,11 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 		}
 		break;
 
-	case	DMode_FILTERLITE:
-	case	DMode_STUCKI:
-	case	DMode_ATKINSON:
-	case	DMode_FLOYD:
-	case	DMode_OSTRO:
+	case DMode_FILTERLITE:
+	case DMode_STUCKI:
+	case DMode_ATKINSON:
+	case DMode_FLOYD:
+	case DMode_OSTRO:
 		ctx._ed_buf_ptr = ed_buf_ptr;
 		break;
 
