@@ -39,6 +39,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include <stdexcept>
 
 #include <cassert>
+#include <cmath>
+
 
 
 namespace fmtc
@@ -1550,7 +1552,6 @@ void	Bitdepth::process_seg_qrs_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	constexpr float   sc_mul  = float (1 << sc_l2);
 	constexpr int     qrs_shf = sc_l2 - 9;
 	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
-	constexpr uint32_t qrs_sm = uint32_t (1) << (31 - sc_l2);
 	uint32_t          qrs_cnt = uint32_t (std::llrint (
 		(alpha2 * double (ctx._y + ctx._qrs_seed)) * sc_mul
 	));
@@ -1609,7 +1610,6 @@ void	Bitdepth::process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	constexpr float   sc_mul  = float (1 << sc_l2);
 	constexpr int     qrs_shf = sc_l2 - 9;
 	constexpr int     qrs_inc = int (alpha1 * sc_mul + 0.5f);
-	constexpr uint32_t qrs_sm = uint32_t (1) << (31 - sc_l2);
 	uint32_t          qrs_cnt = uint32_t (std::llrint (
 		(alpha2 * double (ctx._y + ctx._qrs_seed)) * sc_mul
 	));
