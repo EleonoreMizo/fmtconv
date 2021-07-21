@@ -153,61 +153,71 @@ private:
 
 	void           dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const fmtcl::BitBltConv::ScaleInfo &scale_info, const PatData &pattern, uint32_t rnd_state);
 
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	void           process_seg_fast_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const;
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 	void           process_seg_fast_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
 	void           process_seg_fast_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const;
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
 	void           process_seg_fast_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 #endif
 
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	void           process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 	void           process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
 	void           process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
 	void           process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 #endif
 
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	void           process_seg_qrs_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 	void           process_seg_qrs_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
 	void           process_seg_qrs_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
 	void           process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 #endif
 
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS, typename DFNC>
+	template <bool S_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS, typename DFNC>
 	fstb_FORCEINLINE void
 	               process_seg_common_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const;
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, typename DFNC>
+	template <bool S_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, typename DFNC>
 	fstb_FORCEINLINE void
 	               process_seg_common_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const;
+	template <bool T_FLAG>
+	static fstb_FORCEINLINE int
+	               generate_dith_n_scalar (uint32_t &rnd_state) noexcept;
+	static fstb_FORCEINLINE int
+	               remap_tpdf_scalar (int d) noexcept;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS, typename DFNC>
+	template <bool S_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS, typename DFNC>
 	fstb_FORCEINLINE void
 	               process_seg_common_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const;
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, typename DFNC>
+	template <bool S_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, typename DFNC>
 	fstb_FORCEINLINE void
 	               process_seg_common_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const;
+	template <bool T_FLAG>
+	static fstb_FORCEINLINE __m128i
+	               generate_dith_n_vec (uint32_t &rnd_state) noexcept;
+	static fstb_FORCEINLINE __m128i
+	               remap_tpdf_vec (__m128i d) noexcept;
 #endif
 
-	template <bool S_FLAG, class ERRDIF>
+	template <bool S_FLAG, bool TN_FLAG, class ERRDIF>
 	void           process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	template <bool S_FLAG, class ERRDIF>
+	template <bool S_FLAG, bool TN_FLAG, class ERRDIF>
 	void           process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
 
 	static inline void
@@ -215,10 +225,10 @@ private:
 	static inline void
 	               generate_rnd_eol (uint32_t &state);
 
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+	template <bool S_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	static inline void
 	               quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, int &err, uint32_t &rnd_state, int ampe_i, int ampn_i);
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+	template <bool S_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 	static inline void
 	               quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, float &err, uint32_t &rnd_state, float ampe_f, float ampn_f, float mul, float add);
 
@@ -386,11 +396,13 @@ private:
 	bool           _range_def_flag;
 
 	int            _dmode;
+	int            _pat_size;        // Must be a divisor of PAT_WIDTH
 	double         _ampo;
 	double         _ampn;
 	bool           _dyn_flag;
 	bool           _static_noise_flag;
-	int            _pat_size;        // Must be a divisor of PAT_WIDTH
+	bool           _tpdfo_flag;
+	bool           _tpdfn_flag;
 
 	int            _ampo_i;          // [0 ;  127], 1.0 = 1 << AMP_BITS
 	int            _ampn_i;          // [0 ;  127], 1.0 = 1 << AMP_BITS

@@ -73,11 +73,13 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 ,	_full_range_out_flag (false)
 ,	_range_def_flag (false)
 ,	_dmode (get_arg_int (in, out, "dmode", DMode_FILTERLITE))
+,	_pat_size (get_arg_int (in, out, "patsize", PAT_WIDTH))
 ,	_ampo (get_arg_flt (in, out, "ampo", 1.0))
 ,	_ampn (get_arg_flt (in, out, "ampn", 0.0))
 ,	_dyn_flag (get_arg_int (in, out, "dyn", 0) != 0)
 ,	_static_noise_flag (get_arg_int (in, out, "staticnoise", 0) != 0)
-,	_pat_size (get_arg_int (in, out, "patsize", PAT_WIDTH))
+,	_tpdfo_flag (get_arg_int (in, out, "tpdfo", 0) != 0)
+,	_tpdfn_flag (get_arg_int (in, out, "tpdfn", 0) != 0)
 ,	_ampo_i (0)
 ,	_ampn_i (0)
 ,	_ampe_i (0)
@@ -231,6 +233,17 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		throw_inval_arg ("Wrong value for patsize.");
 	}
 
+	// In case of TPDF, rescales the amplitude so the power is kept constant.
+	// Sum of two noises (uncorrelated signals) -> +3 dB
+	if (_tpdfo_flag)
+	{
+		_ampo *= fstb::SQRT2 * 0.5;
+	}
+	if (_tpdfn_flag)
+	{
+		_ampn *= fstb::SQRT2 * 0.5;
+	}
+
 	int            w = _vi_in.width;
 	if (_vi_in.width <= 0)
 	{
@@ -247,7 +260,7 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	const int      ampn_i_raw = fstb::round_int (_ampn * amp_mul);
 	_ampo_i = std::min (ampo_i_raw, 127);
 	_ampn_i = std::min (ampn_i_raw, 127);
-	_ampn_f = float (_ampn * (1.0f / 4294967296.0f));  // / (2 ^ 32)
+	_ampn_f = float (_ampn * (1.0f / 256.0f));
 
 	_simple_flag = (ampo_i_raw == amp_mul && ampn_i_raw == 0);
 
@@ -541,6 +554,7 @@ void	Bitdepth::build_dither_pat ()
 	case DMode_FLOYD:
 	case DMode_OSTRO:
 		_errdif_flag = true;
+		_tpdfo_flag  = false;
 		break;
 
 	case DMode_ROUND:
@@ -636,6 +650,19 @@ void	Bitdepth::build_dither_pat_void_and_cluster (int w)
 
 void	Bitdepth::build_next_dither_pat ()
 {
+	if (_tpdfo_flag)
+	{
+		for (int y = 0; y < PAT_WIDTH; ++y)
+		{
+			for (int x = 0; x < PAT_WIDTH; ++x)
+			{
+				const int      r = _dither_pat_arr [0] [y] [x];
+				const int      t = remap_tpdf_scalar (r);
+				_dither_pat_arr [0] [y] [x] = int16_t (t);
+			}
+		}
+	}
+
 	for (int seq = 1; seq < PAT_PERIOD; ++seq)
 	{
 		const int      angle = (_dyn_flag) ? seq & 3 : 0;
@@ -676,8 +703,9 @@ void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int ang
 
 
 // All possible combinations
-#define fmtc_Bitdepth_SPAN_INT(SETP, NAMP, NAMF, simple_flag, dst_res, dst_fmt, src_res, src_fmt) \
-	switch (  ((simple_flag) << 30) \
+#define fmtc_Bitdepth_SPAN_INT(SETP, NAMP, NAMF, simple_flag, tpdfo_flag, tpdfn_flag, dst_res, dst_fmt, src_res, src_fmt) \
+	switch (  ((simple_flag) << 7) \
+	        + ((tpdfo_flag) << 23) + ((tpdfn_flag) << 22) \
 	        + ((dst_res) << 24) + ((dst_fmt) << 16) \
 	        + ((src_res) <<  8) +  (src_fmt)) \
 	{ \
@@ -701,8 +729,9 @@ void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int ang
 	}
 
 // All possible combinations using float as intermediary data
-#define fmtc_Bitdepth_SPAN_FLT(SETP, NAMP, NAMF, simple_flag, dst_res, dst_fmt, src_res, src_fmt) \
-	switch (  ((simple_flag) << 30) \
+#define fmtc_Bitdepth_SPAN_FLT(SETP, NAMP, NAMF, simple_flag, tpdfo_flag, tpdfn_flag, dst_res, dst_fmt, src_res, src_fmt) \
+	switch (  ((simple_flag) << 7) \
+	        + ((tpdfo_flag) << 23) + ((tpdfn_flag) << 22) \
 	        + ((dst_res) << 24) + ((dst_fmt) << 16) \
 	        + ((src_res) <<  8) +  (src_fmt)) \
 	{ \
@@ -749,63 +778,175 @@ void	Bitdepth::copy_dither_pat_rotate (PatData &dst, const PatData &src, int ang
 	}
 
 #define fmtc_Bitdepth_SET_FNC_INT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (false << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <false, DT, DP, ST, SP>; \
+			&ThisType::process_seg_##NAMF##_int_int_cpp <false, false, false, DT, DP, ST, SP>; \
 		break; \
-	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (true  << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_cpp <true, DT, DP, ST, SP>; \
+			&ThisType::process_seg_##NAMF##_int_int_cpp <true , false, false, DT, DP, ST, SP>; \
+		break; \
+	case (false << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_cpp <false, false, true , DT, DP, ST, SP>; \
+		break; \
+	case (true  << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_cpp <true , false, true , DT, DP, ST, SP>; \
+		break; \
+	case (false << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_cpp <false, true , false, DT, DP, ST, SP>; \
+		break; \
+	case (true  << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_cpp <true , true , false, DT, DP, ST, SP>; \
+		break; \
+	case (false << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_cpp <false, true , true , DT, DP, ST, SP>; \
+		break; \
+	case (true  << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_cpp <true , true , true , DT, DP, ST, SP>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_FLT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (false << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, DT, DP, ST>; \
+			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, false, false, DT, DP, ST>; \
 		break; \
-	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (true  << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_cpp <true, DT, DP, ST>; \
+			&ThisType::process_seg_##NAMF##_flt_int_cpp <true , false, false, DT, DP, ST>; \
+		break; \
+	case (false << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, false, true , DT, DP, ST>; \
+		break; \
+	case (true  << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_cpp <true , false, true , DT, DP, ST>; \
+		break; \
+	case (false << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, true , false, DT, DP, ST>; \
+		break; \
+	case (true  << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_cpp <true , true , false, DT, DP, ST>; \
+		break; \
+	case (false << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_cpp <false, true , true , DT, DP, ST>; \
+		break; \
+	case (true  << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_cpp <true , true , true , DT, DP, ST>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_INT_SSE2(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (false << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, DF, DP, SF, SP>; \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, false, false, DF, DP, SF, SP>; \
 		break; \
-	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (true  << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_##NAMF##_int_int_sse2 <true, DF, DP, SF, SP>; \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <true , false, false, DF, DP, SF, SP>; \
+		break; \
+	case (false << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, false, true , DF, DP, SF, SP>; \
+		break; \
+	case (true  << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <true , false, true , DF, DP, SF, SP>; \
+		break; \
+	case (false << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, true , false, DF, DP, SF, SP>; \
+		break; \
+	case (true  << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <true , true , false, DF, DP, SF, SP>; \
+		break; \
+	case (false << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <false, true , true , DF, DP, SF, SP>; \
+		break; \
+	case (true  << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_##NAMF##_int_int_sse2 <true , true , true , DF, DP, SF, SP>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_FLT_SSE2(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (false << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, DF, DP, SF>; \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, false, false, DF, DP, SF>; \
 		break; \
-	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (true  << 7) + (false << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true, DF, DP, SF>; \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true , false, false, DF, DP, SF>; \
+		break; \
+	case (false << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, false, true , DF, DP, SF>; \
+		break; \
+	case (true  << 7) + (true  << 22) + (false << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true , false, true , DF, DP, SF>; \
+		break; \
+	case (false << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, true , false, DF, DP, SF>; \
+		break; \
+	case (true  << 7) + (false << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true , true , false, DF, DP, SF>; \
+		break; \
+	case (false << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <false, true , true , DF, DP, SF>; \
+		break; \
+	case (true  << 7) + (true  << 22) + (true  << 23) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_##NAMF##_flt_int_sse2 <true , true , true , DF, DP, SF>; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_ERRDIF_INT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (false << 7) + (false << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_errdif_int_int_cpp <false, Diffuse##NAMF <DT, DP, ST, SP> >; \
+			&ThisType::process_seg_errdif_int_int_cpp <false, false, Diffuse##NAMF <DT, DP, ST, SP> >; \
 		break; \
-	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (true  << 7) + (false << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = \
-			&ThisType::process_seg_errdif_int_int_cpp <true, Diffuse##NAMF <DT, DP, ST, SP> >; \
+			&ThisType::process_seg_errdif_int_int_cpp <true , false, Diffuse##NAMF <DT, DP, ST, SP> >; \
+		break; \
+	case (false << 7) + (true  << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_errdif_int_int_cpp <false, true , Diffuse##NAMF <DT, DP, ST, SP> >; \
+		break; \
+	case (true  << 7) + (true  << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_int_int_ptr = \
+			&ThisType::process_seg_errdif_int_int_cpp <true , true , Diffuse##NAMF <DT, DP, ST, SP> >; \
 		break;
 
 #define fmtc_Bitdepth_SET_FNC_ERRDIF_FLT(NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case (false << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (false << 7) + (false << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_errdif_flt_int_cpp <false, Diffuse##NAMF <DT, DP, ST, SP> >; \
+			&ThisType::process_seg_errdif_flt_int_cpp <false, false, Diffuse##NAMF <DT, DP, ST, SP> >; \
 		break; \
-	case (true  << 30) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+	case (true  << 7) + (false << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = \
-			&ThisType::process_seg_errdif_flt_int_cpp <true, Diffuse##NAMF <DT, DP, ST, SP> >; \
+			&ThisType::process_seg_errdif_flt_int_cpp <true , false, Diffuse##NAMF <DT, DP, ST, SP> >; \
+		break; \
+	case (false << 7) + (true  << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_errdif_flt_int_cpp <false, true , Diffuse##NAMF <DT, DP, ST, SP> >; \
+		break; \
+	case (true  << 7) + (true  << 22) + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
+		_process_seg_flt_int_ptr = \
+			&ThisType::process_seg_errdif_flt_int_cpp <true , true , Diffuse##NAMF <DT, DP, ST, SP> >; \
 		break;
 
 
@@ -818,11 +959,11 @@ void	Bitdepth::init_fnc_fast ()
 	const int            src_res = _vi_in.format->bitsPerSample;
 
 	fmtc_Bitdepth_SPAN_INT (
-		fmtc_Bitdepth_SET_FNC_INT, fast, fast, false,
+		fmtc_Bitdepth_SET_FNC_INT, fast, fast, false, false, false,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
 	fmtc_Bitdepth_SPAN_FLT (
-		fmtc_Bitdepth_SET_FNC_FLT, fast, fast, false,
+		fmtc_Bitdepth_SET_FNC_FLT, fast, fast, false, false, false,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
 
@@ -830,11 +971,11 @@ void	Bitdepth::init_fnc_fast ()
 	if (_sse2_flag)
 	{
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT_SSE2, fast, fast, false,
+			fmtc_Bitdepth_SET_FNC_INT_SSE2, fast, fast, false, false, false,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT_SSE2, fast, fast, false,
+			fmtc_Bitdepth_SET_FNC_FLT_SSE2, fast, fast, false, false, false,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 	}
@@ -853,11 +994,13 @@ void	Bitdepth::init_fnc_ordered ()
 	const int            src_res = _vi_in.format->bitsPerSample;
 
 	fmtc_Bitdepth_SPAN_INT (
-		fmtc_Bitdepth_SET_FNC_INT, ord, ord, _simple_flag,
+		fmtc_Bitdepth_SET_FNC_INT,
+		ord, ord, _simple_flag, _tpdfo_flag, _tpdfn_flag,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
 	fmtc_Bitdepth_SPAN_FLT (
-		fmtc_Bitdepth_SET_FNC_FLT, ord, ord, _simple_flag,
+		fmtc_Bitdepth_SET_FNC_FLT,
+		ord, ord, _simple_flag, _tpdfo_flag, _tpdfn_flag,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
 
@@ -865,11 +1008,13 @@ void	Bitdepth::init_fnc_ordered ()
 	if (_sse2_flag)
 	{
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT_SSE2, ord, ord, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_INT_SSE2,
+			ord, ord, _simple_flag, _tpdfo_flag, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT_SSE2, ord, ord, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_FLT_SSE2,
+			ord, ord, _simple_flag, _tpdfo_flag, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 	}
@@ -888,11 +1033,13 @@ void	Bitdepth::init_fnc_quasirandom ()
 	const int            src_res = _vi_in.format->bitsPerSample;
 
 	fmtc_Bitdepth_SPAN_INT (
-		fmtc_Bitdepth_SET_FNC_INT, qrs, qrs, _simple_flag,
+		fmtc_Bitdepth_SET_FNC_INT,
+		qrs, qrs, _simple_flag, _tpdfo_flag, _tpdfn_flag,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
 	fmtc_Bitdepth_SPAN_FLT (
-		fmtc_Bitdepth_SET_FNC_FLT, qrs, qrs, _simple_flag,
+		fmtc_Bitdepth_SET_FNC_FLT,
+		qrs, qrs, _simple_flag, _tpdfo_flag, _tpdfn_flag,
 		dst_res, dst_fmt, src_res, src_fmt
 	)
 
@@ -900,11 +1047,13 @@ void	Bitdepth::init_fnc_quasirandom ()
 	if (_sse2_flag)
 	{
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_INT_SSE2, qrs, qrs, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_INT_SSE2,
+			qrs, qrs, _simple_flag, _tpdfo_flag, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_FLT_SSE2, qrs, qrs, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_FLT_SSE2,
+			qrs, qrs, _simple_flag, _tpdfo_flag, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 	}
@@ -926,55 +1075,65 @@ void	Bitdepth::init_fnc_errdiff ()
 	{
 	case	DMode_FILTERLITE:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, FilterLite, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
+			errdif, FilterLite, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FilterLite, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT,
+			errdif, FilterLite, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_STUCKI:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Stucki, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
+			errdif, Stucki, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Stucki, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT,
+			errdif, Stucki, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_ATKINSON:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Atkinson, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
+			errdif, Atkinson, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Atkinson, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT,
+			errdif, Atkinson, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_FLOYD:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, FloydSteinberg, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
+			errdif, FloydSteinberg, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, FloydSteinberg, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT,
+			errdif, FloydSteinberg, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
 
 	case	DMode_OSTRO:
 		fmtc_Bitdepth_SPAN_INT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_INT, errdif, Ostromoukhov, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_INT,
+			errdif, Ostromoukhov, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		fmtc_Bitdepth_SPAN_FLT (
-			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT, errdif, Ostromoukhov, _simple_flag,
+			fmtc_Bitdepth_SET_FNC_ERRDIF_FLT,
+			errdif, Ostromoukhov, _simple_flag, false, _tpdfn_flag,
 			dst_res, dst_fmt, src_res, src_fmt
 		)
 		break;
@@ -982,7 +1141,6 @@ void	Bitdepth::init_fnc_errdiff ()
 	default:
 		break;
 	}
-
 }
 
 
@@ -1080,7 +1238,7 @@ void	Bitdepth::dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_pt
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 void	Bitdepth::process_seg_fast_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const
 {
 	assert (dst_ptr != 0);
@@ -1103,7 +1261,7 @@ void	Bitdepth::process_seg_fast_int_int_cpp (uint8_t *dst_ptr, const uint8_t *sr
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 void	Bitdepth::process_seg_fast_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
@@ -1134,7 +1292,7 @@ void	Bitdepth::process_seg_fast_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *sr
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
 void	Bitdepth::process_seg_fast_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const
 {
 	assert (dst_ptr != 0);
@@ -1162,7 +1320,7 @@ void	Bitdepth::process_seg_fast_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *s
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
 void	Bitdepth::process_seg_fast_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
@@ -1207,13 +1365,13 @@ void	Bitdepth::process_seg_fast_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *s
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	const PatRow & pattern = ctx.extract_pattern_row ();
 
 	process_seg_common_int_int_cpp <
-		S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
+		S_FLAG, TN_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
 	> (dst_ptr, src_ptr, w, ctx,
 		[&] (int pos)
 		{
@@ -1224,13 +1382,13 @@ void	Bitdepth::process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	const PatRow & pattern = ctx.extract_pattern_row ();
 
 	process_seg_common_flt_int_cpp <
-		S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE
+		S_FLAG, TN_FLAG, DST_TYPE, DST_BITS, SRC_TYPE
 	> (dst_ptr, src_ptr, w, ctx,
 		[&] (int pos)
 		{
@@ -1245,13 +1403,13 @@ void	Bitdepth::process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
 void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	const PatRow & pattern = ctx.extract_pattern_row ();
 
 	process_seg_common_int_int_sse2 <
-		S_FLAG, DST_FMT, DST_BITS, SRC_FMT, SRC_BITS
+		S_FLAG, TN_FLAG, DST_FMT, DST_BITS, SRC_FMT, SRC_BITS
 	> (dst_ptr, src_ptr, w, ctx,
 		[&] (int pos)
 		{
@@ -1264,13 +1422,13 @@ void	Bitdepth::process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
 void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	const PatRow & pattern = ctx.extract_pattern_row ();
 
 	process_seg_common_flt_int_sse2 <
-		S_FLAG, DST_FMT, DST_BITS, SRC_FMT
+		S_FLAG, TN_FLAG, DST_FMT, DST_BITS, SRC_FMT
 	> (dst_ptr, src_ptr, w, ctx,
 		[&] (int pos)
 		{
@@ -1287,7 +1445,7 @@ void	Bitdepth::process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 void	Bitdepth::process_seg_qrs_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	// alpha1 = 1 / x, with x real solution of: x^3 - x - 1 = 0
@@ -1304,13 +1462,18 @@ void	Bitdepth::process_seg_qrs_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
 
 	process_seg_common_int_int_cpp <
-		S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
+		S_FLAG, TN_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
 	> (dst_ptr, src_ptr, w, ctx,
 		[&] (int /*pos*/)
 		{
 			const int      p      = (qrs_cnt >> qrs_shf) & 0x1FF;
-			const int      dith_o = (p > 255) ? 512 - 128 - p : p - 128; // s8
+			int            dith_o = (p > 255) ? 512 - 128 - p : p - 128; // s8
 			qrs_cnt += qrs_inc;
+
+			if (TO_FLAG)
+			{
+				dith_o = remap_tpdf_scalar (dith_o);
+			}
 
 			return dith_o;
 		}
@@ -1319,7 +1482,7 @@ void	Bitdepth::process_seg_qrs_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 void	Bitdepth::process_seg_qrs_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	// alpha1 = 1 / x, with x real solution of: x^3 - x - 1 = 0
@@ -1336,13 +1499,18 @@ void	Bitdepth::process_seg_qrs_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src
 		fstb::round_int (alpha2 * sc_mul * float (ctx._y));
 
 	process_seg_common_flt_int_cpp <
-		S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE
+		S_FLAG, TN_FLAG, DST_TYPE, DST_BITS, SRC_TYPE
 	> (dst_ptr, src_ptr, w, ctx,
 		[&] (int /*pos*/)
 		{
 			const int      p      = (qrs_cnt >> qrs_shf) & 0x1FF;
-			const int      dith_o = (p > 255) ? 512 - 128 - p : p - 128; // s8
+			int            dith_o = (p > 255) ? 512 - 128 - p : p - 128; // s8
 			qrs_cnt += qrs_inc;
+
+			if (TO_FLAG)
+			{
+				dith_o = remap_tpdf_scalar (dith_o);
+			}
 
 			return dith_o;
 		}
@@ -1381,7 +1549,7 @@ void	Bitdepth::process_seg_qrs_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	const __m128i     c384      = _mm_set1_epi16 (384);
 
 	process_seg_common_int_int_sse2 <
-		S_FLAG, DST_FMT, DST_BITS, SRC_FMT, SRC_BITS
+		S_FLAG, TN_FLAG, DST_FMT, DST_BITS, SRC_FMT, SRC_BITS
 	> (dst_ptr, src_ptr, w, ctx,
 		[&] (int /*pos*/)
 		{
@@ -1400,14 +1568,19 @@ void	Bitdepth::process_seg_qrs_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 				_mm_andnot_si128 (cond, tri_d)
 			);
 
-			return dith_o; // 8 s16 [-128 ; +127]
+			if (TO_FLAG)
+			{
+				dith_o = remap_tpdf_vec (dith_o);
+			}
+
+			return dith_o; // 8 s16 [-128 ; +127] or [-256 ; +255]
 		}
 	);
 }
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
+template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
 void	Bitdepth::process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	// alpha1 = 1 / x, with x real solution of: x^3 - x - 1 = 0
@@ -1433,7 +1606,7 @@ void	Bitdepth::process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 	const __m128i     c384      = _mm_set1_epi16 (384);
 
 	process_seg_common_flt_int_sse2 <
-		S_FLAG, DST_FMT, DST_BITS, SRC_FMT
+		S_FLAG, TN_FLAG, DST_FMT, DST_BITS, SRC_FMT
 	> (dst_ptr, src_ptr, w, ctx,
 		[&] (int /*pos*/)
 		{
@@ -1452,6 +1625,11 @@ void	Bitdepth::process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 				_mm_andnot_si128 (cond, tri_d)
 			);
 
+			if (TO_FLAG)
+			{
+				dith_o = remap_tpdf_vec (dith_o);
+			}
+
 			return dith_o; // 8 s16 [-128 ; +127]
 		}
 	);
@@ -1463,14 +1641,14 @@ void	Bitdepth::process_seg_qrs_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *sr
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS, typename DFNC>
+template <bool S_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS, typename DFNC>
 void	Bitdepth::process_seg_common_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
 
-	enum {         DIF_BITS = SRC_BITS - DST_BITS };
+	constexpr int  DIF_BITS = SRC_BITS - DST_BITS;
 	static_assert (DIF_BITS >= 1, "This function must reduce bidepth.");
 
 	uint32_t &     rnd_state = ctx._rnd_state;
@@ -1486,31 +1664,26 @@ void	Bitdepth::process_seg_common_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 
 	for (int pos = 0; pos < w; ++pos)
 	{
-		if (! S_FLAG)
-		{
-			generate_rnd (rnd_state);
-		}
-
 		const int      s = src_n_ptr [pos];
 
 		const int      dith_o = dither_fnc (pos); // s8
 		int            dither;
 		if (S_FLAG)
 		{
-			enum {         DIT_SHFT = 8 - DIF_BITS };
+			constexpr int  DIT_SHFT = 8 - DIF_BITS;
 			dither = fstb::sshift_r <int, DIT_SHFT> (dith_o);
 		}
 		else
 		{
-			const int      dith_n = int8_t (rnd_state >> 24);			// s8
+			const int      dith_n = generate_dith_n_scalar <TN_FLAG> (rnd_state); // s8
 
-			enum {         DIT_SHFT = AMP_BITS + 8 - DIF_BITS };
+			constexpr int  DIT_SHFT = AMP_BITS + 8 - DIF_BITS;
 			dither = fstb::sshift_r <int, DIT_SHFT> (dith_o * ao + dith_n * an);	// s16 = s8 * s8 // s16 = s16 >> cst
 		}
-		const int      sum    = s + dither;	// s16+
-		const int      quant  = (sum + rcst) >> DIF_BITS;	// s16
+		const int      sum   = s + dither;	// s16+
+		const int      quant = (sum + rcst) >> DIF_BITS;	// s16
 
-		const int      pix = fstb::limit (quant, 0, vmax);
+		const int      pix   = fstb::limit (quant, 0, vmax);
 		dst_n_ptr [pos] = static_cast <DST_TYPE> (pix);
 	}
 
@@ -1522,7 +1695,10 @@ void	Bitdepth::process_seg_common_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, typename DFNC>
+// int dither_fnc (int pos) noexcept;
+// Must provide the ordered dither value, in [-128 ; +127] nominal range
+// (doubled for TPDF)
+template <bool S_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, typename DFNC>
 void	Bitdepth::process_seg_common_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const
 {
 	assert (dst_ptr != 0);
@@ -1544,11 +1720,6 @@ void	Bitdepth::process_seg_common_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 
 	for (int pos = 0; pos < w; ++pos)
 	{
-		if (! S_FLAG)
-		{
-			generate_rnd (rnd_state);
-		}
-
 		float          s = float (src_n_ptr [pos]);
 		s = s * mul + add;
 
@@ -1561,7 +1732,7 @@ void	Bitdepth::process_seg_common_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 		}
 		else
 		{
-			const int      dith_n = int8_t (rnd_state >> 24);			// s8
+			const int      dith_n = generate_dith_n_scalar <TN_FLAG> (rnd_state); // s8
 			dither = float (dith_o * ao + dith_n * an) * qt;
 		}
 		const float    sum    = s + dither;
@@ -1579,18 +1750,64 @@ void	Bitdepth::process_seg_common_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 
 
 
+template <bool T_FLAG>
+int	Bitdepth::generate_dith_n_scalar (uint32_t &rnd_state) noexcept
+{
+	generate_rnd (rnd_state);
+	int            dith_n = int8_t (rnd_state >> 24);
+	if (T_FLAG)
+	{
+		generate_rnd (rnd_state);
+		dith_n += int8_t (rnd_state >> 24);
+	}
+
+	return dith_n;
+}
+
+
+
+int	Bitdepth::remap_tpdf_scalar (int d) noexcept
+{
+	// [-128 ; 127] to [-32767 ; +32767], representing [-1 ; 1] (15-bit scale)
+	auto           x2   = d * d;
+	x2 += x2;
+	x2 = std::min (x2, 0x7FFFF); // Saturated here because of -min * -min overflow
+	auto           x4   = (x2  * x2 ) >> 15;
+	auto           x8   = (x4  * x4 ) >> 15;
+	auto           x16  = (x8  * x8 ) >> 15;
+	auto           x32  = (x16 * x16) >> 15;
+
+	// 15-bit scale
+	constexpr int  c3  = 0x8000 * 5 / 8;
+	constexpr int  c33 = 0x8000 * 3 / 8;
+
+	// 15-bit scale
+	auto           sum_s15 = (x2 * c3 + x32 * c33) >> 15;
+	const auto     x_s15   = d << 8;
+	const auto     sum_s7 = (sum_s15 * x_s15) >> (30 - 7);
+
+	d += sum_s7;
+
+	return d;
+}
+
+
+
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS, typename DFNC>
+// __m128i dither_fnc (int pos) noexcept;
+// Must provide the ordered dither values as a vector of 8 x int16_t,
+// in [-128 ; +127] nominal range (doubled for TPDF)
+template <bool S_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS, typename DFNC>
 void	Bitdepth::process_seg_common_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const
 {
 	assert (dst_ptr != 0);
 	assert (src_ptr != 0);
 	assert (w > 0);
 
-	enum {         DIF_BITS = SRC_BITS - DST_BITS };
+	constexpr int  DIF_BITS = SRC_BITS - DST_BITS;
 	static_assert (DIF_BITS >= 0, "This function cannot increase bidepth.");
 
 	uint32_t &     rnd_state = ctx._rnd_state;
@@ -1601,7 +1818,6 @@ void	Bitdepth::process_seg_common_int_int_sse2 (uint8_t *dst_ptr, const uint8_t 
 	DstPtr         dst_n_ptr = reinterpret_cast <DstPtr> (dst_ptr);
 	const __m128i  zero      = _mm_setzero_si128 ();
 	const __m128i  mask_lsb  = _mm_set1_epi16 (0x00FF);
-	const __m128i  c128_16   = _mm_set1_epi16 (0x80);
 	const __m128i  sign_bit  = _mm_set1_epi16 (-0x8000);
 	const __m128i  rcst      = _mm_set1_epi16 (1 << (DIF_BITS - 1));
 	const __m128i  vmax      = _mm_set1_epi16 ((1 << DST_BITS) - 1);
@@ -1614,32 +1830,25 @@ void	Bitdepth::process_seg_common_int_int_sse2 (uint8_t *dst_ptr, const uint8_t 
 		const __m128i  s =	// 8 u16
 			fmtcl::ProxyRwSse2 <SRC_FMT>::read_i16 (src_n_ptr + pos, zero);
 
-		__m128i        dith_o = dither_fnc (pos); // 8 s16 [-128 ; +127]
+		// 8 s16 [-128 ; +127] or [-256 ; 255]
+		__m128i        dith_o = dither_fnc (pos);
 
 		__m128i        dither;
 		if (S_FLAG)
 		{
-			enum {         DIT_SHFT = 8 - DIF_BITS };
+			constexpr int  DIT_SHFT = 8 - DIF_BITS;
 			dither = _mm_srai_epi16 (dith_o, DIT_SHFT);
 		}
 		else
 		{
-			// Random generation
-			generate_rnd (rnd_state);
-			const uint32_t rnd_03  = rnd_state;
-			generate_rnd (rnd_state);
-			const uint32_t rnd_47  = rnd_state;
-			const __m128i  rnd_val = _mm_set_epi32 (0, 0, rnd_47, rnd_03);
-
-			__m128i			dith_n =
-				_mm_unpacklo_epi8 (rnd_val, zero);           // 8 ?16 [0 ; 255]
-			dith_n = _mm_sub_epi16 (dith_n, c128_16);       // 8 s16 [-128 ; 127]
+			// Random generation. 8 s16 [-128 ; 127] or [-256 ; 255]
+			__m128i			dith_n = generate_dith_n_vec <TN_FLAG> (rnd_state);
 
 			dith_o = _mm_mullo_epi16 (dith_o, ampo_i);      // 8 s16 (full range)
 			dith_n = _mm_mullo_epi16 (dith_n, ampn_i);      // 8 s16 (full range)
 			dither = _mm_adds_epi16 (dith_o, dith_n);       // 8 s16 = s8 * s8
 
-			enum {         DIT_SHFT = AMP_BITS + 8 - DIF_BITS };
+			constexpr int  DIT_SHFT = AMP_BITS + 8 - DIF_BITS;
 			dither = _mm_srai_epi16 (dither, DIT_SHFT);     // 8 s16 = s16 >> cst
 		}
 
@@ -1677,7 +1886,7 @@ void	Bitdepth::process_seg_common_int_int_sse2 (uint8_t *dst_ptr, const uint8_t 
 
 
 
-template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, typename DFNC>
+template <bool S_FLAG, bool TN_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, typename DFNC>
 void	Bitdepth::process_seg_common_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx, DFNC dither_fnc) const
 {
 	assert (dst_ptr != 0);
@@ -1697,7 +1906,6 @@ void	Bitdepth::process_seg_common_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t 
 	DstPtr         dst_n_ptr = reinterpret_cast <DstPtr> (dst_ptr);
 	const __m128   zero_f    = _mm_setzero_ps ();
 	const __m128i  zero_i    = _mm_setzero_si128 ();
-	const __m128i  c128_16   = _mm_set1_epi16 (0x80);
 	const __m128   mul       = _mm_set1_ps (float (ctx._scale_info_ptr->_gain));
 	const __m128   add       = _mm_set1_ps (float (ctx._scale_info_ptr->_add_cst));
 	const __m128   qt        = _mm_set1_ps (qt_cst);
@@ -1719,7 +1927,8 @@ void	Bitdepth::process_seg_common_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t 
 		s0 = _mm_add_ps (_mm_mul_ps (s0, mul), add);
 		s1 = _mm_add_ps (_mm_mul_ps (s1, mul), add);
 
-		__m128i        dith_o = dither_fnc (pos); // 8 s16 [-128 ; +127]
+		// 8 s16 [-128 ; +127] or [-256 ; 255]
+		__m128i        dith_o = dither_fnc (pos);
 
 		__m128i        dither;
 		if (S_FLAG)
@@ -1728,16 +1937,8 @@ void	Bitdepth::process_seg_common_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t 
 		}
 		else
 		{
-			// Random generation
-			generate_rnd (rnd_state);
-			const uint32_t rnd_03  = rnd_state;
-			generate_rnd (rnd_state);
-			const uint32_t rnd_47  = rnd_state;
-			const __m128i  rnd_val = _mm_set_epi32 (0, 0, rnd_47, rnd_03);
-
-			__m128i			dith_n =
-				_mm_unpacklo_epi8 (rnd_val, zero_i);         // 8 ?16 [0 ; 255]
-			dith_n = _mm_sub_epi16 (dith_n, c128_16);       // 8 s16 [-128 ; 127]
+			// Random generation. 8 s16 [-128 ; 127] or [-256 ; 255]
+			__m128i			dith_n = generate_dith_n_vec <TN_FLAG> (rnd_state);
 
 			dith_o = _mm_mullo_epi16 (dith_o, ampo_i);      // 8 s16 (full range)
 			dith_n = _mm_mullo_epi16 (dith_n, ampn_i);      // 8 s16 (full range)
@@ -1770,11 +1971,86 @@ void	Bitdepth::process_seg_common_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t 
 
 
 
+template <bool T_FLAG>
+__m128i	Bitdepth::generate_dith_n_vec (uint32_t &rnd_state) noexcept
+{
+	generate_rnd (rnd_state);
+	const uint32_t rnd_03  = rnd_state;
+	generate_rnd (rnd_state);
+	const uint32_t rnd_47  = rnd_state;
+	const auto        zero = _mm_setzero_si128 ();
+
+	if (T_FLAG)
+	{
+		generate_rnd (rnd_state);
+		const uint32_t rnd_03x = rnd_state;
+		generate_rnd (rnd_state);
+		const uint32_t rnd_47x = rnd_state;
+		const auto     rnd_val = _mm_set_epi32 (rnd_47x, rnd_03x, rnd_47, rnd_03);
+		const auto     c256_16 = _mm_set1_epi16 (0x100);
+		const auto     x0      = _mm_unpacklo_epi8 (rnd_val, zero);
+		const auto     x1      = _mm_unpackhi_epi8 (rnd_val, zero);
+		const auto     dith_n  = _mm_sub_epi16 (_mm_add_epi16 (x0, x1), c256_16);
+		return dith_n; // 8 s16 [-256 ; 255]
+	}
+
+	else
+	{
+		const auto     rnd_val = _mm_set_epi32 (0, 0, rnd_47, rnd_03);
+		const auto     c128_16 = _mm_set1_epi16 (0x80);
+		const auto     x0      = _mm_unpacklo_epi8 (rnd_val, zero); // 8 ?16 [0 ; 255]
+		const auto     dith_n  = _mm_sub_epi16 (x0, c128_16);       
+
+		return dith_n; // 8 s16 [-128 ; 127]
+	}
+}
+
+
+
+// d: 8 s16 [-128 ; 127]
+// Returns: 8 s16 [-256 ; 255]
+// Formula:
+// f: [-1 ; +1] -> [-2 ; +2]
+//            x -> x + 5/8 * x^3 + 3/8 * x^33
+__m128i	Bitdepth::remap_tpdf_vec (__m128i d) noexcept
+{
+	// [-128 ; 127] to [-32767 ; +32767], representing [-1 ; 1] (15-bit scale)
+	auto           x2   = _mm_mullo_epi16 (d  , d  );
+	x2  = _mm_adds_epi16 (x2 , x2 ); // Saturated here because of -min * -min overflow
+	auto           x4   = _mm_mulhi_epi16 (x2 , x2 );
+	x4  = _mm_add_epi16 (x4 , x4 );
+	auto           x8   = _mm_mulhi_epi16 (x4 , x4 );
+	x8  = _mm_add_epi16 (x8 , x8 );
+	auto           x16  = _mm_mulhi_epi16 (x8 , x8 );
+	x16 = _mm_add_epi16 (x16, x16);
+	auto           x32  = _mm_mulhi_epi16 (x16, x16);
+	x32 = _mm_add_epi16 (x32, x32);
+
+	// 15-bit scale
+	const auto     c3  = _mm_set1_epi16 (0x8000 * 5 / 8);
+	const auto     c33 = _mm_set1_epi16 (0x8000 * 3 / 8);
+
+	// 14-bit scale
+	auto           sum_s14 = _mm_mulhi_epi16 (x2, c3);
+	sum_s14 = _mm_add_epi16 (sum_s14, _mm_mulhi_epi16 (x32, c33));
+
+	const auto     x_s15 = _mm_slli_epi16 (d, 8);
+	const auto     sum_s13 = _mm_mulhi_epi16 (sum_s14, x_s15);
+
+	const auto     sum_s7  = _mm_srai_epi16 (sum_s13, 13 - 7);
+
+	d = _mm_add_epi16 (d, sum_s7);
+
+	return d;
+}
+
+
+
 #endif
 
 
 
-template <bool S_FLAG, class ERRDIF>
+template <bool S_FLAG, bool T_FLAG, class ERRDIF>
 void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
@@ -1818,7 +2094,9 @@ void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 			int            err = err_nxt0;
 			SRC_TYPE       src_raw;
 
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
+			quantize_pix_int <
+				S_FLAG, T_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
+			> (
 				dst_n_ptr, src_n_ptr, src_raw, x, err, rnd_state, ae, _ampn_i
 			);
 			ERRDIF::template diffuse <1> (
@@ -1837,7 +2115,9 @@ void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 			int            err = err_nxt0;
 			SRC_TYPE       src_raw;
 
-			quantize_pix_int <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS> (
+			quantize_pix_int <
+				S_FLAG, T_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
+			> (
 				dst_n_ptr, src_n_ptr, src_raw, x, err, rnd_state, ae, _ampn_i
 			);
 			ERRDIF::template diffuse <-1> (
@@ -1859,7 +2139,7 @@ void	Bitdepth::process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *
 
 
 
-template <bool S_FLAG, class ERRDIF>
+template <bool S_FLAG, bool T_FLAG, class ERRDIF>
 void	Bitdepth::process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const
 {
 	assert (dst_ptr != 0);
@@ -1906,7 +2186,7 @@ void	Bitdepth::process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 			float          err = err_nxt0;
 			SRC_TYPE       src_raw;
 
-			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
+			quantize_pix_flt <S_FLAG, T_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
 				dst_n_ptr, src_n_ptr, src_raw, x, err, rnd_state, ae, an, mul, add
 			);
 			ERRDIF::template diffuse <1> (
@@ -1925,7 +2205,7 @@ void	Bitdepth::process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *
 			float          err = err_nxt0;
 			SRC_TYPE       src_raw;
 
-			quantize_pix_flt <S_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
+			quantize_pix_flt <S_FLAG, T_FLAG, DST_TYPE, DST_BITS, SRC_TYPE> (
 				dst_n_ptr, src_n_ptr, src_raw, x, err, rnd_state, ae, an, mul, add
 			);
 			ERRDIF::template diffuse <-1> (
@@ -1987,7 +2267,7 @@ const Bitdepth::PatRow &	Bitdepth::SegContext::extract_pattern_row () const
 
 
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
+template <bool S_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 void	Bitdepth::quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, int &err, uint32_t &rnd_state, int ampe_i, int ampn_i)
 {
 	enum {         DIF_BITS = SRC_BITS - DST_BITS };
@@ -2010,11 +2290,10 @@ void	Bitdepth::quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC
 	{
 		enum {         DIT_SHFT = AMP_BITS + 8 - TMP_INVS };  // May be negative
 
-		generate_rnd (rnd_state);
-		const int		rnd_val = int8_t (rnd_state >> 24);			// s8
+		const int      dith_n  = generate_dith_n_scalar <TN_FLAG> (rnd_state); // s8
 		const int		err_add = (err < 0) ? -ampe_i : ampe_i;
 		const int		noise   =
-			fstb::sshift_r <int, DIT_SHFT> (rnd_val * ampn_i + err_add);	// s16 = s8 * s8 // s16 = s16 >> cst
+			fstb::sshift_r <int, DIT_SHFT> (dith_n * ampn_i + err_add);	// s16 = s8 * s8 // s16 = s16 >> cst
 
 		sum += noise;
 	}
@@ -2044,7 +2323,7 @@ static inline float	Bitdepth_extract_src (float src_read, float src)
 	return (src);
 }
 
-template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
+template <bool S_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 void	Bitdepth::quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, float &err, uint32_t &rnd_state, float ampe_f, float ampn_f, float mul, float add)
 {
 	const int      vmax = (1 << DST_BITS) - 1;
@@ -2057,10 +2336,9 @@ void	Bitdepth::quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC
 	float          sum      = preq;
 	if (! S_FLAG)
 	{
-		generate_rnd (rnd_state);
-		const int32_t  rnd_val = int32_t (rnd_state);   // Signed
+		const int      dith_n  = generate_dith_n_scalar <TN_FLAG> (rnd_state); // s8
 		const float    err_add = (err < 0) ? -ampe_f : (err > 0) ? ampe_f : 0;
-		const float    noise   = float (rnd_val) * ampn_f + err_add;
+		const float    noise   = float (dith_n) * ampn_f + err_add;
 
 		sum += noise;
 	}

@@ -302,6 +302,8 @@ useful).</p>
 	staticnoise: int  : opt; (False)
 	cpuopt     : int  : opt; (-1)
 	patsize    : int  : opt; (32)
+	tpdfo      : int  : opt; (0)
+	tpdfn      : int  : opt; (0)
 )
 </pre>
 
@@ -313,14 +315,14 @@ useful).</p>
 <li>Doing a full-range ↔ TV-range conversion between integer formats, because the resulting values haven’t an exact representation.</li>
 </ul>
 
-<p>Pure ordered dithering seems to be retained better than noise or error
-diffusion by video compression in 8 bits.
-Therefore this is the recommended method to avoid color banding, unless you
-encode at very high bitrates.
-If you don’t care about video compression, error diffusion gives the most
-accurate results.
-To avoid discontinuities between purely flat areas and dithered areas, you
-can add a bit of noise.</p>
+<p>Video compression seems to retrain better pure ordered (Bayer) dithering.
+Therefore this is the recommended method to avoid color banding in 8 bit
+signals, unless you encode at high bitrates.
+If you don’t care about video compression, error diffusion, void and cluster
+and quasirandom sequence methods give the most accurate results.
+To avoid discontinuities between purely flat areas and dithered areas (also
+called noise modulation), you can add a bit of noise, ideally in triangular
+distribution.</p>
 
 <p>The internal noise generator is deterministic and will give the same result
 each run.</p>
@@ -385,11 +387,11 @@ formats.</p>
 <tr><td><b>2</b></td><td>Round, may be a bit faster but possibly less accurate.</td></tr>
 <tr><td><b>3</b></td><td>Sierra-2-4A error diffusion, aka “Filter Lite”. Quick and excellent quality, similar to Floyd-Steinberg.</td></tr>
 <tr><td><b>4</b></td><td>Stucki error diffusion. Preserves delicate edges better but distorts gradients.</td></tr>
-<tr><td><b>5</b></td><td>Atkinson error diffusion. Generates distinct patterns but keeps clean the flat areas.</td></tr>
-<tr><td><b>6</b></td><td>Floyd-Steinberg error diffusion. Classic.</td></tr>
+<tr><td><b>5</b></td><td>Atkinson error diffusion. Generates distinct patterns but keeps clean the flat areas (noise modulation).</td></tr>
+<tr><td><b>6</b></td><td>Classic Floyd-Steinberg error diffusion, modified for serpentine scan (avoids worm artefacts).</td></tr>
 <tr><td><b>7</b></td><td><a href="http://www.iro.umontreal.ca/~ostrom/publications/publications_abstracts.html#SIGGRAPH01_VarcoeffED">Ostromoukhov error diffusion</a>. Slow, available only for integer input at the moment. Avoids usual F-S artefacts.</td></tr>
-<tr><td><b>8</b></td><td>Void and cluster halftone dithering. Better visual aspect than ordered dithering.</td></tr>
-<tr><td><b>9</b></td><td>Dither using <a href="http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/">quasirandom sequences</a>.</td></tr>
+<tr><td><b>8</b></td><td>Void and cluster halftone dithering. This is a way to generate blue-noise dither and has a much better visual aspect than ordered dithering.</td></tr>
+<tr><td><b>9</b></td><td>Dither using <a href="http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/">quasirandom sequences</a>. Good intermediated between Void and cluster and error diffusion algorithms.</td></tr>
 </table>
 
 <p>When using error-diffusion dithering on interlaced content, you should
@@ -413,7 +415,7 @@ visual appearance.</p>
 
 <p class="var">dyn</p>
 <p>Indicates if the ordered dither pattern is dynamic (True) or static (False).
-If dynamic, the pattern is rotated each frame.</p>
+If dynamic, the pattern is changed or rotated each frame.</p>
 
 <p class="var">staticnoise</p>
 <p>If set to 1, the noise generated with <var>ampn</var> is static
@@ -429,6 +431,21 @@ and remains the same every frame.</p>
 <p class="var">patsize</p>
 <p>Width of the pattern used in the Void and cluster algorithm.
 The only valid values are 4, 8, 16 and 32.</p>
+
+<p class="var">tpdfo</p>
+<p>Set it to 1 to enable the triangular probability distribution function
+(TPDF) for halftone-based dithering algorithms.
+It has no effect on error diffusion methods.
+0 is the standard rectangular distribution (RPDF).
+Note that when triangular distribution is enabled, the maximum halftone
+amplitude is multiplied by 1.414 at constant <var>ampo</var>.</p>
+
+<p class="var">tpdfn</p>
+<p>Same as <var>tpdfo</var>, but for the additive noise part.
+TPDF noise looks more natural than RPDF noise, and is a crude approximation of
+a gaussian noise, with a bounded amplitude.
+Maximum noise amplitude is multiplied by 1.414 at constant <var>ampn</var>,
+so the introduced noise power is kept approximately constant.</p>
 
 
 
@@ -1538,7 +1555,8 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <p><b>r24, 202?-??-??</b></p>
 <ul>
-<li><code>bitdepth</code>: added dithering <code>mode</code> 9: quasirandom sequences.</li>
+<li><code>bitdepth</code>: added dithering <var>mode</var> 9: quasirandom sequences.</li>
+<li><code>bitdepth</code>: added a triangular probability distribution function (TPDF) for the dithering patterns and noises, along with the associated parameters <var>tpdfo</var> and <var>tpdfn</var>.</li>
 </ul>
 
 <p><b>r23, 2021-07-14</b></p>
