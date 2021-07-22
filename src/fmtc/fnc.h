@@ -27,6 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/ColorFamily.h"
 #include "fmtcl/ColorSpaceH265.h"
 #include "fmtcl/SplFmt.h"
 
@@ -50,6 +51,8 @@ namespace fmtc
 
 
 fmtcl::SplFmt  conv_vsfmt_to_splfmt (const ::VSFormat &fmt);
+fmtcl::ColorFamily
+               conv_colfam_to_fmtcl (const ::VSFormat &fmt);
 void           prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSFormat &fmt_dst, bool full_range_dst_flag, const ::VSFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out = fmtcl::ColorSpaceH265_UNSPECIFIED, int plane_out = -1);
 
 

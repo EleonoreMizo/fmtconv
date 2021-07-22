@@ -148,6 +148,7 @@
     <ClInclude Include="..\..\src\fmtcl\ContFirSpline64.h" />
     <ClInclude Include="..\..\src\fmtcl\DiscreteFirCustom.h" />
     <ClInclude Include="..\..\src\fmtcl\DiscreteFirInterface.h" />
+    <ClInclude Include="..\..\src\fmtcl\Dither.h" />
     <ClInclude Include="..\..\src\fmtcl\ErrDifBuf.h" />
     <ClInclude Include="..\..\src\fmtcl\ErrDifBuf.hpp" />
     <ClInclude Include="..\..\src\fmtcl\ErrDifBufFactory.h" />
@@ -321,6 +322,7 @@
     <ClCompile Include="..\..\src\fmtcl\ContFirSpline64.cpp" />
     <ClCompile Include="..\..\src\fmtcl\DiscreteFirCustom.cpp" />
     <ClCompile Include="..\..\src\fmtcl\DiscreteFirInterface.cpp" />
+    <ClCompile Include="..\..\src\fmtcl\Dither.cpp" />
     <ClCompile Include="..\..\src\fmtcl\ErrDifBuf.cpp" />
     <ClCompile Include="..\..\src\fmtcl\ErrDifBufFactory.cpp" />
     <ClCompile Include="..\..\src\fmtcl\FilterResize.cpp" />

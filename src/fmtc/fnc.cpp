@@ -133,6 +133,24 @@ fmtcl::SplFmt	conv_vsfmt_to_splfmt (const ::VSFormat &fmt)
 
 
 
+fmtcl::ColorFamily	conv_colfam_to_fmtcl (const ::VSFormat &fmt)
+{
+	auto          col_fam = fmtcl::ColorFamily_INVALID;
+
+	switch (fmt.colorFamily)
+	{
+	case cmGray:  col_fam = fmtcl::ColorFamily_GRAY;  break;
+	case cmRGB:   col_fam = fmtcl::ColorFamily_RGB;   break;
+	case cmYUV:   col_fam = fmtcl::ColorFamily_YUV;   break;
+	case cmYCoCg: col_fam = fmtcl::ColorFamily_YCGCO; break;
+	default:      assert (false);                     break;
+	}
+
+	return col_fam;
+}
+
+
+
 void	prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSFormat &fmt_dst, bool full_range_dst_flag, const ::VSFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out, int plane_out)
 {
 	const bool     int_proc_flag =

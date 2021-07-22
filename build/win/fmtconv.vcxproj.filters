@@ -526,6 +526,9 @@
     <ClInclude Include="..\..\src\fmtcl\TransOpHlg.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\Dither.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\fmtc\Bitdepth.cpp">
@@ -748,6 +751,9 @@
       <Filter>fmtcl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\fmtcl\TransOpHlg.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\Dither.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
   </ItemGroup>

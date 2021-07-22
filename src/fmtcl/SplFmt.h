@@ -49,6 +49,8 @@ enum SplFmt
 
 
 
+inline bool SplFmt_is_float (SplFmt fmt);
+inline bool SplFmt_is_int (SplFmt fmt);
 inline int	SplFmt_get_unit_size (SplFmt fmt);
 inline int	SplFmt_get_data_size (SplFmt fmt);
 

@@ -35,6 +35,26 @@ namespace fmtcl
 
 
 
+bool	SplFmt_is_float (SplFmt fmt)
+{
+	assert (fmt >= 0);
+	assert (fmt < SplFmt_NBR_ELT);
+
+	return (fmt == SplFmt_FLOAT);
+}
+
+
+
+bool	SplFmt_is_int (SplFmt fmt)
+{
+	assert (fmt >= 0);
+	assert (fmt < SplFmt_NBR_ELT);
+
+	return (fmt != SplFmt_FLOAT);
+}
+
+
+
 int	SplFmt_get_unit_size (SplFmt fmt)
 {
 	assert (fmt >= 0);

@@ -171,6 +171,8 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/DiscreteFirCustom.h \
         ../../src/fmtcl/DiscreteFirInterface.cpp \
         ../../src/fmtcl/DiscreteFirInterface.h \
+        ../../src/fmtcl/Dither.cpp \
+        ../../src/fmtcl/Dither.h \
         ../../src/fmtcl/ErrDifBuf.cpp \
         ../../src/fmtcl/ErrDifBuf.h \
         ../../src/fmtcl/ErrDifBuf.hpp \
