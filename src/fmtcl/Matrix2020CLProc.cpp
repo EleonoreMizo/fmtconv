@@ -30,6 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/fnc.h"
 #include "fmtcl/Matrix2020CLProc.h"
 #include "fmtcl/Matrix2020CLProc_macro.h"
+#include "fmtcl/PicFmt.h"
 #include "fmtcl/ProxyRwCpp.h"
 #include "fmtcl/TransOpLinPow.h"
 #include "fstb/fnc.h"
@@ -242,14 +243,14 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_rgb_2_ycbcr ()
 		double         b_c;
 		compute_fmt_mac_cst (
 			a_y, b_y,
-			_dst_fmt, RGB_INT_BITS, ColorFamily_YUV, _full_range_flag,
-			_dst_fmt, RGB_INT_BITS, ColorFamily_YUV, true,
+			PicFmt { _dst_fmt, RGB_INT_BITS, ColorFamily_YUV, _full_range_flag },
+			PicFmt { _dst_fmt, RGB_INT_BITS, ColorFamily_YUV, true             },
 			0
 		);
 		compute_fmt_mac_cst (
 			a_c, b_c,
-			_dst_fmt, RGB_INT_BITS, ColorFamily_YUV, _full_range_flag,
-			_dst_fmt, RGB_INT_BITS, ColorFamily_YUV, true,
+			PicFmt { _dst_fmt, RGB_INT_BITS, ColorFamily_YUV, _full_range_flag },
+			PicFmt { _dst_fmt, RGB_INT_BITS, ColorFamily_YUV, true             },
 			1
 		);
 		const int      dif_bits   = RGB_INT_BITS - _dst_bits;
@@ -358,14 +359,14 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_ycbcr_2_rgb ()
 		double         b_c;
 		compute_fmt_mac_cst (
 			a_y, b_y,
-			_src_fmt, _src_bits, ColorFamily_YUV, true,
-			_src_fmt, _src_bits, ColorFamily_YUV, _full_range_flag,
+			PicFmt { _src_fmt, _src_bits, ColorFamily_YUV, true             },
+			PicFmt { _src_fmt, _src_bits, ColorFamily_YUV, _full_range_flag },
 			0
 		);
 		compute_fmt_mac_cst (
 			a_c, b_c,
-			_src_fmt, _src_bits, ColorFamily_YUV, true,
-			_src_fmt, _src_bits, ColorFamily_YUV, _full_range_flag,
+			PicFmt { _src_fmt, _src_bits, ColorFamily_YUV, true             },
+			PicFmt { _src_fmt, _src_bits, ColorFamily_YUV, _full_range_flag },
 			1
 		);
 		const int      dif_bits   = RGB_INT_BITS - _src_bits;

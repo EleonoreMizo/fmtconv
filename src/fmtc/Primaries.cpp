@@ -26,7 +26,9 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtc/fnc.h"
 #include "fmtc/Primaries.h"
+#include "fmtcl/fnc.h"
 #include "fmtcl/Mat3.h"
+#include "fmtcl/PrimUtil.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/CpuOpt.h"
@@ -90,19 +92,20 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 	_vi_out.format = &fmt_dst;
 
 	// Primaries
-	_prim_s.init (*this, in, out, "prims");
-	_prim_s.init (*this, in, out, "rs", "gs", "bs", "ws");
+	init (_prim_s, *this, in, out, "prims");
+	init (_prim_s, *this, in, out, "rs", "gs", "bs", "ws");
 	if (! _prim_s.is_ready ())
 	{
 		throw_inval_arg ("input primaries not set.");
 	}
 
 	_prim_d = _prim_s;
-	_prim_d.init (*this, in, out, "primd");
-	_prim_d.init (*this, in, out, "rd", "gd", "bd", "wd");
+	init (_prim_d, *this, in, out, "primd");
+	init (_prim_d, *this, in, out, "rd", "gd", "bd", "wd");
 	assert (_prim_d.is_ready ());
 
-	const fmtcl::Mat3 mat_conv = compute_conversion_matrix ();
+	const fmtcl::Mat3 mat_conv =
+		fmtcl::PrimUtil::compute_conversion_matrix (_prim_s, _prim_d);
 	_mat_main.insert3 (mat_conv);
 	_mat_main.clean3 (1);
 
@@ -154,26 +157,26 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 		const int         h = _vsapi.getFrameHeight (&src, 0);
 		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
 
-		uint8_t * const   dst_ptr_arr [fmtcl::MatrixProc::NBR_PLANES] =
+		uint8_t * const   dst_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
 		{
 			_vsapi.getWritePtr (dst_ptr, 0),
 			_vsapi.getWritePtr (dst_ptr, 1),
 			_vsapi.getWritePtr (dst_ptr, 2)
 		};
-		const int         dst_str_arr [fmtcl::MatrixProc::NBR_PLANES] =
+		const int         dst_str_arr [fmtcl::MatrixProc::_nbr_planes] =
 		{
 			_vsapi.getStride (dst_ptr, 0),
 			_vsapi.getStride (dst_ptr, 1),
 			_vsapi.getStride (dst_ptr, 2)
 		};
 		const uint8_t * const
-		                  src_ptr_arr [fmtcl::MatrixProc::NBR_PLANES] =
+		                  src_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
 		{
 			_vsapi.getReadPtr (&src, 0),
 			_vsapi.getReadPtr (&src, 1),
 			_vsapi.getReadPtr (&src, 2)
 		};
-		const int         src_str_arr [fmtcl::MatrixProc::NBR_PLANES] =
+		const int         src_str_arr [fmtcl::MatrixProc::_nbr_planes] =
 		{
 			_vsapi.getStride (&src, 0),
 			_vsapi.getStride (&src, 1),
@@ -213,92 +216,7 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 
 
 
-void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0)
-{
-	assert (preset_0 != 0);
-
-	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
-	fstb::conv_to_lower_case (preset_str);
-	_preset = conv_string_to_primaries (preset_str);
-	if (_preset >= 0)
-	{
-		set (_preset);
-	}
-}
-
-
-
-void	Primaries::RgbSystem::init (const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 [])
-{
-	assert (r_0 != 0);
-	assert (g_0 != 0);
-	assert (b_0 != 0);
-	assert (w_0 != 0);
-
-	const bool     ready_old_flag         = is_ready ();
-	std::array <Vec2, NBR_PLANES> rgb_old = _rgb;
-	Vec2                          w_old   = _white;
-
-	const char *   name_0_arr [NBR_PLANES] = { r_0, g_0, b_0 };
-	for (int k = 0; k < NBR_PLANES; ++k)
-	{
-		_init_flag_arr [k] |=
-			read_coord_tuple (_rgb [k], filter, in, out, name_0_arr [k]);
-	}
-
-	_init_flag_arr [NBR_PLANES] |=
-		read_coord_tuple (_white, filter, in, out, w_0);
-
-	if (ready_old_flag && is_ready () && (rgb_old != _rgb || w_old != _white))
-	{
-		_preset = fmtcl::PrimariesPreset_UNDEF;
-	}
-}
-
-
-
-bool	Primaries::RgbSystem::read_coord_tuple (Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0)
-{
-	bool           set_flag = false;
-	typedef std::vector <double> Vect;
-	Vect           v_def;
-
-	Vect           c_v = filter.get_arg_vflt (in, out, name_0, v_def);
-	if (c_v.size () != 0)
-	{
-		if (c_v.size () != c.size ())
-		{
-			fstb::snprintf4all (
-				filter._filter_error_msg_0,
-				filter._max_error_buf_len,
-				"%s: wrong number of coordinates (expected %d).",
-				name_0,
-				int (c.size ())
-			);
-			filter.throw_inval_arg (filter._filter_error_msg_0);
-		}
-		double            sum = 0;
-		for (size_t k = 0; k < c_v.size (); ++k)
-		{
-			sum += c_v [k];
-			c [k] = c_v [k];
-		}
-		if (c [1] == 0)
-		{
-			fstb::snprintf4all (
-				filter._filter_error_msg_0,
-				filter._max_error_buf_len,
-				"%s: y coordinate cannot be 0.",
-				name_0
-			);
-			filter.throw_inval_arg (filter._filter_error_msg_0);
-		}
-
-		set_flag = true;
-	}
-
-	return (set_flag);
-}
+constexpr int	Primaries::_nbr_planes;
 
 
 
@@ -339,239 +257,97 @@ void	Primaries::check_colorspace (const ::VSFormat &fmt, const char *inout_0) co
 		throw_inval_arg (_filter_error_msg_0);
 	}
 
-	assert (fmt.numPlanes == NBR_PLANES);
+	assert (fmt.numPlanes == _nbr_planes);
 }
 
 
 
-fmtcl::Mat3	Primaries::compute_conversion_matrix () const
+void	Primaries::init (fmtcl::RgbSystem &prim, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0)
 {
-	fmtcl::Mat3    rgb2xyz = compute_rgb2xyz (_prim_s);
-	fmtcl::Mat3    xyz2rgb = compute_rgb2xyz (_prim_d).invert ();
-	fmtcl::Mat3    adapt   = compute_chroma_adapt (_prim_s, _prim_d);
+	assert (preset_0 != 0);
 
-	return xyz2rgb * adapt * rgb2xyz;
-}
-
-
-
-// http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
-fmtcl::Mat3	Primaries::compute_rgb2xyz (const RgbSystem &prim)
-{
-	fmtcl::Mat3    m;
-
-	if (prim._preset == fmtcl::PrimariesPreset_CIEXYZ)
+	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
+	fstb::conv_to_lower_case (preset_str);
+	prim._preset = fmtcl::PrimUtil::conv_string_to_primaries (preset_str);
+	if (prim._preset >= 0)
 	{
-		m = fmtcl::Mat3 (1, fmtcl::Mat3::Preset_DIAGONAL);
+		prim.set (prim._preset);
+	}
+}
+
+
+
+void	Primaries::init (fmtcl::RgbSystem &prim, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 [])
+{
+	assert (r_0 != 0);
+	assert (g_0 != 0);
+	assert (b_0 != 0);
+	assert (w_0 != 0);
+
+	const bool     ready_old_flag = prim.is_ready ();
+	std::array <fmtcl::RgbSystem::Vec2, _nbr_planes> rgb_old = prim._rgb;
+	fmtcl::RgbSystem::Vec2  w_old = prim._white;
+
+	const char *   name_0_arr [_nbr_planes] = { r_0, g_0, b_0 };
+	for (int k = 0; k < _nbr_planes; ++k)
+	{
+		prim._init_flag_arr [k] |=
+			read_coord_tuple (prim._rgb [k], filter, in, out, name_0_arr [k]);
 	}
 
-	else
-	{
-		const fmtcl::Vec3 white = conv_xy_to_xyz (prim._white);
+	prim._init_flag_arr [_nbr_planes] |=
+		read_coord_tuple (prim._white, filter, in, out, w_0);
 
-		fmtcl::Mat3    xyzrgb;
-		for (int k = 0; k < NBR_PLANES; ++k)
+	if (   ready_old_flag && prim.is_ready ()
+	    && (rgb_old != prim._rgb || w_old != prim._white))
+	{
+		prim._preset = fmtcl::PrimariesPreset_UNDEF;
+	}
+}
+
+
+
+bool	Primaries::read_coord_tuple (fmtcl::RgbSystem::Vec2 &c, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *name_0)
+{
+	bool           set_flag = false;
+	typedef std::vector <double> Vect;
+	Vect           v_def;
+
+	Vect           c_v = filter.get_arg_vflt (in, out, name_0, v_def);
+	if (c_v.size () != 0)
+	{
+		if (c_v.size () != c.size ())
 		{
-			fmtcl::Vec3    comp_xyz = conv_xy_to_xyz (prim._rgb [k]);
-			xyzrgb.set_col (k, comp_xyz);
+			fstb::snprintf4all (
+				filter._filter_error_msg_0,
+				filter._max_error_buf_len,
+				"%s: wrong number of coordinates (expected %d).",
+				name_0,
+				int (c.size ())
+			);
+			filter.throw_inval_arg (filter._filter_error_msg_0);
+		}
+		double            sum = 0;
+		for (size_t k = 0; k < c_v.size (); ++k)
+		{
+			sum += c_v [k];
+			c [k] = c_v [k];
+		}
+		if (c [1] == 0)
+		{
+			fstb::snprintf4all (
+				filter._filter_error_msg_0,
+				filter._max_error_buf_len,
+				"%s: y coordinate cannot be 0.",
+				name_0
+			);
+			filter.throw_inval_arg (filter._filter_error_msg_0);
 		}
 
-		fmtcl::Vec3    s = xyzrgb.compute_inverse () * white;
-
-		for (int u = 0; u < NBR_PLANES; ++u)
-		{
-			m.set_col (u, xyzrgb.get_col (u) * s [u]);
-		}
+		set_flag = true;
 	}
 
-	return m;
-}
-
-
-
-// http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
-fmtcl::Mat3	Primaries::compute_chroma_adapt (const RgbSystem &prim_s, const RgbSystem &prim_d)
-{
-	fmtcl::Vec3    white_s = conv_xy_to_xyz (prim_s._white);
-	fmtcl::Vec3    white_d = conv_xy_to_xyz (prim_d._white);
-
-	// Bradford adaptation
-	const fmtcl::Mat3 ma ({
-		fmtcl::Vec3 ( 0.8951,  0.2664, -0.1614),
-		fmtcl::Vec3 (-0.7502,  1.7135,  0.0367),
-		fmtcl::Vec3 ( 0.0389, -0.0685,  1.0296)
-	});
-
-	fmtcl::Vec3    crd_s = ma * white_s;
-	fmtcl::Vec3    crd_d = ma * white_d;
-	fmtcl::Mat3    scale (0.0);
-	for (int k = 0; k < NBR_PLANES; ++k)
-	{
-		assert (crd_s [k] != 0);
-		scale [k] [k] = crd_d [k] / crd_s [k];
-	}
-
-	return ma.compute_inverse () * scale * ma;
-}
-
-
-
-// Obtains X, Y, Z from (x, y)
-// Y is assumed to be 1.0
-// X =      x      / y
-// Z = (1 - x - y) / y
-// http://www.brucelindbloom.com/index.html?Eqn_xyY_to_XYZ.html
-fmtcl::Vec3	Primaries::conv_xy_to_xyz (const RgbSystem::Vec2 &xy)
-{
-	fmtcl::Vec3    xyz;
-
-	// When y is null, X = Y = Z = 0.
-	if (fstb::is_null (xy [1]))
-	{
-		xyz [0] = 0;
-		xyz [1] = 0;
-		xyz [2] = 0;
-	}
-	else
-	{
-		xyz [0] =      xy [0]           / xy [1];
-		xyz [1] = 1;
-		xyz [2] = (1 - xy [0] - xy [1]) / xy [1];
-	}
-
-	return xyz;
-}
-
-
-
-// str should be already converted to lower case
-fmtcl::PrimariesPreset	Primaries::conv_string_to_primaries (const std::string &str)
-{
-	fmtcl::PrimariesPreset  preset = fmtcl::PrimariesPreset_UNDEF;
-
-	if (        str == "709"
-	         || str == "1361"
-	         || str == "61966-2-1"
-	         || str == "61966-2-4"
-	         || str == "hdtv"
-	         || str == "srgb")
-	{
-		preset = fmtcl::PrimariesPreset_BT709;
-	}
-	else if (   str == "470m"
-	         || str == "ntsc")
-	{
-		preset = fmtcl::PrimariesPreset_FCC;
-	}
-	else if (   str == "470m93"
-	         || str == "ntscj")
-	{
-		preset = fmtcl::PrimariesPreset_NTSCJ;
-	}
-	else if (   str == "470bg"
-	         || str == "601-625"
-	         || str == "1358-625"
-	         || str == "1700-625"
-	         || str == "pal"
-	         || str == "secam")
-	{
-		preset = fmtcl::PrimariesPreset_BT470BG;
-	}
-	else if (   str == "170m"
-	         || str == "601-525"
-	         || str == "1358-525"
-	         || str == "1700-525")
-	{
-		preset = fmtcl::PrimariesPreset_SMPTE170M;
-	}
-	else if (   str == "240m")
-	{
-		preset = fmtcl::PrimariesPreset_SMPTE240M;
-	}
-	else if (   str == "filmc")
-	{
-		preset = fmtcl::PrimariesPreset_GENERIC_FILM;
-	}
-	else if (   str == "2020"
-	         || str == "2100"
-	         || str == "uhdtv")
-	{
-		preset = fmtcl::PrimariesPreset_BT2020;
-	}
-	else if (   str == "61966-2-2"
-	         || str == "scrgb")
-	{
-		preset = fmtcl::PrimariesPreset_SCRGB;
-	}
-	else if (   str == "adobe98")
-	{
-		preset = fmtcl::PrimariesPreset_ADOBE_RGB_98;
-	}
-	else if (   str == "adobewide")
-	{
-		preset = fmtcl::PrimariesPreset_ADOBE_RGB_WIDE;
-	}
-	else if (   str == "apple")
-	{
-		preset = fmtcl::PrimariesPreset_APPLE_RGB;
-	}
-	else if (   str == "photopro"
-	         || str == "romm")
-	{
-		preset = fmtcl::PrimariesPreset_ROMM;
-	}
-	else if (   str == "ciergb")
-	{
-		preset = fmtcl::PrimariesPreset_CIERGB;
-	}
-	else if (   str == "ciexyz")
-	{
-		preset = fmtcl::PrimariesPreset_CIEXYZ;
-	}
-	else if (   str == "p3d65"
-	         || str == "dcip3")
-	{
-		preset = fmtcl::PrimariesPreset_P3D65;
-	}
-	else if (   str == "aces")
-	{
-		preset = fmtcl::PrimariesPreset_ACES;
-	}
-	else if (   str == "ap1")
-	{
-		preset = fmtcl::PrimariesPreset_ACESAP1;
-	}
-	else if (   str == "sgamut"
-	         || str == "sgamut3")
-	{
-		preset = fmtcl::PrimariesPreset_SGAMUT;
-	}
-	else if (   str == "sgamut3cine")
-	{
-		preset = fmtcl::PrimariesPreset_SGAMUT3CINE;
-	}
-	else if (   str == "alexa")
-	{
-		preset = fmtcl::PrimariesPreset_ALEXA;
-	}
-	else if (   str == "vgamut")
-	{
-		preset = fmtcl::PrimariesPreset_VGAMUT;
-	}
-	else if (   str == "p3dci")
-	{
-		preset = fmtcl::PrimariesPreset_P3DCI;
-	}
-	else if (   str == "p3d60")
-	{
-		preset = fmtcl::PrimariesPreset_P3D60;
-	}
-	else if (   str == "3213")
-	{
-		preset = fmtcl::PrimariesPreset_EBU3213E;
-	}
-
-	return preset;
+	return (set_flag);
 }
 
 

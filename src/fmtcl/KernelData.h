@@ -50,8 +50,10 @@ class KernelData
 
 public:
 
-	               KernelData () = default;
-	virtual        ~KernelData () {}
+	               KernelData ()                   = default;
+	               ~KernelData ()                  = default;
+	               KernelData (KernelData &&other) = default;
+	KernelData &   operator = (KernelData &&other) = default;
 
    uint32_t       get_hash () const;
 

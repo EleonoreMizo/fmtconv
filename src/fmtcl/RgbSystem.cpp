@@ -39,6 +39,10 @@ namespace fmtcl
 
 
 
+constexpr int	RgbSystem::_nbr_planes;
+
+
+
 RgbSystem::Vec2::Vec2 (double c0, double c1)
 :	Inherited ({ { c0, c1 } })
 {

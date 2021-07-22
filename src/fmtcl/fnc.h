@@ -28,6 +28,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/ColorFamily.h"
+#include "fmtcl/ColorSpaceH265.h"
 #include "fmtcl/SplFmt.h"
 
 
@@ -35,14 +36,21 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 namespace fmtcl
 {
 
+class Mat4;
+class MatrixProc;
+class PicFmt;
 
 
+
+int    compute_plane_width (ColorFamily col_fam, int ss_h, int base_w, int plane_index);
+int    compute_plane_height (ColorFamily col_fam, int ss_v, int base_h, int plane_index);
 bool   has_chroma (ColorFamily col_fam);
 bool   is_chroma_plane (ColorFamily col_fam, int plane_index);
 bool   is_full_range_default (ColorFamily col_fam);
-double compute_pix_scale (SplFmt spl_fmt, int nbr_bits, ColorFamily col_fam, int plane_index, bool full_flag);
-double get_pix_min (SplFmt spl_fmt, int nbr_bits, ColorFamily col_fam, int plane_index, bool full_flag);
-void   compute_fmt_mac_cst (double &gain, double &add_cst, SplFmt dst_spl_fmt, int dst_nbr_bits, ColorFamily dst_col_fam, bool dst_full_flag, SplFmt src_spl_fmt, int src_nbr_bits, ColorFamily src_col_fam, bool src_full_flag, int plane_index);
+double compute_pix_scale (const PicFmt &fmt, int plane_index);
+double get_pix_min (const PicFmt &fmt, int plane_index);
+void   compute_fmt_mac_cst (double &gain, double &add_cst, const PicFmt &dst_fmt, const PicFmt &src_fmt, int plane_index);
+int    prepare_matrix_coef (MatrixProc &mat_proc, const Mat4 &mat_main, const PicFmt &dst_fmt, const PicFmt &src_fmt, ColorSpaceH265 csp_out, int plane_out);
 
 
 

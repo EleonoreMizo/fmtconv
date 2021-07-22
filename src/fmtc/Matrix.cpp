@@ -31,7 +31,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtc/Matrix.h"
 #include "fmtc/fnc.h"
-#include "fmtcl/Mat4.h"
+#include "fmtcl/MatrixUtil.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/CpuOpt.h"
@@ -77,9 +77,9 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	_avx_flag  = cpu_opt.has_avx ();
 	_avx2_flag = cpu_opt.has_avx2 ();
 
-	_proc_uptr = std::unique_ptr <fmtcl::MatrixProc> (new fmtcl::MatrixProc (
+	_proc_uptr = std::make_unique <fmtcl::MatrixProc> (
 		_sse_flag, _sse2_flag, _avx_flag, _avx2_flag
-	));
+	);
 
 	// Checks the input clip
 	if (_vi_in.format == 0)
@@ -93,7 +93,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	{
 		throw_inval_arg ("input must be 4:4:4.");
 	}
-	if (fmt_src.numPlanes != NBR_PLANES)
+	if (fmt_src.numPlanes != _nbr_planes)
 	{
 		throw_inval_arg ("greyscale format not supported as input.");
 	}
@@ -107,7 +107,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		throw_inval_arg ("pixel bitdepth not supported.");
 	}
 
-	if (_plane_out >= NBR_PLANES)
+	if (_plane_out >= _nbr_planes)
 	{
 		throw_inval_arg (
 			"singleout is a plane index and must be -1 or ranging from 0 to 3."
@@ -172,7 +172,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	_vi_out.format = fmt_dst_ptr;
 	const ::VSFormat &fmt_dst = *fmt_dst_ptr;
 
-	const int      nbr_expected_coef = NBR_PLANES * (NBR_PLANES + 1);
+	const int      nbr_expected_coef = _nbr_planes * (_nbr_planes + 1);
 
 	bool           mat_init_flag = false;
 
@@ -192,8 +192,14 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 
 		fmtcl::Mat4    m2s;
 		fmtcl::Mat4    m2d;
-		make_mat_from_str (m2s, mats, true);
-		make_mat_from_str (m2d, matd, false);
+		if (fmtcl::MatrixUtil::make_mat_from_str (m2s, mats, true) != 0)
+		{
+			throw_inval_arg ("unknown source matrix identifier.");
+		}
+		if (fmtcl::MatrixUtil::make_mat_from_str (m2d, matd, false) != 0)
+		{
+			throw_inval_arg ("unknown destination matrix identifier.");
+		}
 		_csp_out = find_cs_from_mat_str (*this, matd, false);
 
 		_mat_main = m2d * m2s;
@@ -223,13 +229,13 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 			throw_inval_arg ("coef has a wrong number of elements.");
 		}
 
-		for (int y = 0; y < NBR_PLANES + 1; ++y)
+		for (int y = 0; y < _nbr_planes + 1; ++y)
 		{
-			for (int x = 0; x < NBR_PLANES + 1; ++x)
+			for (int x = 0; x < _nbr_planes + 1; ++x)
 			{
 				_mat_main [y] [x] = (x == y) ? 1 : 0;
 
-				if (   (x < fmt_src.numPlanes || x == NBR_PLANES)
+				if (   (x < fmt_src.numPlanes || x == _nbr_planes)
 				    &&  y < fmt_dst.numPlanes)
 				{
 					int            err = 0;
@@ -319,26 +325,26 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 		const int         h  =  _vsapi.getFrameHeight (&src, 0);
 		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
 
-		uint8_t * const   dst_ptr_arr [fmtcl::MatrixProc::NBR_PLANES] =
+		uint8_t * const   dst_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
 		{
 			                        _vsapi.getWritePtr (dst_ptr, 0),
 			(_plane_out >= 0) ? 0 : _vsapi.getWritePtr (dst_ptr, 1),
 			(_plane_out >= 0) ? 0 : _vsapi.getWritePtr (dst_ptr, 2)
 		};
-		const int         dst_str_arr [fmtcl::MatrixProc::NBR_PLANES] =
+		const int         dst_str_arr [fmtcl::MatrixProc::_nbr_planes] =
 		{
 			                        _vsapi.getStride (dst_ptr, 0),
 			(_plane_out >= 0) ? 0 : _vsapi.getStride (dst_ptr, 1),
 			(_plane_out >= 0) ? 0 : _vsapi.getStride (dst_ptr, 2)
 		};
 		const uint8_t * const
-		                  src_ptr_arr [fmtcl::MatrixProc::NBR_PLANES] =
+		                  src_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
 		{
 			_vsapi.getReadPtr (&src, 0),
 			_vsapi.getReadPtr (&src, 1),
 			_vsapi.getReadPtr (&src, 2)
 		};
-		const int         src_str_arr [fmtcl::MatrixProc::NBR_PLANES] =
+		const int         src_str_arr [fmtcl::MatrixProc::_nbr_planes] =
 		{
 			_vsapi.getStride (&src, 0),
 			_vsapi.getStride (&src, 1),
@@ -371,7 +377,7 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 		}
 	}
 
-	return (dst_ptr);
+	return dst_ptr;
 }
 
 
@@ -406,62 +412,15 @@ void	Matrix::select_def_mat (std::string &mat, const ::VSFormat &fmt)
 // mat should be already converted to lower case
 fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (const vsutl::FilterBase &flt, const std::string &mat, bool allow_2020cl_flag)
 {
-	fmtcl::ColorSpaceH265   cs = fmtcl::ColorSpaceH265_UNSPECIFIED;
+	const auto     cs =
+		fmtcl::MatrixUtil::find_cs_from_mat_str (mat, allow_2020cl_flag);
 
-	if (mat.empty () || mat == "rgb")
-	{
-		cs = fmtcl::ColorSpaceH265_RGB;
-	}
-	else if (mat == "601")
-	{
-		cs = fmtcl::ColorSpaceH265_SMPTE170M;
-	}
-	else if (mat == "709")
-	{
-		cs = fmtcl::ColorSpaceH265_BT709;
-	}
-	else if (mat == "240")
-	{
-		cs = fmtcl::ColorSpaceH265_SMPTE240M;
-	}
-	else if (mat == "fcc")
-	{
-		cs = fmtcl::ColorSpaceH265_FCC;
-	}
-	else if (mat == "ycgco" || mat == "ycocg")
-	{
-		cs = fmtcl::ColorSpaceH265_YCGCO;
-	}
-	else if (mat == "2020")
-	{
-		cs = fmtcl::ColorSpaceH265_BT2020NCL;
-	}
-	else if (mat == "2020cl" && allow_2020cl_flag)
-	{
-		cs = fmtcl::ColorSpaceH265_BT2020CL;
-	}
-	else if (mat == "ydzdx")
-	{
-		cs = fmtcl::ColorSpaceH265_YDZDX;
-	}
-	else if (mat == "lms")
-	{
-		cs = fmtcl::ColorSpaceH265_LMS;
-	}
-	else if (mat == "ictcp_pq")
-	{
-		cs = fmtcl::ColorSpaceH265_ICTCP_PQ;
-	}
-	else if (mat == "ictcp_hlg")
-	{
-		cs = fmtcl::ColorSpaceH265_ICTCP_HLG;
-	}
-	else
+	if (cs == fmtcl::ColorSpaceH265_UNDEF)
 	{
 		flt.throw_inval_arg ("unknown matrix identifier.");
 	}
 
-	return (cs);
+	return cs;
 }
 
 
@@ -471,6 +430,10 @@ fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (const vsutl::FilterBase &flt
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr int	Matrix::_nbr_planes;
 
 
 
@@ -629,238 +592,7 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 		}
 	}
 
-	return (fmt_dst_ptr);
-}
-
-
-
-void	Matrix::make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_rgb_flag) const
-{
-	if (mat.empty () || mat == "rgb")
-	{
-		m[0][0] = 1; m[0][1] = 0; m[0][2] = 0;
-		m[1][0] = 0; m[1][1] = 1; m[1][2] = 0;
-		m[2][0] = 0; m[2][1] = 0; m[2][2] = 1;
-		m.clean3 (1);
-	}
-	else if (mat == "601")
-	{
-		make_mat_yuv (m, 0.299, 0.587, 0.114, to_rgb_flag);
-	}
-	else if (mat == "709")
-	{
-		make_mat_yuv (m, 0.2126, 0.7152, 0.0722, to_rgb_flag);
-	}
-	else if (mat == "240")
-	{
-		make_mat_yuv (m, 0.212, 0.701, 0.087, to_rgb_flag);
-	}
-	else if (mat == "fcc")
-	{
-		make_mat_yuv (m, 0.30, 0.59, 0.11, to_rgb_flag);
-	}
-	else if (mat == "ycgco" || mat == "ycocg")
-	{
-		make_mat_ycgco (m, to_rgb_flag);
-	}
-	else if (mat == "2020")
-	{
-		make_mat_yuv (m, 0.2627, 0.678, 0.0593, to_rgb_flag);
-	}
-	else if (mat == "ydzdx")
-	{
-		make_mat_ydzdx (m, to_rgb_flag);
-	}
-	else if (mat == "lms")
-	{
-		make_mat_lms (m, to_rgb_flag);
-	}
-	else if (mat == "ictcp_pq")
-	{
-		make_mat_ictcp (m, false, to_rgb_flag);
-	}
-	else if (mat == "ictcp_hlg")
-	{
-		make_mat_ictcp (m, true, to_rgb_flag);
-	}
-	else
-	{
-		throw_inval_arg ("unknown matrix identifier.");
-	}
-}
-
-
-
-/*
-kr/kg/kb matrix (Rec. ITU-T H.265 2019-06, p. 413):
-
-R = Y                  + V*(1-Kr)
-G = Y - U*(1-Kb)*Kb/Kg - V*(1-Kr)*Kr/Kg
-B = Y + U*(1-Kb)
-
-Y =                  R * Kr        + G * Kg        + B * Kb
-U = (B-Y)/(1-Kb) = - R * Kr/(1-Kb) - G * Kg/(1-Kb) + B
-V = (R-Y)/(1-Kr) =   R             - G * Kg/(1-Kr) - B * Kb/(1-Kr)
-
-The given equations work for R, G, B in range [0 ; 1] and U and V in range
-[-1 ; 1]. Scaling must be applied to match the required range for U and V.
-
-R, G, B, Y range : [0 ; 1]
-U, V range : [-0.5 ; 0.5]
-*/
-
-void	Matrix::make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag)
-{
-	assert (! fstb::is_null (kg));
-	assert (! fstb::is_eq (kb, 1.0));
-	assert (! fstb::is_eq (kr, 1.0));
-
-	const double   r = 0.5;
-	const double   x = 1.0 / r;
-	if (to_rgb_flag)
-	{
-		m[0][0] = 1; m[0][1] =              0; m[0][2] = x*(1-kr)      ;
-		m[1][0] = 1; m[1][1] = x*(kb-1)*kb/kg; m[1][2] = x*(kr-1)*kr/kg;
-		m[2][0] = 1; m[2][1] = x*(1-kb)      ; m[2][2] =              0;
-	}
-
-	else
-	{
-		m[0][0] =     kr     ; m[0][1] =   kg       ; m[0][2] =   kb       ;
-		m[1][0] = r*kr/(kb-1); m[1][1] = r*kg/(kb-1); m[1][2] = r          ;
-		m[2][0] = r          ; m[2][1] = r*kg/(kr-1); m[2][2] = r*kb/(kr-1);
-	}
-
-	m.clean3 (1);
-}
-
-
-
-/*
-YCgCo matrix (Rec. ITU-T H.265 2019-06, p. 413):
-
-R  = Y - Cg + Co
-G  = Y + Cg
-B  = Y - Cg - Co
-
-Y  =  0.25 * R + 0.5  * G + 0.25 * B
-Cg = -0.25 * R + 0.5  * G - 0.25 * B
-Co =  0.5  * R            - 0.5  * B
-
-R, G, B, Y range : [0 ; 1]
-Cg, Co range : [-0.5 ; 0.5]
-
-Note: this implementation is not exactly the same as specified because the
-standard specifies specific steps to apply the RGB-to-YCgCo matrix, leading
-to different roundings.
-*/
-
-void	Matrix::make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag)
-{
-	if (to_rgb_flag)
-	{
-		m[0][0] = 1; m[0][1] = -1; m[0][2] =  1;
-		m[1][0] = 1; m[1][1] =  1; m[1][2] =  0;
-		m[2][0] = 1; m[2][1] = -1; m[2][2] = -1;
-	}
-	else
-	{
-		m[0][0] =  0.25; m[0][1] = 0.5; m[0][2] =  0.25;
-		m[1][0] = -0.25; m[1][1] = 0.5; m[1][2] = -0.25;
-		m[2][0] =  0.5 ; m[2][1] = 0  ; m[2][2] = -0.5 ;
-	}
-
-	m.clean3 (1);
-}
-
-
-
-/*
-YDzDx transform (Rec. ITU-T H.265 2019-06, p. 414)
-
-Y  = G
-Dz = 0.5 * (0.986566 * B - Y)
-Dx = 0.5 * (R - 0.991902 * Y)
-
-Y  =                      G
-Dz =         - 0.5      * G + 0.493283 * B
-Dx = 0.5 * R - 0.495951 * G
-*/
-
-void	Matrix::make_mat_ydzdx (fmtcl::Mat4 &m, bool to_rgb_flag)
-{
-	fmtcl::Mat3    m3;
-	m3[0][0] = 0  ; m3[0][1] =  1       ; m3[0][2] = 0;
-	m3[1][0] = 0  ; m3[1][1] = -0.5     ; m3[1][2] = 0.493283;
-	m3[2][0] = 0.5; m3[2][1] = -0.495951; m3[2][2] = 0;
-
-	if (to_rgb_flag)
-	{
-		m3.invert ();
-	}
-
-	m.insert3 (m3);
-	m.clean3 (1);
-}
-
-
-
-/*
-LMS transform (Rec. ITU-T H.265 2019-06, p. 411)
-
-LMS is an intermediate colorspace for ICtCp transforms.
-LMS data are conveyed on RGB planes.
-Here, to_rgb_flag indicates real RGB target.
-*/
-
-void	Matrix::make_mat_lms (fmtcl::Mat4 &m, bool to_rgb_flag)
-{
-	fmtcl::Mat3    m3;
-	m3[0][0] = 1688; m3[0][1] = 2146; m3[0][2] =  262;
-	m3[1][0] =  683; m3[1][1] = 2951; m3[1][2] =  462;
-	m3[2][0] =   99; m3[2][1] =  309; m3[2][2] = 3688;
-	m3 *= 1.0 / 4096;
-
-	if (to_rgb_flag)
-	{
-		m3.invert ();
-	}
-
-	m.insert3 (m3);
-	m.clean3 (1);
-}
-
-
-
-/*
-ICtCp transfrom from and to LMS (Rec. ITU-T H.265 2019-06, p. 414)
-
-LMS data are conveyed on RGB planes.
-*/
-
-void	Matrix::make_mat_ictcp (fmtcl::Mat4 &m, bool hlg_flag, bool to_lms_flag)
-{
-	fmtcl::Mat3    m3;
-	m3[0][0] =  2048; m3[0][1] =   2048; m3[0][2] =    0;
-	if (hlg_flag)
-	{
-		m3[1][0] =  3625; m3[1][1] =  -7465; m3[1][2] = 3840;
-		m3[2][0] =  9500; m3[2][1] =  -9212; m3[2][2] = -288;
-	}
-	else
-	{
-		m3[1][0] =  6610; m3[1][1] = -13613; m3[1][2] = 7003;
-		m3[2][0] = 17933; m3[2][1] = -17390; m3[2][2] = -543;
-	}
-	m3 *= 1.0 / 4096;
-
-	if (to_lms_flag)
-	{
-		m3.invert ();
-	}
-
-	m.insert3 (m3);
-	m.clean3 (1);
+	return fmt_dst_ptr;
 }
 
 

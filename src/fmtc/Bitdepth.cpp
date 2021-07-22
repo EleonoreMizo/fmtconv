@@ -250,7 +250,7 @@ const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &
 		}
 	}
 
-	return (dst_ptr);
+	return dst_ptr;
 }
 
 
@@ -306,7 +306,7 @@ int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 		}
 	}
 
-	return (ret_val);
+	return ret_val;
 }
 
 
@@ -404,7 +404,7 @@ const ::VSFormat &	Bitdepth::get_output_colorspace (const ::VSMap &in, ::VSMap &
 		}
 	}
 
-	return (*fmt_dst_ptr);
+	return *fmt_dst_ptr;
 }
 
 

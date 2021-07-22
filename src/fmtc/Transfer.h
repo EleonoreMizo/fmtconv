@@ -84,14 +84,6 @@ private:
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
-	fmtcl::TransOpLogC::ExpIdx
-	               conv_logc_ei (int val_raw) const;
-
-	void           init_table ();
-
-	static fmtcl::TransCurve
-	               conv_string_to_curve (const vsutl::FilterBase &flt, const std::string &str);
-	static OpSPtr  conv_curve_to_op (fmtcl::TransCurve c, bool inv_flag, fmtcl::TransOpLogC::ExpIdx logc_ei);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
@@ -132,7 +124,9 @@ private:
 
 	               Transfer ()                               = delete;
 	               Transfer (const Transfer &other)          = delete;
+	               Transfer (Transfer &&other)               = delete;
 	Transfer &     operator = (const Transfer &other)        = delete;
+	Transfer &     operator = (Transfer &&other)             = delete;
 	bool           operator == (const Transfer &other) const = delete;
 	bool           operator != (const Transfer &other) const = delete;
 

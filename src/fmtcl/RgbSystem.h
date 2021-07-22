@@ -45,29 +45,31 @@ class RgbSystem
 
 public:
 
-	static const int  NBR_PLANES = 3;
+	static constexpr int _nbr_planes = 3;
 
 	class Vec2
-	:	public std::array <double, NBR_PLANES - 1>
+	:	public std::array <double, _nbr_planes - 1>
 	{
-		typedef std::array <double, NBR_PLANES - 1> Inherited;
+		typedef std::array <double, _nbr_planes - 1> Inherited;
 	public:
 		               Vec2 () = default;
 		               Vec2 (double c0, double c1);
 	};
 
 	               RgbSystem ();
-	               RgbSystem (const RgbSystem &other)         = default;
-	virtual        ~RgbSystem ()                              = default;
-	RgbSystem &    operator = (const RgbSystem &other)        = default;
+	               RgbSystem (const RgbSystem &other)  = default;
+	               RgbSystem (RgbSystem &&other)       = default;
+	virtual        ~RgbSystem ()                       = default;
+	RgbSystem &    operator = (const RgbSystem &other) = default;
+	RgbSystem &    operator = (RgbSystem &&other)      = default;
 
 	void           set (PrimariesPreset preset);
 	bool           is_ready () const;
 
-	std::array <Vec2, NBR_PLANES>       // x,y coordinates for R, G and B
+	std::array <Vec2, _nbr_planes>      // x,y coordinates for R, G and B
 	               _rgb;
 	Vec2           _white;              // XYZ coordinates for the ref. white
-	std::array <bool, NBR_PLANES + 1>   // R, G, B, W
+	std::array <bool, _nbr_planes + 1>  // R, G, B, W
 	               _init_flag_arr;
 	fmtcl::PrimariesPreset              // If known
 	               _preset;

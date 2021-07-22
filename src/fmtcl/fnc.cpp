@@ -25,6 +25,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/fnc.h"
+#include "fmtcl/Mat4.h"
+#include "fmtcl/MatrixProc.h"
+#include "fmtcl/PicFmt.h"
+
+#include <algorithm>
 
 #include <cassert>
 #include <cstdint>
@@ -36,7 +41,101 @@ namespace fmtcl
 
 
 
+/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+static void	override_fmt_with_csp (PicFmt &fmt, ColorSpaceH265 csp_out, int plane_out)
+{
+	if (plane_out >= 0)
+	{
+		if (csp_out == ColorSpaceH265_RGB)
+		{
+			fmt._col_fam = ColorFamily_RGB;
+		}
+		else if (csp_out == ColorSpaceH265_YCGCO)
+		{
+			fmt._col_fam = ColorFamily_YCGCO;
+		}
+		else
+		{
+			fmt._col_fam = ColorFamily_YUV;
+		}
+	}
+}
+
+
+
+// Int: depends on the input format (may be float too)
+// R, G, B, Y: [0 ; 1]
+// U, V, Cg, Co : [-0.5 ; 0.5]
+static void	make_mat_flt_int (Mat4 &m, bool to_flt_flag, const PicFmt &fmt)
+{
+	PicFmt         fmt2 (fmt);
+	fmt2._sf = SplFmt_FLOAT;
+
+	const PicFmt * fmt_src_ptr = &fmt2;
+	const PicFmt * fmt_dst_ptr = &fmt;
+	if (to_flt_flag)
+	{
+		std::swap (fmt_src_ptr, fmt_dst_ptr);
+	}
+
+	double         ay, by;
+	double         ac, bc;
+	const int      ch_plane = (fmt_dst_ptr->_col_fam != ColorFamily_GRAY) ? 1 : 0;
+	compute_fmt_mac_cst (ay, by, *fmt_dst_ptr, *fmt_src_ptr, 0       );
+	compute_fmt_mac_cst (ac, bc, *fmt_dst_ptr, *fmt_src_ptr, ch_plane);
+
+	m[0][0] = ay; m[0][1] =  0; m[0][2] =  0; m[0][3] = by;
+	m[1][0] =  0; m[1][1] = ac; m[1][2] =  0; m[1][3] = bc;
+	m[2][0] =  0; m[2][1] =  0; m[2][2] = ac; m[2][3] = bc;
+	m[3][0] =  0; m[3][1] =  0; m[3][2] =  0; m[3][3] =  1;
+}
+
+
+
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+int	compute_plane_width (ColorFamily col_fam, int ss_h, int base_w, int plane_index)
+{
+	assert (col_fam >= 0);
+	assert (col_fam < ColorFamily_NBR_ELT);
+	assert (plane_index >= 0);
+	assert (ss_h >= 0);
+	assert (base_w >= 0);
+
+	int            plane_w = base_w;
+	if (is_chroma_plane (col_fam, plane_index))
+	{
+		assert ((base_w & ((1 << ss_h) - 1)) == 0);
+		plane_w >>= ss_h;
+	}
+
+	return plane_w;
+}
+
+
+
+int	compute_plane_height (ColorFamily col_fam, int ss_v, int base_h, int plane_index)
+{
+	assert (col_fam >= 0);
+	assert (col_fam < ColorFamily_NBR_ELT);
+	assert (plane_index >= 0);
+	assert (ss_v >= 0);
+	assert (base_h >= 0);
+
+	int            plane_h = base_h;
+	if (is_chroma_plane (col_fam, plane_index))
+	{
+		assert ((base_h & ((1 << ss_v) - 1)) == 0);
+		plane_h >>= ss_v;
+	}
+
+	return plane_h;
+}
 
 
 
@@ -73,25 +172,21 @@ bool	is_full_range_default (ColorFamily col_fam)
 
 
 
-double	compute_pix_scale (SplFmt spl_fmt, int nbr_bits, ColorFamily col_fam, int plane_index, bool full_flag)
+double	compute_pix_scale (const PicFmt &fmt, int plane_index)
 {
-	assert (spl_fmt >= 0);
-	assert (spl_fmt < SplFmt_NBR_ELT);
-	assert (nbr_bits > 0);
-	assert (col_fam >= 0);
-	assert (col_fam < ColorFamily_NBR_ELT);
+	assert (fmt.is_valid ());
 	assert (plane_index >= 0);
 
 	double         scale = 1.0;
 
-	if (spl_fmt != SplFmt_FLOAT)
+	if (fmt._sf != SplFmt_FLOAT)
 	{
-		const int      bps_m8 = nbr_bits - 8;
-		if (full_flag)
+		const int      bps_m8 = fmt._res - 8;
+		if (fmt._full_flag)
 		{
-			scale = double ((uint64_t (1) << nbr_bits) - 1);
+			scale = double ((uint64_t (1) << fmt._res) - 1);
 		}
-		else if (is_chroma_plane (col_fam, plane_index))
+		else if (is_chroma_plane (fmt._col_fam, plane_index))
 		{
 			scale = double ((uint64_t (224)) << bps_m8);
 		}
@@ -101,32 +196,28 @@ double	compute_pix_scale (SplFmt spl_fmt, int nbr_bits, ColorFamily col_fam, int
 		}
 	}
 
-	return (scale);
+	return scale;
 }
 
 
 
-double	get_pix_min (SplFmt spl_fmt, int nbr_bits, ColorFamily col_fam, int plane_index, bool full_flag)
+double	get_pix_min (const PicFmt &fmt, int plane_index)
 {
-	assert (spl_fmt >= 0);
-	assert (spl_fmt < SplFmt_NBR_ELT);
-	assert (nbr_bits > 0);
-	assert (col_fam >= 0);
-	assert (col_fam < ColorFamily_NBR_ELT);
+	assert (fmt.is_valid ());
 	assert (plane_index >= 0);
 
 	double         add_val = 0;
 
-	if (spl_fmt == SplFmt_FLOAT)
+	if (fmt._sf == SplFmt_FLOAT)
 	{
-		if (is_chroma_plane (col_fam, plane_index))
+		if (is_chroma_plane (fmt._col_fam, plane_index))
 		{
 			add_val = -0.5;
 		}
 	}
-	else if (full_flag)
+	else if (fmt._full_flag)
 	{
-		if (is_chroma_plane (col_fam, plane_index))
+		if (is_chroma_plane (fmt._col_fam, plane_index))
 		{
 			// So the neutral value (0) is exactly: 1 << (nbr_bits - 1)
 			add_val = 0.5;
@@ -134,34 +225,74 @@ double	get_pix_min (SplFmt spl_fmt, int nbr_bits, ColorFamily col_fam, int plane
 	}
 	else
 	{
-		add_val = double ((uint64_t (16)) << (nbr_bits - 8));
+		add_val = double ((uint64_t (16)) << (fmt._res - 8));
 	}
 
-	return (add_val);
+	return add_val;
 }
 
 
 
-void	compute_fmt_mac_cst (double &gain, double &add_cst, SplFmt dst_spl_fmt, int dst_nbr_bits, ColorFamily dst_col_fam, bool dst_full_flag, SplFmt src_spl_fmt, int src_nbr_bits, ColorFamily src_col_fam, bool src_full_flag, int plane_index)
+void	compute_fmt_mac_cst (double &gain, double &add_cst, const PicFmt &dst_fmt, const PicFmt &src_fmt, int plane_index)
 {
 	// (X_d - m_d) / S_d  =  (X_s - m_s) / S_s
 	// X_d = X_s * (S_d / S_s) + (m_d - m_s * S_d / S_s)
 	//                gain              add_cst
-	const double   scale_src = compute_pix_scale (
-		src_spl_fmt, src_nbr_bits, src_col_fam, plane_index, src_full_flag
-	);
-	const double   scale_dst = compute_pix_scale (
-		dst_spl_fmt, dst_nbr_bits, dst_col_fam, plane_index, dst_full_flag
-	);
+	const double   scale_src = compute_pix_scale (src_fmt, plane_index);
+	const double   scale_dst = compute_pix_scale (dst_fmt, plane_index);
 	gain = scale_dst / scale_src;
 
-	const double   cst_src = get_pix_min (
-		src_spl_fmt, src_nbr_bits, src_col_fam, plane_index, src_full_flag
-	);
-	const double   cst_dst = get_pix_min (
-		dst_spl_fmt, dst_nbr_bits, dst_col_fam, plane_index, dst_full_flag
-	);
+	const double   cst_src = get_pix_min (src_fmt, plane_index);
+	const double   cst_dst = get_pix_min (dst_fmt, plane_index);
 	add_cst = cst_dst - cst_src * gain;
+}
+
+
+
+int	prepare_matrix_coef (MatrixProc &mat_proc, const Mat4 &mat_main, const PicFmt &dst_fmt, const PicFmt &src_fmt, ColorSpaceH265 csp_out, int plane_out)
+{
+	const bool     int_proc_flag =
+		(SplFmt_is_int (src_fmt._sf) && SplFmt_is_int (dst_fmt._sf));
+
+	Mat4           m (1, Mat4::Preset_DIAGONAL);
+
+	PicFmt         dst_fmt2 = dst_fmt;
+	if (int_proc_flag)
+	{
+		// For the coefficient calculation, use the same output bitdepth
+		// as the input. The bitdepth change will be done separately with
+		// a simple bitshift.
+		dst_fmt2._res = src_fmt._res;
+	}
+
+	override_fmt_with_csp (dst_fmt2, csp_out, plane_out);
+
+	Mat4           m1s;
+	Mat4           m1d;
+	make_mat_flt_int (m1s, true , src_fmt );
+	make_mat_flt_int (m1d, false, dst_fmt2);
+	m *= m1d;
+	if (! int_proc_flag)
+	{
+		if (plane_out > 0 && is_chroma_plane (dst_fmt2._col_fam, plane_out))
+		{
+			// When we extract a single plane, it's a conversion to R or
+			// to Y, so the outout range is always [0; 1]. Therefore we
+			// need to offset the chroma planes.
+			m [plane_out] [MatrixProc::_nbr_planes] += 0.5;
+		}
+	}
+	m *= mat_main;
+	m *= m1s;
+
+	const MatrixProc::Err   ret_val = mat_proc.configure (
+		m, int_proc_flag,
+		src_fmt._sf, src_fmt._res,
+		dst_fmt._sf, dst_fmt._res,
+		plane_out
+	);
+
+	return ret_val;
 }
 
 

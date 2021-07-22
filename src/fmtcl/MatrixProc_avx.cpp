@@ -70,7 +70,7 @@ void	MatrixProc::setup_fnc_avx (bool int_proc_flag, SplFmt src_fmt, int src_bits
 
 
 
-void	MatrixProc::process_3_flt_avx (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_3_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -79,7 +79,7 @@ void	MatrixProc::process_3_flt_avx (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);
@@ -158,7 +158,7 @@ void	MatrixProc::process_3_flt_avx (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 
 
 
-void	MatrixProc::process_1_flt_avx (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_1_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -167,7 +167,7 @@ void	MatrixProc::process_1_flt_avx (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);

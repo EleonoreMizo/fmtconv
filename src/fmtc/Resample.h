@@ -28,8 +28,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/ChromaPlacement.h"
+#include "fmtcl/ColorFamily.h"
 #include "fmtcl/FilterResize.h"
+#include "fmtcl/InterlacingType.h"
 #include "fmtcl/KernelData.h"
+#include "fmtcl/ResamplePlaneData.h"
 #include "fmtcl/ResampleSpecPlane.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
@@ -86,7 +89,7 @@ protected:
 
 private:
 
-	static const int  MAX_NBR_PLANES = 3;
+	static constexpr int _max_nbr_planes = 3;
 
 	enum InterlacingParam
 	{
@@ -106,55 +109,16 @@ private:
 		FieldOrder_NBR_ELT
 	};
 
-	enum InterlacingType
-	{
-		InterlacingType_FRAME = 0,
-		InterlacingType_TOP,
-		InterlacingType_BOT,
-
-		InterlacingType_NBR_ELT
-	};
-
-	class Win
-	{
-	public:
-		double         _x;	// Data is in full coordinates whatever the plane (never subsampled)
-		double         _y;
-		double         _w;
-		double         _h;
-	};
-
 	class FrameInfo
 	{
 	public:
-		bool           _itl_s_flag;
-		bool           _top_s_flag;
-		bool           _itl_d_flag;
-		bool           _top_d_flag;
+		bool           _itl_s_flag = false;
+		bool           _top_s_flag = false;
+		bool           _itl_d_flag = false;
+		bool           _top_d_flag = false;
 	};
 
-	// Array order: [dest] [src]
-	typedef std::array <fmtcl::ResampleSpecPlane, InterlacingType_NBR_ELT> SpecSrcArray;
-	typedef std::array <SpecSrcArray,             InterlacingType_NBR_ELT> SpecArray;
-
-	class PlaneData
-	{
-	public:
-		typedef std::array <
-			fmtcl::KernelData,
-			fmtcl::FilterResize::Dir_NBR_ELT
-		>  KernelArray;
-		Win            _win;
-		SpecArray      _spec_arr;        // Contains the spec (used as a key) for each plane/interlacing combination
-		KernelArray    _kernel_arr;
-		double         _kernel_scale_h;  // Can be negative (forced scaling)
-		double         _kernel_scale_v;  // Can be negative (forced scaling)
-		double         _gain;
-		double         _add_cst;
-		bool           _preserve_center_flag;
-	};
-
-	typedef std::array <PlaneData, MAX_NBR_PLANES> PlaneDataArray;
+	typedef std::array <fmtcl::ResamplePlaneData, _max_nbr_planes> PlaneDataArray;
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
@@ -163,11 +127,8 @@ private:
 	int            process_plane_proc (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr);
 	int            process_plane_copy (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr);
 	fmtcl::FilterResize *
-	               create_or_access_plane_filter (int plane_index, InterlacingType itl_d, InterlacingType itl_s);
-	void           create_plane_specs ();
-
-	static InterlacingType
-	               get_itl_type (bool itl_flag, bool top_flag);
+	               create_or_access_plane_filter (int plane_index, fmtcl::InterlacingType itl_d, fmtcl::InterlacingType itl_s);
+	void           create_all_plane_specs ();
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
@@ -222,7 +183,9 @@ private:
 
 	               Resample ()                               = delete;
 	               Resample (const Resample &other)          = delete;
+	               Resample (Resample &&other)               = delete;
 	Resample &     operator = (const Resample &other)        = delete;
+	Resample &     operator = (Resample &&other)             = delete;
 	bool           operator == (const Resample &other) const = delete;
 	bool           operator != (const Resample &other) const = delete;
 

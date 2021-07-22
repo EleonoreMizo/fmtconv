@@ -83,7 +83,7 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 	assert (dst_fmt < SplFmt_NBR_ELT);
 	assert (dst_bits >= 8);
 	assert (dst_bits <= 32);
-	assert (plane_out <= NBR_PLANES);
+	assert (plane_out <= _nbr_planes);
 	assert (   (dst_fmt == SplFmt_FLOAT && src_fmt == SplFmt_FLOAT)
 	        || (dst_fmt != SplFmt_FLOAT && src_fmt != SplFmt_FLOAT));
 
@@ -196,7 +196,7 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 
 
 
-void	MatrixProc::process (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (_proc_ptr != 0);
 
@@ -215,19 +215,19 @@ void	MatrixProc::process (uint8_t * const dst_ptr_arr [NBR_PLANES], const int ds
 
 void	MatrixProc::set_matrix_flt (const Mat4 &m, int plane_out)
 {
-	assert (plane_out <= NBR_PLANES);
+	assert (plane_out <= _nbr_planes);
 
 	const int      plane_beg = (plane_out >= 0) ? plane_out     : 0;
-	const int      plane_end = (plane_out >= 0) ? plane_out + 1 : NBR_PLANES;
+	const int      plane_end = (plane_out >= 0) ? plane_out + 1 : _nbr_planes;
 
-	_coef_flt_arr.resize (NBR_PLANES * MAT_SIZE, 0);
+	_coef_flt_arr.resize (_nbr_planes * _mat_size, 0);
 	for (int y = plane_beg; y < plane_end; ++y)
 	{
 		const int      y_dest = (plane_out >= 0) ? 0 : y;
-		for (int x = 0; x < MAT_SIZE; ++x)
+		for (int x = 0; x < _mat_size; ++x)
 		{
 			const float    c = float (m [y] [x]);
-			_coef_flt_arr [y_dest * MAT_SIZE + x] = c;
+			_coef_flt_arr [y_dest * _mat_size + x] = c;
 		}
 	}
 }
@@ -236,7 +236,7 @@ void	MatrixProc::set_matrix_flt (const Mat4 &m, int plane_out)
 
 MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int src_bits, int dst_bits)
 {
-	assert (plane_out <= NBR_PLANES);
+	assert (plane_out <= _nbr_planes);
 	assert (src_bits >= 8);
 	assert (src_bits <= 16);
 	assert (dst_bits >= 8);
@@ -245,9 +245,9 @@ MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int sr
 	Err            ret_val   = Err_OK;
 
 	const int      plane_beg = (plane_out >= 0) ? plane_out     : 0;
-	const int      plane_end = (plane_out >= 0) ? plane_out + 1 : NBR_PLANES;
+	const int      plane_end = (plane_out >= 0) ? plane_out + 1 : _nbr_planes;
 
-	_coef_int_arr.resize (NBR_PLANES * MAT_SIZE, 0);
+	_coef_int_arr.resize (_nbr_planes * _mat_size, 0);
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	if (_sse2_flag || _avx2_flag)
@@ -256,15 +256,15 @@ MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int sr
 		{
 			_coef_simd_arr.set_avx2_mode (true);
 		}
-		_coef_simd_arr.resize (NBR_PLANES * MAT_SIZE);
+		_coef_simd_arr.resize (_nbr_planes * _mat_size);
 	}
 #endif
 
 	// Coefficient scale
-	const double   cintsc    = double ((uint64_t (1)) << SHIFT_INT);
+	const double   cintsc    = double ((uint64_t (1)) << _shift_int);
 
 	// Rounding constant
-	const int      div_shift = SHIFT_INT + src_bits - dst_bits;
+	const int      div_shift = _shift_int + src_bits - dst_bits;
 	const int      rnd       = 1 << (div_shift - 1);
 
 	for (int y = plane_beg; y < plane_end; ++y)
@@ -282,11 +282,11 @@ MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int sr
 		double         bias_flt = (dst_bits == 16) ? -1 : 0;
 #endif   // fstb_ARCHI_X86
 
-		for (int x = 0; x < MAT_SIZE; ++x)
+		for (int x = 0; x < _mat_size; ++x)
 		{
-			const bool     add_flag = (x == NBR_PLANES);
+			const bool     add_flag = (x == _nbr_planes);
 			const int      y_dest   = (plane_out >= 0) ? 0 : y;
-			const int      index    = y_dest * MAT_SIZE + x;
+			const int      index    = y_dest * _mat_size + x;
 
 			const double   c        = m [y] [x];
 			double         scaled_c = c * cintsc;
@@ -338,7 +338,7 @@ MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int sr
 					if (dst_bits == 16 || src_bits == 16)
 					{
 						const double   scale = double (
-							(uint64_t (1)) << (src_bits + SHIFT_INT - 1)
+							(uint64_t (1)) << (src_bits + _shift_int - 1)
 						);
 						const int      bias = fstb::round_int (bias_flt * scale);
 
@@ -428,7 +428,7 @@ void	MatrixProc::setup_fnc_sse2 (bool int_proc_flag, SplFmt src_fmt, int src_bit
 
 
 template <typename DST, int DB, class SRC, int SB>
-void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -437,7 +437,7 @@ void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 
 	typedef typename SRC::PtrConst::Type SrcPtr;
 	typedef typename DST::Ptr::Type      DstPtr;
@@ -476,15 +476,15 @@ void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 			const int      d0 = (  s0 * _coef_int_arr [ 0]
 			                     + s1 * _coef_int_arr [ 1]
 			                     + s2 * _coef_int_arr [ 2]
-			                     +      _coef_int_arr [ 3]) >> (SHIFT_INT + SB - DB);
+			                     +      _coef_int_arr [ 3]) >> (_shift_int + SB - DB);
 			const int      d1 = (  s0 * _coef_int_arr [ 4]
 			                     + s1 * _coef_int_arr [ 5]
 			                     + s2 * _coef_int_arr [ 6]
-			                     +      _coef_int_arr [ 7]) >> (SHIFT_INT + SB - DB);
+			                     +      _coef_int_arr [ 7]) >> (_shift_int + SB - DB);
 			const int      d2 = (  s0 * _coef_int_arr [ 8]
 			                     + s1 * _coef_int_arr [ 9]
 			                     + s2 * _coef_int_arr [10]
-			                     +      _coef_int_arr [11]) >> (SHIFT_INT + SB - DB);
+			                     +      _coef_int_arr [11]) >> (_shift_int + SB - DB);
 
 			DST::template write_clip <DB> (dst_0_ptr, d0);
 			DST::template write_clip <DB> (dst_1_ptr, d1);
@@ -512,7 +512,7 @@ void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 
 
 template <typename DST, int DB, class SRC, int SB>
-void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -521,7 +521,7 @@ void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 
 	typedef typename SRC::PtrConst::Type SrcPtr;
 	typedef typename DST::Ptr::Type      DstPtr;
@@ -554,7 +554,7 @@ void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 			const int      d0 = (  s0 * _coef_int_arr [ 0]
 			                     + s1 * _coef_int_arr [ 1]
 			                     + s2 * _coef_int_arr [ 2]
-			                     +      _coef_int_arr [ 3]) >> (SHIFT_INT + SB - DB);
+			                     +      _coef_int_arr [ 3]) >> (_shift_int + SB - DB);
 
 			DST::template write_clip <DB> (dst_0_ptr, d0);
 
@@ -575,7 +575,7 @@ void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 
 
 
-void	MatrixProc::process_3_flt_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_3_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -584,7 +584,7 @@ void	MatrixProc::process_3_flt_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);
@@ -645,7 +645,7 @@ void	MatrixProc::process_3_flt_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 
 
 
-void	MatrixProc::process_1_flt_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_1_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -654,7 +654,7 @@ void	MatrixProc::process_1_flt_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);
@@ -703,7 +703,7 @@ void	MatrixProc::process_1_flt_cpp (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 
 // DST and SRC are ProxyRwSse2 classes
 template <class DST, int DB, class SRC, int SB, int NP>
-void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -712,7 +712,7 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 
 	enum { BPS_SRC = (SB + 7) >> 3 };
 	enum { BPS_DST = (DB + 7) >> 3 };
@@ -754,7 +754,7 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 				dst_str_arr [plane_index],
 				h
 			));
-			const int      cind    = plane_index * MAT_SIZE;
+			const int      cind    = plane_index * _mat_size;
 
 			for (int x = 0; x < w; x += packsize)
 			{
@@ -765,7 +765,7 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 				const __m128i  s1 = SrcS16R::read (src_1_ptr, zero, sign_bit);
 				const __m128i  s2 = SrcS16R::read (src_2_ptr, zero, sign_bit);
 
-				__m128i        d0 = _mm_load_si128 (coef_ptr + cind + NBR_PLANES);
+				__m128i        d0 = _mm_load_si128 (coef_ptr + cind + _nbr_planes);
 				__m128i        d1 = d0;
 
 				// src is variable, up to 16-bit signed (full range, +1 = 32767+1)
@@ -779,8 +779,8 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 				fstb::ToolsSse2::mac_s16_s16_s32 (
 					d0, d1, s2, _mm_load_si128 (coef_ptr + cind + 2));
 
-				d0 = _mm_srai_epi32 (d0, SHIFT_INT + SB - DB);
-				d1 = _mm_srai_epi32 (d1, SHIFT_INT + SB - DB);
+				d0 = _mm_srai_epi32 (d0, _shift_int + SB - DB);
+				d1 = _mm_srai_epi32 (d1, _shift_int + SB - DB);
 
 				__m128i			val = _mm_packs_epi32 (d0, d1);
 
@@ -806,7 +806,7 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 
 
 
-void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -815,7 +815,7 @@ void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);
@@ -892,7 +892,7 @@ void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 
 
 
-void	MatrixProc::process_1_flt_sse (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_1_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -901,7 +901,7 @@ void	MatrixProc::process_1_flt_sse (uint8_t * const dst_ptr_arr [NBR_PLANES], co
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);

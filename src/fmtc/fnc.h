@@ -29,6 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtcl/ColorFamily.h"
 #include "fmtcl/ColorSpaceH265.h"
+#include "fmtcl/PicFmt.h"
 #include "fmtcl/SplFmt.h"
 
 
@@ -50,6 +51,7 @@ namespace fmtc
 
 
 
+fmtcl::PicFmt  conv_vsfmt_to_picfmt (const ::VSFormat &fmt, bool full_flag);
 fmtcl::SplFmt  conv_vsfmt_to_splfmt (const ::VSFormat &fmt);
 fmtcl::ColorFamily
                conv_colfam_to_fmtcl (const ::VSFormat &fmt);

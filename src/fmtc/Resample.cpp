@@ -24,8 +24,10 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtc/fnc.h"
 #include "fmtc/Resample.h"
 #include "fmtc/SplFmtUtl.h"
+#include "fmtcl/ResampleUtil.h"
 #include "fstb/def.h"
 #include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
@@ -203,7 +205,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 	for (int plane_index = 0; plane_index < fmt_src.numPlanes; ++plane_index)
 	{
-		PlaneData &    plane_data = _plane_data_arr [plane_index];
+		auto &         plane_data = _plane_data_arr [plane_index];
 		vsutl::compute_fmt_mac_cst (
 			plane_data._gain,
 			plane_data._add_cst,
@@ -275,10 +277,10 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	const int      nbr_sh = _vsapi.propNumElements (&in, "sh");
 	for (int plane_index = 0; plane_index < fmt_src.numPlanes; ++plane_index)
 	{
-		PlaneData &    plane_data = _plane_data_arr [plane_index];
+		auto &         plane_data = _plane_data_arr [plane_index];
 
 		// Source window
-		Win &          s = plane_data._win;
+		auto &         s = plane_data._win;
 		if (plane_index > 0)
 		{
 			s = _plane_data_arr [plane_index - 1]._win;
@@ -430,7 +432,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		);
 	}
 
-	create_plane_specs ();
+	create_all_plane_specs ();
 }
 
 
@@ -557,7 +559,7 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 		}
 	}
 
-	return (dst_ptr);
+	return dst_ptr;
 }
 
 
@@ -567,15 +569,15 @@ fmtcl::ChromaPlacement	Resample::conv_str_to_chroma_placement (const vsutl::Filt
 	fmtcl::ChromaPlacement  cp_val = fmtcl::ChromaPlacement_MPEG1;
 
 	fstb::conv_to_lower_case (cplace);
-	if (strcmp (cplace.c_str (), "mpeg1") == 0)
+	if (cplace == "mpeg1")
 	{
 		cp_val = fmtcl::ChromaPlacement_MPEG1;
 	}
-	else if (strcmp (cplace.c_str (), "mpeg2") == 0)
+	else if (cplace == "mpeg2")
 	{
 		cp_val = fmtcl::ChromaPlacement_MPEG2;
 	}
-	else if (strcmp (cplace.c_str (), "dv") == 0)
+	else if (cplace == "dv")
 	{
 		cp_val = fmtcl::ChromaPlacement_DV;
 	}
@@ -584,7 +586,7 @@ fmtcl::ChromaPlacement	Resample::conv_str_to_chroma_placement (const vsutl::Filt
 		flt.throw_inval_arg ("unexpected cplace string.");
 	}
 
-	return (cp_val);
+	return cp_val;
 }
 
 
@@ -637,12 +639,16 @@ int	Resample::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 		_plane_processor.fill_plane (dst, val, plane_index);
 	}
 
-	return (ret_val);
+	return ret_val;
 }
 
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr int	Resample::_max_nbr_planes;
 
 
 
@@ -697,7 +703,7 @@ const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &
 		);
 	}
 
-	return (*fmt_dst_ptr);
+	return *fmt_dst_ptr;
 }
 
 
@@ -712,7 +718,7 @@ bool	Resample::cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const 
 		flag = (val != 0);
 	}
 
-	return (flag);
+	return flag;
 }
 
 
@@ -809,10 +815,12 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, voi
 
 	const FrameInfo & frame_info =
 		*reinterpret_cast <const FrameInfo *> (frame_data_ptr);
-	const InterlacingType   itl_s =
-		get_itl_type (frame_info._itl_s_flag, frame_info._top_s_flag);
-	const InterlacingType   itl_d =
-		get_itl_type (frame_info._itl_d_flag, frame_info._top_d_flag);
+	const fmtcl::InterlacingType  itl_s = fmtcl::InterlacingType_get (
+		frame_info._itl_s_flag, frame_info._top_s_flag
+	);
+	const fmtcl::InterlacingType  itl_d = fmtcl::InterlacingType_get (
+		frame_info._itl_d_flag, frame_info._top_d_flag
+	);
 
 	try
 	{
@@ -845,7 +853,7 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, voi
 		ret_val = -1;
 	}
 
-	return (ret_val);
+	return ret_val;
 }
 
 
@@ -882,7 +890,7 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, voi
 	const bool     src_flt_flag = (_src_type == fmtcl::SplFmt_FLOAT);
 	if (dst_flt_flag != src_flt_flag)
 	{
-		const PlaneData & plane_data = _plane_data_arr [plane_index];
+		const auto &   plane_data = _plane_data_arr [plane_index];
 		scale_info._gain    = plane_data._gain;
 		scale_info._add_cst = plane_data._add_cst;
 
@@ -896,20 +904,20 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, voi
 		w, h, scale_info_ptr
 	);
 
-	return (ret_val);
+	return ret_val;
 }
 
 
 
-fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, InterlacingType itl_d, InterlacingType itl_s)
+fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, fmtcl::InterlacingType itl_d, fmtcl::InterlacingType itl_s)
 {
 	assert (plane_index >= 0);
 	assert (itl_d >= 0);
-	assert (itl_d < InterlacingType_NBR_ELT);
+	assert (itl_d < fmtcl::InterlacingType_NBR_ELT);
 	assert (itl_s >= 0);
-	assert (itl_s < InterlacingType_NBR_ELT);
+	assert (itl_s < fmtcl::InterlacingType_NBR_ELT);
 
-	const PlaneData & plane_data         = _plane_data_arr [plane_index];
+	const auto &   plane_data = _plane_data_arr [plane_index];
 	const fmtcl::ResampleSpecPlane & key = plane_data._spec_arr [itl_d] [itl_s];
 
 	std::lock_guard <std::mutex>  autolock (_filter_mutex);
@@ -917,7 +925,7 @@ fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, 
 	std::unique_ptr <fmtcl::FilterResize> &   filter_uptr = _filter_uptr_map [key];
 	if (filter_uptr.get () == 0)
 	{
-		filter_uptr = std::unique_ptr <fmtcl::FilterResize> (new fmtcl::FilterResize (
+		filter_uptr = std::make_unique <fmtcl::FilterResize> (
 			key,
 			*(plane_data._kernel_arr [fmtcl::FilterResize::Dir_H]._k_uptr),
 			*(plane_data._kernel_arr [fmtcl::FilterResize::Dir_V]._k_uptr),
@@ -925,98 +933,32 @@ fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, 
 			plane_data._gain,
 			_src_type, _src_res, _dst_type, _dst_res,
 			_int_flag, _sse2_flag, _avx2_flag
-		));
+		);
 	}
 
-	return (filter_uptr.get ());
+	return filter_uptr.get ();
 }
 
 
 
-void	Resample::create_plane_specs ()
+void	Resample::create_all_plane_specs ()
 {
-	fmtcl::ResampleSpecPlane   spec;
-
-	const int      src_w = _vi_in.width;
-	const int      src_h = _vi_in.height;
-	const int      dst_w = _vi_out.width;
-	const int      dst_h = _vi_out.height;
+	const fmtcl::ColorFamily src_cf = fmtc::conv_colfam_to_fmtcl (*_vi_in.format);
+	const fmtcl::ColorFamily dst_cf = fmtc::conv_colfam_to_fmtcl (*_vi_out.format);
+	const int      src_ss_h   = _vi_in.format->subSamplingW;
+	const int      src_ss_v   = _vi_in.format->subSamplingH;
+	const int      dst_ss_h   = _vi_out.format->subSamplingW;
+	const int      dst_ss_v   = _vi_out.format->subSamplingH;
 	const int      nbr_planes = _vi_in.format->numPlanes;
-
 	for (int plane_index = 0; plane_index < nbr_planes; ++plane_index)
 	{
-		PlaneData &    plane_data = _plane_data_arr [plane_index];
-
-		spec._src_width  =
-			vsutl::compute_plane_width (*_vi_in.format, plane_index, src_w);
-		spec._src_height =
-			vsutl::compute_plane_height (*_vi_in.format, plane_index, src_h);
-		spec._dst_width  =
-			vsutl::compute_plane_width (*_vi_out.format, plane_index, dst_w);
-		spec._dst_height =
-			vsutl::compute_plane_height (*_vi_out.format, plane_index, dst_h);
-
-		const int      subspl_h = src_w / spec._src_width;
-		const int      subspl_v = src_h / spec._src_height;
-
-		const Win &    s = plane_data._win;
-		spec._win_x   = s._x / subspl_h;
-		spec._win_y   = s._y / subspl_v;
-		spec._win_w   = s._w / subspl_h;
-		spec._win_h   = s._h / subspl_v;
-
-		spec._add_cst        = plane_data._add_cst;
-		spec._kernel_scale_h = plane_data._kernel_scale_h;
-		spec._kernel_scale_v = plane_data._kernel_scale_v;
-		spec._kernel_hash_h  = plane_data._kernel_arr [fmtcl::FilterResize::Dir_H].get_hash ();
-		spec._kernel_hash_v  = plane_data._kernel_arr [fmtcl::FilterResize::Dir_V].get_hash ();
-
-		for (int itl_d = 0; itl_d < InterlacingType_NBR_ELT; ++itl_d)
-		{
-			for (int itl_s = 0; itl_s < InterlacingType_NBR_ELT; ++itl_s)
-			{
-				double         cp_s_h = 0;
-				double         cp_s_v = 0;
-				double         cp_d_h = 0;
-				double         cp_d_v = 0;
-				if (plane_data._preserve_center_flag)
-				{
-					fmtcl::ChromaPlacement_compute_cplace (
-						cp_s_h, cp_s_v, _cplace_s, plane_index,
-						_vi_in.format->subSamplingW, _vi_in.format->subSamplingH,
-						(_vi_in.format->colorFamily == ::cmRGB),
-						(itl_s != InterlacingType_FRAME),
-						(itl_s == InterlacingType_TOP)
-					);
-					fmtcl::ChromaPlacement_compute_cplace (
-						cp_d_h, cp_d_v, _cplace_d, plane_index,
-						_vi_out.format->subSamplingW, _vi_out.format->subSamplingH,
-						(_vi_out.format->colorFamily == ::cmRGB),
-						(itl_d != InterlacingType_FRAME),
-						(itl_d == InterlacingType_TOP)
-					);
-				}
-
-				spec._center_pos_src_h = cp_s_h;
-				spec._center_pos_src_v = cp_s_v;
-				spec._center_pos_dst_h = cp_d_h;
-				spec._center_pos_dst_v = cp_d_v;
-
-				plane_data._spec_arr [itl_d] [itl_s] = spec;
-			}  // for itl_s
-		}  // for itl_d
-	}  // for plane_index
-}
-
-
-
-Resample::InterlacingType	Resample::get_itl_type (bool itl_flag, bool top_flag)
-{
-	return (
-		(itl_flag) ? ((top_flag) ? InterlacingType_TOP
-		                         : InterlacingType_BOT)
-		           :               InterlacingType_FRAME
-	);
+		auto &         plane_data = _plane_data_arr [plane_index];
+		fmtcl::ResampleUtil::create_plane_specs (
+			plane_data, plane_index,
+			src_cf, _src_width   , src_ss_h, _src_height   , src_ss_v, _cplace_s,
+			dst_cf, _vi_out.width, dst_ss_h, _vi_out.height, dst_ss_v, _cplace_d
+		);
+	}
 }
 
 

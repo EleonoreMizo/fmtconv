@@ -70,6 +70,33 @@ double	TransOpLogC::get_max () const
 
 
 
+TransOpLogC::ExpIdx	TransOpLogC::conv_logc_ei (int val_raw)
+{
+	ExpIdx         ei = ExpIdx_INVALID;
+
+	switch (val_raw)
+	{
+	case  160: ei = ExpIdx_160;  break;
+	case  200: ei = ExpIdx_200;  break;
+	case  250: ei = ExpIdx_250;  break;
+	case  320: ei = ExpIdx_320;  break;
+	case  400: ei = ExpIdx_400;  break;
+	case  500: ei = ExpIdx_500;  break;
+	case  640: ei = ExpIdx_640;  break;
+	case  800: ei = ExpIdx_800;  break;
+	case 1000: ei = ExpIdx_1000; break;
+	case 1280: ei = ExpIdx_1280; break;
+	case 1600: ei = ExpIdx_1600; break;
+	default:
+		assert (false);
+		break;
+	}
+
+	return ei;
+}
+
+
+
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 

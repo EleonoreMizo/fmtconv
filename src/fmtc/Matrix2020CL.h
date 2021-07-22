@@ -110,7 +110,9 @@ private:
 
 	               Matrix2020CL ()                                = delete;
 	               Matrix2020CL (const Matrix2020CL &other)       = delete;
+	               Matrix2020CL (Matrix2020CL &&other)            = delete;
 	Matrix2020CL & operator = (const Matrix2020CL &other)         = delete;
+	Matrix2020CL & operator = (Matrix2020CL &&other)              = delete;
 	bool           operator == (const Matrix2020CL &other) const  = delete;
 	bool           operator != (const Matrix2020CL &other) const  = delete;
 

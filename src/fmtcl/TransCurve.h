@@ -84,6 +84,18 @@ enum TransCurve
 
 
 
+inline bool TransCurve_is_valid (TransCurve curve)
+{
+	return (
+		   curve >= 0
+		&& (   curve < TransCurve_NBR_ELT
+		    || curve > TransCurve_ISO_RANGE_LAST)
+		&& curve < TransCurve_NBR_ELT_CUSTOM
+	);
+}
+
+
+
 }	// namespace fmtcl
 
 

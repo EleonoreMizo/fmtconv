@@ -104,7 +104,9 @@ private:
 
 	               Bitdepth ()                               = delete;
 	               Bitdepth (const Bitdepth &other)          = delete;
+	               Bitdepth (Bitdepth &&other)               = delete;
 	Bitdepth &     operator = (const Bitdepth &other)        = delete;
+	Bitdepth &     operator = (Bitdepth &&other)             = delete;
 	bool           operator == (const Bitdepth &other) const = delete;
 	bool           operator != (const Bitdepth &other) const = delete;
 

@@ -154,6 +154,7 @@
     <ClInclude Include="..\..\src\fmtcl\ErrDifBufFactory.h" />
     <ClInclude Include="..\..\src\fmtcl\FilterResize.h" />
     <ClInclude Include="..\..\src\fmtcl\fnc.h" />
+    <ClInclude Include="..\..\src\fmtcl\InterlacingType.h" />
     <ClInclude Include="..\..\src\fmtcl\KernelData.h" />
     <ClInclude Include="..\..\src\fmtcl\Mat3.h" />
     <ClInclude Include="..\..\src\fmtcl\Mat3.hpp" />
@@ -163,9 +164,12 @@
     <ClInclude Include="..\..\src\fmtcl\Matrix2020CLProc_macro.h" />
     <ClInclude Include="..\..\src\fmtcl\MatrixProc.h" />
     <ClInclude Include="..\..\src\fmtcl\MatrixProc_macro.h" />
+    <ClInclude Include="..\..\src\fmtcl\MatrixUtil.h" />
     <ClInclude Include="..\..\src\fmtcl\MatrixWrap.h" />
     <ClInclude Include="..\..\src\fmtcl\MatrixWrap.hpp" />
+    <ClInclude Include="..\..\src\fmtcl\PicFmt.h" />
     <ClInclude Include="..\..\src\fmtcl\PrimariesPreset.h" />
+    <ClInclude Include="..\..\src\fmtcl\PrimUtil.h" />
     <ClInclude Include="..\..\src\fmtcl\Proxy.h" />
     <ClInclude Include="..\..\src\fmtcl\Proxy.hpp" />
     <ClInclude Include="..\..\src\fmtcl\ProxyRwAvx2.h" />
@@ -178,7 +182,9 @@
     <ClInclude Include="..\..\src\fmtcl\ReadWrapperFlt.hpp" />
     <ClInclude Include="..\..\src\fmtcl\ReadWrapperInt.h" />
     <ClInclude Include="..\..\src\fmtcl\ReadWrapperInt.hpp" />
+    <ClInclude Include="..\..\src\fmtcl\ResamplePlaneData.h" />
     <ClInclude Include="..\..\src\fmtcl\ResampleSpecPlane.h" />
+    <ClInclude Include="..\..\src\fmtcl\ResampleUtil.h" />
     <ClInclude Include="..\..\src\fmtcl\ResizeData.h" />
     <ClInclude Include="..\..\src\fmtcl\ResizeData.hpp" />
     <ClInclude Include="..\..\src\fmtcl\ResizeDataFactory.h" />
@@ -210,6 +216,7 @@
     <ClInclude Include="..\..\src\fmtcl\TransOpPow.h" />
     <ClInclude Include="..\..\src\fmtcl\TransOpSLog.h" />
     <ClInclude Include="..\..\src\fmtcl\TransOpSLog3.h" />
+    <ClInclude Include="..\..\src\fmtcl\TransUtil.h" />
     <ClInclude Include="..\..\src\fmtcl\Vec3.h" />
     <ClInclude Include="..\..\src\fmtcl\Vec3.hpp" />
     <ClInclude Include="..\..\src\fmtcl\VoidAndCluster.h" />
@@ -339,7 +346,10 @@
     <ClCompile Include="..\..\src\fmtcl\MatrixProc_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\MatrixUtil.cpp" />
+    <ClCompile Include="..\..\src\fmtcl\PrimUtil.cpp" />
     <ClCompile Include="..\..\src\fmtcl\ResampleSpecPlane.cpp" />
+    <ClCompile Include="..\..\src\fmtcl\ResampleUtil.cpp" />
     <ClCompile Include="..\..\src\fmtcl\ResizeData.cpp" />
     <ClCompile Include="..\..\src\fmtcl\ResizeDataFactory.cpp" />
     <ClCompile Include="..\..\src\fmtcl\RgbSystem.cpp" />
@@ -365,6 +375,7 @@
     <ClCompile Include="..\..\src\fmtcl\TransOpPow.cpp" />
     <ClCompile Include="..\..\src\fmtcl\TransOpSLog.cpp" />
     <ClCompile Include="..\..\src\fmtcl\TransOpSLog3.cpp" />
+    <ClCompile Include="..\..\src\fmtcl\TransUtil.cpp" />
     <ClCompile Include="..\..\src\fmtcl\VoidAndCluster.cpp" />
     <ClCompile Include="..\..\src\fmtc\Bitdepth.cpp" />
     <ClCompile Include="..\..\src\fmtc\Convert.cpp" />

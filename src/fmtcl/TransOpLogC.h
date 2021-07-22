@@ -63,6 +63,8 @@ public:
 	// Exposure Index (EI)
 	enum ExpIdx
 	{
+		ExpIdx_INVALID = -1,
+
 		ExpIdx_160 = 0,
 		ExpIdx_200,
 		ExpIdx_250,
@@ -84,6 +86,8 @@ public:
 	// TransOpInterface
 	virtual double operator () (double x) const;
 	virtual double get_max () const;
+
+	static ExpIdx  conv_logc_ei (int val_raw);
 
 
 

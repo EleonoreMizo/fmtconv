@@ -94,7 +94,7 @@ void	MatrixProc::setup_fnc_avx2 (bool int_proc_flag, SplFmt src_fmt, int src_bit
 
 // DST and SRC are ProxyRwAvx2 classes
 template <class DST, int DB, class SRC, int SB, int NP>
-void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -103,7 +103,7 @@ void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 
 	enum { BPS_SRC = (SB + 7) >> 3 };
 	enum { BPS_DST = (DB + 7) >> 3 };
@@ -145,7 +145,7 @@ void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 				dst_str_arr [plane_index],
 				h
 			));
-			const int      cind    = plane_index * MAT_SIZE;
+			const int      cind = plane_index * _mat_size;
 
 			for (int x = 0; x < w; x += packsize)
 			{
@@ -156,7 +156,7 @@ void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 				const __m256i  s1 = SrcS16R::read (src_1_ptr, zero, sign_bit);
 				const __m256i  s2 = SrcS16R::read (src_2_ptr, zero, sign_bit);
 
-				__m256i        d0 = _mm256_load_si256 (coef_ptr + cind + NBR_PLANES);
+				__m256i        d0 = _mm256_load_si256 (coef_ptr + cind + _nbr_planes);
 				__m256i        d1 = d0;
 
 				// src is variable, up to 16-bit signed (full range, +1 = 32767+1)
@@ -170,8 +170,8 @@ void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [NBR_PLANES], c
 				fstb::ToolsAvx2::mac_s16_s16_s32 (
 					d0, d1, s2, _mm256_load_si256 (coef_ptr + cind + 2));
 
-				d0 = _mm256_srai_epi32 (d0, SHIFT_INT + SB - DB);
-				d1 = _mm256_srai_epi32 (d1, SHIFT_INT + SB - DB);
+				d0 = _mm256_srai_epi32 (d0, _shift_int + SB - DB);
+				d1 = _mm256_srai_epi32 (d1, _shift_int + SB - DB);
 
 				__m256i			val = _mm256_packs_epi32 (d0, d1);
 

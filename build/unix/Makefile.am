@@ -182,6 +182,7 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/FilterResize.h \
         ../../src/fmtcl/fnc.cpp \
         ../../src/fmtcl/fnc.h \
+        ../../src/fmtcl/InterlacingType.h \
         ../../src/fmtcl/KernelData.cpp \
         ../../src/fmtcl/KernelData.h \
         ../../src/fmtcl/Mat3.h \
@@ -194,9 +195,14 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/MatrixProc.cpp \
         ../../src/fmtcl/MatrixProc.h \
         ../../src/fmtcl/MatrixProc_macro.h \
+        ../../src/fmtcl/MatrixUtil.cpp \
+        ../../src/fmtcl/MatrixUtil.h \
         ../../src/fmtcl/MatrixWrap.h \
         ../../src/fmtcl/MatrixWrap.hpp \
+        ../../src/fmtcl/PicFmt.h \
         ../../src/fmtcl/PrimariesPreset.h \
+        ../../src/fmtcl/PrimUtil.cpp \
+        ../../src/fmtcl/PrimUtil.h \
         ../../src/fmtcl/Proxy.h \
         ../../src/fmtcl/Proxy.hpp \
         ../../src/fmtcl/ProxyRwCpp.h \
@@ -207,8 +213,11 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/ReadWrapperFlt.hpp \
         ../../src/fmtcl/ReadWrapperInt.h \
         ../../src/fmtcl/ReadWrapperInt.hpp \
+        ../../src/fmtcl/ResamplePlaneData.h \
         ../../src/fmtcl/ResampleSpecPlane.cpp \
         ../../src/fmtcl/ResampleSpecPlane.h \
+        ../../src/fmtcl/ResampleUtil.cpp \
+        ../../src/fmtcl/ResampleUtil.h \
         ../../src/fmtcl/ResizeData.cpp \
         ../../src/fmtcl/ResizeData.h \
         ../../src/fmtcl/ResizeData.hpp \
@@ -256,6 +265,8 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/TransOpSLog.h \
         ../../src/fmtcl/TransOpSLog3.cpp \
         ../../src/fmtcl/TransOpSLog3.h \
+        ../../src/fmtcl/TransUtil.cpp \
+        ../../src/fmtcl/TransUtil.h \
         ../../src/fmtcl/Vec3.h \
         ../../src/fmtcl/Vec3.hpp \
         ../../src/fmtcl/VoidAndCluster.cpp \

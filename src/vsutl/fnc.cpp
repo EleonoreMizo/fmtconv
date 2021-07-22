@@ -164,7 +164,7 @@ int	compute_plane_width (const ::VSFormat &fmt, int plane_index, int base_w)
 		base_w >>= fmt.subSamplingW;
 	}
 
-	return (base_w);
+	return base_w;
 }
 
 
@@ -181,7 +181,7 @@ int	compute_plane_height (const ::VSFormat &fmt, int plane_index, int base_h)
 		base_h >>= fmt.subSamplingH;
 	}
 
-	return (base_h);
+	return base_h;
 }
 
 
@@ -238,7 +238,7 @@ int	conv_str_to_chroma_subspl (int &ssh, int &ssv, std::string css)
 		ret_val = -1;
 	}
 
-	return (ret_val);
+	return ret_val;
 }
 
 

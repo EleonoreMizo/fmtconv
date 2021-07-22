@@ -28,6 +28,7 @@ http://www.wtfpl.net/ for more details.
 
 #include "fmtcl/Dither.h"
 #include "fmtcl/fnc.h"
+#include "fmtcl/PicFmt.h"
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/ProxyRwSse2.h"
 #endif
@@ -106,7 +107,7 @@ Dither::Dither (
 	assert (color_fam >= 0);
 	assert (color_fam < ColorFamily_NBR_ELT);
 	assert (nbr_planes > 0);
-	assert (nbr_planes < _max_nbr_planes);
+	assert (nbr_planes <= _max_nbr_planes);
 	assert (dmode >= 0);
 	assert (dmode < DMode_NBR_ELT);
 	assert (pat_size >= 4);
@@ -133,8 +134,8 @@ Dither::Dither (
 		fmtcl::compute_fmt_mac_cst (
 			scl_inf._info._gain,
 			scl_inf._info._add_cst,
-			dst_fmt, dst_res, color_fam, _full_range_out_flag,
-			src_fmt, src_res, color_fam, _full_range_in_flag,
+			PicFmt { dst_fmt, dst_res, color_fam, _full_range_out_flag },
+			PicFmt { src_fmt, src_res, color_fam, _full_range_in_flag  },
 			plane_index
 		);
 

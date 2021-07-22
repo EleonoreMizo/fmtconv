@@ -268,7 +268,7 @@ const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void
 		}
 	}
 
-	return (dst_ptr);
+	return dst_ptr;
 }
 
 
@@ -350,7 +350,7 @@ const ::VSFormat &	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSM
 		);
 	}
 
-	return (*fmt_dst_ptr);
+	return *fmt_dst_ptr;
 }
 
 

@@ -529,6 +529,27 @@
     <ClInclude Include="..\..\src\fmtcl\Dither.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\MatrixUtil.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\PicFmt.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\PrimUtil.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\TransUtil.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\ResampleUtil.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\ResamplePlaneData.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\InterlacingType.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\fmtc\Bitdepth.cpp">
@@ -754,6 +775,18 @@
       <Filter>fmtcl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\fmtcl\Dither.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\MatrixUtil.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\PrimUtil.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\TransUtil.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\ResampleUtil.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
   </ItemGroup>

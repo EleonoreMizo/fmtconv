@@ -30,6 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 #include "fmtcl/CoefArrInt.h"
 #include "fmtcl/ColorSpaceH265.h"
+#include "fmtcl/Mat4.h"
 #include "fmtcl/MatrixProc.h"
 #include "fstb/AllocAlign.h"
 #include "vsutl/FilterBase.h"
@@ -46,11 +47,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include <cstdint>
 
 
-
-namespace fmtcl
-{
-	class Mat4;
-}
 
 namespace fmtc
 {
@@ -91,8 +87,7 @@ protected:
 
 private:
 
-	static const int  NBR_PLANES    = 3;
-	static const int  SHIFT_INT     = 12;  // Number of bits for the fractional part
+	static constexpr int _nbr_planes = 3;
 
 	enum Dir
 	{
@@ -107,13 +102,6 @@ private:
 
 	const ::VSFormat *
 	               find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, const ::VSFormat *fmt_dst_ptr, const ::VSFormat &fmt_src, ::VSCore &core);
-	void           make_mat_from_str (fmtcl::Mat4 &m, const std::string &mat, bool to_rgb_flag) const;
-
-	static void    make_mat_yuv (fmtcl::Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag);
-	static void    make_mat_ycgco (fmtcl::Mat4 &m, bool to_rgb_flag);
-	static void    make_mat_ydzdx (fmtcl::Mat4 &m, bool to_rgb_flag);
-	static void    make_mat_lms (fmtcl::Mat4 &m, bool to_rgb_flag);
-	static void    make_mat_ictcp (fmtcl::Mat4 &m, bool hlg_flag, bool to_lms_flag);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
@@ -146,7 +134,9 @@ private:
 
 	               Matrix ()                               = delete;
 	               Matrix (const Matrix &other)            = delete;
+	               Matrix (Matrix &&other)                 = delete;
 	Matrix &       operator = (const Matrix &other)        = delete;
+	Matrix &       operator = (Matrix &&other)             = delete;
 	bool           operator == (const Matrix &other) const = delete;
 	bool           operator != (const Matrix &other) const = delete;
 
