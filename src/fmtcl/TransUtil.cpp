@@ -367,7 +367,11 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 			const double   phi   =
 				  (pow (alpha, gamma) * pow (gamma - 1, gamma - 1))
 				/ (pow (alpha - 1, gamma - 1) * pow (gamma, gamma));
-			ptr = OpSPtr (new TransOpLinPow (inv_flag, alpha, k0 / phi, 1.0 / gamma, phi));
+			const double   pwr   = 1.0 / gamma;
+			const double   r_neg = (c == TransCurve_SRGB) ? -1.0 : 0.0;
+			ptr = OpSPtr (new TransOpLinPow (
+				inv_flag, alpha, k0 / phi, pwr, phi, r_neg, 1, 1, pwr
+			));
 		}
 #else
 		// Rounded constants used in IEC 61966-2-1

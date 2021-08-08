@@ -38,7 +38,9 @@ enum TransCurve
 {
 	TransCurve_UNDEF = -1,
 
-	// ITU-T H.265, High efficiency video coding, 2019-06, p. 409-410
+	// ITU-T H.265, High efficiency video coding, 2019-11, p. 422-423
+	// Table E.4 - Transfer characteristics interpretation using the
+	// transfer_characteristics syntax element
 	TransCurve_RESERVED1 = 0,
 	TransCurve_709,         // ITU-R BT.709
 	TransCurve_UNSPECIFIED,
