@@ -283,6 +283,10 @@ each run.</p>
 <p>The internal processing is done in floating point as soon as the input is
 floating point or a range conversion is detected.</p>
 
+<p>The <code>_ColorRange</code> frame property is set if at least one of the
+<var>fulls</var> or <var>fulld</var> parameter has been explicitely
+defined.</p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
@@ -537,6 +541,12 @@ make sense as these colorspaces are defined with different primaries.
 For meaningful results, convert to R’G’B’ then to linear RGB and use
 </code>primaries</code> to perform the intermediary conversion.</p>
 
+<p>The <code>_ColorRange</code> frame property is set if the <var>fulld</var>
+parameter has been explicitely defined.
+If the destination colorspace is a standardized one (as deduced from the
+specified matrix), the <code>_Matrix</code> and <code>_ColorSpace</code>
+properties are set, otherwise they are deleted from the frame.</p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
@@ -756,6 +766,11 @@ The BT.2020 gamma curve is used in both directions.
 When operating on floating point data, the function uses the 12-bit variant
 of the scaling coefficients.</p>
 
+<p>The <code>_Matrix</code>, <code>_ColorSpace</code> and <code>_Transfer</code>
+frame properties are set according to the transformation.
+The <code>_ColorRange</code> property is set if the <var>full</var>
+parameter has been explicitely defined.</p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
@@ -834,6 +849,8 @@ whose specifications are given by the primaries.
 For more details, see Charles Poynton, <i>A Guided Tour of Color Space</i>,
 1997.</p>
 
+<p>The <code>_Primaries</code> frame property is set or deleted, depending
+on the target gamut.</p>
 
 <h4>Parameters</h4>
 
@@ -1365,6 +1382,8 @@ Use <code>bitdepth</code> to properly convert the output to a lower
 bitdepth.</p>
 <p>The signal is clipped depending on the transfer specification or the domain
 requirement of the functions.</p>
+<p>The function sets the <code>_ColorRange</code> and <code>_Transfer</code>
+frame properties.</p>
 
 <h4>Parameters</h4>
 
@@ -1520,6 +1539,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>matrix</code>: deletes the <code>_Matrix</code> and <code>_ColorSpace</code> properties if a non-standard matrix is used.</li>
 <li><code>matrix2020cl</code>: sets the <code>_Matrix</code> and <code>_Transfer</code> frame properties.</li>
 <li><code>transfer</code>: sYCC curve (similar to sRGB) now supports signed values.</li>
+<li>Added information on functions reading and writing frame properties.</li>
 <li>Added support for 14-bit data.</li>
 </ul>
 
