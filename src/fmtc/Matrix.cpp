@@ -378,6 +378,11 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 				_vsapi.propSetInt (&dst_prop, "_Matrix"    , int (_csp_out), ::paReplace);
 				_vsapi.propSetInt (&dst_prop, "_ColorSpace", int (_csp_out), ::paReplace);
 			}
+			else
+			{
+				_vsapi.propDeleteKey (&dst_prop, "_Matrix");
+				_vsapi.propDeleteKey (&dst_prop, "_ColorSpace");
+			}
 		}
 	}
 
