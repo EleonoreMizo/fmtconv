@@ -4,6 +4,7 @@
 #define NOGDI
 
 #include "avsutl/fnc.h"
+#include "fmtcavs/Bitdepth.h"
 #include "fmtcavs/function_names.h"
 #include "fstb/def.h"
 
@@ -33,6 +34,13 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 {
 	AVS_linkage = vectors_ptr;
 
+	env_ptr->AddFunction (fmtcavs_BITDEPTH,
+		"c"          "[bits]i"  "[flt]b"         "[planes]s"    //  0
+		"[fulls]b"   "[fulld]b" "[dmode]i"       "[ampo]f"      //  4
+		"[ampn]f"    "[dyn]b"   "[staticnoise]b" "[cpuopt]i"    //  8
+		"[patsize]i" "[tpdfo]b" "[tpdfn]b"       "[corplane]b", // 12
+		&main_avs_create <fmtcavs::Bitdepth>, nullptr
+	);
 	return "fmtconv - video format conversion";
 }
 

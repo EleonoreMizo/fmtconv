@@ -49,6 +49,7 @@ table     { margin-left: 2em; margin-top: 1em; margin-bottom: 1em;
 .n     { margin-left: 0em; margin-top: 0em; margin-bottom: 0em; border: 0em; border-collapse:collapse; }
 .m     { margin-left: 0em; margin-top: 0em; margin-bottom: 0em; border: 0em; border-collapse:collapse; }
 th { vertical-align:bottom; padding:1em; padding-top:0em; padding-bottom:0.25em; border-bottom: 1px solid #A8B4D8; font-weight: bold; }
+.p { vertical-align:bottom; padding:0em; border: 0em; padding-left: 2em; } 
 td { vertical-align:top; padding:1em; padding-top:0.25em; padding-bottom:0.25em; border-top: 1px solid #A8B4D8; border-bottom: 1px solid #A8B4D8; }
 .n { vertical-align:top; padding:0em; border: 0em; }
 .m7 { text-align:center; padding:0.25em; border-top: 1px solid #000000; border-left: 1px solid #000000; border-bottom: 0px; }

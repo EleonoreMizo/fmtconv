@@ -50,7 +50,7 @@ class Dither
 
 public:
 
-	static constexpr int _max_nbr_planes = 3;
+	static constexpr int _max_nbr_planes = 4;
 	static constexpr int _max_pat_width = 32;   // Number of pixels for halftone dithering
 
 	enum DMode

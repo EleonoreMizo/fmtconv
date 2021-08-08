@@ -239,13 +239,17 @@ make install</pre>
 
 <h3><a id="bitdepth"></a>bitdepth</h3>
 
-<pre class="proto">fmtc.bitdepth (
+<table class="n" width="100%">
+<tr><th class="p">Vapoursynth</th><th class="p">Avisynth+</th></tr>
+<tr>
+<td class="n"><pre class="proto">
+fmtc.bitdepth (
 	clip       : clip      ;
 	csp        : int  : opt;
 	bits       : int  : opt;
 	flt        : int  : opt;
 	planes     : int[]: opt; (all)
-	fulls      : int  : opt; (depends on the colorspace)
+	fulls      : int  : opt; (depends)
 	fulld      : int  : opt; (fulls)
 	dmode      : int  : opt; (3)
 	ampo       : float: opt; (1)
@@ -257,8 +261,28 @@ make install</pre>
 	tpdfo      : int  : opt; (0)
 	tpdfn      : int  : opt; (0)
 	corplane   : int  : opt; (0)
-)
-</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_bitdepth (
+	clip   c,
+
+	int    bits (-1),
+	bool   flt (undefined),
+	string planes ("all"),
+	bool   fulls (depends),
+	bool   fulld (fulls),
+	int    dmode (3),
+	float  ampo (1),
+	float  ampn (0),
+	bool   dyn (false),
+	bool   staticnoise (false),
+	int    cpuopt (-1),
+	int    patsize (32),
+	bool   tpdfo (false),
+	bool   tpdfn (false),
+	bool   corplane (false)
+)</pre></td>
+</tr>
+</table>
 
 <p>Bitdepth conversion with optional dithering.</p>
 
@@ -299,7 +323,8 @@ Supported input formats:</p>
 </ul>
 
 <p class="var">csp</p>
-<p>The destination format, as Vapoursynth constant.
+<p><span class="host">Vapoursynth</span> The destination format, as
+a Vapoursynth constant.
 Can only change the bitdepth and the data type (integer or float).
 Supported destination colorspaces are the same as for the input clip.</p>
 
@@ -310,6 +335,8 @@ the full format.
 When there is no ambiguity between bitdepth and data type, the data type is
 automatically selected depending on the bitdepth.
 For example, specifying 32 bits is enough to switch the output to float.</p>
+<p><span class="host">Avisynth+</span> A negative value means that the
+parameter is left undefined.</p>
 
 <p class="var">flt</p>
 <p>Set it to 1 to convert to float, and to 0 for integer data.
@@ -317,8 +344,19 @@ As long as only 32-bit floating point data is supported, you don’t need to
 specify the bitdepth for a float conversion.</p>
 
 <p class="var">planes</p>
-<p>A list of planes to process (0 to 2), in any order.
+<p>A list of planes to process.
 The content of an unprocessed plane should be considered as garbage.</p>
+<p><span class="host">Vapoursynth</span> Planes as index (0 to 2), in any order.</p>
+<p><span class="host">Avisynth+</span> This is a string made of concatenated
+substrings for each plane, in any order.
+The planes are identified by their index, as well as the following aliases:</p>
+<table>
+<tr><td><code>"0"</code>, <code>"y"</code>, <code>"r"</code></td><td>Y or red</td></tr>
+<tr><td><code>"1"</code>, <code>"u"</code>, <code>"g"</code></td><td>U or green</td></tr>
+<tr><td><code>"2"</code>, <code>"v"</code>, <code>"b"</code></td><td>V or blue</td></tr>
+<tr><td><code>"3"</code>, <code>"a"</code></td><td>Alpha channel</td></tr>
+<tr><td><code>"all"</code></td><td>All the planes</td></tr>
+</table>
 
 <p class="var">fulls, fulld</p>
 <p>Indicates if the clip is full-range (True) or TV-range (False).
@@ -335,6 +373,8 @@ and floating-point data.
 They can also be used for range conversions.
 Pixel values are not clipped during a conversion between two TV-range
 formats.</p>
+<p><span class="host">Avisynth+</span> Alpha planes are always processed
+as full-range.<p>
 
 <p class="var">dmode</p>
 <p>Dithering mode, when applicable.</p>

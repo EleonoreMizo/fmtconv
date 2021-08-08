@@ -145,6 +145,7 @@
     <ClInclude Include="..\..\..\src\avs\posix.h" />
     <ClInclude Include="..\..\..\src\avs\types.h" />
     <ClInclude Include="..\..\..\src\avs\win.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Bitdepth.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\CpuOpt.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\FmtAvs.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\fnc.h" />
@@ -157,6 +158,7 @@
     <ClCompile Include="..\..\..\src\avsutl\PlaneProcCbInterface.cpp" />
     <ClCompile Include="..\..\..\src\avsutl\PlaneProcessor.cpp" />
     <ClCompile Include="..\..\..\src\avsutl\VideoFilterBase.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Bitdepth.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\CpuOpt.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\FmtAvs.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\fnc_fmtcavs.cpp" />
