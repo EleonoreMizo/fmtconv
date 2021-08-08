@@ -121,6 +121,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		       || (st == ::stInteger && bps == 2 && (   res ==  9
 		                                             || res == 10
 		                                             || res == 12
+		                                             || res == 14
 		                                             || res == 16))
 		       || (st == ::stFloat   && bps == 4 &&     res == 32 )))
 		{

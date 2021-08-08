@@ -24,12 +24,12 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/ColorSpaceH265.h"
+#include "fmtc/CpuOpt.h"
 #include "fmtc/fnc.h"
 #include "fmtc/Matrix2020CL.h"
+#include "fmtcl/ColorSpaceH265.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
-#include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
 
@@ -60,7 +60,7 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 {
 	fstb::unused (user_data_ptr);
 
-	vsutl::CpuOpt  cpu_opt (*this, in, out);
+	const fmtc::CpuOpt   cpu_opt (*this, in, out);
 	const bool     sse2_flag = cpu_opt.has_sse2 ();
 	const bool     avx2_flag = cpu_opt.has_avx2 ();
 

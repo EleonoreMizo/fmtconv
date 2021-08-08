@@ -47,6 +47,13 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 	CI (INT16  , 12, INT16  , 11) \
 	CI (INT16  , 12, INT16  , 12) \
 	                              \
+	CI (INT16  , 14, INT8   ,  8) \
+	CI (INT16  , 14, INT16  ,  9) \
+	CI (INT16  , 14, INT16  , 10) \
+	CI (INT16  , 14, INT16  , 11) \
+	CI (INT16  , 14, INT16  , 12) \
+	CI (INT16  , 14, INT16  , 14) \
+	                              \
 	CI (INT16  , 16, INT8   ,  8) \
 	CI (INT16  , 16, INT16  ,  9) \
 	CI (INT16  , 16, INT16  , 10) \

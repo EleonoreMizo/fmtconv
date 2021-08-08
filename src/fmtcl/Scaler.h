@@ -79,6 +79,9 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 	MC (Int16  , Stack16, INT16  , STACK16, 16, 16, i16_s16) \
 	MC (Stack16, Stack16, STACK16, STACK16, 16, 16, s16_s16) \
 \
+	MC (Int16  , Int16  , INT16  , INT16  , 16, 14, i16_i14) \
+	MC (Stack16, Int16  , STACK16, INT16  , 16, 14, s16_i14) \
+\
 	MC (Int16  , Int16  , INT16  , INT16  , 16, 12, i16_i12) \
 	MC (Stack16, Int16  , STACK16, INT16  , 16, 12, s16_i12) \
 \

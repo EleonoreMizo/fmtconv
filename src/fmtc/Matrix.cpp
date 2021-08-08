@@ -100,6 +100,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	if (   (   fmt_src.sampleType == ::stInteger
 	        && (   fmt_src.bitsPerSample <  8
 	            || fmt_src.bitsPerSample > 12)
+	        && fmt_src.bitsPerSample != 14
 	        && fmt_src.bitsPerSample != 16)
 	    || (   fmt_src.sampleType == ::stFloat
 	        && fmt_src.bitsPerSample != 32))
@@ -130,6 +131,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	if (   (   fmt_dst_ptr->sampleType == ::stInteger
 	        && (   fmt_dst_ptr->bitsPerSample <  8
 	            || fmt_dst_ptr->bitsPerSample > 12)
+	        && fmt_dst_ptr->bitsPerSample != 14
 	        && fmt_dst_ptr->bitsPerSample != 16)
 	    || (   fmt_dst_ptr->sampleType == ::stFloat
 	        && fmt_dst_ptr->bitsPerSample != 32))

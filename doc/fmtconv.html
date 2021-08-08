@@ -543,7 +543,7 @@ For meaningful results, convert to R’G’B’ then to linear RGB and use
 <p>The input clip. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12- and 16-bit integer.</li>
+<li>8-, 9-, 10-, 12-, 14- and 16-bit integer.</li>
 <li>32-bit floating point.</li>
 <li>Any planar colorspace with 3 planes.</li>
 </ul>
@@ -697,8 +697,8 @@ input clip.</p>
 
 <p class="var">bits</p>
 <p>Explicit specification of the destination bitdepth.
-The only allowed values are 8, 9, 10, 12, 16 and 32.
-However you cannot reduce the bitdepth, only keep or increase it.
+The only allowed values are 8, 9, 10, 12, 14, 16 and 32.
+However you cannot reduce the bitdepth, only keep it constant or increase it.
 Supersedes the bitdepth from <var>csp</var>.</p>
 
 <p class="var">singleout</p>
@@ -762,7 +762,7 @@ of the scaling coefficients.</p>
 <p>The input clip. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12- and 16-bit integer for Y’Cb’Cr’, 16-bit integer for RGB.</li>
+<li>8-, 9-, 10-, 12-, 14- and 16-bit integer for Y’Cb’Cr’, 16-bit integer for RGB.</li>
 <li>32-bit floating point.</li>
 <li>YUV and RGB colorspaces.</li>
 </ul>
@@ -1005,7 +1005,7 @@ between the sampling points.</li>
 <p>Clip to be resized. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12- and 16-bit integer.</li>
+<li>8-, 9-, 10-, 12-, 16- and 16-bit integer.</li>
 <li>32-bit floating point.</li>
 <li>Any planar colorspace.</li>
 </ul>
@@ -1517,6 +1517,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>bitdepth</code>: added dithering <var>mode</var> 9: quasirandom sequences.</li>
 <li><code>bitdepth</code>: added a triangular probability distribution function (TPDF) for the dithering patterns and noises, along with the associated parameters <var>tpdfo</var> and <var>tpdfn</var>.</li>
 <li><code>bitdepth</code>: added <var>corplane</var> parameter to prevent colored noise in RGB processing.</li>
+<li>Added support for 14-bit data.</li>
 </ul>
 
 <p><b>r23, 2021-07-14</b></p>
