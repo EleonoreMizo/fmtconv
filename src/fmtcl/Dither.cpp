@@ -425,8 +425,8 @@ void	Dither::copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle
 
 // All possible combinations
 #define fmtcl_Dither_SPAN_INT(SETP, NAMP, NAMF, simple_flag, tpdfo_flag, tpdfn_flag, dst_res, dst_fmt, src_res, src_fmt) \
-	switch (  ((simple_flag) << 7) \
-	        + ((tpdfo_flag) << 23) + ((tpdfn_flag) << 22) \
+	switch (  (int (simple_flag) << 7) \
+	        + (int (tpdfo_flag) << 23) + (int (tpdfn_flag) << 22) \
 	        + ((dst_res) << 24) + ((dst_fmt) << 16) \
 	        + ((src_res) <<  8) +  (src_fmt)) \
 	{ \
@@ -447,12 +447,13 @@ void	Dither::copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle
 	SETP (NAMP, NAMF, SplFmt_INT16, uint16_t, 10, SplFmt_INT16, uint16_t, 16) \
 	SETP (NAMP, NAMF, SplFmt_INT16, uint16_t, 12, SplFmt_INT16, uint16_t, 14) \
 	SETP (NAMP, NAMF, SplFmt_INT16, uint16_t, 12, SplFmt_INT16, uint16_t, 16) \
+	SETP (NAMP, NAMF, SplFmt_INT16, uint16_t, 14, SplFmt_INT16, uint16_t, 16) \
 	}
 
 // All possible combinations using float as intermediary data
 #define fmtcl_Dither_SPAN_FLT(SETP, NAMP, NAMF, simple_flag, tpdfo_flag, tpdfn_flag, dst_res, dst_fmt, src_res, src_fmt) \
-	switch (  ((simple_flag) << 7) \
-	        + ((tpdfo_flag) << 23) + ((tpdfn_flag) << 22) \
+	switch (  (int (simple_flag) << 7) \
+	        + (int (tpdfo_flag) << 23) + (int (tpdfn_flag) << 22) \
 	        + ((dst_res) << 24) + ((dst_fmt) << 16) \
 	        + ((src_res) <<  8) +  (src_fmt)) \
 	{ \
@@ -511,7 +512,8 @@ void	Dither::copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle
 	FCASE (true , true , true , NAMP, NAMF, DF, DT, DP, SF, ST, SP)
 
 #define fmtcl_Dither_SET_FNC_INT_CASE(simple_flag, tpdfo_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case   (simple_flag << 7) + (tpdfn_flag << 22) + (tpdfo_flag << 23) \
+	case   (int (simple_flag) << 7) \
+	     + (int (tpdfn_flag) << 22) + (int (tpdfo_flag) << 23) \
 	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = &process_seg_##NAMF##_int_int_cpp < \
 			simple_flag, tpdfo_flag, tpdfn_flag, DT, DP, ST, SP \
@@ -523,7 +525,8 @@ void	Dither::copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle
 		NAMP, NAMF, DF, DT, DP, SF, ST, SP)
 
 #define fmtcl_Dither_SET_FNC_FLT_CASE(simple_flag, tpdfo_flag, tpdfn_flag,NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case   (simple_flag << 7) + (tpdfn_flag << 22) + (tpdfo_flag << 23) \
+	case   (int (simple_flag) << 7) \
+	     + (int (tpdfn_flag) << 22) + (int (tpdfo_flag) << 23) \
 	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = &process_seg_##NAMF##_flt_int_cpp < \
 			simple_flag, tpdfo_flag, tpdfn_flag, DT, DP, ST \
@@ -535,7 +538,8 @@ void	Dither::copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle
 		NAMP, NAMF, DF, DT, DP, SF, ST, SP)
 
 #define fmtcl_Dither_SET_FNC_INT_SSE2_CASE(simple_flag, tpdfo_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case   (simple_flag << 7) + (tpdfn_flag << 22) + (tpdfo_flag << 23) \
+	case   (int (simple_flag) << 7) \
+	     + (int (tpdfn_flag) << 22) + (int (tpdfo_flag) << 23) \
 	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = &process_seg_##NAMF##_int_int_sse2 < \
 			simple_flag, tpdfo_flag, tpdfn_flag, DF, DP, SF, SP \
@@ -547,7 +551,8 @@ void	Dither::copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle
 		NAMP, NAMF, DF, DT, DP, SF, ST, SP)
 
 #define fmtcl_Dither_SET_FNC_FLT_SSE2_CASE(simple_flag, tpdfo_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case   (simple_flag << 7) + (tpdfn_flag << 22) + (tpdfo_flag << 23) \
+	case   (int (simple_flag) << 7) \
+	     + (int (tpdfn_flag) << 22) + (int (tpdfo_flag) << 23) \
 	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = &process_seg_##NAMF##_flt_int_sse2 < \
 			simple_flag, tpdfo_flag, tpdfn_flag, DF, DP, SF \
@@ -669,7 +674,7 @@ void	Dither::init_fnc_quasirandom () noexcept
 
 
 #define fmtcl_Dither_SET_FNC_ERRDIF_INT_CASE(simple_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case   (simple_flag << 7) + (tpdfn_flag << 22) \
+	case   (int (simple_flag) << 7) + (int (tpdfn_flag) << 22) \
 	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_int_int_ptr = &process_seg_errdif_int_int_cpp < \
 			simple_flag, tpdfn_flag, Diffuse##NAMF <DT, DP, ST, SP> \
@@ -683,7 +688,7 @@ void	Dither::init_fnc_quasirandom () noexcept
 	fmtcl_Dither_SET_FNC_ERRDIF_INT_CASE (true , true , NAMP, NAMF, DF, DT, DP, SF, ST, SP)
 
 #define fmtcl_Dither_SET_FNC_ERRDIF_FLT_CASE(simple_flag, tpdfn_flag, NAMP, NAMF, DF, DT, DP, SF, ST, SP) \
-	case   (simple_flag << 7) + (tpdfn_flag << 22) \
+	case   (int (simple_flag) << 7) + (int (tpdfn_flag) << 22) \
 	     + (DP << 24) + (DF << 16) + (SP << 8) + SF: \
 		_process_seg_flt_int_ptr = &process_seg_errdif_flt_int_cpp < \
 			simple_flag, tpdfn_flag, Diffuse##NAMF <DT, DP, ST, SP> \
@@ -814,10 +819,15 @@ void	Dither::dither_plane (uint8_t *dst_ptr, int dst_stride, const uint8_t *src_
 	}
 	ctx._rnd_state = rnd_state;
 
-	const bool     sc_flag =
-		(   _splfmt_src == SplFmt_FLOAT
-		 || ! fstb::is_eq (scale_info._gain * double ((uint64_t (1)) << (_src_res - _dst_res)), 1.0, 1e-6)
-		 || ! fstb::is_null (scale_info._add_cst, 1e-6));
+	const bool     sc_flag = (
+		   _splfmt_src == SplFmt_FLOAT
+		|| _src_res == _dst_res
+		|| ! fstb::is_eq (
+			scale_info._gain * double ((uint64_t (1)) << (_src_res - _dst_res)),
+			1.0, 1e-6
+		)
+		|| ! fstb::is_null (scale_info._add_cst, 1e-6)
+	);
 
 	void (* process_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) =
 		  (sc_flag)
