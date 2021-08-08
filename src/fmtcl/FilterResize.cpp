@@ -857,7 +857,8 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 	: (x ==  9) ? 1 \
 	: (x == 10) ? 2 \
 	: (x == 12) ? 3 \
-	: (x == 16) ? 4 : -1)
+	: (x == 14) ? 4 \
+	: (x == 16) ? 5 : -1)
 
 #define fmtc_FilterResize_PROC_F(DF, DP, SF, SP) \
 	case	((SplFmt_##DF << 2) + SplFmt_##SF): \
