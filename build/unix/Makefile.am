@@ -52,13 +52,7 @@ AM_LDFLAGS   = $(PLUGINLDFLAGS)
 
 lib_LTLIBRARIES = libfmtconv.la
 
-libfmtconv_la_SOURCES =  \
-        ../../src/avstp.h \
-        ../../src/AvstpWrapper.cpp \
-        ../../src/AvstpWrapper.h \
-        ../../src/main.cpp \
-        ../../src/types.h \
-        ../../src/VapourSynth.h \
+commonsrc = \
         ../../src/conc/AioAdd.h \
         ../../src/conc/AioAdd.hpp \
         ../../src/conc/AioMax.h \
@@ -100,31 +94,6 @@ libfmtconv_la_SOURCES =  \
         ../../src/ffft/FFTReal.hpp \
         ../../src/ffft/OscSinCos.h \
         ../../src/ffft/OscSinCos.hpp \
-        ../../src/fmtc/Bitdepth.cpp \
-        ../../src/fmtc/Bitdepth.h \
-        ../../src/fmtc/Convert.cpp \
-        ../../src/fmtc/Convert.h \
-        ../../src/fmtc/ConvStep.cpp \
-        ../../src/fmtc/ConvStep.h \
-        ../../src/fmtc/fnc.cpp \
-        ../../src/fmtc/fnc.h \
-        ../../src/fmtc/Matrix2020CL.cpp \
-        ../../src/fmtc/Matrix2020CL.h \
-        ../../src/fmtc/Matrix.cpp \
-        ../../src/fmtc/Matrix.h \
-        ../../src/fmtc/NativeToStack16.cpp \
-        ../../src/fmtc/NativeToStack16.h \
-        ../../src/fmtc/Primaries.cpp \
-        ../../src/fmtc/Primaries.h \
-        ../../src/fmtc/Resample.cpp \
-        ../../src/fmtc/Resample.h \
-        ../../src/fmtc/SplFmtUtl.h \
-        ../../src/fmtc/SplFmtUtl.hpp \
-        ../../src/fmtc/Stack16ToNative.cpp \
-        ../../src/fmtc/Stack16ToNative.h \
-        ../../src/fmtc/Transfer.cpp \
-        ../../src/fmtc/Transfer.h \
-        ../../src/fmtc/version.h \
         ../../src/fmtcl/ArrayMultiType.cpp \
         ../../src/fmtcl/ArrayMultiType.h \
         ../../src/fmtcl/ArrayMultiType.hpp \
@@ -167,6 +136,8 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/ContFirSpline64.h \
         ../../src/fmtcl/ContFirSpline.cpp \
         ../../src/fmtcl/ContFirSpline.h \
+        ../../src/fmtcl/CpuOptBase.cpp \
+        ../../src/fmtcl/CpuOptBase.h \
         ../../src/fmtcl/DiscreteFirCustom.cpp \
         ../../src/fmtcl/DiscreteFirCustom.h \
         ../../src/fmtcl/DiscreteFirInterface.cpp \
@@ -180,7 +151,7 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/ErrDifBufFactory.h \
         ../../src/fmtcl/FilterResize.cpp \
         ../../src/fmtcl/FilterResize.h \
-        ../../src/fmtcl/fnc.cpp \
+        ../../src/fmtcl/fnc_fmtcl.cpp \
         ../../src/fmtcl/fnc.h \
         ../../src/fmtcl/InterlacingType.h \
         ../../src/fmtcl/KernelData.cpp \
@@ -283,11 +254,42 @@ libfmtconv_la_SOURCES =  \
         ../../src/fstb/fnc.hpp \
         ../../src/fstb/SingleObj.h \
         ../../src/fstb/SingleObj.hpp \
-        ../../src/vsutl/CpuOpt.cpp \
-        ../../src/vsutl/CpuOpt.h \
+        ../../src/avstp.h \
+        ../../src/AvstpWrapper.cpp \
+        ../../src/AvstpWrapper.h
+
+libfmtconv_la_SOURCES = $(commonsrc) \
+        ../../src/main-vs.cpp \
+        ../../src/types.h \
+        ../../src/VapourSynth.h \
+        ../../src/fmtc/Bitdepth.cpp \
+        ../../src/fmtc/Bitdepth.h \
+        ../../src/fmtc/Convert.cpp \
+        ../../src/fmtc/Convert.h \
+        ../../src/fmtc/ConvStep.cpp \
+        ../../src/fmtc/ConvStep.h \
+        ../../src/fmtc/CpuOpt.cpp \
+        ../../src/fmtc/CpuOpt.h \
+        ../../src/fmtc/fnc_fmtc.cpp \
+        ../../src/fmtc/fnc.h \
+        ../../src/fmtc/Matrix2020CL.cpp \
+        ../../src/fmtc/Matrix2020CL.h \
+        ../../src/fmtc/Matrix.cpp \
+        ../../src/fmtc/Matrix.h \
+        ../../src/fmtc/NativeToStack16.cpp \
+        ../../src/fmtc/NativeToStack16.h \
+        ../../src/fmtc/Primaries.cpp \
+        ../../src/fmtc/Primaries.h \
+        ../../src/fmtc/Resample.cpp \
+        ../../src/fmtc/Resample.h \
+        ../../src/fmtc/Stack16ToNative.cpp \
+        ../../src/fmtc/Stack16ToNative.h \
+        ../../src/fmtc/Transfer.cpp \
+        ../../src/fmtc/Transfer.h \
+        ../../src/fmtc/version.h \
         ../../src/vsutl/FilterBase.cpp \
         ../../src/vsutl/FilterBase.h \
-        ../../src/vsutl/fnc.cpp \
+        ../../src/vsutl/fnc_vsutl.cpp \
         ../../src/vsutl/fnc.h \
         ../../src/vsutl/FrameRefSPtr.h \
         ../../src/vsutl/FuncRefSPtr.h \
@@ -307,6 +309,7 @@ libfmtconv_la_LIBADD =
 noinst_LTLIBRARIES =
 
 
+
 if X86
 
 libsse2_la_SOURCES = \
@@ -318,20 +321,24 @@ libsse2_la_CXXFLAGS = $(AM_CXXFLAGS) -msse2
 libfmtconv_la_LIBADD += libsse2.la
 noinst_LTLIBRARIES += libsse2.la
 
-libavx_la_SOURCES = \
+commonsrcavx = \
         ../../src/fmtcl/MatrixProc_avx.cpp
+
+libavx_la_SOURCES = $(commonsrcavx)
 
 libavx_la_CXXFLAGS = $(AM_CXXFLAGS) -mavx
 libfmtconv_la_LIBADD += libavx.la
 noinst_LTLIBRARIES += libavx.la
 
-libavx2_la_SOURCES = \
+commonsrcavx2 = \
         ../../src/fmtcl/BitBltConv_avx2.cpp \
         ../../src/fmtcl/MatrixProc_avx2.cpp \
         ../../src/fmtcl/ProxyRwAvx2.h \
         ../../src/fmtcl/ProxyRwAvx2.hpp \
         ../../src/fmtcl/Scaler_avx2.cpp \
-        ../../src/fmtcl/TransLut_avx2.cpp \
+        ../../src/fmtcl/TransLut_avx2.cpp
+
+libavx2_la_SOURCES = $(commonsrcavx2) \
         ../../src/fstb/ToolsAvx2.cpp \
         ../../src/fstb/ToolsAvx2.h \
         ../../src/fstb/ToolsAvx2.hpp

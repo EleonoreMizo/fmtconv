@@ -31,6 +31,9 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/ColorSpaceH265.h"
 #include "fmtcl/SplFmt.h"
 
+#include <string>
+#include <vector>
+
 
 
 namespace fmtcl
@@ -51,6 +54,7 @@ double compute_pix_scale (const PicFmt &fmt, int plane_index);
 double get_pix_min (const PicFmt &fmt, int plane_index);
 void   compute_fmt_mac_cst (double &gain, double &add_cst, const PicFmt &dst_fmt, const PicFmt &src_fmt, int plane_index);
 int    prepare_matrix_coef (MatrixProc &mat_proc, const Mat4 &mat_main, const PicFmt &dst_fmt, const PicFmt &src_fmt, ColorSpaceH265 csp_out, int plane_out);
+std::vector <double> conv_str_to_float_arr (const std::string &str);
 
 
 

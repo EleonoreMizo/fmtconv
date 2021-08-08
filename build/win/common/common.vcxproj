@@ -1,0 +1,365 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E3709730-4FD3-4771-844E-719AAC38AA6C}</ProjectGuid>
+    <RootNamespace>common</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\toolset.props" />
+  </ImportGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>$(ProjectDir)$(Configuration)$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)$(Configuration)$(Platform)\</IntDir>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BrowseInformation>true</BrowseInformation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
+    <ClCompile>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <Link>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <AdditionalIncludeDirectories>../../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4127</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\conc\AioAdd.h" />
+    <ClInclude Include="..\..\..\src\conc\AioAdd.hpp" />
+    <ClInclude Include="..\..\..\src\conc\AioMax.h" />
+    <ClInclude Include="..\..\..\src\conc\AioMax.hpp" />
+    <ClInclude Include="..\..\..\src\conc\AioSub.h" />
+    <ClInclude Include="..\..\..\src\conc\AioSub.hpp" />
+    <ClInclude Include="..\..\..\src\conc\AtomicInt.h" />
+    <ClInclude Include="..\..\..\src\conc\AtomicInt.hpp" />
+    <ClInclude Include="..\..\..\src\conc\AtomicIntOp.h" />
+    <ClInclude Include="..\..\..\src\conc\AtomicIntOp.hpp" />
+    <ClInclude Include="..\..\..\src\conc\AtomicMem.h" />
+    <ClInclude Include="..\..\..\src\conc\AtomicMem.hpp" />
+    <ClInclude Include="..\..\..\src\conc\AtomicPtr.h" />
+    <ClInclude Include="..\..\..\src\conc\AtomicPtr.hpp" />
+    <ClInclude Include="..\..\..\src\conc\AtomicPtrIntPair.h" />
+    <ClInclude Include="..\..\..\src\conc\AtomicPtrIntPair.hpp" />
+    <ClInclude Include="..\..\..\src\conc\CellPool.h" />
+    <ClInclude Include="..\..\..\src\conc\CellPool.hpp" />
+    <ClInclude Include="..\..\..\src\conc\def.h" />
+    <ClInclude Include="..\..\..\src\conc\fnc.h" />
+    <ClInclude Include="..\..\..\src\conc\fnc.hpp" />
+    <ClInclude Include="..\..\..\src\conc\Interlocked.h" />
+    <ClInclude Include="..\..\..\src\conc\Interlocked.hpp" />
+    <ClInclude Include="..\..\..\src\conc\LockFreeCell.h" />
+    <ClInclude Include="..\..\..\src\conc\LockFreeQueue.h" />
+    <ClInclude Include="..\..\..\src\conc\LockFreeQueue.hpp" />
+    <ClInclude Include="..\..\..\src\conc\LockFreeStack.h" />
+    <ClInclude Include="..\..\..\src\conc\LockFreeStack.hpp" />
+    <ClInclude Include="..\..\..\src\conc\ObjFactoryDef.h" />
+    <ClInclude Include="..\..\..\src\conc\ObjFactoryDef.hpp" />
+    <ClInclude Include="..\..\..\src\conc\ObjFactoryInterface.h" />
+    <ClInclude Include="..\..\..\src\conc\ObjFactoryInterface.hpp" />
+    <ClInclude Include="..\..\..\src\conc\ObjPool.h" />
+    <ClInclude Include="..\..\..\src\conc\ObjPool.hpp" />
+    <ClInclude Include="..\..\..\src\ffft\def.h" />
+    <ClInclude Include="..\..\..\src\ffft\FFTReal.h" />
+    <ClInclude Include="..\..\..\src\ffft\FFTReal.hpp" />
+    <ClInclude Include="..\..\..\src\ffft\OscSinCos.h" />
+    <ClInclude Include="..\..\..\src\ffft\OscSinCos.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ArrayMultiType.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ArrayMultiType.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\BitBltConv.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ChromaPlacement.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ColorFamily.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ColorSpaceH265.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirBlackman.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirBlackmanMinLobe.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirCubic.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirFromDiscrete.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirGauss.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirInterface.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirLanczos.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirLinear.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirRect.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirSinc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirSnh.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirSpline.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirSpline16.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirSpline36.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirSpline64.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\CpuOptBase.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\DiscreteFirCustom.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\DiscreteFirInterface.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Dither.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ErrDifBuf.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ErrDifBuf.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ErrDifBufFactory.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\FilterResize.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\fnc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\InterlacingType.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\KernelData.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Mat3.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Mat3.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\Mat4.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Mat4.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\Matrix2020CLProc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Matrix2020CLProc_macro.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\MatrixProc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\MatrixProc_macro.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\MatrixUtil.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\MatrixWrap.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\MatrixWrap.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\PicFmt.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\PrimariesPreset.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\PrimUtil.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Proxy.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Proxy.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ProxyRwAvx2.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ProxyRwAvx2.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ProxyRwCpp.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ProxyRwCpp.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ProxyRwSse2.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ProxyRwSse2.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ReadWrapperFlt.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ReadWrapperFlt.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ReadWrapperInt.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ReadWrapperInt.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ResamplePlaneData.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ResampleSpecPlane.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ResampleUtil.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ResizeData.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ResizeData.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ResizeDataFactory.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\RgbSystem.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Scaler.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\CoefArrInt.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\CoefArrInt.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\ScalerCopy.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\SplFmt.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\SplFmt.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransCurve.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransLut.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOp2084.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpAcesCc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpAffine.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpBypass.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpCanonLog.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpCompose.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpCompose.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpContrast.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpContrast.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpErimm.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpFilmStream.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpHlg.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpInterface.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpLinPow.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpLogC.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpLogTrunc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpPow.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpSLog.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpSLog3.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransUtil.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Vec3.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\Vec3.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\VoidAndCluster.h" />
+    <ClInclude Include="..\..\..\src\fstb\AllocAlign.h" />
+    <ClInclude Include="..\..\..\src\fstb\AllocAlign.hpp" />
+    <ClInclude Include="..\..\..\src\fstb\ArrayAlign.h" />
+    <ClInclude Include="..\..\..\src\fstb\ArrayAlign.hpp" />
+    <ClInclude Include="..\..\..\src\fstb\CpuId.h" />
+    <ClInclude Include="..\..\..\src\fstb\SingleObj.h" />
+    <ClInclude Include="..\..\..\src\fstb\SingleObj.hpp" />
+    <ClInclude Include="..\..\..\src\fstb\ToolsAvx2.h" />
+    <ClInclude Include="..\..\..\src\fstb\ToolsAvx2.hpp" />
+    <ClInclude Include="..\..\..\src\fstb\ToolsSse2.h" />
+    <ClInclude Include="..\..\..\src\fstb\ToolsSse2.hpp" />
+    <ClInclude Include="..\..\..\src\fstb\def.h" />
+    <ClInclude Include="..\..\..\src\fstb\fnc.h" />
+    <ClInclude Include="..\..\..\src\fstb\fnc.hpp" />
+    <ClInclude Include="..\..\..\src\avstp.h" />
+    <ClInclude Include="..\..\..\src\AvstpFinder.h" />
+    <ClInclude Include="..\..\..\src\AvstpWrapper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\fmtcl\ArrayMultiType.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\BitBltConv.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\BitBltConv_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\ChromaPlacement.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirBlackman.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirBlackmanMinLobe.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirCubic.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirFromDiscrete.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirGauss.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirInterface.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirLanczos.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirLinear.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirRect.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirSinc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirSnh.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirSpline.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirSpline16.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirSpline36.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirSpline64.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\CpuOptBase.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\DiscreteFirCustom.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\DiscreteFirInterface.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\Dither.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ErrDifBuf.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ErrDifBufFactory.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\FilterResize.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\fnc_fmtcl.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\KernelData.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\Matrix2020CLProc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\MatrixProc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\MatrixProc_avx.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\MatrixProc_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\MatrixUtil.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\PrimUtil.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ResampleSpecPlane.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ResampleUtil.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ResizeData.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ResizeDataFactory.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\RgbSystem.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\Scaler.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\CoefArrInt.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\Scaler_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransLut.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransLut_avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransOp2084.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpAcesCc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpAffine.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpCanonLog.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpErimm.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpFilmStream.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpHlg.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpLinPow.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpLogC.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpLogTrunc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpPow.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpSLog.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpSLog3.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransUtil.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\VoidAndCluster.cpp" />
+    <ClCompile Include="..\..\..\src\fstb\CpuId.cpp" />
+    <ClCompile Include="..\..\..\src\fstb\fnc_fstb.cpp" />
+    <ClCompile Include="..\..\..\src\fstb\ToolsAvx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fstb\ToolsSse2.cpp" />
+    <ClCompile Include="..\..\..\src\AvstpFinder.cpp" />
+    <ClCompile Include="..\..\..\src\AvstpWrapper.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

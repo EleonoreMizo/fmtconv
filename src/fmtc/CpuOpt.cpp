@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-        SplFmtUtl.hpp
-        Author: Laurent de Soras, 2012
+        CpuOpt.cpp
+        Author: Laurent de Soras, 2015
 
 --- Legal stuff ---
 
@@ -15,14 +15,19 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-#if ! defined (fmtc_SplFmtUtl_CODEHEADER_INCLUDED)
-#define	fmtc_SplFmtUtl_CODEHEADER_INCLUDED
+#if defined (_MSC_VER)
+	#pragma warning (1 : 4130 4223 4705 4706)
+	#pragma warning (4 : 4355 4786 4800)
+#endif
 
 
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "VapourSynth.h"
+#include "fmtc/CpuOpt.h"
+#include "vsutl/FilterBase.h"
+
+#include <cassert>
 
 
 
@@ -35,35 +40,12 @@ namespace fmtc
 
 
 
-fmtcl::SplFmt	SplFmtUtl::conv_from_vsformat (const ::VSFormat &fmt)
+CpuOpt::CpuOpt (vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *param_name_0)
 {
-	fmtcl::SplFmt  type = fmtcl::SplFmt_ILLEGAL;
-
-	if (fmt.sampleType == ::stFloat && fmt.bitsPerSample == 32)
-	{
-		type = fmtcl::SplFmt_FLOAT;
-	}
-	else
-	{
-		if (fmt.bitsPerSample > 8 && fmt.bitsPerSample <= 16)
-		{
-			type = fmtcl::SplFmt_INT16;
-		}
-		else if (fmt.bitsPerSample <= 8)
-		{
-			type = fmtcl::SplFmt_INT8;
-		}
-	}
-
-	return (type);
-}
-
-
-
-void	SplFmtUtl::conv_from_vsformat (fmtcl::SplFmt &type, int &bitdepth, const ::VSFormat &fmt)
-{
-	type     = conv_from_vsformat (fmt);
-	bitdepth = fmt.bitsPerSample;
+	assert (param_name_0 != 0);
+	set_level (static_cast <Level> (filter.get_arg_int (
+		in, out, param_name_0, Level_ANY_AVAILABLE
+	) & Level_MASK));
 }
 
 
@@ -77,10 +59,6 @@ void	SplFmtUtl::conv_from_vsformat (fmtcl::SplFmt &type, int &bitdepth, const ::
 
 
 }	// namespace fmtc
-
-
-
-#endif	// fmtc_SplFmtUtl_CODEHEADER_INCLUDED
 
 
 

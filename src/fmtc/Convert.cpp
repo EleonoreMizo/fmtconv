@@ -29,9 +29,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtc/Convert.h"
+#include "fmtc/fnc.h"
 #include "fmtc/Matrix.h"
 #include "fmtc/Resample.h"
 #include "fmtc/version.h"
+#include "fmtcl/MatrixUtil.h"
 #include "fstb/def.h"
 #include "vsutl/fnc.h"
 
@@ -103,8 +105,10 @@ Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore
 	{
 		fstb::conv_to_lower_case (mats);
 		fstb::conv_to_lower_case (matd);
-		Matrix::select_def_mat (mats, fmt_src);
-		Matrix::select_def_mat (matd, fmt_dst);
+		const auto     col_fam_src = fmtc::conv_vsfmt_to_colfam (fmt_src);
+		const auto     col_fam_dst = fmtc::conv_vsfmt_to_colfam (fmt_dst);
+		fmtcl::MatrixUtil::select_def_mat (mats, col_fam_src);
+		fmtcl::MatrixUtil::select_def_mat (matd, col_fam_dst);
 		_mats = Matrix::find_cs_from_mat_str (*this, mats, true);
 		_matd = Matrix::find_cs_from_mat_str (*this, matd, true);
 	}

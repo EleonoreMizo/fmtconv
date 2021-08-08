@@ -29,12 +29,12 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtc/CpuOpt.h"
 #include "fmtc/Matrix.h"
 #include "fmtc/fnc.h"
 #include "fmtcl/MatrixUtil.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
-#include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
 
@@ -71,7 +71,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 ,	_plane_out (get_arg_int (in, out, "singleout", -1))
 ,	_proc_uptr ()
 {
-	vsutl::CpuOpt  cpu_opt (*this, in, out);
+	const fmtc::CpuOpt   cpu_opt (*this, in, out);
 	_sse_flag  = cpu_opt.has_sse ();
 	_sse2_flag = cpu_opt.has_sse2 ();
 	_avx_flag  = cpu_opt.has_avx ();
@@ -146,7 +146,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		);
 	}
 
-	// Preliminary matrix test: deduce the target color family if unspecified
+	// Preliminary matrix test: deduces the target color family if unspecified
 	if (   ! force_col_fam_flag
 	    && fmt_dst_ptr->colorFamily != ::cmGray)
 	{
@@ -187,8 +187,10 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	{
 		fstb::conv_to_lower_case (mats);
 		fstb::conv_to_lower_case (matd);
-		select_def_mat (mats, fmt_src);
-		select_def_mat (matd, fmt_dst);
+		const auto     col_fam_src = fmtc::conv_vsfmt_to_colfam (fmt_src);
+		const auto     col_fam_dst = fmtc::conv_vsfmt_to_colfam (fmt_dst);
+		fmtcl::MatrixUtil::select_def_mat (mats, col_fam_src);
+		fmtcl::MatrixUtil::select_def_mat (matd, col_fam_dst);
 
 		fmtcl::Mat4    m2s;
 		fmtcl::Mat4    m2d;
@@ -378,33 +380,6 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 	}
 
 	return dst_ptr;
-}
-
-
-
-// Everything should be lower case at this point
-void	Matrix::select_def_mat (std::string &mat, const ::VSFormat &fmt)
-{
-	if (mat.empty ())
-	{
-		switch (fmt.colorFamily)
-		{
-		case	::cmYUV:
-			mat = "601";
-			break;
-
-		case	::cmYCoCg:
-			mat = "ycgco";
-			break;
-
-		case	::cmGray:   // Should not happen actually
-		case	::cmRGB:
-		case	::cmCompat:
-		default:
-			// Nothing
-			break;
-		}
-	}
 }
 
 

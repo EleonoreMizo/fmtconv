@@ -1,9 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fmtconv", "fmtconv.vcxproj", "{82B962E5-3DE3-4933-8B0F-CDA03FAADCB2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fmtconv", "fmtconv\fmtconv.vcxproj", "{82B962E5-3DE3-4933-8B0F-CDA03FAADCB2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E3709730-4FD3-4771-844E-719AAC38AA6C} = {E3709730-4FD3-4771-844E-719AAC38AA6C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\common.vcxproj", "{E3709730-4FD3-4771-844E-719AAC38AA6C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EB6F259-071E-497F-AA1B-8D88A993671A}"
+	ProjectSection(SolutionItems) = preProject
+		..\unix\configure.ac = ..\unix\configure.ac
+		..\unix\Makefile.am = ..\unix\Makefile.am
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,8 +36,21 @@ Global
 		{82B962E5-3DE3-4933-8B0F-CDA03FAADCB2}.Release|Win32.Build.0 = Release|Win32
 		{82B962E5-3DE3-4933-8B0F-CDA03FAADCB2}.Release|x64.ActiveCfg = Release|x64
 		{82B962E5-3DE3-4933-8B0F-CDA03FAADCB2}.Release|x64.Build.0 = Release|x64
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Debug|ARM.ActiveCfg = Debug|Win32
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Debug|Win32.Build.0 = Debug|Win32
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Debug|x64.ActiveCfg = Debug|x64
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Debug|x64.Build.0 = Debug|x64
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Release|ARM.ActiveCfg = Release|Win32
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Release|Win32.ActiveCfg = Release|Win32
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Release|Win32.Build.0 = Release|Win32
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Release|x64.ActiveCfg = Release|x64
+		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D79DED9A-5DF1-4F26-AE1E-6A2BB4C64FE2}
 	EndGlobalSection
 EndGlobal

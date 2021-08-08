@@ -51,11 +51,11 @@ namespace fmtc
 
 
 
-fmtcl::PicFmt  conv_vsfmt_to_picfmt (const ::VSFormat &fmt, bool full_flag);
-fmtcl::SplFmt  conv_vsfmt_to_splfmt (const ::VSFormat &fmt);
-fmtcl::ColorFamily
-               conv_colfam_to_fmtcl (const ::VSFormat &fmt);
-void           prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSFormat &fmt_dst, bool full_range_dst_flag, const ::VSFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out = fmtcl::ColorSpaceH265_UNSPECIFIED, int plane_out = -1);
+fmtcl::PicFmt conv_vsfmt_to_picfmt (const ::VSFormat &fmt, bool full_flag);
+fmtcl::SplFmt conv_vsfmt_to_splfmt (const ::VSFormat &fmt);
+void conv_vsfmt_to_splfmt (fmtcl::SplFmt &type, int &bitdepth, const ::VSFormat &fmt);
+fmtcl::ColorFamily conv_vsfmt_to_colfam (const ::VSFormat &fmt);
+void prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSFormat &fmt_dst, bool full_range_dst_flag, const ::VSFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out = fmtcl::ColorSpaceH265_UNSPECIFIED, int plane_out = -1);
 
 
 

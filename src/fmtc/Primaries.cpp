@@ -24,6 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtc/CpuOpt.h"
 #include "fmtc/fnc.h"
 #include "fmtc/Primaries.h"
 #include "fmtcl/fnc.h"
@@ -31,7 +32,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/PrimUtil.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
-#include "vsutl/CpuOpt.h"
 #include "vsutl/FrameRefSPtr.h"
 
 #include <cassert>
@@ -64,7 +64,7 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 {
 	fstb::unused (user_data_ptr, core);
 
-	vsutl::CpuOpt  cpu_opt (*this, in, out);
+	const fmtc::CpuOpt   cpu_opt (*this, in, out);
 	_sse_flag  = cpu_opt.has_sse ();
 	_sse2_flag = cpu_opt.has_sse2 ();
 	_avx_flag  = cpu_opt.has_avx ();

@@ -24,12 +24,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtc/CpuOpt.h"
 #include "fmtc/fnc.h"
 #include "fmtc/Resample.h"
-#include "fmtc/SplFmtUtl.h"
 #include "fmtcl/ResampleUtil.h"
 #include "fstb/def.h"
-#include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
 #include "vsutl/PlaneProcMode.h"
@@ -102,7 +101,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 {
 	fstb::unused (user_data_ptr);
 
-	vsutl::CpuOpt  cpu_opt (*this, in, out);
+	const fmtc::CpuOpt   cpu_opt (*this, in, out);
 	_sse2_flag = cpu_opt.has_sse2 ();
 	_avx2_flag = cpu_opt.has_avx2 ();
 
@@ -135,7 +134,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 	_src_width  = _vi_in.width;
 	_src_height = _vi_in.height;
-	SplFmtUtl::conv_from_vsformat (_src_type, _src_res, *_vi_in.format);
+	conv_vsfmt_to_splfmt (_src_type, _src_res, *_vi_in.format);
 
 	// Destination colorspace
 	::VSFormat     fmt_def = fmt_src;
@@ -173,7 +172,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	// Done with the format
 	_vi_out.format = &fmt_dst;
 
-	SplFmtUtl::conv_from_vsformat (_dst_type, _dst_res, *_vi_out.format);
+	conv_vsfmt_to_splfmt (_dst_type, _dst_res, *_vi_out.format);
 
 	if (_interlaced_src < 0 || _interlaced_src >= InterlacingParam_NBR_ELT)
 	{
@@ -943,8 +942,8 @@ fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, 
 
 void	Resample::create_all_plane_specs ()
 {
-	const fmtcl::ColorFamily src_cf = fmtc::conv_colfam_to_fmtcl (*_vi_in.format);
-	const fmtcl::ColorFamily dst_cf = fmtc::conv_colfam_to_fmtcl (*_vi_out.format);
+	const fmtcl::ColorFamily src_cf = fmtc::conv_vsfmt_to_colfam (*_vi_in.format);
+	const fmtcl::ColorFamily dst_cf = fmtc::conv_vsfmt_to_colfam (*_vi_out.format);
 	const int      src_ss_h   = _vi_in.format->subSamplingW;
 	const int      src_ss_v   = _vi_in.format->subSamplingH;
 	const int      dst_ss_h   = _vi_out.format->subSamplingW;

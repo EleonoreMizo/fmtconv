@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="fmtc">
+      <UniqueIdentifier>{d1d807c2-3439-4dee-ad19-f29504e4be29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vsutl">
+      <UniqueIdentifier>{a51f5b8a-dc58-499b-89f1-eaa79698ba55}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\fmtc\Bitdepth.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\Matrix.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\NativeToStack16.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\Resample.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\Stack16ToNative.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\version.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\FilterBase.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\fnc.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\FrameRefSPtr.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\NodeRefSPtr.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\ObjRefSPtr.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\ObjRefSPtr.hpp">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\PlaneProcCbInterface.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\PlaneProcessor.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\PlaneProcMode.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\Redirect.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\Redirect.hpp">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\VapourSynth.h" />
+    <ClInclude Include="..\..\..\src\fmtc\Matrix2020CL.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\Convert.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\ConvStep.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\Transfer.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vsutl\FuncRefSPtr.h">
+      <Filter>vsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\fnc.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\Primaries.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtc\CpuOpt.h">
+      <Filter>fmtc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\fmtc\Bitdepth.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Matrix.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\NativeToStack16.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Resample.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Stack16ToNative.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vsutl\FilterBase.cpp">
+      <Filter>vsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vsutl\PlaneProcCbInterface.cpp">
+      <Filter>vsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vsutl\PlaneProcessor.cpp">
+      <Filter>vsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Matrix2020CL.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Convert.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\ConvStep.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Transfer.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Primaries.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\main-vs.cpp" />
+    <ClCompile Include="..\..\..\src\vsutl\fnc_vsutl.cpp">
+      <Filter>vsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\fnc_fmtc.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\CpuOpt.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

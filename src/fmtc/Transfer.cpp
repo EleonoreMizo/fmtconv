@@ -26,11 +26,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/def.h"
 
+#include "fmtc/CpuOpt.h"
 #include "fmtc/Transfer.h"
 #include "fmtc/fnc.h"
 #include "fmtcl/TransUtil.h"
 #include "fstb/fnc.h"
-#include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
 
@@ -81,7 +81,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 	fstb::conv_to_lower_case (_transs);
 	fstb::conv_to_lower_case (_transd);
 
-	vsutl::CpuOpt  cpu_opt (*this, in, out);
+	const fmtc::CpuOpt   cpu_opt (*this, in, out);
 	_sse2_flag = cpu_opt.has_sse2 ();
 	_avx2_flag = cpu_opt.has_avx2 ();
 

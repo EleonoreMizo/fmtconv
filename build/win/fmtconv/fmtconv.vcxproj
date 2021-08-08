@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{82B962E5-3DE3-4933-8B0F-CDA03FAADCB2}</ProjectGuid>
+    <RootNamespace>fmtconv</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\toolset.props" />
+  </ImportGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>$(ProjectDir)$(Configuration)$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)$(Configuration)$(Platform)\</IntDir>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BrowseInformation>true</BrowseInformation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
+    <ClCompile>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <Link>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <AdditionalIncludeDirectories>../../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;FMTCONV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4127</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>common.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\common\$(Configuration)$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\fmtc\Bitdepth.h" />
+    <ClInclude Include="..\..\..\src\fmtc\Convert.h" />
+    <ClInclude Include="..\..\..\src\fmtc\ConvStep.h" />
+    <ClInclude Include="..\..\..\src\fmtc\CpuOpt.h" />
+    <ClInclude Include="..\..\..\src\fmtc\fnc.h" />
+    <ClInclude Include="..\..\..\src\fmtc\Matrix.h" />
+    <ClInclude Include="..\..\..\src\fmtc\Matrix2020CL.h" />
+    <ClInclude Include="..\..\..\src\fmtc\NativeToStack16.h" />
+    <ClInclude Include="..\..\..\src\fmtc\Primaries.h" />
+    <ClInclude Include="..\..\..\src\fmtc\Resample.h" />
+    <ClInclude Include="..\..\..\src\fmtc\Stack16ToNative.h" />
+    <ClInclude Include="..\..\..\src\fmtc\Transfer.h" />
+    <ClInclude Include="..\..\..\src\fmtc\version.h" />
+    <ClInclude Include="..\..\..\src\vsutl\FilterBase.h" />
+    <ClInclude Include="..\..\..\src\vsutl\fnc.h" />
+    <ClInclude Include="..\..\..\src\vsutl\FrameRefSPtr.h" />
+    <ClInclude Include="..\..\..\src\vsutl\FuncRefSPtr.h" />
+    <ClInclude Include="..\..\..\src\vsutl\NodeRefSPtr.h" />
+    <ClInclude Include="..\..\..\src\vsutl\ObjRefSPtr.h" />
+    <ClInclude Include="..\..\..\src\vsutl\ObjRefSPtr.hpp" />
+    <ClInclude Include="..\..\..\src\vsutl\PlaneProcCbInterface.h" />
+    <ClInclude Include="..\..\..\src\vsutl\PlaneProcessor.h" />
+    <ClInclude Include="..\..\..\src\vsutl\PlaneProcMode.h" />
+    <ClInclude Include="..\..\..\src\vsutl\Redirect.h" />
+    <ClInclude Include="..\..\..\src\vsutl\Redirect.hpp" />
+    <ClInclude Include="..\..\..\src\VapourSynth.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\fmtc\Bitdepth.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Convert.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\ConvStep.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\CpuOpt.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\fnc_fmtc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Matrix.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Matrix2020CL.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\NativeToStack16.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Primaries.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Resample.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Stack16ToNative.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Transfer.cpp" />
+    <ClCompile Include="..\..\..\src\vsutl\FilterBase.cpp" />
+    <ClCompile Include="..\..\..\src\vsutl\fnc_vsutl.cpp" />
+    <ClCompile Include="..\..\..\src\vsutl\PlaneProcCbInterface.cpp" />
+    <ClCompile Include="..\..\..\src\vsutl\PlaneProcessor.cpp" />
+    <ClCompile Include="..\..\..\src\main-vs.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

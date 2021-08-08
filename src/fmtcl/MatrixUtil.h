@@ -23,6 +23,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/ColorFamily.h"
 #include "fmtcl/ColorSpaceH265.h"
 
 #include <string>
@@ -43,6 +44,7 @@ class MatrixUtil
 
 public:
 
+	static void    select_def_mat (std::string &mat, ColorFamily col_fam);
 	static ColorSpaceH265
 	               find_cs_from_mat_str (const std::string &mat, bool allow_2020cl_flag);
 

@@ -43,6 +43,32 @@ namespace fmtcl
 
 
 // mat should be already converted to lower case
+void	MatrixUtil::select_def_mat (std::string &mat, ColorFamily col_fam)
+{
+	if (mat.empty ())
+	{
+		switch (col_fam)
+		{
+		case	ColorFamily_YUV:
+			mat = "601";
+			break;
+
+		case	ColorFamily_YCGCO:
+			mat = "ycgco";
+			break;
+
+		case	ColorFamily_GRAY: // Should not happen actually
+		case	ColorFamily_RGB:
+		default:
+			// Nothing
+			break;
+		}
+	}
+}
+
+
+
+// mat should be already converted to lower case
 // Returns ColorSpaceH265_UNDEF if mat is unknown
 ColorSpaceH265	MatrixUtil::find_cs_from_mat_str (const std::string &mat, bool allow_2020cl_flag)
 {

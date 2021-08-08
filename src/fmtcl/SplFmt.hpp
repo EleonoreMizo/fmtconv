@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-        SplFmtUtl.hpp
+        SplFmt.hpp
         Author: Laurent de Soras, 2012
 
 --- Legal stuff ---
@@ -15,8 +15,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-#if ! defined (fmtcl_SplFmtUtl_CODEHEADER_INCLUDED)
-#define	fmtcl_SplFmtUtl_CODEHEADER_INCLUDED
+#if ! defined (fmtcl_SplFmt_CODEHEADER_INCLUDED)
+#define	fmtcl_SplFmt_CODEHEADER_INCLUDED
 
 
 
@@ -91,7 +91,7 @@ int	SplFmt_get_data_size (SplFmt fmt)
 
 
 
-#endif	// fmtcl_SplFmtUtl_CODEHEADER_INCLUDED
+#endif	// fmtcl_SplFmt_CODEHEADER_INCLUDED
 
 
 

@@ -25,11 +25,10 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtc/Bitdepth.h"
+#include "fmtc/CpuOpt.h"
 #include "fmtc/fnc.h"
-#include "fmtc/SplFmtUtl.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
-#include "vsutl/CpuOpt.h"
 #include "vsutl/fnc.h"
 
 #include <algorithm>
@@ -64,7 +63,7 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 {
 	fstb::unused (user_data_ptr);
 
-	vsutl::CpuOpt  cpu_opt (*this, in, out);
+	const fmtc::CpuOpt   cpu_opt (*this, in, out);
 	const bool     sse2_flag = cpu_opt.has_sse2 ();
 	const bool     avx2_flag = cpu_opt.has_avx2 ();
 
@@ -96,8 +95,8 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		}
 	}
 
-	const auto     splfmt_src = SplFmtUtl::conv_from_vsformat (fmt_src);
-	const auto     col_fam    = conv_colfam_to_fmtcl (fmt_src);
+	const auto     splfmt_src = conv_vsfmt_to_splfmt (fmt_src);
+	const auto     col_fam    = conv_vsfmt_to_colfam (fmt_src);
 
 	// Destination colorspace
 	const ::VSFormat& fmt_dst = get_output_colorspace (in, out, core, fmt_src);
@@ -129,7 +128,7 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 	// Format is validated
 	_vi_out.format = &fmt_dst;
-	const auto     splfmt_dst = SplFmtUtl::conv_from_vsformat (fmt_dst);
+	const auto     splfmt_dst = conv_vsfmt_to_splfmt (fmt_dst);
 
 	const int      w = _vi_in.width; // May be <= 0
 

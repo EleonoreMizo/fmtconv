@@ -71,7 +71,6 @@ public:
 	virtual const ::VSFrameRef *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core);
 
-	static void    select_def_mat (std::string &mat, const ::VSFormat &fmt);
 	static fmtcl::ColorSpaceH265
 	               find_cs_from_mat_str (const vsutl::FilterBase &flt, const std::string &mat, bool allow_2020cl_flag);
 
@@ -87,7 +86,7 @@ protected:
 
 private:
 
-	static constexpr int _nbr_planes = 3;
+	static constexpr int _nbr_planes = fmtcl::MatrixProc::_nbr_planes;
 
 	enum Dir
 	{

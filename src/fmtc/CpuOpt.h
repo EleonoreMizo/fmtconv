@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-        SplFmtUtl.h
-        Author: Laurent de Soras, 2012
+        CpuOpt.h
+        Author: Laurent de Soras, 2015
 
 --- Legal stuff ---
 
@@ -15,11 +15,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-#if ! defined (fmtc_SplFmtUtl_HEADER_INCLUDED)
-#define	fmtc_SplFmtUtl_HEADER_INCLUDED
+#pragma once
+#if ! defined (fmtc_CpuOpt_HEADER_INCLUDED)
+#define	fmtc_CpuOpt_HEADER_INCLUDED
 
 #if defined (_MSC_VER)
-	#pragma once
 	#pragma warning (4 : 4250)
 #endif
 
@@ -27,28 +27,31 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/SplFmt.h"
+#include "fmtcl/CpuOptBase.h"
+
+#include "VapourSynth.h"
 
 
 
-struct VSFormat;
+namespace vsutl
+{
+	class FilterBase;
+}
 
 namespace fmtc
 {
 
 
 
-class SplFmtUtl
+class CpuOpt
+:	public fmtcl::CpuOptBase
 {
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 public:
 
-	static inline fmtcl::SplFmt
-	               conv_from_vsformat (const ::VSFormat &fmt);
-	static inline void
-	               conv_from_vsformat (fmtcl::SplFmt &type, int &bitdepth, const ::VSFormat &fmt);
+	explicit       CpuOpt (vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *param_name_0 = "cpuopt");
 
 
 
@@ -68,14 +71,15 @@ private:
 
 private:
 
-	               SplFmtUtl ()                               = delete;
-	               SplFmtUtl (const SplFmtUtl &other)         = delete;
-	virtual        ~SplFmtUtl ()                              = delete;
-	SplFmtUtl &    operator = (const SplFmtUtl &other)        = delete;
-	bool           operator == (const SplFmtUtl &other) const = delete;
-	bool           operator != (const SplFmtUtl &other) const = delete;
+	               CpuOpt ()                               = delete;
+	               CpuOpt (const CpuOpt &other)            = delete;
+	               CpuOpt (CpuOpt &&other)                 = delete;
+	CpuOpt &       operator = (const CpuOpt &other)        = delete;
+	CpuOpt &       operator = (CpuOpt &&other)             = delete;
+	bool           operator == (const CpuOpt &other) const = delete;
+	bool           operator != (const CpuOpt &other) const = delete;
 
-};	// class SplFmtUtl
+};	// class CpuOpt
 
 
 
@@ -83,11 +87,11 @@ private:
 
 
 
-#include "fmtc/SplFmtUtl.hpp"
+//#include "fmtc/CpuOpt.hpp"
 
 
 
-#endif	// fmtc_SplFmtUtl_HEADER_INCLUDED
+#endif	// fmtc_CpuOpt_HEADER_INCLUDED
 
 
 

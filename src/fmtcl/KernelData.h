@@ -105,8 +105,6 @@ private:
 
 	uint32_t       _hash = 0;
 
-	static void    conv_to_float_arr (std::vector <double> &coef_arr, const std::string &str);
-
 	template <class W>
 	static void    apply_window (std::vector <double> &x, double &norm_sum, int taps, int h_len, int h_len_i, double inv_ovr_s);
 

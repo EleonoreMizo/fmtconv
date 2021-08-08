@@ -55,7 +55,7 @@ fmtcl::PicFmt	conv_vsfmt_to_picfmt (const ::VSFormat &fmt, bool full_flag)
 	fmtcl::PicFmt  pic_fmt;
 	pic_fmt._sf        = conv_vsfmt_to_splfmt (fmt);
 	pic_fmt._res       = fmt.bitsPerSample;
-	pic_fmt._col_fam   = conv_colfam_to_fmtcl (fmt);
+	pic_fmt._col_fam   = conv_vsfmt_to_colfam (fmt);
 	pic_fmt._full_flag = full_flag;
 
 	return pic_fmt;
@@ -67,12 +67,9 @@ fmtcl::SplFmt	conv_vsfmt_to_splfmt (const ::VSFormat &fmt)
 {
 	fmtcl::SplFmt  splfmt = fmtcl::SplFmt_ILLEGAL;
 
-	if (fmt.sampleType == ::stFloat)
+	if (fmt.sampleType == ::stFloat && fmt.bitsPerSample == 32)
 	{
-		if (fmt.bitsPerSample == 32)
-		{
-			splfmt = fmtcl::SplFmt_FLOAT;
-		}
+		splfmt = fmtcl::SplFmt_FLOAT;
 	}
 	else
 	{
@@ -91,7 +88,15 @@ fmtcl::SplFmt	conv_vsfmt_to_splfmt (const ::VSFormat &fmt)
 
 
 
-fmtcl::ColorFamily	conv_colfam_to_fmtcl (const ::VSFormat &fmt)
+void	conv_vsfmt_to_splfmt (fmtcl::SplFmt &type, int &bitdepth, const ::VSFormat &fmt)
+{
+	type     = conv_vsfmt_to_splfmt (fmt);
+	bitdepth = fmt.bitsPerSample;
+}
+
+
+
+fmtcl::ColorFamily	conv_vsfmt_to_colfam (const ::VSFormat &fmt)
 {
 	auto          col_fam = fmtcl::ColorFamily_INVALID;
 

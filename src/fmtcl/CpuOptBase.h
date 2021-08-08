@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-        CpuOpt.h
-        Author: Laurent de Soras, 2015
+        CpuOptBase.h
+        Author: Laurent de Soras, 2021
 
 --- Legal stuff ---
 
@@ -9,19 +9,15 @@ This program is free software. It comes without any warranty, to
 the extent permitted by applicable law. You can redistribute it
 and/or modify it under the terms of the Do What The Fuck You Want
 To Public License, Version 2, as published by Sam Hocevar. See
-http://sam.zoy.org/wtfpl/COPYING for more details.
+http://www.wtfpl.net/ for more details.
 
 *Tab=3***********************************************************************/
 
 
 
 #pragma once
-#if ! defined (vsutl_CpuOpt_HEADER_INCLUDED)
-#define	vsutl_CpuOpt_HEADER_INCLUDED
-
-#if defined (_MSC_VER)
-	#pragma warning (4 : 4250)
-#endif
+#if ! defined (fmtcl_CpuOptBase_HEADER_INCLUDED)
+#define fmtcl_CpuOptBase_HEADER_INCLUDED
 
 
 
@@ -29,18 +25,14 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/CpuId.h"
 
-#include "VapourSynth.h"
 
 
-
-namespace vsutl
+namespace fmtcl
 {
 
 
 
-class FilterBase;
-
-class CpuOpt
+class CpuOptBase
 {
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
@@ -62,11 +54,16 @@ public:
 		Level_AVX2,          // 10
 		Level_AVX512F,
 
-		Level_ANY_AVAILABLE = 0xFFFF
+		Level_MASK = 0xFFFF,
+		Level_ANY_AVAILABLE = Level_MASK
 	};
 
-	explicit       CpuOpt (FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *param_name_0 = "cpuopt");
-	virtual        ~CpuOpt () {}
+	               CpuOptBase ()                        = default;
+	virtual        ~CpuOptBase ()                       = default;
+	               CpuOptBase (const CpuOptBase &other) = default;
+	               CpuOptBase (CpuOptBase &&other)      = default;
+	CpuOptBase &   operator = (const CpuOptBase &other) = default;
+	CpuOptBase &   operator = (CpuOptBase &&other)      = default;
 
 	void           set_level (Level level);
 
@@ -103,7 +100,7 @@ protected:
 private:
 
 	fstb::CpuId    _cpu;
-	Level          _level;
+	Level          _level = Level_ANY_AVAILABLE;
 
 
 
@@ -111,25 +108,22 @@ private:
 
 private:
 
-	               CpuOpt ()                               = delete;
-	               CpuOpt (const CpuOpt &other)            = delete;
-	CpuOpt &       operator = (const CpuOpt &other)        = delete;
-	bool           operator == (const CpuOpt &other) const = delete;
-	bool           operator != (const CpuOpt &other) const = delete;
+	bool           operator == (const CpuOptBase &other) const = delete;
+	bool           operator != (const CpuOptBase &other) const = delete;
 
-};	// class CpuOpt
+}; // class CpuOptBase
 
 
 
-}	// namespace vsutl
+}  // namespace fmtcl
 
 
 
-//#include "vsutl/CpuOpt.hpp"
+//#include "fmtcl/CpuOptBase.hpp"
 
 
 
-#endif	// vsutl_CpuOpt_HEADER_INCLUDED
+#endif   // fmtcl_CpuOptBase_HEADER_INCLUDED
 
 
 

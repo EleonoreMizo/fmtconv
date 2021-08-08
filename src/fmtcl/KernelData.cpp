@@ -41,6 +41,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/ContFirSpline36.h"
 #include "fmtcl/ContFirSpline64.h"
 #include "fmtcl/DiscreteFirCustom.h"
+#include "fmtcl/fnc.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
 
@@ -203,7 +204,7 @@ void	KernelData::create_kernel_base (std::string kernel_fnc, std::vector <double
 			{
 				throw std::runtime_error ("impulse coefficients missing.");
 			}
-			conv_to_float_arr (coef_arr, kernel_fnc.substr (name_end));
+			coef_arr = conv_str_to_float_arr (kernel_fnc.substr (name_end));
 		}
 		const size_t   sz = coef_arr.size ();
 		if (sz == 0)
@@ -396,30 +397,6 @@ void	KernelData::hash_val (const T &val)
 	{
 		hash_byte (reinterpret_cast <const uint8_t *> (&val) [i]);
 	}
-}
-
-
-
-void	KernelData::conv_to_float_arr (std::vector <double> &coef_arr, const std::string &str)
-{
-	coef_arr.clear ();
-	const char *   cur_0 = str.c_str ();
-	bool           cont_flag = true;
-	do
-	{
-		const char *   end_0 = cur_0;
-		const double   val   = strtod (cur_0, const_cast <char **> (&end_0));
-		if (end_0 == cur_0)
-		{
-			cont_flag = false;
-		}
-		else
-		{
-			coef_arr.push_back (val);
-			cur_0 = end_0;
-		}
-	}
-	while (cont_flag);
 }
 
 

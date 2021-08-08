@@ -435,7 +435,7 @@ void	PlaneProcessor::copy_plane (::VSFrameRef &dst, const ::VSFrameRef &src, int
 template <class T>
 void	PlaneProcessor::fill_plane (void *ptr, T val, int stride, int w, int h)
 {
-	assert (ptr != 0);
+	assert (ptr != nullptr);
 	assert (stride > 0);
 	assert (w > 0);
 	assert (h > 0);
@@ -457,10 +457,7 @@ void	PlaneProcessor::fill_plane (void *ptr, T val, int stride, int w, int h)
 			}
 			else
 			{
-				for (int x = 0; x < w; ++x)
-				{
-					data_ptr [x] = val;
-				}
+				std::fill (data_ptr, data_ptr + w, val);
 			}
 
 			data_ptr += stride_pix;
