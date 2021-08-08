@@ -232,56 +232,8 @@ make install</pre>
 <p>You can add some options to the <code>configure</code> command:</p>
 <ul>
 <li><code>--enable-debug</code> to activate debugging code</li>
-<li><code>--enable-clang</code> to use Clang instead of the default compiler, usually GCC</li>
+<li><code>--enable-clang</code> to use Clang instead of the default compiler which is usually GCC</li>
 </ul>
-
-<h4>GCC</h4>
-
-<p>Here are the steps needed to compile without the autotools.
-From the <code>src</code> directory, compile and link all these files with
-<code>g++</code>:</p>
-
-<pre class="src">main.cpp
-AvstpWrapper.cpp
-fmtc/*.cpp
-fmtcl/*.cpp
-fstb/*.cpp
-vsutl/*.cpp</pre>
-
-<p>Add <code>AvstpFinder.cpp</code> on Windows.
-Use the following options (on a single line):</p>
-
-<pre class="src">-std=c++14 -shared -fabi-version=6 -msse2 -mcx16 -O3 -DNDEBUG -I.
--Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow
--Wno-unused-private-field</pre>
-
-<p>You’ll need to replace <code>-msse2</code> with <code>-mavx2</code> for all
-the <code>*.cpp</code> files containing <code>avx2</code> in their name.
-Same with <code>-mavx</code> and <code>avx</code> files.</p>
-
-<p>Be careful, some files located in different directories have the same name.
-To avoid conflicts and missing symbols, keep the source directory structure for
-your object files.</p>
-
-<p>People have reported that the <code>-fPIC</code> option was sometimes
-needed.</p>
-
-<p>The <code>-mcx16</code> option is only need for 64-bit builds.
-This means that they won’t work on
-<a href="http://en.wikipedia.org/wiki/X86-64#Older_implementations">early AMD64
-CPUs</a> and
-<a href="http://www.pcworld.com/article/2058683/new-windows-8-1-requirements-strand-some-users-on-windows-8.html">allegedly</a>
-on a few Intel-based motherboards where the CMPXCHG16B instruction doesn’t work
-for some reason.</p>
-
-<p>To compile a debug version, replace <code>-O3 -DNDEBUG</code> with
-<code>-g</code>.</p>
-
-<p>Link with <code>-latomic -lpthread</code>.</p>
-
-<p>With MinGW, it seems you will need a specific MinGW-64 build supporting
-C++14 threading (not tested here yet, please report if you find something
-useful).</p>
 
 <h2><a id="description"></a>III) Filters description</h2>
 
