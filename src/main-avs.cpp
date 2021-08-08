@@ -6,6 +6,7 @@
 #include "avsutl/fnc.h"
 #include "fmtcavs/Bitdepth.h"
 #include "fmtcavs/function_names.h"
+#include "fmtcavs/Matrix.h"
 #include "fstb/def.h"
 
 #include <windows.h>
@@ -41,6 +42,13 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		"[patsize]i" "[tpdfo]b" "[tpdfn]b"       "[corplane]b", // 12
 		&main_avs_create <fmtcavs::Bitdepth>, nullptr
 	);
+	env_ptr->AddFunction (fmtcavs_MATRIX,
+		"c"          "[mat]s"   "[mats]s"      "[matd]s"    // 0
+		"[fulls]b"   "[fulld]b" "[coef]s"      "[csp]s"     // 4
+		"[col_fam]s" "[bits]i"  "[singleout]i" "[cpuopt]i", // 8
+		&main_avs_create <fmtcavs::Matrix>, nullptr
+	);
+
 	return "fmtconv - video format conversion";
 }
 

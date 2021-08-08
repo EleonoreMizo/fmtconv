@@ -35,6 +35,7 @@ namespace fmtcavs
 #define fmtcavs_BUILD_NAME(x) fmtcavs_NAMESPACE "_" x
 
 #define fmtcavs_BITDEPTH     fmtcavs_BUILD_NAME ("bitdepth")
+#define fmtcavs_MATRIX       fmtcavs_BUILD_NAME ("matrix")
 
 
 

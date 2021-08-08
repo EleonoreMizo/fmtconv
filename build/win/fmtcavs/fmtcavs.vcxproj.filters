@@ -39,6 +39,9 @@
     <ClInclude Include="..\..\..\src\avs\win.h">
       <Filter>avs</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Bitdepth.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\avsutl\PlaneProcessor.h">
       <Filter>avsutl</Filter>
     </ClInclude>
@@ -64,6 +67,9 @@
     <ClInclude Include="..\..\..\src\fmtcavs\CpuOpt.h">
       <Filter>fmtcavs</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Matrix.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\fmtcavs\FmtAvs.h">
       <Filter>fmtcavs</Filter>
     </ClInclude>
@@ -82,6 +88,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main-avs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Bitdepth.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\avsutl\PlaneProcessor.cpp">
       <Filter>avsutl</Filter>
     </ClCompile>
@@ -95,6 +104,9 @@
       <Filter>fmtcavs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\fmtcavs\CpuOpt.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Matrix.cpp">
       <Filter>fmtcavs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\fmtcavs\FmtAvs.cpp">

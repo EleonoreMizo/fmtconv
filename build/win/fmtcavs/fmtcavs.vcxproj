@@ -150,6 +150,7 @@
     <ClInclude Include="..\..\..\src\fmtcavs\FmtAvs.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\fnc.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\function_names.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Matrix.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\ProcAlpha.h" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +163,7 @@
     <ClCompile Include="..\..\..\src\fmtcavs\CpuOpt.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\FmtAvs.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\fnc_fmtcavs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Matrix.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\ProcAlpha.cpp" />
     <ClCompile Include="..\..\..\src\main-avs.cpp" />
   </ItemGroup>

@@ -32,6 +32,7 @@ h4        { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 15px;
 
 p         { margin-left: 2em; margin-right: 0em; text-align: justify; }
 .var { margin-left: 0.6em; font-style: italic; letter-spacing: 0.0833em; color: #660033; }
+.host { font-variant: small-caps; font-weight: bold; color: #505050; display: inline-block; width: 8em; }
 
 ul        { margin-left: 2em; margin-right: 0em; text-align: justify; list-style-type: square; }
 .n { margin-left: 2em; margin-right: 0em; text-align: justify; list-style-type: none; }

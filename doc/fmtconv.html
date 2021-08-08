@@ -544,20 +544,38 @@ features.</p>
 
 <h3><a id="matrix"></a>matrix</h3>
 
-<pre class="proto">fmtc.matrix (
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.matrix (
 	clip     : clip        ;
 	mat      : data   : opt;
 	mats     : data   : opt;
 	matd     : data   : opt;
-	fulls    : int    : opt; (depends on the colorspace)
-	fulld    : int    : opt; (fulls)
+	fulls    : int    : opt; (depends)
+	fulld    : int    : opt; (depends)
 	coef     : float[]: opt;
 	csp      : int    : opt;
 	col_fam  : int    : opt;
 	bits     : int    : opt;
 	singleout: int    : opt; (-1)
 	cpuopt   : int    : opt; (-1)
-)</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_matrix (
+	clip   c,
+	string mat (undefined),
+	string mats (undefined),
+	string matd (undefined),
+	bool   fulls (depends),
+	bool   fulld (depends),
+	string coef (undefined),
+	string csp (undefined),
+	string col_fam (undefined),
+	int    bits (undefined),
+	int    singleout (-1),
+	int    cpuopt (-1)
+)</pre></td>
+</tr>
+</table>
 
 <p>Colorspace conversion or simple cross-plane matrix.</p>
 
@@ -587,16 +605,25 @@ If the destination colorspace is a standardized one (as deduced from the
 specified matrix), the <code>_Matrix</code> and <code>_ColorSpace</code>
 properties are set, otherwise they are deleted from the frame.</p>
 
+<p><span class="host">Avisynth+</span>If an alpha channel is present in
+both the source and destination colorspaces, it is copied and its bitdepth is
+possibly adapted to the destination format.
+If there is no alpha channel in the source, full opacity is assumed.
+If there is no alpha channel in the destination, the plane is lost.<p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
 <p>The input clip. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12-, 14- and 16-bit integer.</li>
+<li>8-, 10-, 12-, 14- and 16-bit integer.</li>
 <li>32-bit floating point.</li>
 <li>Any planar colorspace with 3 planes.</li>
 </ul>
+<p><span class="host">Vapoursynth</span> 9-bit integer data is supported too.<p>
+<p><span class="host">Avisynth+</span>  Colorspaces with an alpha channel are
+supported too.<p>
 
 <p class="var">mat</p>
 <p>Predefined matrix for conversions to and from R’G’B’.
@@ -732,11 +759,21 @@ For example, with an R’G’B’ input:</p>
 
 
 <p class="var">csp</p>
-<p>The destination format, as Vapoursynth constant.
+<p>The destination format.
 It cannot change the data type (integer or float) nor the chroma
 subsampling.
-If the colorspace family is set to GRAY, single-plane processing is enabled.
-The output plane is selected with <var>singleout</var> (0 if not specified).</p>
+If the colorspace family is set to GRAY (or Y), single-plane processing is
+enabled.
+The output plane is selected with <var>singleout</var> (0 if not
+specified).
+Only planar colorspaces are allowed.</p>
+<p><span class="host">Vapoursynth</span> The format is a Vapoursynth
+built-in constant.</p>
+<p><span class="host">Avisynth+</span> The format is a string with the
+same kind of content as the result from <code>BuildPixelType</code> or the
+<var>pixel_type</var> parameter from <code>BlankClip</code>.
+For example: <code>"RGBP48"</code>, <code>"YV12"</code>,
+<code>"YUV444PS"</code>…</p>
 
 <p class="var">col_fam</p>
 <p>Explicit specification of the destination color family, as Vapoursynth
@@ -747,9 +784,10 @@ input clip.</p>
 
 <p class="var">bits</p>
 <p>Explicit specification of the destination bitdepth.
-The only allowed values are 8, 9, 10, 12, 14, 16 and 32.
+The only allowed values are 8, 10, 12, 14, 16 and 32.
 However you cannot reduce the bitdepth, only keep it constant or increase it.
 Supersedes the bitdepth from <var>csp</var>.</p>
+<p><span class="host">Vapoursynth</span> 9 bits is allowed too.</p>
 
 <p class="var">singleout</p>
 <p>Enable single-plane processing.
@@ -1055,6 +1093,15 @@ is not the sum of the impulse</li>
 	<li>and <var>center</var> to False to keep the desired spacing
 between the sampling points.</li>
 </ul>
+
+<p>The function handles the following frame properties:</p>
+<table>
+<tr><th>Property</th><th>Read condition</th><th>Write condition</th></tr>
+<tr><td><b><code>_FieldBased</code></b></td><td>Automatic interlacing detection</td><td rowspan="2">Interlaced<br />content</td></tr>
+<tr><td><b><code>_Field</code></b></td><td>Interlaced content</td></tr>
+<tr><td><b><code>_ChromaLocation</code></b></td><td></td><td>Depends on <var>cplace</var> parameters</td></tr>
+<tr><td><b><code>_ColorRange</code></b></td><td></td><td><var>fulld</var> is explicitly set</td></tr>
+</table>
 
 <h4>Parameters</h4>
 
