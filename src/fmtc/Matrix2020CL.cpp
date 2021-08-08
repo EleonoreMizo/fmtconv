@@ -28,6 +28,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/fnc.h"
 #include "fmtc/Matrix2020CL.h"
 #include "fmtcl/ColorSpaceH265.h"
+#include "fmtcl/TransCurve.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/fnc.h"
@@ -260,6 +261,13 @@ const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void
 			? fmtcl::ColorSpaceH265_BT2020CL
 			: fmtcl::ColorSpaceH265_RGB;
 		_vsapi.propSetInt (&dst_prop, "_ColorSpace", cs_out, ::paReplace);
+		_vsapi.propSetInt (&dst_prop, "_Matrix", cs_out, ::paReplace);
+
+		const auto     curve =
+			  (! _to_yuv_flag) ?                      fmtcl::TransCurve_LINEAR
+			: (_vi_out.format->bitsPerSample <= 10) ? fmtcl::TransCurve_2020_10
+			:                                         fmtcl::TransCurve_2020_12;
+		_vsapi.propSetInt (&dst_prop, "_Transfer", int (curve), ::paReplace);
 
 		if (! _to_yuv_flag || _range_set_flag)
 		{
