@@ -626,11 +626,13 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [NB
 			const int      bl = _map_gamma_int [bg];
 			const int      rl = _map_gamma_int [rg];
 
-			const int      gl = uint16_t (
+			const int      gl = uint16_t (std::max (
 				(  rl * _coef_rgby_int [Col_R]
 				 + yl * _coef_rgby_int [Col_G]
 				 + bl * _coef_rgby_int [Col_B]
-			    +      cst_r                 ) >> SHIFT_INT);
+			    +      cst_r                 ) >> SHIFT_INT,
+				0
+			));
 
 			DST::template write_clip <DB> (dst_0_ptr, rl);
 			DST::template write_clip <DB> (dst_1_ptr, gl);

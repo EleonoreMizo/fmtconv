@@ -1626,6 +1626,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>bitdepth</code>: fixed crash when trying to change the range (full or TV) without reducing the bitdepth.</li>
 <li><code>matrix</code>: deletes the <code>_Matrix</code> and <code>_ColorSpace</code> properties if a non-standard matrix is used.</li>
 <li><code>matrix2020cl</code>: sets the <code>_Matrix</code> and <code>_Transfer</code> frame properties.</li>
+<li><code>matrix2020cl</code>: fixed hideous colors with slightly out-of-colorspace values when converting from integer Y’Cb’Cr’ to integer linear RGB.</li>
 <li><code>transfer</code>: sYCC curve (similar to sRGB) now supports signed values.</li>
 <li>Added information on functions reading and writing frame properties.</li>
 <li>Added support for 14-bit data.</li>
