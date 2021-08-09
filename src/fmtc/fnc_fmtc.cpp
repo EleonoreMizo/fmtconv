@@ -102,11 +102,24 @@ fmtcl::ColorFamily	conv_vsfmt_to_colfam (const ::VSFormat &fmt)
 
 	switch (fmt.colorFamily)
 	{
-	case cmGray:  col_fam = fmtcl::ColorFamily_GRAY;  break;
-	case cmRGB:   col_fam = fmtcl::ColorFamily_RGB;   break;
-	case cmYUV:   col_fam = fmtcl::ColorFamily_YUV;   break;
-	case cmYCoCg: col_fam = fmtcl::ColorFamily_YCGCO; break;
-	default:      assert (false);                     break;
+	case cfGray:
+	case cmGray:
+		col_fam = fmtcl::ColorFamily_GRAY;
+		break;
+	case cfRGB:
+	case cmRGB:
+		col_fam = fmtcl::ColorFamily_RGB;
+		break;
+	case cfYUV:
+	case cmYUV:
+		col_fam = fmtcl::ColorFamily_YUV;
+		break;
+	case cmYCoCg:
+		col_fam = fmtcl::ColorFamily_YCGCO;
+		break;
+	default:
+		assert (false);
+		break;
 	}
 
 	return col_fam;

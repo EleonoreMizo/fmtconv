@@ -85,8 +85,8 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	{
 		throw_inval_arg ("greyscale format not supported.");
 	}
-	if (   fmt_src.colorFamily != ::cmRGB
-	    && fmt_src.colorFamily != ::cmYUV)
+	if (   ! vsutl::is_vs_rgb (fmt_src.colorFamily)
+	    && ! vsutl::is_vs_yuv (fmt_src.colorFamily))
 	{
 		throw_inval_arg ("Only RGB and YUV color families are supported.");
 	}
@@ -100,7 +100,7 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	{
 		throw_inval_arg ("pixel bitdepth not supported.");
 	}
-	if (   fmt_src.colorFamily   == ::cmRGB
+	if (   vsutl::is_vs_rgb (fmt_src.colorFamily)
 	    && fmt_src.sampleType    == ::stInteger
 		 && fmt_src.bitsPerSample != RGB_INT_BITS)
 	{
@@ -110,8 +110,8 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	// Destination colorspace
 	const ::VSFormat& fmt_dst = get_output_colorspace (in, out, core, fmt_src);
 
-	if (   fmt_dst.colorFamily != ::cmRGB
-	    && fmt_dst.colorFamily != ::cmYUV)
+	if (   ! vsutl::is_vs_rgb (fmt_dst.colorFamily)
+	    && ! vsutl::is_vs_yuv (fmt_dst.colorFamily))
 	{
 		throw_inval_arg ("unsupported color family for output.");
 	}
@@ -125,9 +125,9 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	{
 		throw_inval_arg ("output bitdepth not supported.");
 	}
-	if (   fmt_src.colorFamily   == ::cmRGB
-	    && fmt_src.sampleType    == ::stInteger
-		 && fmt_src.bitsPerSample != RGB_INT_BITS)
+	if (   vsutl::is_vs_rgb (fmt_dst.colorFamily)
+	    && fmt_dst.sampleType    == ::stInteger
+	    && fmt_dst.bitsPerSample != RGB_INT_BITS)
 	{
 		throw_inval_arg ("output clip: RGB depth cannot be less than 16 bits.");
 	}
@@ -142,7 +142,7 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 			"specified output colorspace is not compatible with the input."
 		);
 	}
-	if (fmt_dst.colorFamily == fmt_src.colorFamily)
+	if (vsutl::is_vs_same_colfam (fmt_dst.colorFamily, fmt_src.colorFamily))
 	{
 		throw_inval_arg (
 			"Input and output clips must be of different color families."
@@ -151,7 +151,7 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 
 	// Output format is validated.
 	_vi_out.format = &fmt_dst;
-	_to_yuv_flag   = (fmt_dst.colorFamily == ::cmYUV);
+	_to_yuv_flag   = vsutl::is_vs_yuv (fmt_dst.colorFamily);
 
 	// Range
 	const ::VSFormat &   fmt_yuv = (_to_yuv_flag) ? fmt_dst : fmt_src;
@@ -297,7 +297,7 @@ const ::VSFormat &	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSM
 	int            spl_type = fmt_dst_ptr->sampleType;
 
 	// Automatic default conversion
-	if (col_fam == ::cmRGB)
+	if (vsutl::is_vs_rgb (col_fam))
 	{
 		col_fam = ::cmYUV;
 	}

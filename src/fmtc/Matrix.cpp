@@ -121,10 +121,10 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		in, out, core, fmt_src, _plane_out, force_col_fam_flag
 	);
 
-	if (   fmt_dst_ptr->colorFamily != ::cmGray
-	    && fmt_dst_ptr->colorFamily != ::cmRGB
-	    && fmt_dst_ptr->colorFamily != ::cmYUV
-	    && fmt_dst_ptr->colorFamily != ::cmYCoCg)
+	if (   ! vsutl::is_vs_gray (fmt_dst_ptr->colorFamily)
+	    && ! vsutl::is_vs_rgb ( fmt_dst_ptr->colorFamily)
+	    && ! vsutl::is_vs_yuv ( fmt_dst_ptr->colorFamily)
+	    && ::cmYCoCg != fmt_dst_ptr->colorFamily)
 	{
 		throw_inval_arg ("unsupported color family for output.");
 	}
@@ -180,9 +180,9 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 
 	// Matrix presets
 	std::string    mat (get_arg_str (in, out, "mat", ""));
-	std::string    mats ((   fmt_src.colorFamily == ::cmYUV ) ? mat : "");
-	std::string    matd ((   fmt_dst.colorFamily == ::cmYUV
-	                      || fmt_dst.colorFamily == ::cmGray) ? mat : "");
+	std::string    mats ((   vsutl::is_vs_yuv ( fmt_src.colorFamily)) ? mat : "");
+	std::string    matd ((   vsutl::is_vs_yuv ( fmt_dst.colorFamily)
+	                      || vsutl::is_vs_gray (fmt_dst.colorFamily)) ? mat : "");
 	mats = get_arg_str (in, out, "mats", mats);
 	matd = get_arg_str (in, out, "matd", matd);
 	if (! mats.empty () || ! matd.empty ())
@@ -460,7 +460,7 @@ const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &ou
 	{
 		col_fam = ::cmGray;
 	}
-	else if (col_fam == ::cmGray)
+	else if (vsutl::is_vs_gray (col_fam))
 	{
 		plane_out = 0;
 	}
@@ -544,7 +544,7 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 		int            bits     = fmt_dst_ptr->bitsPerSample;
 		int            ssh      = fmt_dst_ptr->subSamplingW;
 		int            ssv      = fmt_dst_ptr->subSamplingH;
-		if (fmt_src.colorFamily == ::cmRGB)
+		if (vsutl::is_vs_rgb (fmt_src.colorFamily))
 		{
 			col_fam = alt_cf;
 		}

@@ -27,17 +27,20 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "VapourSynth.h"
+
 #include <string>
 
 
-
-struct VSFormat;
-struct VSVideoInfo;
 
 namespace vsutl
 {
 
 
+bool     is_vs_gray (int cf);
+bool     is_vs_rgb (int cf);
+bool     is_vs_yuv (int cf);
+bool     is_vs_same_colfam (int lhs, int rhs);
 
 bool     is_constant_format (const ::VSVideoInfo &vi);
 bool     has_chroma (const ::VSFormat &fmt);

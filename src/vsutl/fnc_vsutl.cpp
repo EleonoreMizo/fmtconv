@@ -26,7 +26,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/fnc.h"
 #include "vsutl/fnc.h"
-#include "VapourSynth.h"
 
 #include <cassert>
 #include <cstdint>
@@ -35,6 +34,38 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 namespace vsutl
 {
+
+
+
+bool	is_vs_gray (int cf)
+{
+	return (cf == ::cfGray || cf == ::cmGray);
+}
+
+
+
+bool	is_vs_rgb (int cf)
+{
+	return (cf == ::cfRGB || cf == ::cmRGB);
+}
+
+
+
+bool	is_vs_yuv (int cf)
+{
+	return (cf == ::cfYUV || cf == ::cmYUV);
+}
+
+
+
+bool	is_vs_same_colfam (int lhs, int rhs)
+{
+	return (
+		   is_vs_gray (lhs) == is_vs_gray (rhs)
+		&& is_vs_rgb ( lhs) == is_vs_rgb ( rhs)
+		&& is_vs_yuv ( lhs) == is_vs_yuv ( rhs)
+	);
+}
 
 
 
@@ -47,7 +78,7 @@ bool	is_constant_format (const ::VSVideoInfo &vi)
 
 bool	has_chroma (const ::VSFormat &fmt)
 {
-	return (   fmt.colorFamily == ::cmYUV
+	return (   is_vs_yuv (fmt.colorFamily)
 	        || fmt.colorFamily == ::cmYCoCg);
 }
 
@@ -65,7 +96,7 @@ bool	is_chroma_plane (const ::VSFormat &fmt, int plane_index)
 
 bool	is_full_range_default (const ::VSFormat &fmt)
 {
-	return (   fmt.colorFamily == ::cmRGB
+	return (   is_vs_rgb (fmt.colorFamily)
 	        || fmt.colorFamily == ::cmYCoCg);
 }
 

@@ -75,6 +75,12 @@ typedef struct VSAPI VSAPI;
 typedef struct VSFrameContext VSFrameContext;
 
 typedef enum VSColorFamily {
+    /* New API V4 constants */
+    cfUndefined = 0,
+    cfGray      = 1,
+    cfRGB       = 2,
+    cfYUV       = 3,
+    /* (end of new API V4 constants) */
     /* all planar formats */
     cmGray   = 1000000,
     cmRGB    = 2000000,

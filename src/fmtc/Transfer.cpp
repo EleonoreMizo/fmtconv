@@ -93,8 +93,8 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 
 	const ::VSFormat &   fmt_src = *_vi_in.format;
 
-	if (   fmt_src.colorFamily != ::cmGray
-	    && fmt_src.colorFamily != ::cmRGB)
+	if (   ! vsutl::is_vs_gray (fmt_src.colorFamily)
+	    && ! vsutl::is_vs_rgb ( fmt_src.colorFamily))
 	{
 		throw_inval_arg ("unsupported color family.");
 	}

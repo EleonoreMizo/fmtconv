@@ -26,6 +26,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/fnc.h"
 #include "vsutl/FilterBase.h"
+#include "vsutl/fnc.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -288,6 +289,14 @@ char	FilterBase::_filter_error_msg_0 [_max_error_buf_len] = "";
 // are passed to the function.
 const VSFormat *	FilterBase::register_format (int color_family, int sample_type, int bits_per_sample, int sub_sampling_w, int sub_sampling_h, ::VSCore &core) const
 {
+	// Maps API V4 colorfamily values to API V3
+	switch (color_family)
+	{
+	case ::cfGray: color_family = ::cmGray; break;
+	case ::cfRGB:  color_family = ::cmRGB;	 break;
+	case ::cfYUV:  color_family = ::cmYUV;	 break;
+	}
+
 	// Copy of the beginning of VSCore::registerFormat()
 	if (   sub_sampling_h < 0 || sub_sampling_w < 0
 	    || sub_sampling_h > 4 || sub_sampling_w > 4)
@@ -300,7 +309,7 @@ const VSFormat *	FilterBase::register_format (int color_family, int sample_type,
 		throw_rt_err ("Invalid sample type");
 	}
 
-	if (color_family ==:: cmRGB && (sub_sampling_h != 0 || sub_sampling_w != 0))
+	if (is_vs_rgb (color_family) && (sub_sampling_h != 0 || sub_sampling_w != 0))
 	{
 		throw_rt_err ("We do not like subsampled rgb around here");
 	}

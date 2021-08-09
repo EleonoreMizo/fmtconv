@@ -32,6 +32,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/PrimUtil.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
+#include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
 
 #include <cassert>
@@ -234,7 +235,7 @@ void	Primaries::check_colorspace (const ::VSFormat &fmt, const char *inout_0) co
 		);
 		throw_inval_arg (_filter_error_msg_0);
 	}
-	if (fmt.colorFamily != ::cmRGB)
+	if (! vsutl::is_vs_rgb (fmt.colorFamily))
 	{
 		fstb::snprintf4all (
 			_filter_error_msg_0,
