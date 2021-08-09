@@ -55,7 +55,7 @@ public:
 	void           invalidate () noexcept;
 	int            conv_from_str (std::string fmt_str);
 	void           conv_from_vi (const VideoInfo &vi);
-	int            conv_to_vi (VideoInfo &vi);
+	int            conv_to_vi (VideoInfo &vi) const;
 
 	bool           is_valid () const noexcept;
 

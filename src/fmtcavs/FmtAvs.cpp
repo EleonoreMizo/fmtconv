@@ -259,7 +259,7 @@ void	FmtAvs::conv_from_vi (const VideoInfo &vi)
 
 
 // Returns 0 if conversion is OK.
-int	FmtAvs::conv_to_vi (VideoInfo &vi)
+int	FmtAvs::conv_to_vi (VideoInfo &vi) const
 {
 	assert (is_valid ());
 
