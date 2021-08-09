@@ -312,27 +312,27 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 		const double   eps = 1e-9;
 
-		if (fstb::is_null (s._w))
+		if (fstb::is_null (s._w, eps))
 		{
 			s._w = _src_width;
 		}
-		else if (s._w < eps)
+		else if (s._w < 0)
 		{
 			s._w = _src_width + s._w - s._x;
-			if (s._w <= 0)
+			if (s._w <= eps)
 			{
 				throw_inval_arg ("sw must be positive.");
 			}
 		}
 
-		if (fstb::is_null (s._h))
+		if (fstb::is_null (s._h, eps))
 		{
 			s._h = _src_height;
 		}
 		else if (s._h < 0)
 		{
 			s._h = _src_height + s._h - s._y;
-			if (s._h < eps)
+			if (s._h <= eps)
 			{
 				throw_inval_arg ("sh must be positive.");
 			}
