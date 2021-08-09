@@ -60,8 +60,10 @@ void	ResampleUtil::create_plane_specs (ResamplePlaneData &plane_data, int plane_
 	spec._dst_height =
 		compute_plane_height (dst_cf, dst_ss_v, dst_h, plane_index);
 
-	const double   subspl_h = double (1 << src_ss_h);
-	const double   subspl_v = double (1 << src_ss_v);
+	// We don't use src_ss_* because they are only valid for the chroma planes.
+	// The formulas belows are valid for any plane.
+	const double   subspl_h = double (src_w / spec._src_width );
+	const double   subspl_v = double (src_h / spec._src_height);
 
 	const ResamplePlaneData::Win &   s = plane_data._win;
 	spec._win_x = s._x / subspl_h;
