@@ -48,36 +48,30 @@ namespace fmtcl
 
 
 
-const double	Matrix2020CLProc::_coef_rgb_to_y_dbl [NBR_PLANES] =
-{
-	0.2627,
-	0.6780,
-	0.0593
-};
+constexpr std::array <double, Matrix2020CLProc::_nbr_planes>	Matrix2020CLProc::_coef_rgb_to_y_dbl;
+constexpr std::array <double, Matrix2020CLProc::_nbr_planes>	Matrix2020CLProc::_coef_ryb_to_g_dbl;
 
-const double	Matrix2020CLProc::_coef_ryb_to_g_dbl [NBR_PLANES] =
-{
-	-_coef_rgb_to_y_dbl [Col_R] / _coef_rgb_to_y_dbl [Col_G],
-	+1                          / _coef_rgb_to_y_dbl [Col_G],
-	-_coef_rgb_to_y_dbl [Col_B] / _coef_rgb_to_y_dbl [Col_G]
-};
+constexpr double	Matrix2020CLProc::_coef_cb_neg;
+constexpr double	Matrix2020CLProc::_coef_cb_pos;
+constexpr double	Matrix2020CLProc::_coef_cr_neg;
+constexpr double	Matrix2020CLProc::_coef_cr_pos;
 
-const double	Matrix2020CLProc::_coef_cb_neg = 1.9404;
-const double	Matrix2020CLProc::_coef_cb_pos = 1.5816;
-const double	Matrix2020CLProc::_coef_cr_neg = 1.7184;
-const double	Matrix2020CLProc::_coef_cr_pos = 0.9936;
+constexpr double	Matrix2020CLProc::_alpha_b12;
+constexpr double	Matrix2020CLProc::_alpha_low;
+constexpr double	Matrix2020CLProc::_beta_b12;
+constexpr double	Matrix2020CLProc::_beta_low;
 
-const double	Matrix2020CLProc::_alpha_b12   = 1.0993;
-const double	Matrix2020CLProc::_alpha_low   = 1.099 ;
-const double	Matrix2020CLProc::_beta_b12    = 0.0181;
-const double	Matrix2020CLProc::_beta_low    = 0.018 ;
-
-const double	Matrix2020CLProc::_slope_lin   = 4.5;
-const double	Matrix2020CLProc::_gam_pow     = 0.45;
+constexpr double	Matrix2020CLProc::_slope_lin;
+constexpr double	Matrix2020CLProc::_gam_pow;
 
 
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr int	Matrix2020CLProc::_nbr_planes;
+constexpr int	Matrix2020CLProc::_rgb_int_bits;
 
 
 
@@ -136,7 +130,7 @@ Matrix2020CLProc::Err	Matrix2020CLProc::configure (bool to_yuv_flag, SplFmt src_
 
 
 
-void	Matrix2020CLProc::process (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	Matrix2020CLProc::process (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (_src_fmt != SplFmt_ILLEGAL);
 	assert (_dst_fmt != SplFmt_ILLEGAL);
@@ -156,6 +150,11 @@ void	Matrix2020CLProc::process (uint8_t * const dst_ptr_arr [NBR_PLANES], const 
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr int	Matrix2020CLProc::_shift_int;
+constexpr int	Matrix2020CLProc::_buf_len;
 
 
 
@@ -216,18 +215,18 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_rgb_2_ycbcr ()
 
 		// RGB -> Y
 		int            sum = 0;
-		for (int p = 0; p < NBR_PLANES - 1; ++p)
+		for (int p = 0; p < _nbr_planes - 1; ++p)
 		{
 			_coef_rgby_int [p] = static_cast <int16_t> (fstb::round_int (
-				_coef_rgb_to_y_dbl [p] * (1 << SHIFT_INT)
+				_coef_rgb_to_y_dbl [p] * (1 << _shift_int)
 			));
 			sum += _coef_rgby_int [p];
 		}
-		_coef_rgby_int [NBR_PLANES - 1] =
-			static_cast <int16_t> ((1 << SHIFT_INT) - sum);
+		_coef_rgby_int [_nbr_planes - 1] =
+			static_cast <int16_t> ((1 << _shift_int) - sum);
 
 		// E -> E'
-		const int      table_size = 1 << RGB_INT_BITS;
+		constexpr int  table_size = 1 << _rgb_int_bits;
 		for (int v = 0; v < table_size; ++v)
 		{
 			const double   v_lin = double (v) / double (table_size - 1);
@@ -243,20 +242,20 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_rgb_2_ycbcr ()
 		double         b_c;
 		compute_fmt_mac_cst (
 			a_y, b_y,
-			PicFmt { _dst_fmt, RGB_INT_BITS, ColorFamily_YUV, _full_range_flag },
-			PicFmt { _dst_fmt, RGB_INT_BITS, ColorFamily_YUV, true             },
+			PicFmt { _dst_fmt, _rgb_int_bits, ColorFamily_YUV, _full_range_flag },
+			PicFmt { _dst_fmt, _rgb_int_bits, ColorFamily_YUV, true             },
 			0
 		);
 		compute_fmt_mac_cst (
 			a_c, b_c,
-			PicFmt { _dst_fmt, RGB_INT_BITS, ColorFamily_YUV, _full_range_flag },
-			PicFmt { _dst_fmt, RGB_INT_BITS, ColorFamily_YUV, true             },
+			PicFmt { _dst_fmt, _rgb_int_bits, ColorFamily_YUV, _full_range_flag },
+			PicFmt { _dst_fmt, _rgb_int_bits, ColorFamily_YUV, true             },
 			1
 		);
-		const int      dif_bits   = RGB_INT_BITS - _dst_bits;
-		const int      coef_scale = 1 <<  SHIFT_INT;
-		const int      cst_r      = 1 << (SHIFT_INT + dif_bits - 1);
-		const int      ofs_grey   = 1 << (SHIFT_INT + RGB_INT_BITS - 1);
+		const int      dif_bits   = _rgb_int_bits - _dst_bits;
+		const int      coef_scale = 1 <<  _shift_int;
+		const int      cst_r      = 1 << (_shift_int + dif_bits - 1);
+		const int      ofs_grey   = 1 << (_shift_int + _rgb_int_bits - 1);
 		const double   coef_a_y   = a_y * coef_scale;
 		const double   coef_b_y   = b_y * coef_scale + cst_r;
 		const double   coef_a_c   = a_c * coef_scale;
@@ -335,15 +334,15 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_ycbcr_2_rgb ()
 #undef fmtcl_Matrix2020CLProc_CASE_INT
 
 		// YBR -> G
-		for (int p = 0; p < NBR_PLANES; ++p)
+		for (int p = 0; p < _nbr_planes; ++p)
 		{
 			_coef_rgby_int [p] = static_cast <int16_t> (fstb::round_int (
-				_coef_ryb_to_g_dbl [p] * (1 << SHIFT_INT)
+				_coef_ryb_to_g_dbl [p] * (1 << _shift_int)
 			));
 		}
 
 		// E' -> E
-		const int      table_size = 1 << RGB_INT_BITS;
+		constexpr int  table_size = 1 << _rgb_int_bits;
 		for (int v = 0; v < table_size; ++v)
 		{
 			const double   v_gam = double (v) / double (table_size - 1);
@@ -369,9 +368,9 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_ycbcr_2_rgb ()
 			PicFmt { _src_fmt, _src_bits, ColorFamily_YUV, _full_range_flag },
 			1
 		);
-		const int      dif_bits   = RGB_INT_BITS - _src_bits;
-		const int      coef_scale = 1 <<  SHIFT_INT;
-		const int      cst_r      = 1 << (SHIFT_INT - dif_bits - 1);
+		const int      dif_bits   = _rgb_int_bits - _src_bits;
+		const int      coef_scale = 1 <<  _shift_int;
+		const int      cst_r      = 1 << (_shift_int - dif_bits - 1);
 		const double   coef_a_y   = a_y * coef_scale;
 		const double   coef_b_y   = b_y * coef_scale + cst_r;
 		const double   coef_a_c   = a_c * coef_scale;
@@ -395,7 +394,7 @@ Matrix2020CLProc::Err	Matrix2020CLProc::setup_ycbcr_2_rgb ()
 
 
 template <typename DST, int DB, class SRC, int SB>
-void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -404,7 +403,7 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [NB
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 
 	typedef typename SRC::PtrConst::Type SrcPtr;
 	typedef typename DST::Ptr::Type      DstPtr;
@@ -432,8 +431,8 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [NB
 	const int      dst_1_str = dst_str_arr [1] / sizeof_dt - w;
 	const int      dst_2_str = dst_str_arr [2] / sizeof_dt - w;
 
-	const int      shft2 = SHIFT_INT + RGB_INT_BITS - DB;
-	const int      cst_r = 1 << (SHIFT_INT - 1);
+	constexpr int  shft2 = _shift_int + _rgb_int_bits - DB;
+	constexpr int  cst_r = 1 << (_shift_int - 1);
 
 	for (int y = 0; y < h; ++y)
 	{
@@ -443,11 +442,13 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [NB
 			const int      gl = SRC::read (src_1_ptr);
 			const int      bl = SRC::read (src_2_ptr);
 
-			const int      yl = uint16_t (
+			const int      yl = uint16_t (std::min (std::max (
 				(  rl * _coef_rgby_int [Col_R]
 				 + gl * _coef_rgby_int [Col_G]
 				 + bl * _coef_rgby_int [Col_B]
-			    +      cst_r                 ) >> SHIFT_INT);
+			    +      cst_r                 ) >> _shift_int,
+				0), 0xFFFF)
+			);
 
 			const int      yg = _map_gamma_int [yl];
 			const int      bg = _map_gamma_int [bl];
@@ -485,7 +486,7 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [NB
 
 
 
-void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -494,7 +495,7 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_flt (uint8_t * const dst_ptr_arr [NB
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);
@@ -561,7 +562,7 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_flt (uint8_t * const dst_ptr_arr [NB
 
 
 template <typename DST, int DB, class SRC, int SB>
-void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -570,7 +571,7 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [NB
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 
 	typedef typename SRC::PtrConst::Type SrcPtr;
 	typedef typename DST::Ptr::Type      DstPtr;
@@ -598,10 +599,10 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [NB
 	const int      dst_1_str = dst_str_arr [1] / sizeof_dt - w;
 	const int      dst_2_str = dst_str_arr [2] / sizeof_dt - w;
 
-	const int      shft2     = SHIFT_INT + SB - RGB_INT_BITS;
-	const int      cst_r     = 1 << (SHIFT_INT - 1);
-	const int      ma_int    = (1 << RGB_INT_BITS) - 1;
-	const int      ofs_grey  = 1 << (SB - 1);
+	constexpr int  shft2     = _shift_int + SB - _rgb_int_bits;
+	constexpr int  cst_r     = 1 << (_shift_int - 1);
+	constexpr int  ma_int    = (1 << _rgb_int_bits) - 1;
+	constexpr int  ofs_grey  = 1 << (SB - 1);
 
 	for (int y = 0; y < h; ++y)
 	{
@@ -630,7 +631,7 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [NB
 				(  rl * _coef_rgby_int [Col_R]
 				 + yl * _coef_rgby_int [Col_G]
 				 + bl * _coef_rgby_int [Col_B]
-			    +      cst_r                 ) >> SHIFT_INT,
+			    +      cst_r                 ) >> _shift_int,
 				0
 			));
 
@@ -659,7 +660,7 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [NB
 
 
 
-void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (dst_ptr_arr != 0);
 	assert (dst_str_arr != 0);
@@ -668,7 +669,7 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_flt (uint8_t * const dst_ptr_arr [NB
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);
@@ -738,7 +739,7 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_flt (uint8_t * const dst_ptr_arr [NB
 
 
 
-void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (_lut_uptr.get () != 0);
 	assert (dst_ptr_arr != 0);
@@ -748,7 +749,7 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [N
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);
@@ -757,7 +758,7 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [N
 	assert (dst_str_arr [1] % sizeof_xt == 0);
 	assert (dst_str_arr [2] % sizeof_xt == 0);
 
-	const int      stride_fix = ((w + BUF_LEN - 1) / BUF_LEN) * BUF_LEN;
+	const int      stride_fix = ((w + _buf_len - 1) / _buf_len) * _buf_len;
 
 	const float *  src_0_ptr = reinterpret_cast <const float *> (src_ptr_arr [0]);
 	const float *  src_1_ptr = reinterpret_cast <const float *> (src_ptr_arr [1]);
@@ -788,9 +789,9 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [N
 
 	for (int y = 0; y < h; ++y)
 	{
-		for (int x_buf = 0; x_buf < w; x_buf += BUF_LEN)
+		for (int x_buf = 0; x_buf < w; x_buf += _buf_len)
 		{
-			const int      w_work = std::min (w - x_buf, int (BUF_LEN));
+			const int      w_work = std::min <int> (w - x_buf, _buf_len);
 
 			for (int x = 0; x < w_work; x += 4)
 			{
@@ -802,21 +803,21 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [N
 					_mm_mul_ps (gl, c_yg)),
 					_mm_mul_ps (bl, c_yb)
 				);
-				_mm_store_ps (tmp_buf_arr [0] + x, yl);
+				_mm_store_ps (&tmp_buf_arr [0] [x], yl);
 			}
 
 			_lut_uptr->process_plane (
 				reinterpret_cast <      uint8_t *> (dst_0_ptr),
-				reinterpret_cast <const uint8_t *> (tmp_buf_arr [0]),
+				reinterpret_cast <const uint8_t *> (tmp_buf_arr [0].data ()),
 				0, 0, w_work, 1
 			);
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (tmp_buf_arr [1]),
+				reinterpret_cast <      uint8_t *> (tmp_buf_arr [1].data ()),
 				reinterpret_cast <const uint8_t *> (src_2_ptr),
 				0, 0, w_work, 1
 			);
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (tmp_buf_arr [2]),
+				reinterpret_cast <      uint8_t *> (tmp_buf_arr [2].data ()),
 				reinterpret_cast <const uint8_t *> (src_0_ptr),
 				0, 0, w_work, 1
 			);
@@ -824,8 +825,8 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [N
 			for (int x = 0; x < w_work; x += 4)
 			{
 				const __m128   yg   = _mm_load_ps (dst_0_ptr       + x);
-				const __m128   bg   = _mm_load_ps (tmp_buf_arr [1] + x);
-				const __m128   rg   = _mm_load_ps (tmp_buf_arr [2] + x);
+				const __m128   bg   = _mm_load_ps (&tmp_buf_arr [1] [x]);
+				const __m128   rg   = _mm_load_ps (&tmp_buf_arr [2] [x]);
 
 				const __m128   cb   = _mm_sub_ps (bg, yg);
 				const __m128   cr   = _mm_sub_ps (rg, yg);
@@ -843,13 +844,13 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [N
 				_mm_store_ps (dst_2_ptr + x, dcr);
 			}
 
-			src_0_ptr += BUF_LEN;
-			src_1_ptr += BUF_LEN;
-			src_2_ptr += BUF_LEN;
+			src_0_ptr += _buf_len;
+			src_1_ptr += _buf_len;
+			src_2_ptr += _buf_len;
 
-			dst_0_ptr += BUF_LEN;
-			dst_1_ptr += BUF_LEN;
-			dst_2_ptr += BUF_LEN;
+			dst_0_ptr += _buf_len;
+			dst_1_ptr += _buf_len;
+			dst_2_ptr += _buf_len;
 		}
 
 		src_0_ptr += src_0_str;
@@ -864,7 +865,7 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [N
 
 
 
-void	Matrix2020CLProc::conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const
+void	Matrix2020CLProc::conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
 	assert (_lut_uptr.get () != 0);
 	assert (dst_ptr_arr != 0);
@@ -874,7 +875,7 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [N
 	assert (w > 0);
 	assert (h > 0);
 
-	static_assert (NBR_PLANES == 3, "Code is hardcoded for 3 planes");
+	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
 	const int      sizeof_xt = int (sizeof (float));
 	assert (src_str_arr [0] % sizeof_xt == 0);
 	assert (src_str_arr [1] % sizeof_xt == 0);
@@ -883,7 +884,7 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [N
 	assert (dst_str_arr [1] % sizeof_xt == 0);
 	assert (dst_str_arr [2] % sizeof_xt == 0);
 
-	const int      stride_fix = ((w + BUF_LEN - 1) / BUF_LEN) * BUF_LEN;
+	const int      stride_fix = ((w + _buf_len - 1) / _buf_len) * _buf_len;
 
 	const float *  src_0_ptr = reinterpret_cast <const float *> (src_ptr_arr [0]);
 	const float *  src_1_ptr = reinterpret_cast <const float *> (src_ptr_arr [1]);
@@ -914,9 +915,9 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [N
 
 	for (int y = 0; y < h; ++y)
 	{
-		for (int x_buf = 0; x_buf < w; x_buf += BUF_LEN)
+		for (int x_buf = 0; x_buf < w; x_buf += _buf_len)
 		{
-			const int      w_work = std::min (w - x_buf, int (BUF_LEN));
+			const int      w_work = std::min <int> (w - x_buf, _buf_len);
 
 			for (int x = 0; x < w_work; x += 4)
 			{
@@ -936,29 +937,29 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [N
 				const __m128   bg   = _mm_add_ps (cb, yg);
 				const __m128   rg   = _mm_add_ps (cr, yg);
 
-				_mm_store_ps (tmp_buf_arr [1] + x, bg);
-				_mm_store_ps (tmp_buf_arr [2] + x, rg);
+				_mm_store_ps (&tmp_buf_arr [1] [x], bg);
+				_mm_store_ps (&tmp_buf_arr [2] [x], rg);
 			}
 
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (tmp_buf_arr [0]),
+				reinterpret_cast <      uint8_t *> (tmp_buf_arr [0].data ()),
 				reinterpret_cast <const uint8_t *> (src_0_ptr),
 				0, 0, w_work, 1
 			);
 			_lut_uptr->process_plane (
 				reinterpret_cast <      uint8_t *> (dst_2_ptr),
-				reinterpret_cast <const uint8_t *> (tmp_buf_arr [1]),
+				reinterpret_cast <const uint8_t *> (tmp_buf_arr [1].data ()),
 				0, 0, w_work, 1
 			);
 			_lut_uptr->process_plane (
 				reinterpret_cast <      uint8_t *> (dst_0_ptr),
-				reinterpret_cast <const uint8_t *> (tmp_buf_arr [2]),
+				reinterpret_cast <const uint8_t *> (tmp_buf_arr [2].data ()),
 				0, 0, w_work, 1
 			);
 
 			for (int x = 0; x < w_work; x += 4)
 			{
-				const __m128   yl = _mm_load_ps (tmp_buf_arr [0] + x);
+				const __m128   yl = _mm_load_ps (&tmp_buf_arr [0] [x]);
 				const __m128   bl = _mm_load_ps (dst_2_ptr + x);
 				const __m128   rl = _mm_load_ps (dst_0_ptr + x);
 				const __m128   gl = _mm_add_ps (_mm_add_ps (
@@ -969,13 +970,13 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [N
 				_mm_store_ps (dst_1_ptr + x, gl);
 			}
 
-			src_0_ptr += BUF_LEN;
-			src_1_ptr += BUF_LEN;
-			src_2_ptr += BUF_LEN;
+			src_0_ptr += _buf_len;
+			src_1_ptr += _buf_len;
+			src_2_ptr += _buf_len;
 
-			dst_0_ptr += BUF_LEN;
-			dst_1_ptr += BUF_LEN;
-			dst_2_ptr += BUF_LEN;
+			dst_0_ptr += _buf_len;
+			dst_1_ptr += _buf_len;
+			dst_2_ptr += _buf_len;
 		}
 
 		src_0_ptr += src_0_str;

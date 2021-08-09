@@ -64,7 +64,8 @@ public:
 		Err_INVALID_FORMAT_COMBINATION = -1000
 	};
 
-	static const int   NBR_PLANES = 3;
+	static constexpr int _nbr_planes   =  3;
+	static constexpr int _rgb_int_bits = 16;
 
 	explicit        Matrix2020CLProc (bool sse2_flag, bool avx2_flag);
 	virtual        ~Matrix2020CLProc () {}
@@ -74,7 +75,7 @@ public:
 	// All stride values are in bytes
 	// h must be the frame height too, not only the processed stripe height
 	// (required for Stack16 formats to compute the lsb offset)
-	void           process (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	void           process (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
 
 
 
@@ -95,27 +96,26 @@ private:
 		Col_B = 2
 	};
 
-	static const int  SHIFT_INT     =   12;   // Number of bits for the fractional part
-	static const int  RGB_INT_BITS  =   16;
-	static const int  BUF_LEN       = 2048;
+	static constexpr int _shift_int    =   12;   // Number of bits for the fractional part
+	static constexpr int _buf_len      = 2048;
 
-	typedef float FltBuf [BUF_LEN];
+	typedef std::array <float, _buf_len> FltBuf;
 	typedef fstb::ArrayAlign <FltBuf, 3, 32> BufAlign;
 
 	Err            setup_rgb_2_ycbcr ();
 	Err            setup_ycbcr_2_rgb ();
 
 	template <typename DST, int DB, class SRC, int SB>
-	void           conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
-	void           conv_rgb_2_ycbcr_cpp_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	void           conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           conv_rgb_2_ycbcr_cpp_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
 
 	template <typename DST, int DB, class SRC, int SB>
-	void           conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
-	void           conv_ycbcr_2_rgb_cpp_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	void           conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           conv_ycbcr_2_rgb_cpp_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	void           conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
-	void           conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	void           conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
 #endif   // fstb_ARCHI_X86
 
 	template <typename T>
@@ -138,9 +138,9 @@ private:
 	bool           _flt_flag;
 	bool           _full_range_flag;
 
-	std::array <int16_t, NBR_PLANES>
+	std::array <int16_t, _nbr_planes>
 	               _coef_rgby_int;
-	std::array <uint16_t, 1 << RGB_INT_BITS>
+	std::array <uint16_t, 1 << _rgb_int_bits>
 	               _map_gamma_int;
 	uint16_t       _coef_yg_a_int;
 	int32_t        _coef_yg_b_int;
@@ -156,33 +156,31 @@ private:
 #endif   // fstb_ARCHI_X86
 
 	void (ThisType::*             // 0 = not set
-	               _proc_ptr) (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	               _proc_ptr) (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
 
-	static const double
-	               _coef_rgb_to_y_dbl [NBR_PLANES];
-	static const double
-	               _coef_ryb_to_g_dbl [NBR_PLANES];
-	static const double
-	               _coef_cb_neg;
-	static const double
-	               _coef_cb_pos;
-	static const double
-	               _coef_cr_neg;
-	static const double
-	               _coef_cr_pos;
+	static constexpr std::array <double, _nbr_planes>
+	               _coef_rgb_to_y_dbl { 0.2627, 0.6780, 0.0593 };
 
-	static const double
-	               _alpha_b12;
-	static const double
-	               _alpha_low;
-	static const double
-	               _beta_b12;
-	static const double
-	               _beta_low;
-	static const double
-	               _slope_lin;
-	static const double
-	               _gam_pow;
+	static constexpr std::array <double, _nbr_planes>
+	               _coef_ryb_to_g_dbl
+	{
+		-_coef_rgb_to_y_dbl [Col_R] / _coef_rgb_to_y_dbl [Col_G],
+		+1                          / _coef_rgb_to_y_dbl [Col_G],
+		-_coef_rgb_to_y_dbl [Col_B] / _coef_rgb_to_y_dbl [Col_G]
+	};
+
+	static constexpr double _coef_cb_neg = 1.9404;
+	static constexpr double _coef_cb_pos = 1.5816;
+	static constexpr double _coef_cr_neg = 1.7184;
+	static constexpr double _coef_cr_pos = 0.9936;
+
+	static constexpr double _alpha_b12   = 1.0993;
+	static constexpr double _alpha_low   = 1.099 ;
+	static constexpr double _beta_b12    = 0.0181;
+	static constexpr double _beta_low    = 0.018 ;
+
+	static constexpr double _slope_lin   = 4.5;
+	static constexpr double _gam_pow     = 0.45;
 
 
 
