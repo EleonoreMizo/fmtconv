@@ -7,6 +7,7 @@
 #include "fmtcavs/Bitdepth.h"
 #include "fmtcavs/function_names.h"
 #include "fmtcavs/Matrix.h"
+#include "fmtcavs/Matrix2020CL.h"
 #include "fstb/def.h"
 
 #include <windows.h>
@@ -47,6 +48,11 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		"[fulls]b"   "[fulld]b" "[coef]s"      "[csp]s"     // 4
 		"[col_fam]s" "[bits]i"  "[singleout]i" "[cpuopt]i", // 8
 		&main_avs_create <fmtcavs::Matrix>, nullptr
+	);
+	env_ptr->AddFunction (fmtcavs_MATRIX2020CL,
+		"c"         "[full]b" "[csp]i" "[bits]i" // 0
+		"[cpuopt]i",                             // 4
+		&main_avs_create <fmtcavs::Matrix2020CL>, nullptr
 	);
 
 	return "fmtconv - video format conversion";

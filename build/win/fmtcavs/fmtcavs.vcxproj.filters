@@ -85,6 +85,9 @@
     <ClInclude Include="..\..\..\src\avsutl\VideoFilterBase.h">
       <Filter>avsutl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Matrix2020CL.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main-avs.cpp" />
@@ -120,6 +123,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\avsutl\VideoFilterBase.cpp">
       <Filter>avsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Matrix2020CL.cpp">
+      <Filter>fmtcavs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

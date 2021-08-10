@@ -816,13 +816,24 @@ data range, it lies slightly below.</p>
 
 <h3><a id="matrix2020cl"></a>matrix2020cl</h3>
 
-<pre class="proto">fmtc.matrix2020cl (
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.matrix2020cl (
 	clip    : clip      ;
 	full    : int  : opt; (False)
 	csp     : int  : opt;
 	bits    : int  : opt;
 	cpuopt  : int  : opt; (-1)
-)</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_matrix2020cl (
+	clip   c,
+	bool   full (false),
+	string csp (undefined),
+	int    bits (undefined),
+	int    cpuopt (-1)
+)</pre></td>
+</tr>
+</table>
 
 <p>Colorspace conversion using the ITU-R BT.2020 constant luminance matrix.</p>
 
@@ -849,16 +860,25 @@ frame properties are set according to the transformation.
 The <code>_ColorRange</code> property is set if the <var>full</var>
 parameter has been explicitely defined.</p>
 
+<p><span class="host">Avisynth+</span>If an alpha channel is present in
+both the source and destination colorspaces, it is copied and its bitdepth is
+possibly adapted to the destination format.
+If there is no alpha channel in the source, full opacity is assumed.
+If there is no alpha channel in the destination, the plane is lost.<p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
 <p>The input clip. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12-, 14- and 16-bit integer for Y’Cb’Cr’, 16-bit integer for RGB.</li>
+<li>8-, 10-, 12-, 14- and 16-bit integer for Y’Cb’Cr’, 16-bit integer for RGB.</li>
 <li>32-bit floating point.</li>
 <li>YUV and RGB colorspaces.</li>
 </ul>
+<p><span class="host">Vapoursynth</span> 9-bit integer data is supported too.<p>
+<p><span class="host">Avisynth+</span>  Colorspaces with an alpha channel are
+supported too.<p>
 
 <p class="var">full</p>
 <p>Indicates if the Y’Cb’Cr’ clip is full-range (True) or TV-range (False).
@@ -868,17 +888,25 @@ in TV-range (16 to 240 for the YUV chroma planes).
 This value has no meaning for float data.</p>
 
 <p class="var">csp</p>
-<p>The destination format, as Vapoursynth constant.
-It must be compatible with what is logically expected as output (RGB or YUV).
+<p>It must be compatible with what is logically expected as output (RGB or YUV).
 It cannot change the data type (integer or float) nor the chroma subsampling.
-If the output is integer RGB, the bitdepth must be 16.</p>
+If the output is integer RGB, the bitdepth must be 16.
+Only planar colorspaces are allowed.</p>
+<p><span class="host">Vapoursynth</span> The format is a Vapoursynth
+built-in constant.</p>
+<p><span class="host">Avisynth+</span> The format is a string with the
+same kind of content as the result from <code>BuildPixelType</code> or the
+<var>pixel_type</var> parameter from <code>BlankClip</code>.
+For example: <code>"RGBP48"</code>, <code>"YV12"</code>,
+<code>"YUV444PS"</code>…</p>
 
 <p class="var">bits</p>
 <p>Explicit specification of the destination bitdepth.
-The only allowed values are 8, 9, 10, 12, 16 and 32.
+The only allowed values are 8, 10, 12, 14, 16 and 32.
 They are restricted by the output data type and format
 (16 bits for integer RGB).
 Supersedes the bitdepth from <var>csp</var>.</p>
+<p><span class="host">Vapoursynth</span> 9 bits is allowed too.</p>
 
 <p class="var">cpuopt</p>
 <p>Limits the CPU instruction set.

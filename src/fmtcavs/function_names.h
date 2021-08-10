@@ -36,6 +36,10 @@ namespace fmtcavs
 
 #define fmtcavs_BITDEPTH     fmtcavs_BUILD_NAME ("bitdepth")
 #define fmtcavs_MATRIX       fmtcavs_BUILD_NAME ("matrix")
+#define fmtcavs_MATRIX2020CL fmtcavs_BUILD_NAME ("matrix2020cl")
+#define fmtcavs_PRIMARIES    fmtcavs_BUILD_NAME ("primaries")
+#define fmtcavs_RESAMPLE     fmtcavs_BUILD_NAME ("resample")
+#define fmtcavs_TRANSFER     fmtcavs_BUILD_NAME ("transfer")
 
 
 
