@@ -539,7 +539,7 @@ features.</p>
 
 <p>Multi-purpose conversion function.</p>
 
-<p><i>Not available yet.</i></p>
+<p><em>Not available yet.</em></p>
 
 
 <h3><a id="matrix"></a>matrix</h3>
@@ -826,7 +826,7 @@ data range, it lies slightly below.</p>
 
 <p>Colorspace conversion using the ITU-R BT.2020 constant luminance matrix.</p>
 
-<p>The function converts between <i>linear</i> RGB and Y’Cb’Cr’ colorspaces.
+<p>The function converts between <em>linear</em> RGB and Y’Cb’Cr’ colorspaces.
 This conversion cannot be achieve with a classic linear matrix.
 The output colorspace, hence the direction of the conversion, is automatically
 deduced from the input colorspace.</p>
@@ -934,7 +934,7 @@ on the target gamut.</p>
 
 <p class="var">clip</p>
 <p>The input clip. Mandatory.
-Supported colorspaces are 16-bit int or 32-bit float <i>linear</i> RGB.
+Supported colorspaces are 16-bit int or 32-bit float <em>linear</em> RGB.
 You should use the <code>transfer</code> function to convert between linear
 RGB and gamma-compressed R’G’B ’colorspaces.</p>
 
@@ -1161,7 +1161,7 @@ Possible values are:</p>
 <tr><td><b><code>"spline16"</code></b></td><td>Standard cubic spline based kernel, 4 sample points. Same as <code>Spline16Resize</code>.</td></tr>
 <tr><td><b><code>"spline36"</code></b></td><td>Spline, 6 sample points. Same as <code>Spline36Resize</code>.</td></tr>
 <tr><td><b><code>"spline64"</code></b></td><td>Spline, 8 sample points. Same as <code>Spline64Resize</code>.</td></tr>
-<tr><td><b><code>"spline"</code></b></td><td>Generic <i>natural</i> cubic splines, number of sample points is twice the <var>taps</var> parameter, so you can use <var>taps&nbsp;= 6</var> to get a more or less <code>Spline144Resize</code> equivalent.</td></tr>
+<tr><td><b><code>"spline"</code></b></td><td>Generic <em>natural</em> cubic splines, number of sample points is twice the <var>taps</var> parameter, so you can use <var>taps&nbsp;= 6</var> to get a more or less <code>Spline144Resize</code> equivalent.</td></tr>
 <tr><td><b><code>"gauss"</code></b> or<br /><b><code>"gaussian"</code></b></td><td>Gaussian kernel. The p parameter is mapped on <var>a1</var> and controls the curve width. The higher p, the sharper. It is set to 30 by default. This resizer is the same as <code>GaussResize</code>, but <var>taps</var> offers a control on the filter impulse length. For low p values (soft and blurry), it’s better to increase the number of taps to avoid truncating the gaussian curve too early and creating artifacts.</td></tr>
 <tr><td><b><code>"sinc"</code></b></td><td>Truncated sinc function. Use <var>taps</var> to control its length. Same as <code>SincResize</code>.</td></tr>
 </table>
