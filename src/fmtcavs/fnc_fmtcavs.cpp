@@ -156,6 +156,7 @@ fmtcl::ColorFamily	conv_str_to_colfam (std::string str)
 
 
 
+// plane_out < 0: all planes are selected for output
 void	prepare_matrix_coef (::IScriptEnvironment &env, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const FmtAvs &fmt_dst, bool full_range_dst_flag, const FmtAvs &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out, int plane_out)
 {
 	const fmtcl::PicFmt  fmt_src_fmtcl =
