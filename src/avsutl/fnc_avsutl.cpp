@@ -68,9 +68,29 @@ bool set_default (TFlag tristate, bool def_flag)
 
 
 
+bool has_alpha (const ::VideoInfo &vi)
+{
+	return (
+		   vi.IsRGB32 () || vi.IsRGB64 ()
+		|| vi.IsPlanarRGBA () || vi.IsYUVA ()
+	);
+}
+
+
+
+bool is_rgb (const ::VideoInfo &vi)
+{
+	return (
+		   vi.IsRGB () || vi.IsRGB48 () || vi.IsRGB64 ()
+		|| vi.IsPlanarRGB () || vi.IsPlanarRGBA ()
+	);
+}
+
+
+
 bool is_full_range_default (const ::VideoInfo &vi)
 {
-	return vi.IsRGB ();
+	return is_rgb (vi);
 }
 
 

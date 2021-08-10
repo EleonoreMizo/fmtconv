@@ -24,6 +24,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "avsutl/fnc.h"
 #include "fmtcavs/FmtAvs.h"
 #include "fmtcavs/fnc.h"
 #include "fmtcl/fnc.h"
@@ -117,7 +118,7 @@ fmtcl::ColorFamily	conv_vi_to_colfam (const ::VideoInfo &vi)
 	{
 		col_fam = fmtcl::ColorFamily_GRAY;
 	}
-	else if (vi.IsRGB ())
+	else if (avsutl::is_rgb (vi))
 	{
 		col_fam = fmtcl::ColorFamily_RGB;
 	}

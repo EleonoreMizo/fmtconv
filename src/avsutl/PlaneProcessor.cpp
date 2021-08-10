@@ -363,8 +363,8 @@ void	PlaneProcessor::check_same_format (::IScriptEnvironment *env_ptr, const ::V
 	else
 	{
 		if (   (flags & FmtChkFlag_CS_TYPE) != 0
-		    && (   vi_tst.IsRGB () != vi.IsRGB ()
-		        || (vi.IsRGB () && vi_tst.IsRGB24 () != vi.IsRGB24 ())))
+		    && (   is_rgb (vi_tst) != is_rgb (vi)
+		        || (is_rgb (vi) && has_alpha (vi_tst) != has_alpha (vi))))
 		{
 			fstb::snprintf4all (
 				txt_0, sizeof (txt_0),

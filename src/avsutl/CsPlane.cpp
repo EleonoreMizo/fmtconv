@@ -47,7 +47,10 @@ constexpr int	CsPlane::_plane_index_alpha;
 
 CsPlane::CategCs	CsPlane::get_cs_categ (const ::VideoInfo &vi) noexcept
 {
-	return vi.IsRGB () ? CategCs_RGB : CategCs_YUV;
+	return
+		  (vi.IsRGB () || vi.IsPlanarRGB () || vi.IsPlanarRGBA ())
+		? CategCs_RGB
+		: CategCs_YUV;
 }
 
 

@@ -37,6 +37,8 @@ namespace avsutl
 
 TFlag set_tristate (const ::AVSValue &val);
 bool set_default (TFlag tristate, bool def_flag);
+bool has_alpha (const ::VideoInfo &vi);
+bool is_rgb (const ::VideoInfo &vi);
 bool is_full_range_default (const ::VideoInfo &vi);
 
 template <class T>
