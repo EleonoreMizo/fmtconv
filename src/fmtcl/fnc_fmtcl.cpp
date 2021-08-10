@@ -275,7 +275,7 @@ int	prepare_matrix_coef (MatrixProc &mat_proc, const Mat4 &mat_main, const PicFm
 	m *= m1d;
 	if (! int_proc_flag)
 	{
-		if (plane_out > 0 && is_chroma_plane (dst_fmt2._col_fam, plane_out))
+		if (plane_out >= 0 && is_chroma_plane (dst_fmt2._col_fam, plane_out))
 		{
 			// When we extract a single plane, it's a conversion to R or
 			// to Y, so the outout range is always [0; 1]. Therefore we
