@@ -312,7 +312,6 @@ int	FmtAvs::conv_to_vi (VideoInfo &vi) const
 	{
 		if (_planar_flag)
 		{
-			pixel_type |= VideoInfo::CS_YUY2;
 			pixel_type |= VideoInfo::CS_PLANAR;
 			pixel_type |= VideoInfo::CS_VPlaneFirst;
 			pixel_type |= (_alpha_flag) ? VideoInfo::CS_YUVA : VideoInfo::CS_YUV;
