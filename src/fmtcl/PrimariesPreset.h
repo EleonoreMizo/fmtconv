@@ -29,7 +29,8 @@ namespace fmtcl
 // ITU-T H.265, High efficiency video coding, 2016-06, p. 408
 enum PrimariesPreset
 {
-	PrimariesPreset_UNDEF = -1,
+	PrimariesPreset_INVALID = -2,
+	PrimariesPreset_UNDEF   = -1,
 
 	PrimariesPreset_RESERVED0 = 0,
 	PrimariesPreset_BT709,

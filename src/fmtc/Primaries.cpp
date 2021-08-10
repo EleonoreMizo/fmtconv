@@ -270,7 +270,17 @@ void	Primaries::init (fmtcl::RgbSystem &prim, const vsutl::FilterBase &filter, c
 	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
 	fstb::conv_to_lower_case (preset_str);
 	prim._preset = fmtcl::PrimUtil::conv_string_to_primaries (preset_str);
-	if (prim._preset >= 0)
+	if (prim._preset == fmtcl::PrimariesPreset_INVALID)
+	{
+		fstb::snprintf4all (
+			filter._filter_error_msg_0,
+			filter._max_error_buf_len,
+			"%s: invalid preset name.",
+			preset_0
+		);
+		filter.throw_inval_arg (filter._filter_error_msg_0);
+	}
+	else if (prim._preset >= 0)
 	{
 		prim.set (prim._preset);
 	}

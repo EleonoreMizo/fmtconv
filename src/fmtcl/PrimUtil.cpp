@@ -155,11 +155,13 @@ Vec3	PrimUtil::conv_xy_to_xyz (const RgbSystem::Vec2 &xy)
 // str should be already converted to lower case
 PrimariesPreset	PrimUtil::conv_string_to_primaries (const std::string &str)
 {
-	assert (! str.empty ());
+	PrimariesPreset  preset = PrimariesPreset_INVALID;
 
-	PrimariesPreset  preset = PrimariesPreset_UNDEF;
-
-	if (        str == "709"
+	if (str.empty ())
+	{
+		preset = PrimariesPreset_UNDEF;
+	}
+	else if (   str == "709"
 	         || str == "1361"
 	         || str == "61966-2-1"
 	         || str == "61966-2-4"
