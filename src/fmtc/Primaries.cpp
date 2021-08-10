@@ -76,7 +76,7 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 	));
 
 	// Checks the input clip
-	if (_vi_in.format == 0)
+	if (_vi_in.format == nullptr)
 	{
 		throw_inval_arg ("only constant pixel formats are supported.");
 	}
@@ -116,7 +116,7 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 		fmt_src, true
 	);
 
-	if (_vsapi.getError (&out) != 0)
+	if (_vsapi.getError (&out) != nullptr)
 	{
 		throw -1;
 	}
@@ -138,8 +138,8 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 	fstb::unused (frame_data_ptr);
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = 0;
-	::VSNodeRef &     node = *_clip_src_sptr;
+	::VSFrameRef *    dst_ptr = nullptr;
+	::VSNodeRef &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -204,7 +204,7 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 		}
 	}
 
-	return (dst_ptr);
+	return dst_ptr;
 }
 
 
@@ -223,7 +223,7 @@ constexpr int	Primaries::_nbr_planes;
 
 void	Primaries::check_colorspace (const ::VSFormat &fmt, const char *inout_0) const
 {
-	assert (inout_0 != 0);
+	assert (inout_0 != nullptr);
 
 	if (fmt.subSamplingW != 0 || fmt.subSamplingH != 0)
 	{
@@ -265,7 +265,7 @@ void	Primaries::check_colorspace (const ::VSFormat &fmt, const char *inout_0) co
 
 void	Primaries::init (fmtcl::RgbSystem &prim, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0)
 {
-	assert (preset_0 != 0);
+	assert (preset_0 != nullptr);
 
 	std::string    preset_str = filter.get_arg_str (in, out, preset_0, "");
 	fstb::conv_to_lower_case (preset_str);
@@ -280,16 +280,16 @@ void	Primaries::init (fmtcl::RgbSystem &prim, const vsutl::FilterBase &filter, c
 
 void	Primaries::init (fmtcl::RgbSystem &prim, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 [])
 {
-	assert (r_0 != 0);
-	assert (g_0 != 0);
-	assert (b_0 != 0);
-	assert (w_0 != 0);
+	assert (r_0 != nullptr);
+	assert (g_0 != nullptr);
+	assert (b_0 != nullptr);
+	assert (w_0 != nullptr);
 
 	const bool     ready_old_flag = prim.is_ready ();
 	std::array <fmtcl::RgbSystem::Vec2, _nbr_planes> rgb_old = prim._rgb;
 	fmtcl::RgbSystem::Vec2  w_old = prim._white;
 
-	const char *   name_0_arr [_nbr_planes] = { r_0, g_0, b_0 };
+	const std::array <const char *, _nbr_planes> name_0_arr { r_0, g_0, b_0 };
 	for (int k = 0; k < _nbr_planes; ++k)
 	{
 		prim._init_flag_arr [k] |=
@@ -315,16 +315,15 @@ bool	Primaries::read_coord_tuple (fmtcl::RgbSystem::Vec2 &c, const vsutl::Filter
 	Vect           v_def;
 
 	Vect           c_v = filter.get_arg_vflt (in, out, name_0, v_def);
-	if (c_v.size () != 0)
+	if (! c_v.empty ())
 	{
 		if (c_v.size () != c.size ())
 		{
 			fstb::snprintf4all (
 				filter._filter_error_msg_0,
 				filter._max_error_buf_len,
-				"%s: wrong number of coordinates (expected %d).",
-				name_0,
-				int (c.size ())
+				"%s: wrong number of coordinates (expected x and y).",
+				name_0
 			);
 			filter.throw_inval_arg (filter._filter_error_msg_0);
 		}
@@ -348,7 +347,7 @@ bool	Primaries::read_coord_tuple (fmtcl::RgbSystem::Vec2 &c, const vsutl::Filter
 		set_flag = true;
 	}
 
-	return (set_flag);
+	return set_flag;
 }
 
 

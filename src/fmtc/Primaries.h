@@ -84,17 +84,17 @@ private:
 	               _vi_in;        // Input. Must be declared after _clip_src_sptr because of initialisation order.
 	::VSVideoInfo  _vi_out;       // Output. Must be declared after _vi_in.
 
-	bool           _sse_flag;
-	bool           _sse2_flag;
-	bool           _avx_flag;
-	bool           _avx2_flag;
+	bool           _sse_flag  = false;
+	bool           _sse2_flag = false;
+	bool           _avx_flag  = false;
+	bool           _avx2_flag = false;
 
 	fmtcl::RgbSystem
 	               _prim_s;
 	fmtcl::RgbSystem
 	               _prim_d;
 
-	fmtcl::Mat4    _mat_main;
+	fmtcl::Mat4    _mat_main { 1.0, fmtcl::Mat4::Preset_DIAGONAL };
 
 	std::unique_ptr <fmtcl::MatrixProc>
 	               _proc_uptr;
