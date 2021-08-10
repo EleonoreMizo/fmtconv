@@ -46,7 +46,7 @@ namespace fmtcavs
 
 
 // w and h in pixels
-ProcAlpha::ProcAlpha (FmtAvs fmt_dst, FmtAvs fmt_src, bool fulld_flag, bool fulls_flag, int w, int h, const CpuOpt &cpu_opt)
+ProcAlpha::ProcAlpha (FmtAvs fmt_dst, FmtAvs fmt_src, int w, int h, const CpuOpt &cpu_opt)
 :	_dst_a_flag (fmt_dst.has_alpha ())
 ,	_src_a_flag (fmt_src.has_alpha ())
 ,	_dst_res (fmt_dst.get_bitdepth ())
@@ -66,8 +66,8 @@ ProcAlpha::ProcAlpha (FmtAvs fmt_dst, FmtAvs fmt_src, bool fulld_flag, bool full
 		fmtcl::compute_fmt_mac_cst (
 			_scale_info._gain,
 			_scale_info._add_cst,
-			fmtcl::PicFmt { _splfmt_dst, _dst_res, col_fam_dst, fulld_flag },
-			fmtcl::PicFmt { _splfmt_src, _src_res, col_fam_src, fulls_flag },
+			fmtcl::PicFmt { _splfmt_dst, _dst_res, col_fam_dst, true },
+			fmtcl::PicFmt { _splfmt_src, _src_res, col_fam_src, true },
 			avsutl::CsPlane::_plane_index_alpha
 		);
 	}

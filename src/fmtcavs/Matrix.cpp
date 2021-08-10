@@ -74,7 +74,7 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 		env.ThrowError (fmtcavs_MATRIX ": input must be 4:4:4.");
 	}
 	const int      nbr_planes_src = _vi_src.NumComponents ();
-	if (nbr_planes_src < _nbr_planes_proc)
+	if (fmt_src.get_nbr_comp_non_alpha () != _nbr_planes_proc)
 	{
 		env.ThrowError (
 			fmtcavs_MATRIX ": greyscale format not supported as input."
@@ -197,7 +197,7 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 
 	// Alpha plane processing, if any
 	_proc_alpha_uptr = std::make_unique <fmtcavs::ProcAlpha> (
-		fmt_dst, fmt_src, _fulld_flag, _fulls_flag, vi.width, vi.height, cpu_opt
+		fmt_dst, fmt_src, vi.width, vi.height, cpu_opt
 	);
 
 	// Custom coefficients

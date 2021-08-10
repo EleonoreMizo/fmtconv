@@ -45,7 +45,7 @@ class ProcAlpha
 
 public:
 
-	explicit       ProcAlpha (FmtAvs fmt_dst, FmtAvs fmt_src, bool fulld_flag, bool fulls_flag, int w, int h, const CpuOpt &cpu_opt);
+	explicit       ProcAlpha (FmtAvs fmt_dst, FmtAvs fmt_src, int w, int h, const CpuOpt &cpu_opt);
 
 	void           process_plane (::PVideoFrame &dst_sptr, ::PVideoFrame &src_sptr) const;
 
