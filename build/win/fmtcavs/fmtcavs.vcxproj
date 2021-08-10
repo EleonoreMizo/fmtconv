@@ -152,6 +152,7 @@
     <ClInclude Include="..\..\..\src\fmtcavs\function_names.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\Matrix.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\Matrix2020CL.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Primaries.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\ProcAlpha.h" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +167,7 @@
     <ClCompile Include="..\..\..\src\fmtcavs\fnc_fmtcavs.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\Matrix.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\Matrix2020CL.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Primaries.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\ProcAlpha.cpp" />
     <ClCompile Include="..\..\..\src\main-avs.cpp" />
   </ItemGroup>

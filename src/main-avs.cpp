@@ -8,6 +8,7 @@
 #include "fmtcavs/function_names.h"
 #include "fmtcavs/Matrix.h"
 #include "fmtcavs/Matrix2020CL.h"
+#include "fmtcavs/Primaries.h"
 #include "fstb/def.h"
 
 #include <windows.h>
@@ -53,6 +54,12 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		"c"         "[full]b" "[csp]i" "[bits]i" // 0
 		"[cpuopt]i",                             // 4
 		&main_avs_create <fmtcavs::Matrix2020CL>, nullptr
+	);
+	env_ptr->AddFunction (fmtcavs_PRIMARIES,
+		"c"     "[rs]s"    "[gs]s"    "[bs]s"      // 0
+		"[ws]s" "[rd]s"    "[gd]s"    "[bd]s"      // 4
+		"[wd]s" "[prims]s" "[primd]s" "[cpuopt]i", // 8
+		&main_avs_create <fmtcavs::Primaries>, nullptr
 	);
 
 	return "fmtconv - video format conversion";
