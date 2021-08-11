@@ -31,6 +31,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/Matrix2020CLProc.h"
 #include "fmtcl/Matrix2020CLProc_macro.h"
 #include "fmtcl/PicFmt.h"
+#include "fmtcl/ProcComp3Arg.h"
 #include "fmtcl/ProxyRwCpp.h"
 #include "fmtcl/TransOpLinPow.h"
 #include "fstb/fnc.h"
@@ -130,16 +131,17 @@ Matrix2020CLProc::Err	Matrix2020CLProc::configure (bool to_yuv_flag, SplFmt src_
 
 
 
-void	Matrix2020CLProc::process (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	Matrix2020CLProc::process (const ProcComp3Arg &arg) const
 {
 	assert (_src_fmt != SplFmt_ILLEGAL);
 	assert (_dst_fmt != SplFmt_ILLEGAL);
-	assert (_proc_ptr != 0);
+	assert (_proc_ptr != nullptr);
+	assert (arg.is_valid (false));
 
 	(this->*_proc_ptr) (
-		dst_ptr_arr, dst_str_arr,
-		src_ptr_arr, src_str_arr,
-		w, h
+		arg._dst._ptr_arr.data (), arg._dst._str_arr.data (),
+		arg._src._ptr_arr.data (), arg._src._str_arr.data (),
+		arg._w, arg._h
 	);
 }
 

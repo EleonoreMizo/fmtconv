@@ -33,6 +33,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/Matrix.h"
 #include "fmtc/fnc.h"
 #include "fmtcl/MatrixUtil.h"
+#include "fmtcl/ProcComp3Arg.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/fnc.h"
@@ -325,41 +326,14 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 		);
 		const ::VSFrameRef & src = *src_sptr;
 
-		const int         w  =  _vsapi.getFrameWidth (&src, 0);
-		const int         h  =  _vsapi.getFrameHeight (&src, 0);
+		const int      w = _vsapi.getFrameWidth (&src, 0);
+		const int      h = _vsapi.getFrameHeight (&src, 0);
 		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
 
-		uint8_t * const   dst_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
-		{
-			                        _vsapi.getWritePtr (dst_ptr, 0),
-			(_plane_out >= 0) ? 0 : _vsapi.getWritePtr (dst_ptr, 1),
-			(_plane_out >= 0) ? 0 : _vsapi.getWritePtr (dst_ptr, 2)
-		};
-		const int         dst_str_arr [fmtcl::MatrixProc::_nbr_planes] =
-		{
-			                        _vsapi.getStride (dst_ptr, 0),
-			(_plane_out >= 0) ? 0 : _vsapi.getStride (dst_ptr, 1),
-			(_plane_out >= 0) ? 0 : _vsapi.getStride (dst_ptr, 2)
-		};
-		const uint8_t * const
-		                  src_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
-		{
-			_vsapi.getReadPtr (&src, 0),
-			_vsapi.getReadPtr (&src, 1),
-			_vsapi.getReadPtr (&src, 2)
-		};
-		const int         src_str_arr [fmtcl::MatrixProc::_nbr_planes] =
-		{
-			_vsapi.getStride (&src, 0),
-			_vsapi.getStride (&src, 1),
-			_vsapi.getStride (&src, 2)
-		};
-
-		_proc_uptr->process (
-			dst_ptr_arr, dst_str_arr,
-			src_ptr_arr, src_str_arr,
-			w, h
-		);
+		const auto     pa { build_mat_proc (
+			_vsapi, *dst_ptr, src, (_plane_out >= 0)
+		) };
+		_proc_uptr->process (pa);
 
 		// Output frame properties
 		if (_range_set_dst_flag || _csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED)

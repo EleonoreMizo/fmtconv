@@ -49,6 +49,8 @@ namespace fmtcl
 
 
 
+class ProcComp3Arg;
+
 class Matrix2020CLProc
 {
 
@@ -75,7 +77,7 @@ public:
 	// All stride values are in bytes
 	// h must be the frame height too, not only the processed stripe height
 	// (required for Stack16 formats to compute the lsb offset)
-	void           process (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           process (const ProcComp3Arg &arg) const;
 
 
 
@@ -125,30 +127,30 @@ private:
 	static fstb_FORCEINLINE T
 	               map_gam_to_lin (T v_gam, bool b12_flag);
 
-	SplFmt         _src_fmt;
-	int            _src_bits;
-	SplFmt         _dst_fmt;
-	int            _dst_bits;
+	SplFmt         _src_fmt     = SplFmt_ILLEGAL;
+	int            _src_bits    = 0;
+	SplFmt         _dst_fmt     = SplFmt_ILLEGAL;
+	int            _dst_bits    = 0;
 
-	bool           _sse2_flag;
-	bool           _avx2_flag;
+	bool           _sse2_flag   = false;
+	bool           _avx2_flag   = false;
 
-	bool           _to_yuv_flag;
-	bool           _b12_flag;
-	bool           _flt_flag;
-	bool           _full_range_flag;
+	bool           _to_yuv_flag = false;
+	bool           _b12_flag    = false;
+	bool           _flt_flag    = false;
+	bool           _full_range_flag = true;
 
 	std::array <int16_t, _nbr_planes>
 	               _coef_rgby_int;
 	std::array <uint16_t, 1 << _rgb_int_bits>
 	               _map_gamma_int;
-	uint16_t       _coef_yg_a_int;
-	int32_t        _coef_yg_b_int;
+	uint16_t       _coef_yg_a_int = 0;
+	int32_t        _coef_yg_b_int = 0;
 	std::array <uint16_t, 2>
-	               _coef_cb_a_int;  // 0: cb >= 0, 1: cb < 0
+	               _coef_cb_a_int {};  // 0: cb >= 0, 1: cb < 0
 	std::array <uint16_t, 2>
-	               _coef_cr_a_int;
-	int32_t        _coef_cbcr_b_int;
+	               _coef_cr_a_int {};
+	int32_t        _coef_cbcr_b_int = 0;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	std::unique_ptr <TransLut>

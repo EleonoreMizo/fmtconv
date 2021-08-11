@@ -24,6 +24,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "avsutl/CsPlane.h"
 #include "avsutl/fnc.h"
 #include "fmtcavs/FmtAvs.h"
 #include "fmtcavs/fnc.h"
@@ -196,6 +197,30 @@ void	prepare_matrix_coef (::IScriptEnvironment &env, fmtcl::MatrixProc &mat_proc
 			);
 		}
 	}
+}
+
+
+
+fmtcl::ProcComp3Arg	build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFrame &dst_sptr, const ::VideoInfo &vi_src, const ::PVideoFrame &src_sptr, bool single_plane_flag)
+{
+	fmtcl::ProcComp3Arg  pa;
+	pa._w = vi_dst.width;
+	pa._h = vi_dst.height;
+
+	for (int p_idx = 0; p_idx < fmtcl::ProcComp3Arg::_nbr_planes; ++p_idx)
+	{
+		if (! single_plane_flag || p_idx == 0)
+		{
+			const int      pd = avsutl::CsPlane::get_plane_id (p_idx, vi_dst);
+			pa._dst._ptr_arr [p_idx] = dst_sptr->GetWritePtr (pd);
+			pa._dst._str_arr [p_idx] = dst_sptr->GetPitch (pd);
+		}
+		const int      ps = avsutl::CsPlane::get_plane_id (p_idx, vi_src);
+		pa._src._ptr_arr [p_idx] = src_sptr->GetReadPtr (ps);
+		pa._src._str_arr [p_idx] = src_sptr->GetPitch (ps);
+	}
+
+	return pa;
 }
 
 

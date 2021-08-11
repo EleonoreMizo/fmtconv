@@ -26,6 +26,7 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/ColorFamily.h"
 #include "fmtcl/ColorSpaceH265.h"
 #include "fmtcl/PicFmt.h"
+#include "fmtcl/ProcComp3Arg.h"
 #include "fmtcl/SplFmt.h"
 
 #include <string>
@@ -33,6 +34,7 @@ http://www.wtfpl.net/ for more details.
 
 
 class IScriptEnvironment;
+class PVideoFrame;
 struct VideoInfo;
 
 
@@ -57,6 +59,7 @@ fmtcl::SplFmt conv_bitdepth_to_splfmt (int bitdepth);
 fmtcl::ColorFamily	conv_vi_to_colfam (const ::VideoInfo &vi);
 fmtcl::ColorFamily	conv_str_to_colfam (std::string str);
 void	prepare_matrix_coef (::IScriptEnvironment &env, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const FmtAvs &fmt_dst, bool full_range_dst_flag, const FmtAvs &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out, int plane_out);
+fmtcl::ProcComp3Arg build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFrame &dst_sptr, const ::VideoInfo &vi_src, const ::PVideoFrame &src_sptr, bool single_plane_flag = false);
 
 }  // namespace fmtcavs
 

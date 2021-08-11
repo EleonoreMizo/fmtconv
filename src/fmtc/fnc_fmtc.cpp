@@ -170,6 +170,29 @@ void	prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &ma
 
 
 
+fmtcl::ProcComp3Arg	build_mat_proc (const ::VSAPI &vsapi, ::VSFrameRef &dst, const ::VSFrameRef &src, bool single_plane_flag)
+{
+	fmtcl::ProcComp3Arg  pa;
+
+	pa._w = vsapi.getFrameWidth (&dst, 0);
+	pa._h = vsapi.getFrameHeight (&dst, 0);
+
+	for (int p_idx = 0; p_idx < fmtcl::ProcComp3Arg::_nbr_planes; ++p_idx)
+	{
+		if (! single_plane_flag || p_idx == 0)
+		{
+			pa._dst._ptr_arr [p_idx] = vsapi.getWritePtr (&dst, p_idx);
+			pa._dst._str_arr [p_idx] = vsapi.getStride (&dst, p_idx);
+		}
+		pa._src._ptr_arr [p_idx] = vsapi.getReadPtr (&src, p_idx);
+		pa._src._str_arr [p_idx] = vsapi.getStride (&src, p_idx);
+	}
+
+	return pa;
+}
+
+
+
 }	// namespace fmtc
 
 

@@ -43,6 +43,8 @@ namespace fmtcl
 
 
 
+class ProcComp3Arg;
+
 class MatrixProc
 {
 
@@ -71,7 +73,7 @@ public:
 	// All stride values are in bytes
 	// h must be the frame height too, not only the processed stripe height
 	// (required for Stack16 formats to compute the lsb offset)
-	void           process (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           process (const ProcComp3Arg &arg) const;
 
 
 
@@ -117,13 +119,15 @@ private:
 	void           process_1_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
 #endif   // fstb_ARCHI_X86
 
-	bool           _sse_flag;
-	bool           _sse2_flag;
-	bool           _avx_flag;
-	bool           _avx2_flag;
+	bool           _sse_flag  = false;
+	bool           _sse2_flag = false;
+	bool           _avx_flag  = false;
+	bool           _avx2_flag = false;
+
+	bool           _single_plane_flag = false;
 
 	void (ThisType::*                   // 0 = not set
-	               _proc_ptr) (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	               _proc_ptr) (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const = nullptr;
 
 	std::vector <float>
 	               _coef_flt_arr;

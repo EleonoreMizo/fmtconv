@@ -31,6 +31,7 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcavs/Matrix.h"
 #include "fmtcl/fnc.h"
 #include "fmtcl/MatrixUtil.h"
+#include "fmtcl/ProcComp3Arg.h"
 #include "fstb/fnc.h"
 
 #include <cassert>
@@ -286,49 +287,10 @@ fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (::IScriptEnvironment &env, c
 	::PVideoFrame  src_sptr = _clip_src_sptr->GetFrame (n, env_ptr);
 	::PVideoFrame	dst_sptr = build_new_frame (*env_ptr, vi, &src_sptr);
 
-	const int      p0d = avsutl::CsPlane::get_plane_id (0, vi);
-	const int      p1d = avsutl::CsPlane::get_plane_id (1, vi);
-	const int      p2d = avsutl::CsPlane::get_plane_id (2, vi);
-
-	const int      p0s = avsutl::CsPlane::get_plane_id (0, _vi_src);
-	const int      p1s = avsutl::CsPlane::get_plane_id (1, _vi_src);
-	const int      p2s = avsutl::CsPlane::get_plane_id (2, _vi_src);
-
-	const int      w   = vi.width;
-	const int      h   = vi.height;
-
-	uint8_t * const   dst_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
-	{
-		                              dst_sptr->GetWritePtr (p0d),
-		(_plane_out >= 0) ? nullptr : dst_sptr->GetWritePtr (p1d),
-		(_plane_out >= 0) ? nullptr : dst_sptr->GetWritePtr (p2d)
-	};
-	const int         dst_str_arr [fmtcl::MatrixProc::_nbr_planes] =
-	{
-		                              dst_sptr->GetPitch (p0d),
-		(_plane_out >= 0) ? 0       : dst_sptr->GetPitch (p1d),
-		(_plane_out >= 0) ? 0       : dst_sptr->GetPitch (p2d)
-	};
-
-	const uint8_t * const
-	                  src_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
-	{
-		src_sptr->GetReadPtr (p0s),
-		src_sptr->GetReadPtr (p1s),
-		src_sptr->GetReadPtr (p2s)
-	};
-	const int         src_str_arr [fmtcl::MatrixProc::_nbr_planes] =
-	{
-		src_sptr->GetPitch (p0s),
-		src_sptr->GetPitch (p1s),
-		src_sptr->GetPitch (p2s)
-	};
-
-	_proc_uptr->process (
-		dst_ptr_arr, dst_str_arr,
-		src_ptr_arr, src_str_arr,
-		w, h
-	);
+	const auto     pa { build_mat_proc (
+		vi, dst_sptr, _vi_src, src_sptr, (_plane_out >= 0)
+	) };
+	_proc_uptr->process (pa);
 
 	// Alpha plane now
 	_proc_alpha_uptr->process_plane (dst_sptr, src_sptr);

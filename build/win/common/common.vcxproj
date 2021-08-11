@@ -205,6 +205,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\Matrix2020CLProc.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Matrix2020CLProc_macro.h" />
     <ClInclude Include="..\..\..\src\fmtcl\MatrixProc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ProcComp3Arg.h" />
     <ClInclude Include="..\..\..\src\fmtcl\MatrixProc_macro.h" />
     <ClInclude Include="..\..\..\src\fmtcl\MatrixUtil.h" />
     <ClInclude Include="..\..\..\src\fmtcl\MatrixWrap.h" />
@@ -313,6 +314,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\KernelData.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\Matrix2020CLProc.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\MatrixProc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ProcComp3Arg.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\MatrixProc_avx.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>

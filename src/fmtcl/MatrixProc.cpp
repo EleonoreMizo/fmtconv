@@ -33,6 +33,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtcl/MatrixProc.h"
 #include "fmtcl/MatrixProc_macro.h"
+#include "fmtcl/ProcComp3Arg.h"
 #include "fmtcl/ProxyRwCpp.h"
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/ProxyRwSse2.h"
@@ -60,12 +61,6 @@ MatrixProc::MatrixProc (bool sse_flag, bool sse2_flag, bool avx_flag, bool avx2_
 ,	_sse2_flag (sse2_flag)
 ,	_avx_flag (avx_flag)
 ,	_avx2_flag (avx2_flag)
-,	_proc_ptr (0)
-,	_coef_flt_arr ()
-,	_coef_int_arr ()
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-,	_coef_simd_arr ()
-#endif // fstb_ARCHI_X86
 {
 	// Nothing
 }
@@ -83,14 +78,13 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 	assert (dst_fmt < SplFmt_NBR_ELT);
 	assert (dst_bits >= 8);
 	assert (dst_bits <= 32);
-	assert (plane_out <= _nbr_planes);
+	assert (plane_out < _nbr_planes);
 	assert (   (dst_fmt == SplFmt_FLOAT && src_fmt == SplFmt_FLOAT)
 	        || (dst_fmt != SplFmt_FLOAT && src_fmt != SplFmt_FLOAT));
 
 	Err            ret_val = Err_OK;
-	_proc_ptr = 0;
-
-	const bool     single_plane_flag = (plane_out >= 0);
+	_proc_ptr          = nullptr;
+	_single_plane_flag = (plane_out >= 0);
 
 	// Integer
 	if (int_proc_flag)
@@ -120,7 +114,7 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 				+ (dst_bits << 11)
 				+ (src_fmt  <<  8)
 				+ (src_bits <<  1)
-				+ (single_plane_flag ? 1 : 0)
+				+ (_single_plane_flag ? 1 : 0)
 			)
 			{
 			fmtcl_MatrixProc_SPAN_I (fmtcl_MatrixProc_CASE_INT)
@@ -136,7 +130,7 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 	else
 	{
 		set_matrix_flt (m, plane_out);
-		if (single_plane_flag)
+		if (_single_plane_flag)
 		{
 			_proc_ptr = &ThisType::process_1_flt_cpp;
 		}
@@ -155,7 +149,7 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 				int_proc_flag,
 				src_fmt, src_bits,
 				dst_fmt, dst_bits,
-				single_plane_flag
+				_single_plane_flag
 			);
 		}
 
@@ -165,7 +159,7 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 				int_proc_flag,
 				src_fmt, src_bits,
 				dst_fmt, dst_bits,
-				single_plane_flag
+				_single_plane_flag
 			);
 		}
 
@@ -175,7 +169,7 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 				int_proc_flag,
 				src_fmt, src_bits,
 				dst_fmt, dst_bits,
-				single_plane_flag
+				_single_plane_flag
 			);
 		}
 
@@ -185,7 +179,7 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 				int_proc_flag,
 				src_fmt, src_bits,
 				dst_fmt, dst_bits,
-				single_plane_flag
+				_single_plane_flag
 			);
 		}
 	}
@@ -196,14 +190,15 @@ MatrixProc::Err	MatrixProc::configure (const Mat4 &m, bool int_proc_flag, SplFmt
 
 
 
-void	MatrixProc::process (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process (const ProcComp3Arg &arg) const
 {
-	assert (_proc_ptr != 0);
+	assert (_proc_ptr != nullptr);
+	assert (arg.is_valid (_single_plane_flag));
 
 	(this->*_proc_ptr) (
-		dst_ptr_arr, dst_str_arr,
-		src_ptr_arr, src_str_arr,
-		w, h
+		arg._dst._ptr_arr.data (), arg._dst._str_arr.data (),
+		arg._src._ptr_arr.data (), arg._src._str_arr.data (),
+		arg._w, arg._h
 	);
 }
 
@@ -215,7 +210,7 @@ void	MatrixProc::process (uint8_t * const dst_ptr_arr [_nbr_planes], const int d
 
 void	MatrixProc::set_matrix_flt (const Mat4 &m, int plane_out)
 {
-	assert (plane_out <= _nbr_planes);
+	assert (plane_out < _nbr_planes);
 
 	const int      plane_beg = (plane_out >= 0) ? plane_out     : 0;
 	const int      plane_end = (plane_out >= 0) ? plane_out + 1 : _nbr_planes;
@@ -236,7 +231,7 @@ void	MatrixProc::set_matrix_flt (const Mat4 &m, int plane_out)
 
 MatrixProc::Err	MatrixProc::set_matrix_int (const Mat4 &m, int plane_out, int src_bits, int dst_bits)
 {
-	assert (plane_out <= _nbr_planes);
+	assert (plane_out < _nbr_planes);
 	assert (src_bits >= 8);
 	assert (src_bits <= 16);
 	assert (dst_bits >= 8);
@@ -430,10 +425,10 @@ void	MatrixProc::setup_fnc_sse2 (bool int_proc_flag, SplFmt src_fmt, int src_bit
 template <typename DST, int DB, class SRC, int SB>
 void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst_ptr_arr != nullptr);
+	assert (dst_str_arr != nullptr);
+	assert (src_ptr_arr != nullptr);
+	assert (src_str_arr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 
@@ -514,10 +509,10 @@ void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 template <typename DST, int DB, class SRC, int SB>
 void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst_ptr_arr != nullptr);
+	assert (dst_str_arr != nullptr);
+	assert (src_ptr_arr != nullptr);
+	assert (src_str_arr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 
@@ -577,10 +572,10 @@ void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 void	MatrixProc::process_3_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst_ptr_arr != nullptr);
+	assert (dst_str_arr != nullptr);
+	assert (src_ptr_arr != nullptr);
+	assert (src_str_arr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 
@@ -647,10 +642,10 @@ void	MatrixProc::process_3_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 void	MatrixProc::process_1_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst_ptr_arr != nullptr);
+	assert (dst_str_arr != nullptr);
+	assert (src_ptr_arr != nullptr);
+	assert (src_str_arr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 
@@ -705,10 +700,10 @@ void	MatrixProc::process_1_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 template <class DST, int DB, class SRC, int SB, int NP>
 void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst_ptr_arr != nullptr);
+	assert (dst_str_arr != nullptr);
+	assert (src_ptr_arr != nullptr);
+	assert (src_str_arr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 
@@ -808,10 +803,10 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [_nbr_planes], 
 
 void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst_ptr_arr != nullptr);
+	assert (dst_str_arr != nullptr);
+	assert (src_ptr_arr != nullptr);
+	assert (src_str_arr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 
@@ -894,10 +889,10 @@ void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 void	MatrixProc::process_1_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst_ptr_arr != nullptr);
+	assert (dst_str_arr != nullptr);
+	assert (src_ptr_arr != nullptr);
+	assert (src_str_arr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 

@@ -174,6 +174,8 @@ commonsrc = \
         ../../src/fmtcl/PrimariesPreset.h \
         ../../src/fmtcl/PrimUtil.cpp \
         ../../src/fmtcl/PrimUtil.h \
+        ../../src/fmtcl/ProcComp3Arg.cpp \
+        ../../src/fmtcl/ProcComp3Arg.h \
         ../../src/fmtcl/Proxy.h \
         ../../src/fmtcl/Proxy.hpp \
         ../../src/fmtcl/ProxyRwCpp.h \

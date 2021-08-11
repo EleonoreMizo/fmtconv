@@ -192,6 +192,9 @@
     <ClCompile Include="..\..\..\src\fmtcl\CpuOptBase.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\ProcComp3Arg.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\avstp.h" />
@@ -642,6 +645,9 @@
       <Filter>fmtcl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\fmtcl\CpuOptBase.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\ProcComp3Arg.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
   </ItemGroup>
