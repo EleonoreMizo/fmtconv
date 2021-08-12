@@ -34,6 +34,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/Resample.h"
 #include "fmtc/version.h"
 #include "fmtcl/MatrixUtil.h"
+#include "fmtcl/ResampleUtil.h"
 #include "fstb/def.h"
 #include "vsutl/fnc.h"
 
@@ -199,7 +200,8 @@ void	Convert::retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSC
 	std::string    css (get_arg_str (in, out, "css", ""));
 	if (! css.empty ())
 	{
-		const int      ret_val = vsutl::conv_str_to_chroma_subspl (ssh, ssv, css);
+		const int      ret_val =
+			fmtcl::ResampleUtil::conv_str_to_chroma_subspl (ssh, ssv, css);
 		if (ret_val != 0)
 		{
 			throw_inval_arg ("unsupported css value.");

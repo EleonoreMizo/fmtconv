@@ -28,12 +28,12 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtcl/ChromaPlacement.h"
-#include "fmtcl/ColorFamily.h"
 #include "fmtcl/FilterResize.h"
 #include "fmtcl/InterlacingType.h"
 #include "fmtcl/KernelData.h"
 #include "fmtcl/ResamplePlaneData.h"
 #include "fmtcl/ResampleSpecPlane.h"
+#include "fmtcl/ResampleUtil.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
 #include "vsutl/PlaneProcCbInterface.h"
@@ -44,7 +44,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include <map>
 #include <memory>
 #include <mutex>
-#include <vector>
 
 
 
@@ -89,41 +88,15 @@ protected:
 
 private:
 
+	using Ru = fmtcl::ResampleUtil;
+
 	static constexpr int _max_nbr_planes = 3;
-
-	enum InterlacingParam
-	{
-		InterlacingParam_FRAMES = 0,
-		InterlacingParam_FIELDS,
-		InterlacingParam_AUTO,
-
-		InterlacingParam_NBR_ELT
-	};
-
-	enum FieldOrder
-	{
-		FieldOrder_BFF = 0,
-		FieldOrder_TFF,
-		FieldOrder_AUTO,
-
-		FieldOrder_NBR_ELT
-	};
-
-	class FrameInfo
-	{
-	public:
-		bool           _itl_s_flag = false;
-		bool           _top_s_flag = false;
-		bool           _itl_d_flag = false;
-		bool           _top_d_flag = false;
-	};
 
 	typedef std::array <fmtcl::ResamplePlaneData, _max_nbr_planes> PlaneDataArray;
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
 	bool           cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const char name_0 [], int pos = 0) const;
-	void           get_interlacing_param (bool &itl_flag, bool &top_flag, int field_index, const ::VSFrameRef &src, InterlacingParam interlaced, FieldOrder field_order) const;
 	int            process_plane_proc (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr);
 	int            process_plane_copy (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr);
 	fmtcl::FilterResize *
@@ -136,37 +109,34 @@ private:
 	               _vi_in;        // Input. Must be declared after _clip_src_sptr because of initialisation order.
 	::VSVideoInfo  _vi_out;       // Output. Must be declared after _vi_in.
 
-	std::vector <int>             // Not used at the moment. Will be useful to specify the planes to process/copy/trash.
-	               _plane_arr;
-
-	int            _src_width;
-	int            _src_height;
-	fmtcl::SplFmt  _src_type;
-	int            _src_res;
-	fmtcl::SplFmt  _dst_type;
-	int            _dst_res;
-	double         _norm_val_h;
-	double         _norm_val_v;
-	InterlacingParam
-	               _interlaced_src;
-	InterlacingParam
-	               _interlaced_dst;
-	FieldOrder     _field_order_src;
-	FieldOrder     _field_order_dst;
-	bool           _int_flag;
-	bool           _norm_flag;
-	bool           _range_set_in_flag;
-	bool           _range_set_out_flag;
-	bool           _full_range_in_flag;
-	bool           _full_range_out_flag;
-	bool           _cplace_d_set_flag;
+	int            _src_width  = 0;
+	int            _src_height = 0;
+	fmtcl::SplFmt  _src_type   = fmtcl::SplFmt_ILLEGAL;
+	int            _src_res    = 0;
+	fmtcl::SplFmt  _dst_type   = fmtcl::SplFmt_ILLEGAL;
+	int            _dst_res    = 0;
+	double         _norm_val_h = 0;
+	double         _norm_val_v = 0;
+	Ru::InterlacingParam
+	               _interlaced_src  = Ru::InterlacingParam_INVALID;
+	Ru::InterlacingParam
+	               _interlaced_dst  = Ru::InterlacingParam_INVALID;
+	Ru::FieldOrder _field_order_src = Ru::FieldOrder_INVALID;
+	Ru::FieldOrder _field_order_dst = Ru::FieldOrder_INVALID;
+	bool           _int_flag   = false;
+	bool           _norm_flag  = false;
+	bool           _range_set_in_flag   = false;
+	bool           _range_set_out_flag  = false;
+	bool           _full_range_in_flag  = false;
+	bool           _full_range_out_flag = false;
+	bool           _cplace_d_set_flag   = false;
 	fmtcl::ChromaPlacement
-	               _cplace_s;
+	               _cplace_s   = fmtcl::ChromaPlacement_INVALID;
 	fmtcl::ChromaPlacement
-	               _cplace_d;
+	               _cplace_d   = fmtcl::ChromaPlacement_INVALID;
 
-	bool           _sse2_flag;
-	bool           _avx2_flag;
+	bool           _sse2_flag  = false;
+	bool           _avx2_flag  = false;
 	vsutl::PlaneProcessor
 	               _plane_processor;
 	std::mutex     _filter_mutex;          // To access _filter_uptr_map.

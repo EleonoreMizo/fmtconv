@@ -27,21 +27,18 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/CpuOpt.h"
 #include "fmtc/fnc.h"
 #include "fmtc/Resample.h"
-#include "fmtcl/ResampleUtil.h"
+#include "fmtcl/ColorFamily.h"
 #include "fstb/def.h"
 #include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
 #include "vsutl/PlaneProcMode.h"
 
 #include <algorithm>
+#include <vector>
 
 #include <cassert>
 #include <cctype>
 #include <cstring>
-
-#if VAPOURSYNTH_API_VERSION < 0x30002
-	#define FMTC_RESAMPLE_OLD_FIELDBASED_BEHAVIOUR
-#endif
 
 
 
@@ -54,39 +51,32 @@ namespace fmtc
 
 
 
+static constexpr bool Resample_old_fieldbased_behaviour_flag =
+	(VAPOURSYNTH_API_VERSION < 0x30002);
+
+
+
 Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi)
 :	vsutl::FilterBase (vsapi, "resample", ::fmParallel, 0)
 ,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
-,	_plane_arr ()
-,	_src_width (0)
-,	_src_height (0)
-,	_norm_val_h (0)
-,	_norm_val_v (0)
-,	_interlaced_src (static_cast <InterlacingParam> (
-		get_arg_int (in, out, "interlaced", InterlacingParam_AUTO)
+,	_interlaced_src (static_cast <Ru::InterlacingParam> (
+		get_arg_int (in, out, "interlaced", Ru::InterlacingParam_AUTO)
 	))
-,	_interlaced_dst (static_cast <InterlacingParam> (
+,	_interlaced_dst (static_cast <Ru::InterlacingParam> (
 		get_arg_int (in, out, "interlacedd", _interlaced_src)
 	))
-,	_field_order_src (static_cast <FieldOrder> (
-		get_arg_int (in, out, "tff", FieldOrder_AUTO)
+,	_field_order_src (static_cast <Ru::FieldOrder> (
+		get_arg_int (in, out, "tff", Ru::FieldOrder_AUTO)
 	))
-,	_field_order_dst (static_cast <FieldOrder> (
+,	_field_order_dst (static_cast <Ru::FieldOrder> (
 		get_arg_int (in, out, "tffd", _field_order_src)
 	))
 ,	_int_flag (get_arg_int (in, out, "flt", 0) == 0)
 ,	_norm_flag (get_arg_int (in, out, "cnorm", 1) != 0)
-,	_range_set_in_flag (false)
-,	_range_set_out_flag (false)
-,	_full_range_in_flag (false)
-,	_full_range_out_flag (false)
-,	_cplace_d_set_flag (false)
 ,	_cplace_s (fmtcl::ChromaPlacement_MPEG2)
 ,	_cplace_d (fmtcl::ChromaPlacement_MPEG2)
-,	_sse2_flag (false)
-,	_avx2_flag (false)
 #if defined (_MSC_VER)
 #pragma warning (push)
 #pragma warning (disable : 4355)
@@ -95,9 +85,6 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 #if defined (_MSC_VER)
 #pragma warning (pop)
 #endif
-,	_filter_mutex ()
-,	_filter_uptr_map ()
-,	_plane_data_arr ()
 {
 	fstb::unused (user_data_ptr);
 
@@ -175,19 +162,23 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 	conv_vsfmt_to_splfmt (_dst_type, _dst_res, *_vi_out.format);
 
-	if (_interlaced_src < 0 || _interlaced_src >= InterlacingParam_NBR_ELT)
+	if (   _interlaced_src < 0
+	    || _interlaced_src >= Ru::InterlacingParam_NBR_ELT)
 	{
 		throw_inval_arg ("interlaced argument out of range.");
 	}
-	if (_interlaced_dst < 0 || _interlaced_dst >= InterlacingParam_NBR_ELT)
+	if (   _interlaced_dst < 0
+	    || _interlaced_dst >= Ru::InterlacingParam_NBR_ELT)
 	{
 		throw_inval_arg ("interlacedd argument out of range.");
 	}
-	if (_field_order_src < 0 || _field_order_src >= FieldOrder_NBR_ELT)
+	if (   _field_order_src < 0
+	    || _field_order_src >= Ru::FieldOrder_NBR_ELT)
 	{
 		throw_inval_arg ("tff argument out of range.");
 	}
-	if (_field_order_dst < 0 || _field_order_dst >= FieldOrder_NBR_ELT)
+	if (   _field_order_dst < 0
+	    || _field_order_dst >= Ru::FieldOrder_NBR_ELT)
 	{
 		throw_inval_arg ("tffd argument out of range.");
 	}
@@ -391,8 +382,8 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		{
 			throw_inval_arg ("fv cannot be null.");
 		}
-		if (   taps_h < 1 || taps_h > 128
-		    || taps_v < 1 || taps_v > 128)
+		if (   taps_h < 1 || taps_h > Ru::_max_nbr_taps
+		    || taps_v < 1 || taps_v > Ru::_max_nbr_taps)
 		{
 			throw_inval_arg ("taps* must be in the 1-128 range.");
 		}
@@ -404,8 +395,8 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		{
 			throw_inval_arg ("totalv must be positive or null.");
 		}
-		if (   invks_taps_h < 1 || invks_taps_h > 128
-		    || invks_taps_v < 1 || invks_taps_v > 128)
+		if (   invks_taps_h < 1 || invks_taps_h > Ru::_max_nbr_taps
+		    || invks_taps_v < 1 || invks_taps_v > Ru::_max_nbr_taps)
 		{
 			throw_inval_arg ("invkstaps* must be in the 1-128 range.");
 		}
@@ -451,8 +442,8 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 {
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = 0;
-	::VSNodeRef &     node = *_clip_src_sptr;
+	::VSFrameRef *    dst_ptr = nullptr;
+	::VSNodeRef &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -474,15 +465,39 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 			&core
 		);
 
+		Ru::FieldBased prop_fieldbased = Ru::FieldBased_INVALID;
+		Ru::Field      prop_field      = Ru::Field_INVALID;
+		const ::VSMap* src_prop_ptr    = _vsapi.getFramePropsRO (&src);
+		if (src_prop_ptr != nullptr)
+		{
+			int            err      = 0;
+			int            prop_val = -1;
+			prop_val = int (_vsapi.propGetInt (src_prop_ptr, "_FieldBased", 0, &err));
+			prop_fieldbased =
+				  (err      != 0) ? Ru::FieldBased_INVALID
+				: (prop_val == 0) ? Ru::FieldBased_FRAMES
+				: (prop_val == 1) ? Ru::FieldBased_BFF
+				: (prop_val == 2) ? Ru::FieldBased_TFF
+				:                   Ru::FieldBased_INVALID;
+			prop_val = int (_vsapi.propGetInt (src_prop_ptr, "_Field", 0, &err));
+			prop_field =
+				  (err      != 0) ? Ru::Field_INVALID
+				: (prop_val == 0) ? Ru::Field_BOT
+				: (prop_val == 1) ? Ru::Field_TOP
+				:                   Ru::Field_INVALID;
+		}
+
 		// Collects informations from the input frame properties
-		FrameInfo      frame_info;
-		get_interlacing_param (
+		Ru::FrameInfo  frame_info;
+		Ru::get_interlacing_param (
 			frame_info._itl_s_flag, frame_info._top_s_flag,
-			n, src, _interlaced_src, _field_order_src
+			n, _interlaced_src, _field_order_src, prop_fieldbased, prop_field,
+			Resample_old_fieldbased_behaviour_flag
 		);
-		get_interlacing_param (
+		Ru::get_interlacing_param (
 			frame_info._itl_d_flag, frame_info._top_d_flag,
-			n, src, _interlaced_dst, _field_order_dst
+			n, _interlaced_dst, _field_order_dst, prop_fieldbased, prop_field,
+			Resample_old_fieldbased_behaviour_flag
 		);
 		frame_data_ptr = &frame_info;
 
@@ -491,9 +506,10 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 		);
 
 		// Output frame properties
-		if (ret_val == 0 && (   _range_set_out_flag
-		                     || _cplace_d_set_flag
-		                     || _interlaced_dst != InterlacingParam_AUTO))
+		if (   ret_val == 0
+		    && (   _range_set_out_flag
+		        || _cplace_d_set_flag
+		        || _interlaced_dst != Ru::InterlacingParam_AUTO))
 		{
 			::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
 			if (_range_set_out_flag)
@@ -521,22 +537,24 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 					_vsapi.propSetInt (&dst_prop, "_ChromaLocation", cl_val, ::paReplace);
 				}
 			}
-			if (_interlaced_dst != InterlacingParam_AUTO)
+			if (_interlaced_dst != Ru::InterlacingParam_AUTO)
 			{
 				if (frame_info._itl_d_flag)
 				{
-#if defined (FMTC_RESAMPLE_OLD_FIELDBASED_BEHAVIOUR)
-					_vsapi.propSetInt (&dst_prop, "_FieldBased", 1, ::paReplace);
-#endif
-					if (_field_order_dst != FieldOrder_AUTO)
+					if (Resample_old_fieldbased_behaviour_flag)
 					{
-#if ! defined (FMTC_RESAMPLE_OLD_FIELDBASED_BEHAVIOUR)
-						_vsapi.propSetInt (
-							&dst_prop, "_FieldBased",
-							(_field_order_dst == FieldOrder_TFF) ? 1 : 2,
-							::paReplace
-						);
-#endif
+						_vsapi.propSetInt (&dst_prop, "_FieldBased", 1, ::paReplace);
+					}
+					if (_field_order_dst != Ru::FieldOrder_AUTO)
+					{
+						if (! Resample_old_fieldbased_behaviour_flag)
+						{
+							_vsapi.propSetInt (
+								&dst_prop, "_FieldBased",
+								(_field_order_dst == Ru::FieldOrder_BFF) ? 1 : 2,
+								::paReplace
+							);
+						}
 						_vsapi.propSetInt (
 							&dst_prop, "_Field",
 							(frame_info._top_d_flag) ? 1 : 0,
@@ -566,22 +584,8 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 
 fmtcl::ChromaPlacement	Resample::conv_str_to_chroma_placement (const vsutl::FilterBase &flt, std::string cplace)
 {
-	fmtcl::ChromaPlacement  cp_val = fmtcl::ChromaPlacement_MPEG1;
-
-	fstb::conv_to_lower_case (cplace);
-	if (cplace == "mpeg1")
-	{
-		cp_val = fmtcl::ChromaPlacement_MPEG1;
-	}
-	else if (cplace == "mpeg2")
-	{
-		cp_val = fmtcl::ChromaPlacement_MPEG2;
-	}
-	else if (cplace == "dv")
-	{
-		cp_val = fmtcl::ChromaPlacement_DV;
-	}
-	else
+	const auto     cp_val = Ru::conv_str_to_chroma_placement (cplace);
+	if (cp_val < 0)
 	{
 		flt.throw_inval_arg ("unexpected cplace string.");
 	}
@@ -593,7 +597,7 @@ fmtcl::ChromaPlacement	Resample::conv_str_to_chroma_placement (const vsutl::Filt
 
 void	Resample::conv_str_to_chroma_subspl (const vsutl::FilterBase &flt, int &ssh, int &ssv, std::string css)
 {
-	const int      ret_val = vsutl::conv_str_to_chroma_subspl (ssh, ssv, css);
+	const int      ret_val = Ru::conv_str_to_chroma_subspl (ssh, ssv, css);
 	if (ret_val != 0)
 	{
 		flt.throw_inval_arg ("unsupported css value.");
@@ -609,8 +613,8 @@ void	Resample::conv_str_to_chroma_subspl (const vsutl::FilterBase &flt, int &ssh
 int	Resample::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
 {
 	fstb::unused (src_node2_sptr, src_node3_sptr);
-	assert (src_node1_sptr.get () != 0);
-	assert (frame_data_ptr != 0);
+	assert (src_node1_sptr.get () != nullptr);
+	assert (frame_data_ptr != nullptr);
 
 	int            ret_val = 0;
 
@@ -661,7 +665,7 @@ const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &
 	if (csp_dst != ::pfNone)
 	{
 		fmt_dst_ptr = _vsapi.getFormatPreset (csp_dst, &core);
-		if (fmt_dst_ptr == 0)
+		if (fmt_dst_ptr == nullptr)
 		{
 			throw_inval_arg ("unknown output colorspace.");
 		}
@@ -694,9 +698,9 @@ const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &
 	}
 	catch (...)
 	{
-		fmt_dst_ptr = 0;
+		fmt_dst_ptr = nullptr;
 	}
-	if (fmt_dst_ptr == 0)
+	if (fmt_dst_ptr == nullptr)
 	{
 		throw_rt_err (
 			"couldn\'t get a pixel format identifier for the output clip."
@@ -710,7 +714,7 @@ const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &
 
 bool	Resample::cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const char name_0 [], int pos) const
 {
-	assert (name_0 != 0);
+	assert (name_0 != nullptr);
 
 	if (is_arg_defined (in, name_0))
 	{
@@ -719,79 +723,6 @@ bool	Resample::cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const 
 	}
 
 	return flag;
-}
-
-
-
-void	Resample::get_interlacing_param (bool &itl_flag, bool &top_flag, int field_index, const ::VSFrameRef &src, InterlacingParam interlaced, FieldOrder field_order) const
-{
-	assert (interlaced >= 0);
-	assert (interlaced < InterlacingParam_NBR_ELT);
-	assert (field_order >= 0);
-	assert (field_order < FieldOrder_NBR_ELT);
-
-	// Default: assumes interlaced only if explicitely specified.
-	itl_flag = (interlaced == InterlacingParam_FIELDS);
-	top_flag = true;
-
-	// Fields specified or automatic
-	if (interlaced != InterlacingParam_FRAMES)
-	{
-		const ::VSMap* src_prop_ptr = _vsapi.getFramePropsRO (&src);
-		int            field_based = 0;
-		if (src_prop_ptr != 0)
-		{
-			int            err = 0;
-			field_based =
-				int (_vsapi.propGetInt (src_prop_ptr, "_FieldBased", 0, &err));
-			if (err == 0)
-			{
-				itl_flag = (itl_flag || field_based != 0);
-			}
-			else
-			{
-				field_based = 0;
-			}
-		}
-
-		// Now finds the field order. First check explicit parameters.
-		if (field_order == FieldOrder_BFF)
-		{
-			top_flag = ((field_index & 1) != 0);
-		}
-		else if (field_order == FieldOrder_TFF)
-		{
-			top_flag = ((field_index & 1) == 0);
-		}
-
-		// Else, assumes auto-detection. If it cannot be detected,
-		// assumes simple frames.
-		else if (src_prop_ptr == 0)
-		{
-			itl_flag = false;
-		}
-		else if (itl_flag)
-		{
-			int            err = 0;
-			const int      field =
-				int (_vsapi.propGetInt (src_prop_ptr, "_Field", 0, &err));
-			if (err == 0)
-			{
-				top_flag = (field != 0);
-			}
-#if ! defined (FMTC_RESAMPLE_OLD_FIELDBASED_BEHAVIOUR)
-			else if (field_based == 1 || field_based == 2)
-			{
-				top_flag = ((field_index & 1) == (field_based - 1));
-			}
-#endif
-			else
-			{
-				// Or should we emit an error?
-				itl_flag = false;
-			}
-		}
-	}
 }
 
 
@@ -813,8 +744,8 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, voi
 	uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
 	const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
 
-	const FrameInfo & frame_info =
-		*reinterpret_cast <const FrameInfo *> (frame_data_ptr);
+	const Ru::FrameInfo& frame_info =
+		*reinterpret_cast <const Ru::FrameInfo *> (frame_data_ptr);
 	const fmtcl::InterlacingType  itl_s = fmtcl::InterlacingType_get (
 		frame_info._itl_s_flag, frame_info._top_s_flag
 	);
@@ -884,7 +815,7 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, voi
 	const int      h = std::min (src_h, dst_h);
 
 	// Copied from fmtcl::FilterResize::process_plane_bypass()
-	fmtcl::BitBltConv::ScaleInfo *   scale_info_ptr = 0;
+	fmtcl::BitBltConv::ScaleInfo *   scale_info_ptr = nullptr;
 	fmtcl::BitBltConv::ScaleInfo     scale_info;
 	const bool     dst_flt_flag = (_dst_type == fmtcl::SplFmt_FLOAT);
 	const bool     src_flt_flag = (_src_type == fmtcl::SplFmt_FLOAT);
@@ -899,8 +830,8 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, voi
 
 	fmtcl::BitBltConv blitter (_sse2_flag, _avx2_flag);
 	blitter.bitblt (
-		_dst_type, _dst_res, data_dst_ptr, 0, stride_dst,
-		_src_type, _src_res, data_src_ptr, 0, stride_src,
+		_dst_type, _dst_res, data_dst_ptr, nullptr, stride_dst,
+		_src_type, _src_res, data_src_ptr, nullptr, stride_src,
 		w, h, scale_info_ptr
 	);
 
@@ -923,7 +854,7 @@ fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, 
 	std::lock_guard <std::mutex>  autolock (_filter_mutex);
 
 	std::unique_ptr <fmtcl::FilterResize> &   filter_uptr = _filter_uptr_map [key];
-	if (filter_uptr.get () == 0)
+	if (filter_uptr.get () == nullptr)
 	{
 		filter_uptr = std::make_unique <fmtcl::FilterResize> (
 			key,
@@ -953,7 +884,7 @@ void	Resample::create_all_plane_specs ()
 	for (int plane_index = 0; plane_index < nbr_planes; ++plane_index)
 	{
 		auto &         plane_data = _plane_data_arr [plane_index];
-		fmtcl::ResampleUtil::create_plane_specs (
+		Ru::create_plane_specs (
 			plane_data, plane_index,
 			src_cf, _src_width   , src_ss_h, _src_height   , src_ss_v, _cplace_s,
 			dst_cf, _vi_out.width, dst_ss_h, _vi_out.height, dst_ss_v, _cplace_d

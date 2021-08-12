@@ -36,9 +36,10 @@ namespace fmtcl
 
 enum ChromaPlacement
 {
-	ChromaPlacement_UNDEF = -1,
+	ChromaPlacement_INVALID = -2,
+	ChromaPlacement_UNDEF   = -1,
 
-	ChromaPlacement_MPEG1 = 0,
+	ChromaPlacement_MPEG1   = 0,
 	ChromaPlacement_MPEG2,
 	ChromaPlacement_DV,
 

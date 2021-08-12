@@ -31,8 +31,12 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/ResamplePlaneData.h"
 #include "fmtcl/ResampleSpecPlane.h"
 #include "fmtcl/ResampleUtil.h"
+#include "fstb/fnc.h"
+
+#include <array>
 
 #include <cassert>
+#include <cctype>
 
 
 
@@ -42,6 +46,94 @@ namespace fmtcl
 
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr int	ResampleUtil::_max_nbr_taps;
+
+
+
+ChromaPlacement	ResampleUtil::conv_str_to_chroma_placement (std::string cplace)
+{
+	ChromaPlacement   cp_val = ChromaPlacement_INVALID;
+
+	fstb::conv_to_lower_case (cplace);
+	if (cplace == "mpeg1")
+	{
+		cp_val = ChromaPlacement_MPEG1;
+	}
+	else if (cplace == "mpeg2")
+	{
+		cp_val = ChromaPlacement_MPEG2;
+	}
+	else if (cplace == "dv")
+	{
+		cp_val = ChromaPlacement_DV;
+	}
+
+	return cp_val;
+}
+
+
+
+int	ResampleUtil::conv_str_to_chroma_subspl (int &ssh, int &ssv, std::string css)
+{
+	assert (! css.empty ());
+
+	int            ret_val = 0;
+
+	fstb::conv_to_lower_case (css);
+
+	if (     css == "444" || css == "4:4:4")
+	{
+		ssh = 0;
+		ssv = 0;
+	}
+	else if (css == "422" || css == "4:2:2")
+	{
+		ssh = 1;
+		ssv = 0;
+	}
+	else if (css == "420" || css == "4:2:0")
+	{
+		ssh = 1;
+		ssv = 1;
+	}
+	else if (css == "411" || css == "4:1:1")
+	{
+		ssh = 2;
+		ssv = 0;
+	}
+	else if (css.length () == 2 && isdigit (css [0]) && isdigit (css [1]))
+	{
+		const int      ssh2  = css [0] - '0';
+		const int      ssv2  = css [1] - '0';
+		constexpr int  nbr_d = 10;
+		constexpr std::array <int, nbr_d> log2table {
+			-1, 0, 1, -1, 2, -1, -1, -1, 3, -1
+		};
+		if (   ssh2 < 0 || ssh2 >= nbr_d
+		    || ssv2 < 0 || ssv2 >= nbr_d)
+		{
+			ret_val = -2;
+		}
+		else
+		{
+			ssh = log2table [ssh2];
+			ssv = log2table [ssv2];
+			if (ssh < 0 || ssv < 0)
+			{
+				ret_val = -3;
+			}
+		}
+	}
+	else
+	{
+		ret_val = -1;
+	}
+
+	return ret_val;
+}
 
 
 
@@ -109,6 +201,65 @@ void	ResampleUtil::create_plane_specs (ResamplePlaneData &plane_data, int plane_
 			plane_data._spec_arr [itl_d] [itl_s] = spec;
 		}  // for itl_s
 	}  // for itl_d
+}
+
+
+
+void	ResampleUtil::get_interlacing_param (bool &itl_flag, bool &top_flag, int field_index, InterlacingParam interlaced, FieldOrder field_order, FieldBased prop_fieldbased, Field prop_field, bool old_behaviour_flag)
+{
+	assert (interlaced >= 0);
+	assert (interlaced < InterlacingParam_NBR_ELT);
+	assert (field_order >= 0);
+	assert (field_order < FieldOrder_NBR_ELT);
+
+	// Default: assumes interlaced only if explicitely specified.
+	itl_flag = (interlaced == InterlacingParam_FIELDS);
+	top_flag = true;
+
+	// Fields specified or automatic
+	if (interlaced != InterlacingParam_FRAMES)
+	{
+		if (prop_fieldbased >= 0)
+		{
+			itl_flag = (itl_flag || prop_fieldbased != FieldBased_FRAMES);
+		}
+
+		// Now finds the field order. First check explicit parameters.
+		if (field_order == FieldOrder_BFF)
+		{
+			top_flag = ((field_index & 1) != 0);
+		}
+		else if (field_order == FieldOrder_TFF)
+		{
+			top_flag = ((field_index & 1) == 0);
+		}
+
+		// Else, assumes auto-detection. If it cannot be detected,
+		// assumes simple frames.
+		else if (prop_fieldbased < 0 && prop_field < 0)
+		{
+			itl_flag = false;
+		}
+		else if (itl_flag)
+		{
+			if (prop_field >= 0)
+			{
+				top_flag = (prop_field != Field_BOT);
+			}
+			else if (   ! old_behaviour_flag
+			         && (   prop_fieldbased == FieldBased_BFF
+			             || prop_fieldbased == FieldBased_TFF))
+			{
+				top_flag =
+				   (((field_index & 1) == 0) == (prop_fieldbased == FieldBased_TFF));
+			}
+			else
+			{
+				// Or should we emit an error?
+				itl_flag = false;
+			}
+		}
+	}
 }
 
 
