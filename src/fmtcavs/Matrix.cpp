@@ -203,7 +203,7 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 
 	// Custom coefficients
 	const auto     coef_list =
-		fmtcl::conv_str_to_float_arr (args [Param_COEF].AsString (""));
+		extract_array (env, args [Param_COEF], fmtcavs_MATRIX ", coef");
 	const int      nbr_coef        = int (coef_list.size ());
 	const bool     custom_mat_flag = (nbr_coef > 0);
 	const int      nbr_proc_planes_src = fmt_src.get_nbr_comp_non_alpha ();

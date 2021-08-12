@@ -230,7 +230,7 @@ bool	Primaries::read_coord_tuple (fmtcl::RgbSystem::Vec2 &c, ::IScriptEnvironmen
 {
 	bool           set_flag = false;
 
-	auto           c_v = fmtcl::conv_str_to_float_arr (args [p].AsString (""));
+	auto           c_v = extract_array (env, args [p], fmtcavs_PRIMARIES);
 	if (! c_v.empty ())
 	{
 		if (c_v.size () != c.size ())

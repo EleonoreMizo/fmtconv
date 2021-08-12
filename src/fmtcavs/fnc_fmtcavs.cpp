@@ -225,6 +225,48 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFra
 
 
 
+std::vector <double>	extract_array (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+{
+	std::vector <double> val_arr;
+
+	if (arg.Defined ())
+	{
+		if (arg.IsString ())
+		{
+			val_arr = fmtcl::conv_str_to_float_arr (arg.AsString (""));
+		}
+
+		else if (arg.IsArray ())
+		{
+			const int      sz = arg.ArraySize ();
+			for (int k = 0; k < sz; ++k)
+			{
+				const ::AVSValue &   elt = arg [k];
+				if (! elt.IsFloat ())
+				{
+					env.ThrowError (
+						"%s: element %d (base 0) should be a float.",
+						filter_and_arg_0, k
+					);
+				}
+				val_arr.push_back (elt.AsFloat (0));
+			}
+		}
+
+		else
+		{
+			env.ThrowError (
+				"%s: unexpected type. Should be a string or an array of float.",
+				filter_and_arg_0
+			);
+		}
+	}
+
+	return val_arr;
+}
+
+
+
 }  // namespace fmtcavs
 
 

@@ -30,9 +30,11 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/SplFmt.h"
 
 #include <string>
+#include <vector>
 
 
 
+class AVSValue;
 class IScriptEnvironment;
 class PVideoFrame;
 struct VideoInfo;
@@ -60,6 +62,7 @@ fmtcl::ColorFamily	conv_vi_to_colfam (const ::VideoInfo &vi);
 fmtcl::ColorFamily	conv_str_to_colfam (std::string str);
 void	prepare_matrix_coef (::IScriptEnvironment &env, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const FmtAvs &fmt_dst, bool full_range_dst_flag, const FmtAvs &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out, int plane_out);
 fmtcl::ProcComp3Arg build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFrame &dst_sptr, const ::VideoInfo &vi_src, const ::PVideoFrame &src_sptr, bool single_plane_flag = false);
+std::vector <double> extract_array (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0);
 
 }  // namespace fmtcavs
 
