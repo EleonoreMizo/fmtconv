@@ -45,6 +45,10 @@ namespace fmtcavs
 
 
 
+constexpr int	FmtAvs::_max_css;
+
+
+
 FmtAvs::FmtAvs (std::string fmt_str)
 {
 	if (conv_from_str (fmt_str) != 0)
@@ -365,6 +369,8 @@ int	FmtAvs::conv_to_vi (VideoInfo &vi) const
 
 
 
+// Makes sure all the field are initialised, but doesn't guarantee
+// that it corresponds to a valid avisynth colorspace.
 bool	FmtAvs::is_valid () const noexcept
 {
 	return (
@@ -439,11 +445,31 @@ bool	FmtAvs::has_alpha () const noexcept
 
 
 
+void	FmtAvs::set_subspl_h (int ss) noexcept
+{
+	assert (ss >= 0);
+	assert (ss <= _max_css);
+
+	_subspl_h = ss;
+}
+
+
+
 int	FmtAvs::get_subspl_h () const noexcept
 {
 	assert (is_valid ());
 
 	return _subspl_h;
+}
+
+
+
+void	FmtAvs::set_subspl_v (int ss) noexcept
+{
+	assert (ss >= 0);
+	assert (ss <= _max_css);
+
+	_subspl_v = ss;
 }
 
 
