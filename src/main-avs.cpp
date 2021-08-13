@@ -46,7 +46,7 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 	);
 	env_ptr->AddFunction (fmtcavs_MATRIX,
 		"c"          "[mat]s"   "[mats]s"      "[matd]s"    // 0
-		"[fulls]b"   "[fulld]b" "[coef]s"      "[csp]s"     // 4
+		"[fulls]b"   "[fulld]b" "[coef]."      "[csp]s"     // 4
 		"[col_fam]s" "[bits]i"  "[singleout]i" "[cpuopt]i", // 8
 		&main_avs_create <fmtcavs::Matrix>, nullptr
 	);
@@ -56,9 +56,9 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		&main_avs_create <fmtcavs::Matrix2020CL>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_PRIMARIES,
-		"c"     "[rs]s"    "[gs]s"    "[bs]s"      // 0
-		"[ws]s" "[rd]s"    "[gd]s"    "[bd]s"      // 4
-		"[wd]s" "[prims]s" "[primd]s" "[cpuopt]i", // 8
+		"c"     "[rs]."    "[gs]."    "[bs]."      // 0
+		"[ws]." "[rd]."    "[gd]."    "[bd]."      // 4
+		"[wd]." "[prims]s" "[primd]s" "[cpuopt]i", // 8
 		&main_avs_create <fmtcavs::Primaries>, nullptr
 	);
 
