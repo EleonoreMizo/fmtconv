@@ -187,6 +187,20 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 		nullptr
 	);
 
+	// Frame properties
+	if (supports_props ())
+	{
+		::AVSMap *     props_ptr = env_ptr->getFramePropsRW (dst_sptr);
+
+		if (_range_def_flag)
+		{
+			const int      cr_val = (_fulld_flag) ? 0 : 1;
+			env_ptr->propSetInt (
+				props_ptr, "_ColorRange", cr_val, ::PROPAPPENDMODE_REPLACE
+			);
+		}
+	}
+
 	return dst_sptr;
 }
 
@@ -220,18 +234,6 @@ void	Bitdepth::do_process_plane (::PVideoFrame &dst_sptr, int n, ::IScriptEnviro
 	catch (...)
 	{
 		assert (false);
-	}
-
-	// Frame properties
-	if (supports_props ())
-	{
-		::AVSMap *     props_ptr = env.getFramePropsRW (dst_sptr);
-
-		if (_range_def_flag)
-		{
-			const int      cr_val = (_fulld_flag) ? 0 : 1;
-			env.propSetInt (props_ptr, "_ColorRange", cr_val, ::PROPAPPENDMODE_REPLACE);
-		}
 	}
 }
 
