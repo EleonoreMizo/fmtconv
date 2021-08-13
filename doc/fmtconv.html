@@ -1047,53 +1047,61 @@ Possible values are:</p>
 <h3><a id="resample"></a>resample</h3>
 
 <pre class="proto">fmtc.resample (
-	clip      : clip        ;
-	w         : int    : opt;
-	h         : int    : opt;
-	sx        : float[]: opt; (0)
-	sy        : float[]: opt; (0)
-	sw        : float[]: opt; (0)
-	sh        : float[]: opt; (0)
-	scale     : float  : opt; (0)
-	scaleh    : float  : opt; (0)
-	scalev    : float  : opt; (0)
-	kernel    : data[] : opt; ("spline36")
-	kernelh   : data[] : opt; (kernel)
-	kernelv   : data[] : opt; (kernel)
-	impulse   : float[]: opt;
-	impulseh  : float[]: opt; (impulse)
-	impulsev  : float[]: opt; (impulse)
-	taps      : int[]  : opt; (4)
-	tapsh     : int[]  : opt; (taps)
-	tapsv     : int[]  : opt; (taps)
-	a1        : float[]: opt;
-	a2        : float[]: opt;
-	a3        : float[]: opt;
-	kovrspl   : int[]  : opt; (1)
-	fh        : float[]: opt; (1)
-	fv        : float[]: opt; (1)
-	cnorm     : int[]  : opt; (True)
-	totalh    : float[]: opt; (0)
-	totalv    : float[]: opt; (0)
-	invks     : int[]  : opt; (False)
-	invksh    : int[]  : opt; (invks)
-	invksv    : int[]  : opt; (invks)
-	invkstaps : int[]  : opt; (4)
-	invkstapsh: int[]  : opt; (invkstaps)
-	invkstapsv: int[]  : opt; (invkstaps)
-	csp       : int    : opt;
-	css       : data   : opt;
-	planes    : float[]: opt; (all)
-	fulls     : int    : opt; (depends on the colorspace)
-	fulld     : int    : opt; (fulls)
-	center    : int[]  : opt; (True)
-	cplace    : data   : opt; ("mpeg2")
-	cplaces   : data   : opt; (cplace)
-	cplaced   : data   : opt; (cplace)
-	interlaced: int    : opt; (2)
-	tff       : int    : opt; (2)
-	flt       : int    : opt; (False)
-	cpuopt    : int    : opt; (-1)
+	clip       : clip        ;
+	w          : int    : opt;
+	h          : int    : opt;
+	sx         : float[]: opt; (0)
+	sy         : float[]: opt; (0)
+	sw         : float[]: opt; (0)
+	sh         : float[]: opt; (0)
+	scale      : float  : opt; (0)
+	scaleh     : float  : opt; (0)
+	scalev     : float  : opt; (0)
+	kernel     : data[] : opt; ("spline36")
+	kernelh    : data[] : opt; (kernel)
+	kernelv    : data[] : opt; (kernel)
+	impulse    : float[]: opt;
+	impulseh   : float[]: opt; (impulse)
+	impulsev   : float[]: opt; (impulse)
+	taps       : int[]  : opt; (4)
+	tapsh      : int[]  : opt; (taps)
+	tapsv      : int[]  : opt; (taps)
+	a1         : float[]: opt;
+	a2         : float[]: opt;
+	a3         : float[]: opt;
+	a1h        : float[]: opt; (a1)
+	a2h        : float[]: opt; (a2)
+	a3h        : float[]: opt; (a3)
+	a1v        : float[]: opt; (a1)
+	a2v        : float[]: opt; (a2)
+	a3v        : float[]: opt; (a3)
+	kovrspl    : int[]  : opt; (1)
+	fh         : float[]: opt; (1)
+	fv         : float[]: opt; (1)
+	cnorm      : int[]  : opt; (True)
+	totalh     : float[]: opt; (0)
+	totalv     : float[]: opt; (0)
+	invks      : int[]  : opt; (False)
+	invksh     : int[]  : opt; (invks)
+	invksv     : int[]  : opt; (invks)
+	invkstaps  : int[]  : opt; (4)
+	invkstapsh : int[]  : opt; (invkstaps)
+	invkstapsv : int[]  : opt; (invkstaps)
+	csp        : int    : opt;
+	css        : data   : opt;
+	planes     : float[]: opt; (all)
+	fulls      : int    : opt; (depends)
+	fulld      : int    : opt; (fulls)
+	center     : int[]  : opt; (True)
+	cplace     : data   : opt; ("mpeg2")
+	cplaces    : data   : opt; (cplace)
+	cplaced    : data   : opt; (cplace)
+	interlaced : int    : opt; (2)
+	interlacedd: int    : opt; (interlaced)
+	tff        : int    : opt; (2)
+	tffd       : int    : opt; (tff)
+	flt        : int    : opt; (False)
+	cpuopt     : int    : opt; (-1)
 )</pre>
 
 <p>Resizes the planes of a clip.
@@ -1235,7 +1243,7 @@ of downscaling, the actual number of sample points may be greater than the
 specified value.
 Range: 1&ndash;128</p>
 
-<p class="var">a1, a2, a3</p>
+<p class="var">a1, a2, a3,&emsp;a1h, a2h, a3h,&emsp;a1v, a2v, a3v</p>
 <p>Specific parameters, depending on the selected kernel.</p>
 
 <p class="var">kovrspl</p>
