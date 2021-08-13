@@ -196,6 +196,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\ErrDifBufFactory.h" />
     <ClInclude Include="..\..\..\src\fmtcl\FilterResize.h" />
     <ClInclude Include="..\..\..\src\fmtcl\fnc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\fnc.hpp" />
     <ClInclude Include="..\..\..\src\fmtcl\InterlacingType.h" />
     <ClInclude Include="..\..\..\src\fmtcl\KernelData.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Mat3.h" />

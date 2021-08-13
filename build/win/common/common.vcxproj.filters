@@ -650,6 +650,9 @@
     <ClInclude Include="..\..\..\src\fmtcl\ProcComp3Arg.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\fnc.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="conc">
