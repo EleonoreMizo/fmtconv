@@ -115,8 +115,6 @@ private:
 	int            _src_res    = 0;
 	fmtcl::SplFmt  _dst_type   = fmtcl::SplFmt_ILLEGAL;
 	int            _dst_res    = 0;
-	double         _norm_val_h = 0;
-	double         _norm_val_v = 0;
 	Ru::InterlacingParam
 	               _interlaced_src  = Ru::InterlacingParam_INVALID;
 	Ru::InterlacingParam

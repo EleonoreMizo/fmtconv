@@ -74,6 +74,8 @@ public:
 	KernelArray    _kernel_arr;
 	double         _kernel_scale_h = 1;  // Can be negative (forced scaling)
 	double         _kernel_scale_v = 1;  // Can be negative (forced scaling)
+	double         _norm_val_h     = 0;  // > 0, 0 = kernel default
+	double         _norm_val_v     = 0;  // > 0, 0 = kernel default
 	double         _gain           = 1;
 	double         _add_cst        = 0;
 	bool           _preserve_center_flag = true;

@@ -355,8 +355,8 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		const double   a1_v           = get_arg_flt (in, out, "a1v", a1, -plane_index, &a1_v_flag);
 		const double   a2_v           = get_arg_flt (in, out, "a2v", a2, -plane_index, &a2_v_flag);
 		const double   a3_v           = get_arg_flt (in, out, "a3v", a3, -plane_index, &a3_v_flag);
-		const double   kernel_total_h = get_arg_flt (in, out, "totalh", 0.0, -plane_index);
-		const double   kernel_total_v = get_arg_flt (in, out, "totalv", 0.0, -plane_index);
+		plane_data._norm_val_h        = get_arg_flt (in, out, "totalh", 0.0, -plane_index);
+		plane_data._norm_val_v        = get_arg_flt (in, out, "totalv", 0.0, -plane_index);
 		const bool     invks_flag     = (get_arg_int (in, out, "invks", 0, -plane_index) != 0);
 		const bool     invks_h_flag   = cumulate_flag (invks_flag, in, out, "invksh", -plane_index);
 		const bool     invks_v_flag   = cumulate_flag (invks_flag, in, out, "invksv", -plane_index);
@@ -387,11 +387,11 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		{
 			throw_inval_arg ("taps* must be in the 1-128 range.");
 		}
-		if (kernel_total_h < 0)
+		if (plane_data._norm_val_h < 0)
 		{
 			throw_inval_arg ("totalh must be positive or null.");
 		}
-		if (kernel_total_v < 0)
+		if (plane_data._norm_val_v < 0)
 		{
 			throw_inval_arg ("totalv must be positive or null.");
 		}
@@ -860,7 +860,7 @@ fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, 
 			key,
 			*(plane_data._kernel_arr [fmtcl::FilterResize::Dir_H]._k_uptr),
 			*(plane_data._kernel_arr [fmtcl::FilterResize::Dir_V]._k_uptr),
-			_norm_flag, _norm_val_h, _norm_val_v,
+			_norm_flag, plane_data._norm_val_h, plane_data._norm_val_v,
 			plane_data._gain,
 			_src_type, _src_res, _dst_type, _dst_res,
 			_int_flag, _sse2_flag, _avx2_flag
