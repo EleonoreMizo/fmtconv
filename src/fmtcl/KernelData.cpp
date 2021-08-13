@@ -70,7 +70,7 @@ uint32_t	KernelData::get_hash () const
 
 
 
-void	KernelData::create_kernel (std::string kernel_fnc, std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl, bool inv_flag, int inv_taps)
+void	KernelData::create_kernel (std::string kernel_fnc, const std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl, bool inv_flag, int inv_taps)
 {
 	hash_reset ();
 	create_kernel_base (kernel_fnc, coef_arr, taps, a1_flag, a1, a2_flag, a2, a3_flag, a3, kovrspl);
@@ -92,7 +92,7 @@ void	KernelData::create_kernel (std::string kernel_fnc, std::vector <double> &co
 
 
 
-void	KernelData::create_kernel_base (std::string kernel_fnc, std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl)
+void	KernelData::create_kernel_base (std::string kernel_fnc, std::vector <double> coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl)
 {
 	fstb::unused (a3, a3_flag);
 
@@ -204,7 +204,7 @@ void	KernelData::create_kernel_base (std::string kernel_fnc, std::vector <double
 			{
 				throw std::runtime_error ("impulse coefficients missing.");
 			}
-			coef_arr = conv_str_to_float_arr (kernel_fnc.substr (name_end));
+			coef_arr = conv_str_to_arr <double> (kernel_fnc.substr (name_end));
 		}
 		const size_t   sz = coef_arr.size ();
 		if (sz == 0)

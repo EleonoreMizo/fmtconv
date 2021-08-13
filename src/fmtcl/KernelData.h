@@ -57,7 +57,7 @@ public:
 
    uint32_t       get_hash () const;
 
-	void           create_kernel (std::string kernel_fnc, std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl, bool inv_flag, int inv_taps);
+	void           create_kernel (std::string kernel_fnc, const std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl, bool inv_flag, int inv_taps);
 	std::unique_ptr <ContFirInterface>
 	               _k_uptr;
 	std::unique_ptr <DiscreteFirInterface>
@@ -95,7 +95,7 @@ private:
 		KType_NBR_ELT
 	};
 
-	void           create_kernel_base (std::string kernel_fnc, std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl);
+	void           create_kernel_base (std::string kernel_fnc, std::vector <double> coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl);
 	void           invert_kernel (int taps);
 
 	void           hash_reset ();

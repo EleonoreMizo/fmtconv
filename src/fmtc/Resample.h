@@ -97,8 +97,8 @@ private:
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
 	bool           cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const char name_0 [], int pos = 0) const;
-	int            process_plane_proc (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr);
-	int            process_plane_copy (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr);
+	int            process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr, const Ru::FrameInfo &frame_info);
+	int            process_plane_copy (::VSFrameRef &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr);
 	fmtcl::FilterResize *
 	               create_or_access_plane_filter (int plane_index, fmtcl::InterlacingType itl_d, fmtcl::InterlacingType itl_s);
 	void           create_all_plane_specs ();
@@ -129,9 +129,9 @@ private:
 	bool           _full_range_out_flag = false;
 	bool           _cplace_d_set_flag   = false;
 	fmtcl::ChromaPlacement
-	               _cplace_s   = fmtcl::ChromaPlacement_INVALID;
+	               _cplace_s   = fmtcl::ChromaPlacement_MPEG2;
 	fmtcl::ChromaPlacement
-	               _cplace_d   = fmtcl::ChromaPlacement_INVALID;
+	               _cplace_d   = fmtcl::ChromaPlacement_MPEG2;
 
 	bool           _sse2_flag  = false;
 	bool           _avx2_flag  = false;

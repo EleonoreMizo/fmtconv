@@ -75,8 +75,6 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	))
 ,	_int_flag (get_arg_int (in, out, "flt", 0) == 0)
 ,	_norm_flag (get_arg_int (in, out, "cnorm", 1) != 0)
-,	_cplace_s (fmtcl::ChromaPlacement_MPEG2)
-,	_cplace_d (fmtcl::ChromaPlacement_MPEG2)
 #if defined (_MSC_VER)
 #pragma warning (push)
 #pragma warning (disable : 4355)
@@ -261,6 +259,15 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		*this, get_arg_str (in, out, "cplaced", cplace_str, 0, &_cplace_d_set_flag)
 	);
 
+	// Could be per-plane, but it would be more complicated to use with the
+	// Vapoursynth interface
+	const std::vector <double> impulse   =
+		get_arg_vflt (in, out, "impulse" , { });
+	const std::vector <double> impulse_h =
+		get_arg_vflt (in, out, "impulseh", impulse);
+	const std::vector <double> impulse_v =
+		get_arg_vflt (in, out, "impulsev", impulse);
+
 	// Per-plane parameters
 	const int      nbr_sx = _vsapi.propNumElements (&in, "sx");
 	const int      nbr_sy = _vsapi.propNumElements (&in, "sy");
@@ -333,12 +340,6 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		std::string    kernel_fnc     = get_arg_str (in, out, "kernel", "spline36", -plane_index);
 		std::string    kernel_fnc_h   = get_arg_str (in, out, "kernelh", ""       , -plane_index);
 		std::string    kernel_fnc_v   = get_arg_str (in, out, "kernelv", ""       , -plane_index);
-		std::vector <double> impulse  =
-			get_arg_vflt (in, out, "impulse", std::vector <double> ());
-		std::vector <double> impulse_h =
-			get_arg_vflt (in, out, "impulseh", impulse);
-		std::vector <double> impulse_v =
-			get_arg_vflt (in, out, "impulsev", impulse);
 		const int      kovrspl        = get_arg_int (in, out, "kovrspl", 0   , -plane_index);
 		const int      taps           = get_arg_int (in, out, "taps"   , 4   , -plane_index);
 		const int      taps_h         = get_arg_int (in, out, "tapsh"  , taps, -plane_index);
@@ -471,15 +472,15 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 		if (src_prop_ptr != nullptr)
 		{
 			int            err      = 0;
-			int            prop_val = -1;
-			prop_val = int (_vsapi.propGetInt (src_prop_ptr, "_FieldBased", 0, &err));
+			int64_t        prop_val = -1;
+			prop_val = _vsapi.propGetInt (src_prop_ptr, "_FieldBased", 0, &err);
 			prop_fieldbased =
 				  (err      != 0) ? Ru::FieldBased_INVALID
 				: (prop_val == 0) ? Ru::FieldBased_FRAMES
 				: (prop_val == 1) ? Ru::FieldBased_BFF
 				: (prop_val == 2) ? Ru::FieldBased_TFF
 				:                   Ru::FieldBased_INVALID;
-			prop_val = int (_vsapi.propGetInt (src_prop_ptr, "_Field", 0, &err));
+			prop_val = _vsapi.propGetInt (src_prop_ptr, "_Field", 0, &err);
 			prop_field =
 				  (err      != 0) ? Ru::Field_INVALID
 				: (prop_val == 0) ? Ru::Field_BOT
@@ -612,7 +613,7 @@ void	Resample::conv_str_to_chroma_subspl (const vsutl::FilterBase &flt, int &ssh
 
 int	Resample::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
 {
-	fstb::unused (src_node2_sptr, src_node3_sptr);
+	fstb::unused (core, src_node2_sptr, src_node3_sptr);
 	assert (src_node1_sptr.get () != nullptr);
 	assert (frame_data_ptr != nullptr);
 
@@ -623,8 +624,10 @@ int	Resample::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 
 	if (proc_mode == vsutl::PlaneProcMode_PROCESS)
 	{
+		const Ru::FrameInfo &   frame_info =
+			*reinterpret_cast <const Ru::FrameInfo *> (frame_data_ptr);
 		process_plane_proc (
-			dst, n, plane_index, frame_data_ptr, frame_ctx, core, src_node1_sptr
+			dst, n, plane_index, frame_ctx, src_node1_sptr, frame_info
 		);
 	}
 
@@ -632,7 +635,7 @@ int	Resample::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 	else if (proc_mode == vsutl::PlaneProcMode_COPY1)
 	{
 		process_plane_copy (
-			dst, n, plane_index, frame_data_ptr, frame_ctx, core, src_node1_sptr
+			dst, n, plane_index, frame_ctx, src_node1_sptr
 		);
 	}
 
@@ -727,10 +730,8 @@ bool	Resample::cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const 
 
 
 
-int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr)
+int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr, const Ru::FrameInfo &frame_info)
 {
-	fstb::unused (core);
-
 	int            ret_val = 0;
 
 	vsutl::FrameRefSPtr	src_sptr (
@@ -744,8 +745,6 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, voi
 	uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
 	const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
 
-	const Ru::FrameInfo& frame_info =
-		*reinterpret_cast <const Ru::FrameInfo *> (frame_data_ptr);
 	const fmtcl::InterlacingType  itl_s = fmtcl::InterlacingType_get (
 		frame_info._itl_s_flag, frame_info._top_s_flag
 	);
@@ -789,10 +788,8 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, voi
 
 
 
-int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr)
+int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr)
 {
-	fstb::unused (frame_data_ptr, core);
-
 	int            ret_val = 0;
 
 	vsutl::FrameRefSPtr	src_sptr (
@@ -843,6 +840,7 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, voi
 fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, fmtcl::InterlacingType itl_d, fmtcl::InterlacingType itl_s)
 {
 	assert (plane_index >= 0);
+	assert (plane_index < _max_nbr_planes);
 	assert (itl_d >= 0);
 	assert (itl_d < fmtcl::InterlacingType_NBR_ELT);
 	assert (itl_s >= 0);
