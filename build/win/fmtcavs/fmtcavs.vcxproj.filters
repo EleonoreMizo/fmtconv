@@ -91,6 +91,9 @@
     <ClInclude Include="..\..\..\src\fmtcavs\Primaries.h">
       <Filter>fmtcavs</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Resample.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main-avs.cpp" />
@@ -131,6 +134,9 @@
       <Filter>fmtcavs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\fmtcavs\Primaries.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Resample.cpp">
       <Filter>fmtcavs</Filter>
     </ClCompile>
   </ItemGroup>

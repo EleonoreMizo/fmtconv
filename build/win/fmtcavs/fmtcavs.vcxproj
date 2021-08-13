@@ -154,6 +154,7 @@
     <ClInclude Include="..\..\..\src\fmtcavs\Matrix2020CL.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\Primaries.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\ProcAlpha.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Resample.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\avsutl\CsPlane.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="..\..\..\src\fmtcavs\Matrix2020CL.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\Primaries.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\ProcAlpha.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Resample.cpp" />
     <ClCompile Include="..\..\..\src\main-avs.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

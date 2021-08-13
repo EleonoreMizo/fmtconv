@@ -1046,7 +1046,9 @@ Possible values are:</p>
 
 <h3><a id="resample"></a>resample</h3>
 
-<pre class="proto">fmtc.resample (
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.resample (
 	clip       : clip        ;
 	w          : int    : opt;
 	h          : int    : opt;
@@ -1089,7 +1091,7 @@ Possible values are:</p>
 	invkstapsv : int[]  : opt; (invkstaps)
 	csp        : int    : opt;
 	css        : data   : opt;
-	planes     : float[]: opt; (all)
+	planes     : float[]: opt; (3)
 	fulls      : int    : opt; (depends)
 	fulld      : int    : opt; (fulls)
 	center     : int[]  : opt; (True)
@@ -1102,7 +1104,66 @@ Possible values are:</p>
 	tffd       : int    : opt; (tff)
 	flt        : int    : opt; (False)
 	cpuopt     : int    : opt; (-1)
-)</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_resample (
+	clip   c,
+	int    w (undefined),
+	int    h (undefined),
+	arrayf sx (0),
+	arrayf sy (0),
+	arrayf sw (0),
+	arrayf sh (0),
+	float  scale  (0),
+	float  scaleh (0),
+	float  scalev (0),
+	string kernel  ("spline36"),
+	string kernelh (kernel),
+	string kernelv (kernel),
+	arrayf impulse  (undefined),
+	arrayf impulseh (impulse),
+	arrayf impulsev (impulse),
+	arrayi taps (4),
+	arrayi tapsh (taps),
+	arrayi tapsv (taps),
+	arrayf a1 (undefined),
+	arrayf a2 (undefined),
+	arrayf a3 (undefined),
+	arrayf a1h (a1),
+	arrayf a2h (a2),
+	arrayf a3h (a3),
+	arrayf a1v (a1),
+	arrayf a2v (a2),
+	arrayf a3v (a3),
+	int    kovrspl (1),
+	arrayf fh (1),
+	arrayf fv (1),
+	bool   cnorm (true),
+	array  totalh (0),
+	array  totalv (0),
+	arrayb invks  (false),
+	arrayb invksh (invks),
+	arrayb invksv (invks),
+	arrayi invkstaps  (4),
+	arrayi invkstapsh (invkstaps),
+	arrayi invkstapsv (invkstaps),
+	int    csp (undefined),
+	string css (undefined),
+	arrayf planes (3),
+	int    fulls (depends),
+	int    fulld (fulls),
+	arrayb center (true),
+	string cplace  ("mpeg2"),
+	string cplaces (cplace),
+	string cplaced (cplace),
+	int    interlaced (2),
+	int    interlacedd (interlaced),
+	int    tff (2),
+	int    tffd (ttf),
+	bool   flt (false),
+	int    cpuopt (-1)
+)</pre></td>
+</tr>
+</table>
 
 <p>Resizes the planes of a clip.
 This function can change the chroma subsampling.</p>
@@ -1132,6 +1193,8 @@ When specifying less than 3 values, the last specified value will be reused
 for the next planes.
 However <var>planes</var> works slightly differently, check the related
 paragraph for details.</p>
+<p><span class="host">Avisynth+</span> Arrays can be specified as values
+printed in a string and separated with spaces.</p>
 
 <p>Note: field resizing is not always the best way to handle interlaced content,
 especially for upscales.
@@ -1305,12 +1368,16 @@ Use it as a tradeof between softness and ringing.
 Range: 1&ndash;128</p>
 
 <p class="var">csp</p>
-<p>The destination format, as Vapoursynth constant.
-Can only change the bitdepth and the data type (integer or float).
+<p>Can only change the bitdepth and the data type (integer or float).
 Only 16-bit integer (xxxP16) and 32-bit float data types are allowed.</p>
+<p><span class="host">Vapoursynth</span> The format is a Vapoursynth
+built-in constant.</p>
+<p><span class="host">Avisynth+</span> The format is a string with the
+same kind of content as the result from <code>BuildPixelType</code> or the
+<var>pixel_type</var> parameter from <code>BlankClip</code>.</p>
 
 <p class="var">css</p>
-<p>Destination chroma subsampling, for YUV and YCgCo colorspaces.
+<p>Destination chroma subsampling, for YUV (and YCgCo) colorspaces.
 Supersedes the chroma subsampling from <var>csp</var>.
 You can also specify the subsampling with the predefined values
 or with a two-digit string.
@@ -1335,7 +1402,7 @@ in Masktools 2.</p>
 <table>
 <tr><td><b>&minus;65535</b><br />to <b>&plus;0.5</b></td><td>All the pixels of the plane will be set to &minus;x (the opposite of the specified value). The range depends on the output data type. Remember, in floating-point YUV, the chroma planes range from &minus;0.5 to &plus;0.5.</td></tr>
 <tr><td><b>1</b></td><td>The plane will not be processed. This means that the content of the output plane is pure garbage.</td></tr>
-<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Areas out of the input picture are left unprocessed. Range (full or TV) conversions are ignored.</td></tr>
+<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Areas out of the input picture are left unprocessed (garbage). Range (full or TV) conversions are ignored.</td></tr>
 <tr><td><b>3</b></td><td>The plane will be processed.</td></tr>
 </table>
 
@@ -1356,8 +1423,8 @@ Pixel values are not clipped during a conversion between two TV-range
 formats.</p>
 
 <p class="var">center</p>
-<p>Like the Avisynth resizers, this resizer preserves the position of the
-picture center.
+<p>Like the Avisynth standard resizers, this resizer preserves the position of
+the picture center.
 Disable this parameter if you may want to resize by preserving the top-left
 corner position.
 Similarly, if you are convolving without resizing, setting it to
