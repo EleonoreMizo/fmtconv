@@ -109,12 +109,15 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 		(args [Param_FULLS].Defined () || args [Param_FULLD].Defined ());
 
 	// Configures the plane processor
-	_plane_proc_uptr = std::make_unique <avsutl::PlaneProcessor> (
-		vi, _vi_src, *this
+	_plane_proc_uptr =
+		std::make_unique <avsutl::PlaneProcessor> (vi, *this, false);
+	_plane_proc_uptr->set_dst_clip_info (avsutl::PlaneProcessor::ClipType_NORMAL);
+	_plane_proc_uptr->set_clip_info (
+		avsutl::PlaneProcessor::ClipIdx_SRC1,
+		_clip_src_sptr,
+		avsutl::PlaneProcessor::ClipType_NORMAL
 	);
 	_plane_proc_uptr->set_proc_mode (args [Param_PLANES].AsString ("all"));
-	_plane_proc_uptr->set_clip_info (0, avsutl::PlaneProcessor::ClipType_NORMAL);
-	_plane_proc_uptr->set_clip_info (1, avsutl::PlaneProcessor::ClipType_NORMAL);
 
 	// Dithering parameters
 	auto           dmode = static_cast <fmtcl::Dither::DMode> (
@@ -181,11 +184,7 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 	::PVideoFrame  src_sptr = _clip_src_sptr->GetFrame (n, env_ptr);
 	::PVideoFrame	dst_sptr = build_new_frame (*env_ptr, vi, &src_sptr);
 
-	_plane_proc_uptr->process_frame (
-		dst_sptr, n, *env_ptr,
-		&_clip_src_sptr, nullptr, nullptr,
-		nullptr
-	);
+	_plane_proc_uptr->process_frame (dst_sptr, n, *env_ptr, nullptr);
 
 	// Frame properties
 	if (supports_props ())
@@ -220,7 +219,9 @@ void	Bitdepth::do_process_plane (::PVideoFrame &dst_sptr, int n, ::IScriptEnviro
 	const int      stride_dst   = dst_sptr->GetPitch (plane_id);
 	const uint8_t* data_src_ptr = src_sptr->GetReadPtr (plane_id);
 	const int      stride_src   = src_sptr->GetPitch (plane_id);
-	const int      w = _plane_proc_uptr->get_width (dst_sptr, plane_id);
+	const int      w = _plane_proc_uptr->get_width (
+		dst_sptr, plane_id, avsutl::PlaneProcessor::ClipIdx_DST
+	);
 	const int      h = _plane_proc_uptr->get_height (dst_sptr, plane_id);
 
 	try

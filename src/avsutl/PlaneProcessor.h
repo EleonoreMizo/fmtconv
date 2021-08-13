@@ -26,6 +26,7 @@ http://www.wtfpl.net/ for more details.
 #include "avsutl/CsPlane.h"
 #include "avsutl/PlaneProcMode.h"
 #include "fstb/fnc.h"
+#include "avisynth.h"
 
 #include <array>
 #include <string>
@@ -33,11 +34,6 @@ http://www.wtfpl.net/ for more details.
 #include <cstdint>
 
 
-
-class IScriptEnvironment;
-class PClip;
-class PlaneProcCbInterface;
-struct VideoInfo;
 
 namespace avsutl
 {
@@ -52,7 +48,18 @@ class PlaneProcessor
 public:
 
 	static constexpr int _max_nbr_planes = CsPlane::_max_nbr_planes;
-	static constexpr int _max_nbr_clips  = 1+3; // Index 0 = destination
+
+	enum ClipIdx
+	{
+		ClipIdx_INVALID = -1,
+
+		ClipIdx_DST     = 0,
+		ClipIdx_SRC1,
+		ClipIdx_SRC2,
+		ClipIdx_SRC3,
+
+		ClipIdx_NBR_ELT
+	};
 
 	enum ClipType
 	{
@@ -84,19 +91,31 @@ public:
 		FmtChkFlag_ALL        = -1
 	};
 
-	explicit       PlaneProcessor (const ::VideoInfo &vi, const ::VideoInfo &vi_src, PlaneProcCbInterface &cb);
+	explicit       PlaneProcessor (const ::VideoInfo &vi, PlaneProcCbInterface &cb, bool manual_flag);
 	virtual        ~PlaneProcessor () = default;
 
-	void           set_proc_mode (const std::array <float, _max_nbr_planes> &pm_arr);
+	void           set_proc_mode (const std::array <double, _max_nbr_planes> &pm_arr);
 	void           set_proc_mode (std::string pmode);
-	void           set_clip_info (int index, ClipType type);
+
+	void           set_dst_clip_info (ClipType type);
+	void           set_clip_info (ClipIdx index, ::PClip clip_sptr, ClipType type);
+
 	int            get_nbr_planes () const;
 
-	void           process_frame (::PVideoFrame &dst_sptr, int n, ::IScriptEnvironment &env, ::PClip *src_1_ptr, ::PClip *src_2_ptr, ::PClip *src_3_ptr, void *ctx_ptr = 0);
-	int            get_plane_id (int plane_index, bool src_flag);
-	int            get_width (const ::PVideoFrame &frame_sptr, int plane_id, bool src_flag = false) const;
+	void           process_frame (::PVideoFrame &dst_sptr, int n, ::IScriptEnvironment &env, void *ctx_ptr);
+	const ::VideoInfo &
+	               use_vi (ClipIdx index) const;
+	int            get_plane_id (int plane_index, ClipIdx index) const;
+	int            get_width (const ::PVideoFrame &frame_sptr, int plane_id, ClipIdx clip_idx) const;
 	int            get_height (const ::PVideoFrame &frame_sptr, int plane_id) const;
 	int            get_height16 (const ::PVideoFrame &frame_sptr, int plane_id) const;
+
+	// For manual operations
+	bool           is_manual () const;
+	PlaneProcMode  get_mode (int plane_index) const;
+	double         get_fill_val (int plane_index) const;
+	void           fill_plane (::PVideoFrame &dst_sptr, int n, double val, int plane_index);
+	void           copy_plane (::PVideoFrame &dst_sptr, ClipIdx clip_idx, int n, int plane_index, ::IScriptEnvironment &env);
 
 	static int     get_nbr_planes (const ::VideoInfo &vi);
 	static int     get_bytes_per_component (const ::VideoInfo &vi);
@@ -120,31 +139,35 @@ protected:
 
 private:
 
-	void           fill (::PVideoFrame &dst_sptr, int n, int plane_id, ClipType type, float val);
-	void           fill_frame_part (::PVideoFrame &dst_sptr, int n, int plane_id, float val, bool stacked_flag, int part);
-	void           copy (::PVideoFrame &dst_sptr, int n, int plane_id, ClipType type_dst, ::PClip &src_clip, ClipType type_src, ::IScriptEnvironment &env);
-	void           copy_n_to_n (::PVideoFrame &dst_sptr, ::PClip &src_clip, int n, int plane_id, ::IScriptEnvironment &env);
-	void           copy_8_to_stack16 (::PVideoFrame &dst_sptr, ::PClip &src_clip, int n, int plane_id, ::IScriptEnvironment &env, int part);
-	void           copy_stack16_to_8 (::PVideoFrame &dst_sptr, ::PClip &src_clip, int n, int plane_id, ::IScriptEnvironment &env, int part);
+	class ClipInfo
+	{
+	public:
+		ClipType       _type = ClipType_UNKNOWN;
+		::PClip        _clip_sptr; // Not valid for the destination clip
+	};
+
+	void           fill (::PVideoFrame &dst_sptr, int n, int plane_index, ClipType type, float val);
+	void           fill_frame_part (::PVideoFrame &dst_sptr, int n, int plane_index, float val, bool stacked_flag, int part);
+	void           copy (::PVideoFrame &dst_sptr, int n, int plane_index, ClipType type_dst, ClipIdx src_idx, ::IScriptEnvironment &env);
+	void           copy_n_to_n (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env);
+	void           copy_8_to_stack16 (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env, int part);
+	void           copy_stack16_to_8 (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env, int part);
 
 	static bool    have_same_height (ClipType t1, ClipType t2);
 	static bool    is_stacked (ClipType type);
 
-	const ::VideoInfo &
+	const ::VideoInfo & // For the destination clip. May changed during the filter setup.
 	               _vi;
-	const ::VideoInfo &
-	               _vi_src;
 	PlaneProcCbInterface &
 	               _cb;
 	int            _nbr_planes = 0;
-	std::array <float, _max_nbr_planes>
+	std::array <double, _max_nbr_planes>
 	               _proc_mode_arr { fstb::make_array <_max_nbr_planes> (
-							float (PlaneProcMode_PROCESS)
+							double (PlaneProcMode_PROCESS)
 	               ) };
-	std::array <ClipType, _max_nbr_clips>
-	               _clip_type_arr { fstb::make_array <_max_nbr_clips> (
-							ClipType_UNKNOWN
-	               ) };
+	std::array <ClipInfo, ClipIdx_NBR_ELT>
+	               _clip_info_arr;
+	bool           _manual_flag = false;
 
 
 

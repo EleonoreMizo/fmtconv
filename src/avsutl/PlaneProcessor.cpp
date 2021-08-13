@@ -46,18 +46,18 @@ namespace avsutl
 
 
 
-PlaneProcessor::PlaneProcessor (const ::VideoInfo &vi, const ::VideoInfo &vi_src, PlaneProcCbInterface &cb)
+PlaneProcessor::PlaneProcessor (const ::VideoInfo &vi, PlaneProcCbInterface &cb, bool manual_flag)
 :	_vi (vi)
-,	_vi_src (vi_src)
 ,	_cb (cb)
 ,	_nbr_planes (get_nbr_planes (vi))
+,	_manual_flag (manual_flag)
 {
 	// Nothing
 }
 
 
 
-void	PlaneProcessor::set_proc_mode (const std::array <float, _max_nbr_planes> &pm_arr)
+void	PlaneProcessor::set_proc_mode (const std::array <double, _max_nbr_planes> &pm_arr)
 {
 	_proc_mode_arr = pm_arr;
 }
@@ -74,11 +74,11 @@ void	PlaneProcessor::set_proc_mode (std::string pmode)
 
 	if (pmode == "all")
 	{
-		_proc_mode_arr.fill (float (PlaneProcMode_PROCESS));
+		_proc_mode_arr.fill (double (PlaneProcMode_PROCESS));
 	}
 	else
 	{
-		_proc_mode_arr.fill (float (PlaneProcMode_GARBAGE));
+		_proc_mode_arr.fill (double (PlaneProcMode_GARBAGE));
 
 		// Plane selection by name
 		for (const auto &info_categ : CsPlane::_plane_info_list)
@@ -107,20 +107,28 @@ void	PlaneProcessor::set_proc_mode (std::string pmode)
 
 
 
+void	PlaneProcessor::set_dst_clip_info (ClipType type)
+{
+	set_clip_info (ClipIdx_DST, {}, type);
+}
+
+
+
 // 0 = destination clip
-void	PlaneProcessor::set_clip_info (int index, ClipType type)
+void	PlaneProcessor::set_clip_info (ClipIdx index, ::PClip clip_sptr, ClipType type)
 {
 	assert (index >= 0);
-	assert (index < _max_nbr_clips);
+	assert (index < ClipIdx_NBR_ELT);
+	assert (index == ClipIdx_DST || clip_sptr);
 	assert (type >= 0);
 	assert (type < ClipType_NBR_ELT);
 
 	// If the clip is one of the "hack-16" type, make sure it is 8 bits.
-	assert (   (type  == ClipType_NORMAL)
-	        || (index == 0 && _vi.ComponentSize () == 1)
-	        || (index >  0 && _vi_src.ComponentSize () == 1));
+	assert (   type  == ClipType_NORMAL
+	        || index == ClipIdx_DST
+	        || clip_sptr->GetVideoInfo ().ComponentSize () == 1);
 
-	_clip_type_arr [index] = type;
+	_clip_info_arr [index] = { type, clip_sptr };
 }
 
 
@@ -132,67 +140,89 @@ int	PlaneProcessor::get_nbr_planes () const
 
 
 
-void	PlaneProcessor::process_frame (::PVideoFrame &dst_sptr, int n, ::IScriptEnvironment &env, ::PClip *src_1_ptr, ::PClip *src_2_ptr, ::PClip *src_3_ptr, void *ctx_ptr)
+void	PlaneProcessor::process_frame (::PVideoFrame &dst_sptr, int n, ::IScriptEnvironment &env, void *ctx_ptr)
 {
 	assert (dst_sptr != nullptr);
 	assert (dst_sptr->IsWritable ());
 	assert (n >= 0);
 
-	const ClipType	type_dst   = _clip_type_arr [0];
-	const auto &   info_categ = CsPlane::use_categ_info (_vi);
+	const ClipType	type_dst = _clip_info_arr [0]._type;
 
 	for (int plane_index = 0; plane_index < _nbr_planes; ++plane_index)
 	{
-		const int      plane_id = info_categ [plane_index]._id;
-		const float    mode     = _proc_mode_arr [plane_index];
+		const double   mode = _proc_mode_arr [plane_index];
 
-		if (mode == float (PlaneProcMode_PROCESS))
+		if (   mode == double (PlaneProcMode_PROCESS)
+		    || _manual_flag)
 		{
+			const int      plane_id = get_plane_id (plane_index, ClipIdx_DST);
 			_cb.process_plane (dst_sptr, n, env, plane_index, plane_id, ctx_ptr);
 		}
 
-		else if (   mode >= float (PlaneProcMode_COPY1)
-		         && mode <= float (PlaneProcMode_COPY3))
+		else if (   mode >= double (PlaneProcMode_COPY1)
+		         && mode <= double (PlaneProcMode_COPY3))
 		{
-			static const int	burp [PlaneProcMode_NBR_ELT] =
+			static constexpr ClipIdx burp [PlaneProcMode_NBR_ELT] =
 			{
-				-1, -1, 1, -1, 2, 3
+				ClipIdx_INVALID, ClipIdx_INVALID, ClipIdx_SRC1,
+				ClipIdx_INVALID, ClipIdx_SRC2, ClipIdx_SRC3
 			};
 			const int         mode_i    = fstb::round_int (mode);
-			const int			src_index = burp [mode_i];
-			::PClip *			pouet [4] = { 0, src_1_ptr, src_2_ptr, src_3_ptr };
-			::PClip *			src_ptr   = pouet [src_index];
-			const ClipType		type_src  = _clip_type_arr [src_index];
-
-			if (src_ptr != nullptr)
+			const ClipIdx     src_index = burp [mode_i];
+			if (_clip_info_arr [src_index]._clip_sptr)
 			{
-				copy (dst_sptr, n, plane_id, type_dst, *src_ptr, type_src, env);
+				copy (dst_sptr, n, plane_index, type_dst, src_index, env);
 			}
 		}
 
-		else if (mode < float (PlaneProcMode_FILL + 1))
+		else if (mode < double (PlaneProcMode_FILL + 1))
 		{
-			fill (dst_sptr, n, plane_id, type_dst, -mode);
+			fill (dst_sptr, n, plane_index, type_dst, float (-mode));
 		}
 	}
 }
 
 
 
-int	PlaneProcessor::get_plane_id (int plane_index, bool src_flag)
+const ::VideoInfo &	PlaneProcessor::use_vi (ClipIdx index) const
 {
-	return CsPlane::get_plane_id (plane_index, *(src_flag ? &_vi_src : &_vi));
+	assert (index >= 0);
+	assert (index < ClipIdx_NBR_ELT);
+
+	if (index == ClipIdx_DST)
+	{
+		return _vi;
+	}
+
+	const ::PClip& clip_sptr = _clip_info_arr [index]._clip_sptr;
+	assert (clip_sptr);
+
+	return clip_sptr->GetVideoInfo ();
 }
 
 
 
-int	PlaneProcessor::get_width (const ::PVideoFrame &frame_sptr, int plane_id, bool src_flag) const
+int	PlaneProcessor::get_plane_id (int plane_index, ClipIdx index) const
+{
+	assert (index >= 0);
+	assert (index < ClipIdx_NBR_ELT);
+
+	const auto &   vi = use_vi (index);
+
+	return CsPlane::get_plane_id (plane_index, vi);
+}
+
+
+
+int	PlaneProcessor::get_width (const ::PVideoFrame &frame_sptr, int plane_id, ClipIdx clip_idx) const
 {
 	assert (frame_sptr != nullptr);
+	assert (clip_idx >= 0);
+	assert (clip_idx < ClipIdx_NBR_ELT);
 
+	const auto &   vi          = use_vi (clip_idx);
 	const int      width_bytes = frame_sptr->GetRowSize (plane_id);
-	const int      bits        =
-		(src_flag) ? _vi_src.BitsPerComponent () : _vi.BitsPerComponent ();
+	const int      bits        = vi.BitsPerComponent ();
 	const int      width       = width_bytes / (bits >> 3);
 
 	return width;
@@ -214,6 +244,65 @@ int	PlaneProcessor::get_height (const ::PVideoFrame &frame_sptr, int plane_id) c
 int	PlaneProcessor::get_height16 (const ::PVideoFrame &frame_sptr, int plane_id) const
 {
 	return get_height (frame_sptr, plane_id) >> 1;
+}
+
+
+
+bool	PlaneProcessor::is_manual () const
+{
+	return _manual_flag;
+}
+
+
+
+PlaneProcMode	PlaneProcessor::get_mode (int plane_index) const
+{
+	assert (plane_index >= 0);
+	assert (plane_index < _nbr_planes);
+
+	const double   val = _proc_mode_arr [plane_index];
+	if (val < double (PlaneProcMode_FILL + 1))
+	{
+		return PlaneProcMode_FILL;
+	}
+
+	return static_cast <PlaneProcMode> (fstb::round_int (val));
+}
+
+
+
+double	PlaneProcessor::get_fill_val (int plane_index) const
+{
+	assert (plane_index >= 0);
+	assert (plane_index < _nbr_planes);
+
+	const double   val = _proc_mode_arr [plane_index];
+	assert (val < double (PlaneProcMode_FILL + 1));
+
+	return val;
+}
+
+
+
+void	PlaneProcessor::fill_plane (::PVideoFrame &dst_sptr, int n, double val, int plane_index)
+{
+	assert (plane_index >= 0);
+	assert (plane_index < _nbr_planes);
+
+	const ClipType type     = _clip_info_arr [0]._type;
+	const int      plane_id = get_plane_id (plane_index, ClipIdx_DST);
+
+	fill (dst_sptr, n, plane_id, type, float (val));
+}
+
+
+
+void	PlaneProcessor::copy_plane (::PVideoFrame &dst_sptr, ClipIdx clip_idx, int n, int plane_index, ::IScriptEnvironment &env)
+{
+	assert (clip_idx >= ClipIdx_SRC1);
+	assert (clip_idx < ClipIdx_NBR_ELT);
+
+	copy (dst_sptr, n, plane_index, _clip_info_arr [0]._type, clip_idx, env);
 }
 
 
@@ -493,7 +582,7 @@ bool	PlaneProcessor::check_stack16_height (const ::VideoInfo &vi, int height)
 
 
 
-void	PlaneProcessor::fill (::PVideoFrame &dst_sptr, int n, int plane_id, ClipType type, float val)
+void	PlaneProcessor::fill (::PVideoFrame &dst_sptr, int n, int plane_index, ClipType type, float val)
 {
 	assert (dst_sptr != nullptr);
 	assert (n >= 0);
@@ -504,31 +593,32 @@ void	PlaneProcessor::fill (::PVideoFrame &dst_sptr, int n, int plane_id, ClipTyp
 		const int      val_int = fstb::round_int (val);
 		const int      val_msb = val_int >> 8;
 		const int      val_lsb = val_int & 255;
-		fill_frame_part (dst_sptr, n, plane_id, float (val_msb), true, 0);
-		fill_frame_part (dst_sptr, n, plane_id, float (val_lsb), true, 1);
+		fill_frame_part (dst_sptr, n, plane_index, float (val_msb), true, 0);
+		fill_frame_part (dst_sptr, n, plane_index, float (val_lsb), true, 1);
 	}
 
 	else if (type == ClipType_INTERLEAVED_16)
 	{
 		int            val_int = fstb::round_int (val);
 		val_int >>= (1 - (n & 1)) * 8;
-		fill_frame_part (dst_sptr, n, plane_id, float (val_int & 255), false, 0);
+		fill_frame_part (dst_sptr, n, plane_index, float (val_int & 255), false, 0);
 	}
 
 	else
 	{
-		fill_frame_part (dst_sptr, n, plane_id, val, false, 0);
+		fill_frame_part (dst_sptr, n, plane_index, val, false, 0);
 	}
 }
 
 
 
-void	PlaneProcessor::fill_frame_part (::PVideoFrame &dst_sptr, int n, int plane_id, float val, bool stacked_flag, int part)
+void	PlaneProcessor::fill_frame_part (::PVideoFrame &dst_sptr, int n, int plane_index, float val, bool stacked_flag, int part)
 {
 	fstb::unused (n);
 
+	const int      plane_id = get_plane_id (plane_index, ClipIdx_DST);
 	const int      stride   = dst_sptr->GetPitch (plane_id);
-	const int      width    = get_width (dst_sptr, plane_id, false);
+	const int      width    = get_width (dst_sptr, plane_id, ClipIdx_DST);
 	int            height   = get_height (dst_sptr, plane_id);
 
 	if (_vi.ComponentSize () == 1)
@@ -569,33 +659,34 @@ void	PlaneProcessor::fill_frame_part (::PVideoFrame &dst_sptr, int n, int plane_
 
 
 
-void	PlaneProcessor::copy (::PVideoFrame &dst_sptr, int n, int plane_id, ClipType type_dst, ::PClip &src_clip, ClipType type_src, ::IScriptEnvironment &env)
+void	PlaneProcessor::copy (::PVideoFrame &dst_sptr, int n, int plane_index, ClipType type_dst, ClipIdx src_idx, ::IScriptEnvironment &env)
 {
 	assert (dst_sptr != nullptr);
 	assert (n >= 0);
 	assert (type_dst >= 0);
 	assert (type_dst < ClipType_NBR_ELT);
-	assert (src_clip != nullptr);
-	assert (type_src >= 0);
-	assert (type_src < ClipType_NBR_ELT);
+	assert (src_idx >= ClipIdx_SRC1);
+	assert (src_idx < ClipIdx_NBR_ELT);
 
-	if (src_clip != nullptr)
+	const ClipInfo &  info_src = _clip_info_arr [src_idx];
+
+	if (info_src._clip_sptr != nullptr)
 	{
 		const int      nbr_bytes_d = get_bytes_per_component (_vi);
 		const int      nbr_bytes_s =
-			get_bytes_per_component (src_clip->GetVideoInfo ());
+			get_bytes_per_component (info_src._clip_sptr->GetVideoInfo ());
 
 		if (nbr_bytes_d == 1 && nbr_bytes_s == 1)
 		{
-			if (have_same_height (type_dst, type_src))
+			if (have_same_height (type_dst, info_src._type))
 			{
-				if (   type_dst == ClipType_INTERLEAVED_16
-				    && type_src != ClipType_INTERLEAVED_16)
+				if (   type_dst       == ClipType_INTERLEAVED_16
+				    && info_src._type != ClipType_INTERLEAVED_16)
 				{
 					n >>= 1;
 				}
-				else if (   type_dst != ClipType_INTERLEAVED_16
-				         && type_src == ClipType_INTERLEAVED_16)
+				else if (   type_dst       != ClipType_INTERLEAVED_16
+				         && info_src._type == ClipType_INTERLEAVED_16)
 				{
 					n <<= 1;
 					if (type_dst == ClipType_LSB)
@@ -604,10 +695,10 @@ void	PlaneProcessor::copy (::PVideoFrame &dst_sptr, int n, int plane_id, ClipTyp
 					}
 				}
 
-				copy_n_to_n (dst_sptr, src_clip, n, plane_id, env);
+				copy_n_to_n (dst_sptr, src_idx, n, plane_index, env);
 			}
 
-			else if (is_stacked (type_src) && ! is_stacked (type_dst))
+			else if (is_stacked (info_src._type) && ! is_stacked (type_dst))
 			{
 				bool				lsb_flag = (type_dst == ClipType_LSB);
 
@@ -618,50 +709,54 @@ void	PlaneProcessor::copy (::PVideoFrame &dst_sptr, int n, int plane_id, ClipTyp
 				}
 
 				copy_stack16_to_8 (
-					dst_sptr, src_clip, n, plane_id, env, (lsb_flag) ? 1 : 0
+					dst_sptr, src_idx, n, plane_index, env, (lsb_flag) ? 1 : 0
 				);
 			}
 
 			else	// ! is_stacked (type_src) && is_stacked (type_dst)
 			{
-				if (type_src == ClipType_INTERLEAVED_16)
+				if (info_src._type == ClipType_INTERLEAVED_16)
 				{
 					n <<= 1;
-					copy_8_to_stack16 (dst_sptr, src_clip, n,     plane_id, env, 0);
-					copy_8_to_stack16 (dst_sptr, src_clip, n + 1, plane_id, env, 1);
+					copy_8_to_stack16 (dst_sptr, src_idx, n,     plane_index, env, 0);
+					copy_8_to_stack16 (dst_sptr, src_idx, n + 1, plane_index, env, 1);
 				}
 
 				else
 				{
-					copy_8_to_stack16 (dst_sptr, src_clip, n,     plane_id, env, 0);
-					fill_frame_part (dst_sptr, n, plane_id, 0, true, 1);
+					copy_8_to_stack16 (dst_sptr, src_idx, n,     plane_index, env, 0);
+					fill_frame_part (dst_sptr, n, plane_index, 0, true, 1);
 				}
 			}
 		}
 
 		else if (nbr_bytes_d == nbr_bytes_s)
 		{
-			copy_n_to_n (dst_sptr, src_clip, n, plane_id, env);
+			copy_n_to_n (dst_sptr, src_idx, n, plane_index, env);
 		}
 	}
 }
 
 
 
-void	PlaneProcessor::copy_n_to_n (::PVideoFrame &dst_sptr, ::PClip &src_clip, int n, int plane_id, ::IScriptEnvironment &env)
+void	PlaneProcessor::copy_n_to_n (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env)
 {
-	const int      dst_stride   = dst_sptr->GetPitch (plane_id);
-	const int      dst_width    = get_width (dst_sptr, plane_id, false);
-	const int      dst_height   = get_height (dst_sptr, plane_id);
-	uint8_t *      dst_data_ptr = dst_sptr->GetWritePtr (plane_id);
+	const int      plane_id_d   = get_plane_id (plane_index, ClipIdx_DST);
+	const int      dst_stride   = dst_sptr->GetPitch (plane_id_d);
+	const int      dst_width    = get_width (dst_sptr, plane_id_d, ClipIdx_DST);
+	const int      dst_height   = get_height (dst_sptr, plane_id_d);
+	uint8_t *      dst_data_ptr = dst_sptr->GetWritePtr (plane_id_d);
 
+	auto &         src_clip     = _clip_info_arr [src_idx]._clip_sptr;
+	assert (src_clip);
 	n = std::min (n, src_clip->GetVideoInfo ().num_frames - 1);
 
 	::PVideoFrame  src_sptr     = src_clip->GetFrame (n, &env);
-	const int      src_stride   = src_sptr->GetPitch (plane_id);
-	const int      src_width    = get_width (src_sptr, plane_id, true);
-	const int      src_height   = get_height (src_sptr, plane_id);
-	const uint8_t* src_data_ptr = src_sptr->GetReadPtr (plane_id);
+	const int      plane_id_s   = get_plane_id (plane_index, src_idx);
+	const int      src_stride   = src_sptr->GetPitch (plane_id_s);
+	const int      src_width    = get_width (src_sptr, plane_id_s, src_idx);
+	const int      src_height   = get_height (src_sptr, plane_id_s);
+	const uint8_t* src_data_ptr = src_sptr->GetReadPtr (plane_id_s);
 
 	const int      width        = std::min (src_width,  dst_width);
 	const int      height       = std::min (src_height, dst_height);
@@ -675,20 +770,24 @@ void	PlaneProcessor::copy_n_to_n (::PVideoFrame &dst_sptr, ::PClip &src_clip, in
 
 
 
-void	PlaneProcessor::copy_8_to_stack16 (::PVideoFrame &dst_sptr, ::PClip &src_clip, int n, int plane_id, ::IScriptEnvironment &env, int part)
+void	PlaneProcessor::copy_8_to_stack16 (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env, int part)
 {
-	const int      dst_stride   = dst_sptr->GetPitch (plane_id);
-	const int      dst_width    = get_width (dst_sptr, plane_id, false);
-	const int      dst_height   = get_height16 (dst_sptr, plane_id);
-	uint8_t *      dst_data_ptr = dst_sptr->GetWritePtr (plane_id);
+	const int      plane_id_d   = get_plane_id (plane_index, ClipIdx_DST);
+	const int      dst_stride   = dst_sptr->GetPitch (plane_id_d);
+	const int      dst_width    = get_width (dst_sptr, plane_id_d, ClipIdx_DST);
+	const int      dst_height   = get_height16 (dst_sptr, plane_id_d);
+	uint8_t *      dst_data_ptr = dst_sptr->GetWritePtr (plane_id_d);
 
+	auto &         src_clip     = _clip_info_arr [src_idx]._clip_sptr;
+	assert (src_clip);
 	n = std::min (n, src_clip->GetVideoInfo ().num_frames - 1);
 
 	::PVideoFrame  src_sptr     = src_clip->GetFrame (n, &env);
-	const int      src_stride   = src_sptr->GetPitch (plane_id);
-	const int      src_width    = get_width (src_sptr, plane_id, true);
-	const int      src_height   = get_height (src_sptr, plane_id);
-	const uint8_t* src_data_ptr = src_sptr->GetReadPtr (plane_id);
+	const int      plane_id_s   = get_plane_id (plane_index, src_idx);
+	const int      src_stride   = src_sptr->GetPitch (plane_id_s);
+	const int      src_width    = get_width (src_sptr, plane_id_s, src_idx);
+	const int      src_height   = get_height (src_sptr, plane_id_s);
+	const uint8_t* src_data_ptr = src_sptr->GetReadPtr (plane_id_s);
 
 	const int      width        = std::min (src_width,  dst_width);
 	const int      height       = std::min (src_height, dst_height);
@@ -701,20 +800,24 @@ void	PlaneProcessor::copy_8_to_stack16 (::PVideoFrame &dst_sptr, ::PClip &src_cl
 
 
 
-void	PlaneProcessor::copy_stack16_to_8 (::PVideoFrame &dst_sptr, ::PClip &src_clip, int n, int plane_id, ::IScriptEnvironment &env, int part)
+void	PlaneProcessor::copy_stack16_to_8 (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env, int part)
 {
-	const int      dst_stride   = dst_sptr->GetPitch (plane_id);
-	const int      dst_width    = get_width (dst_sptr, plane_id, false);
-	const int      dst_height   = get_height (dst_sptr, plane_id);
-	uint8_t *      dst_data_ptr = dst_sptr->GetWritePtr (plane_id);
+	const int      plane_id_d   = get_plane_id (plane_index, ClipIdx_DST);
+	const int      dst_stride   = dst_sptr->GetPitch (plane_id_d);
+	const int      dst_width    = get_width (dst_sptr, plane_id_d, ClipIdx_DST);
+	const int      dst_height   = get_height (dst_sptr, plane_id_d);
+	uint8_t *      dst_data_ptr = dst_sptr->GetWritePtr (plane_id_d);
 
+	auto &         src_clip     = _clip_info_arr [src_idx]._clip_sptr;
+	assert (src_clip);
 	n = std::min (n, src_clip->GetVideoInfo ().num_frames - 1);
 
 	::PVideoFrame  src_sptr     = src_clip->GetFrame (n, &env);
-	const int      src_stride   = src_sptr->GetPitch (plane_id);
-	const int      src_width    = get_width (src_sptr, plane_id, true);
-	const int      src_height   = get_height16 (src_sptr, plane_id);
-	const uint8_t* src_data_ptr = src_sptr->GetReadPtr (plane_id);
+	const int      plane_id_s   = get_plane_id (plane_index, src_idx);
+	const int      src_stride   = src_sptr->GetPitch (plane_id_s);
+	const int      src_width    = get_width (src_sptr, plane_id_s, src_idx);
+	const int      src_height   = get_height16 (src_sptr, plane_id_s);
+	const uint8_t* src_data_ptr = src_sptr->GetReadPtr (plane_id_s);
 
 	const int      width        = std::min (src_width,  dst_width);
 	const int      height       = std::min (src_height, dst_height);
