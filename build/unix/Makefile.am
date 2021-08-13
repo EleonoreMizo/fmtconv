@@ -153,6 +153,7 @@ commonsrc = \
         ../../src/fmtcl/FilterResize.h \
         ../../src/fmtcl/fnc_fmtcl.cpp \
         ../../src/fmtcl/fnc.h \
+        ../../src/fmtcl/fnc.hpp \
         ../../src/fmtcl/InterlacingType.h \
         ../../src/fmtcl/KernelData.cpp \
         ../../src/fmtcl/KernelData.h \

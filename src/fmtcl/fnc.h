@@ -54,7 +54,10 @@ double compute_pix_scale (const PicFmt &fmt, int plane_index);
 double get_pix_min (const PicFmt &fmt, int plane_index);
 void   compute_fmt_mac_cst (double &gain, double &add_cst, const PicFmt &dst_fmt, const PicFmt &src_fmt, int plane_index);
 int    prepare_matrix_coef (MatrixProc &mat_proc, const Mat4 &mat_main, const PicFmt &dst_fmt, const PicFmt &src_fmt, ColorSpaceH265 csp_out, int plane_out);
-std::vector <double> conv_str_to_float_arr (const std::string &str);
+template <typename T>
+std::vector <T> conv_str_to_arr (std::string str);
+template <typename T>
+T      get_arr_elt (const std::vector <T> &v, int pos, const T &def) noexcept;
 
 
 
@@ -62,7 +65,7 @@ std::vector <double> conv_str_to_float_arr (const std::string &str);
 
 
 
-//#include "fmtcl/fnc.hpp"
+#include "fmtcl/fnc.hpp"
 
 
 

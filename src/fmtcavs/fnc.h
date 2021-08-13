@@ -62,7 +62,12 @@ fmtcl::ColorFamily	conv_vi_to_colfam (const ::VideoInfo &vi);
 fmtcl::ColorFamily	conv_str_to_colfam (std::string str);
 void	prepare_matrix_coef (::IScriptEnvironment &env, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const FmtAvs &fmt_dst, bool full_range_dst_flag, const FmtAvs &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out, int plane_out);
 fmtcl::ProcComp3Arg build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFrame &dst_sptr, const ::VideoInfo &vi_src, const ::PVideoFrame &src_sptr, bool single_plane_flag = false);
-std::vector <double> extract_array (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0);
+std::vector <double> extract_array_f (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0);
+std::vector <int> extract_array_i (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0);
+std::vector <bool> extract_array_b (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0);
+std::vector <std::string> extract_array_s (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0);
+
+
 
 }  // namespace fmtcavs
 

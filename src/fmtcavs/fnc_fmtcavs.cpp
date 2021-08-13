@@ -46,6 +46,54 @@ namespace fmtcavs
 
 
 
+template <typename T, typename FT, typename FR>
+std::vector <T>	extract_array_any (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0, const char *typename_0, FT fnc_test, FR fnc_read)
+{
+	std::vector <T> val_arr;
+
+	if (arg.Defined ())
+	{
+		if (arg.IsString ())
+		{
+			val_arr = fmtcl::conv_str_to_arr <T> (arg.AsString (""));
+		}
+
+		else if (arg.IsArray ())
+		{
+			const int      sz = arg.ArraySize ();
+			for (int k = 0; k < sz; ++k)
+			{
+				const ::AVSValue &   elt = arg [k];
+				if (! fnc_test (elt))
+				{
+					env.ThrowError (
+						"%s: element %d (base 0) should be a %s.",
+						filter_and_arg_0, k, typename_0
+					);
+				}
+				val_arr.push_back (fnc_read (elt));
+			}
+		}
+
+		else if (fnc_test (arg))
+		{
+			val_arr.push_back (fnc_read (arg));
+		}
+
+		else
+		{
+			env.ThrowError (
+				"%s: unexpected type. Should be a string or an array of float.",
+				filter_and_arg_0
+			);
+		}
+	}
+
+	return val_arr;
+}
+
+
+
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
@@ -225,44 +273,42 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFra
 
 
 
-std::vector <double>	extract_array (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+std::vector <double>	extract_array_f (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
 {
-	std::vector <double> val_arr;
+	return extract_array_any <double> (env, arg, filter_and_arg_0, "float",
+		[] (const ::AVSValue &elt) { return elt.IsFloat (); },
+		[] (const ::AVSValue &elt) { return elt.AsFloat (0); }
+	);
+}
 
-	if (arg.Defined ())
-	{
-		if (arg.IsString ())
-		{
-			val_arr = fmtcl::conv_str_to_float_arr (arg.AsString (""));
-		}
 
-		else if (arg.IsArray ())
-		{
-			const int      sz = arg.ArraySize ();
-			for (int k = 0; k < sz; ++k)
-			{
-				const ::AVSValue &   elt = arg [k];
-				if (! elt.IsFloat ())
-				{
-					env.ThrowError (
-						"%s: element %d (base 0) should be a float.",
-						filter_and_arg_0, k
-					);
-				}
-				val_arr.push_back (elt.AsFloat (0));
-			}
-		}
 
-		else
-		{
-			env.ThrowError (
-				"%s: unexpected type. Should be a string or an array of float.",
-				filter_and_arg_0
-			);
-		}
-	}
+std::vector <int>	extract_array_i (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+{
+	return extract_array_any <int> (env, arg, filter_and_arg_0, "int",
+		[] (const ::AVSValue &elt) { return elt.IsInt (); },
+		[] (const ::AVSValue &elt) { return elt.AsInt (0); }
+	);
+}
 
-	return val_arr;
+
+
+std::vector <bool>	extract_array_b (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+{
+	return extract_array_any <bool> (env, arg, filter_and_arg_0, "bool",
+		[] (const ::AVSValue &elt) { return elt.IsBool (); },
+		[] (const ::AVSValue &elt) { return elt.AsBool (false); }
+	);
+}
+
+
+
+std::vector <std::string>	extract_array_s (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+{
+	return extract_array_any <std::string> (env, arg, filter_and_arg_0, "string",
+		[] (const ::AVSValue &elt) { return elt.IsString (); },
+		[] (const ::AVSValue &elt) { return elt.AsString (""); }
+	);
 }
 
 

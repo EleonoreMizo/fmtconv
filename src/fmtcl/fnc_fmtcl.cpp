@@ -33,7 +33,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include <cassert>
 #include <cstdint>
-#include <cstdlib>
 
 
 
@@ -294,32 +293,6 @@ int	prepare_matrix_coef (MatrixProc &mat_proc, const Mat4 &mat_main, const PicFm
 	);
 
 	return ret_val;
-}
-
-
-
-std::vector <double>	conv_str_to_float_arr (const std::string &str)
-{
-	std::vector <double> coef_arr;
-	const char *   cur_0     = str.c_str ();
-	bool           cont_flag = true;
-	do
-	{
-		const char *   end_0 = cur_0;
-		const double   val   = strtod (cur_0, const_cast <char **> (&end_0));
-		if (end_0 == cur_0)
-		{
-			cont_flag = false;
-		}
-		else
-		{
-			coef_arr.push_back (val);
-			cur_0 = end_0;
-		}
-	}
-	while (cont_flag);
-
-	return coef_arr;
 }
 
 
