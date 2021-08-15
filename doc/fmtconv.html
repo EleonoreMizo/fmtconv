@@ -1081,8 +1081,9 @@ Possible values are:</p>
 	fh         : float[]: opt; (1)
 	fv         : float[]: opt; (1)
 	cnorm      : int[]  : opt; (True)
-	totalh     : float[]: opt; (0)
-	totalv     : float[]: opt; (0)
+	total      : float[]: opt; (0)
+	totalh     : float[]: opt; (total)
+	totalv     : float[]: opt; (total)
 	invks      : int[]  : opt; (False)
 	invksh     : int[]  : opt; (invks)
 	invksv     : int[]  : opt; (invks)
@@ -1138,8 +1139,9 @@ Possible values are:</p>
 	arrayf fh (1),
 	arrayf fv (1),
 	bool   cnorm (true),
-	array  totalh (0),
-	array  totalv (0),
+	arrayf total (0),
+	arrayf totalh (total),
+	arrayf totalv (total),
 	arrayb invks  (false),
 	arrayb invksh (invks),
 	arrayb invksv (invks),
@@ -1213,8 +1215,7 @@ If you do so, don’t forget to set:</p>
 processed even if its size doesn’t change,</li>
 	<li><var>cnorm</var> to false to avoid automatic kernel
 normalisation if your impulse is already normalised, or specify
-<var>totalv</var> or <var>totalh</var> if the normalisation factor
-is not the sum of the impulse</li>
+<var>total</var> if the normalisation factor is not the sum of the impulse</li>
 	<li>and <var>center</var> to False to keep the desired spacing
 between the sampling points.</li>
 </ul>
@@ -1334,7 +1335,7 @@ constant for all pixels.
 If you use the resizer as a convolution engine, it is advised to disable the
 normalisation.</p>
 
-<p class="var">totalh, totalv</p>
+<p class="var">total, totalh, totalv</p>
 <p>When <var>cnorm</var> is activated, these parameters specify the
 normalisation value for the corresponding kernel.
 0 means that the normalisation value is the sum of the coefficients.
@@ -1343,7 +1344,10 @@ for this use: <var>total</var>&nbsp;= <var>totalh</var> &times; <var>totalv</var
 Because the convolution is computed with floating point data, there is no
 saturation of intermediate results, therefore the balance between
 <var>totalh</var> and <var>totalv</var> is not important, only their product
-will be taken into account.</p>
+will be taken into account.
+Note that because kernels are single-dimention, the “parent” <var>total</var>
+parameter here is the sum of the coefficients for each direction, not the
+product of <var>totalh</var> and <var>totalv</var>.</p>
 
 <p class="var">invks, invksh, invksv</p>
 <p>Set these parameter to True to activate the kernel inversion mode for the
@@ -1756,7 +1760,8 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>matrix</code>: deletes the <code>_Matrix</code> and <code>_ColorSpace</code> properties if a non-standard matrix is used.</li>
 <li><code>matrix2020cl</code>: sets the <code>_Matrix</code> and <code>_Transfer</code> frame properties.</li>
 <li><code>matrix2020cl</code>: fixed hideous colors with slightly out-of-colorspace values when converting from integer Y’Cb’Cr’ to integer linear RGB.</li>
-<li><code>resample</code>: <var>totalh</var> and <var>totalv</var> are now correctly taken into account.</li>
+<li><code>resample</code>: <var>totalh</var> and <var>totalv</var> are now correctly taken into account, added <var>total</var> parameter too.</li>
+<li><code>resample</code>: added a <var>planes</var> parameter.</li>
 <li><code>transfer</code>: sYCC curve (similar to sRGB) now supports signed values.</li>
 <li>Added information on functions reading and writing frame properties.</li>
 <li>Added support for 14-bit data.</li>

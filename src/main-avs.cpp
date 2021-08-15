@@ -63,21 +63,21 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		&main_avs_create <fmtcavs::Primaries>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_RESAMPLE,
-		"c"          "[w]i"          "[h]i"           "[sx]."         //  0
-		"[sy]."      "[sw]."         "[sh]."          "[scale]f"      //  4
-		"[scaleh]f"  "[scalev]f"     "[kernel]s"      "[kernelh]s"    //  8
-		"[kernelv]s" "[impulse]."    "[impulseh]."    "[impulsev]."   // 12
-		"[taps]."    "[tapsh]."      "[tapsv]."       "[a1]."         // 16
-		"[a2]."      "[a3]."         "[a1h]."         "[a2h]."        // 20
-		"[a3h]."     "[a1v]."        "[a2v]."         "[a3v]."        // 24
-		"[kovrspl]i" "[fh]."         "[fv]."          "[cnorm]b"      // 28
-		"[totalh]."  "[totalv]."     "[invks]."       "[invksh]."     // 32
-		"[invksv]."  "[invkstaps]."  "[invkstapsh]."  "[invkstapsv]." // 36
-		"[csp]i"     "[css]s"        "[planes]."      "[fulls]i"      // 40
-		"[fulld]i"   "[center]."     "[cplace]s"      "[cplaces]s"    // 44
-		"[cplaced]s" "[interlaced]i" "[interlacedd]i" "[tff]i"        // 48
-		"[tffd]i"    "[flt]b"        "[cpuopt]i",                     // 52
-		&main_avs_create <fmtcavs::Resample>, nullptr
+		"c"             "[w]i"       "[h]i"          "[sx]."          //  0
+		"[sy]."         "[sw]."      "[sh]."         "[scale]f"       //  4
+		"[scaleh]f"     "[scalev]f"  "[kernel]s"     "[kernelh]s"     //  8
+		"[kernelv]s"    "[impulse]." "[impulseh]."   "[impulsev]."    // 12
+		"[taps]."       "[tapsh]."   "[tapsv]."      "[a1]."          // 16
+		"[a2]."         "[a3]."      "[a1h]."        "[a2h]."         // 20
+		"[a3h]."        "[a1v]."     "[a2v]."        "[a3v]."         // 24
+		"[kovrspl]i"    "[fh]."      "[fv]."         "[cnorm]b"       // 28
+		"[totalh]."     "[total]."   "[totalv]."     "[invks]."       // 32
+		"[invksh]."     "[invksv]."  "[invkstaps]."  "[invkstapsh]."  // 36
+		"[invkstapsv]." "[csp]s"     "[css]s"        "[planes]."      // 40
+		"[fulls]i"      "[fulld]i"   "[center]."     "[cplace]s"      // 44
+		"[cplaces]s"    "[cplaced]s" "[interlaced]i" "[interlacedd]i" // 48
+		"[tff]i"        "[tffd]i"    "[flt]b"        "[cpuopt]i"      // 52
+		, &main_avs_create <fmtcavs::Resample>, nullptr
 	);
 
 	return "fmtconv - video format conversion";

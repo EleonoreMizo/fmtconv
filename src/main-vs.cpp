@@ -495,6 +495,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"fh:float[]:opt;"
 		"fv:float[]:opt;"
 		"cnorm:int[]:opt;"
+		"total:float[]:opt;"
 		"totalh:float[]:opt;"
 		"totalv:float[]:opt;"
 		"invks:int[]:opt;"
@@ -534,6 +535,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"bits:int:opt;"
 		"singleout:int:opt;"
 		"cpuopt:int:opt;"
+		"planes:float[]:opt;" // Masktools style
 		, &vsutl::Redirect <fmtc::Matrix>::create, 0, plugin_ptr
 	);
 
@@ -579,6 +581,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"fulld:int:opt;"
 		"cpuopt:int:opt;"
 		"blacklvl:float:opt;"
+		"planes:float[]:opt;" // Masktools style
 		, &vsutl::Redirect <fmtc::Transfer>::create, 0, plugin_ptr
 	);
 

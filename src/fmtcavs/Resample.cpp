@@ -283,6 +283,7 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 	const auto a1v_arr        = extract_array_f (env, args [Param_A1V       ], fmtcavs_RESAMPLE ", a1v");
 	const auto a2v_arr        = extract_array_f (env, args [Param_A2V       ], fmtcavs_RESAMPLE ", a2v");
 	const auto a3v_arr        = extract_array_f (env, args [Param_A3V       ], fmtcavs_RESAMPLE ", a3v");
+	const auto total_arr      = extract_array_f (env, args [Param_TOTAL     ], fmtcavs_RESAMPLE ", total");
 	const auto totalh_arr     = extract_array_f (env, args [Param_TOTALH    ], fmtcavs_RESAMPLE ", totalh");
 	const auto totalv_arr     = extract_array_f (env, args [Param_TOTALV    ], fmtcavs_RESAMPLE ", totalv");
 	const auto invks_arr      = extract_array_b (env, args [Param_INVKS     ], fmtcavs_RESAMPLE ", invks");
@@ -363,8 +364,9 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 		const double a1_v          = fmtcl::get_arr_elt (a1v_arr    , plane_index, a1 );
 		const double a2_v          = fmtcl::get_arr_elt (a2v_arr    , plane_index, a2 );
 		const double a3_v          = fmtcl::get_arr_elt (a3v_arr    , plane_index, a3 );
-		plane_data._norm_val_h     = fmtcl::get_arr_elt (totalh_arr , plane_index, 0.0);
-		plane_data._norm_val_v     = fmtcl::get_arr_elt (totalv_arr , plane_index, 0.0);
+		const double total         = fmtcl::get_arr_elt (total_arr  , plane_index, 0.0);
+		plane_data._norm_val_h     = fmtcl::get_arr_elt (totalh_arr , plane_index, total);
+		plane_data._norm_val_v     = fmtcl::get_arr_elt (totalv_arr , plane_index, total);
 		const bool   invks_flag    = fmtcl::get_arr_elt (invks_arr  , plane_index, false);
 		const bool   invks_h_flag  = fmtcl::get_arr_elt (invksh_arr , plane_index, invks_flag);
 		const bool   invks_v_flag  = fmtcl::get_arr_elt (invksv_arr , plane_index, invks_flag);

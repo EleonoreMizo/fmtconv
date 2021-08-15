@@ -356,8 +356,9 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		const double   a1_v           = get_arg_flt (in, out, "a1v", a1, -plane_index, &a1_v_flag);
 		const double   a2_v           = get_arg_flt (in, out, "a2v", a2, -plane_index, &a2_v_flag);
 		const double   a3_v           = get_arg_flt (in, out, "a3v", a3, -plane_index, &a3_v_flag);
-		plane_data._norm_val_h        = get_arg_flt (in, out, "totalh", 0.0, -plane_index);
-		plane_data._norm_val_v        = get_arg_flt (in, out, "totalv", 0.0, -plane_index);
+		const double   total          = get_arg_flt (in, out, "total", 0.0, -plane_index);
+		plane_data._norm_val_h        = get_arg_flt (in, out, "totalh", total, -plane_index);
+		plane_data._norm_val_v        = get_arg_flt (in, out, "totalv", total, -plane_index);
 		const bool     invks_flag     = (get_arg_int (in, out, "invks", 0, -plane_index) != 0);
 		const bool     invks_h_flag   = cumulate_flag (invks_flag, in, out, "invksh", -plane_index);
 		const bool     invks_v_flag   = cumulate_flag (invks_flag, in, out, "invksv", -plane_index);

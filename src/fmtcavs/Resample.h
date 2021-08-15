@@ -93,6 +93,7 @@ public:
 		Param_FH,
 		Param_FV, // 30
 		Param_CNORM,
+		Param_TOTAL,
 		Param_TOTALH,
 		Param_TOTALV,
 		Param_INVKS,
@@ -100,8 +101,8 @@ public:
 		Param_INVKSV,
 		Param_INVKSTAPS,
 		Param_INVKSTAPSH,
-		Param_INVKSTAPSV,
-		Param_CSP, // 40
+		Param_INVKSTAPSV, // 40
+		Param_CSP,
 		Param_CSS,
 		Param_PLANES,
 		Param_FULLS,
@@ -110,8 +111,8 @@ public:
 		Param_CPLACE,
 		Param_CPLACES,
 		Param_CPLACED,
-		Param_INTERLACED,
-		Param_INTERLACEDD, // 50
+		Param_INTERLACED, // 50
+		Param_INTERLACEDD,
 		Param_TFF,
 		Param_TFFD,
 		Param_FLT,
