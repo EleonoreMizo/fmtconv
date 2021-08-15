@@ -1583,6 +1583,7 @@ If it’s not the case, floating point operations are silently used as fallback.
 	logceid    : int    : opt; (800)
 	cpuopt     : int    : opt; (-1)
 	blacklvl   : float  : opt; (0)
+	planes     : float[]: opt; (3)
 )</pre>
 
 <p>Applies electro-optical and opto-electrical transfer characteristics to the
@@ -1712,6 +1713,17 @@ The parameter should be &ge; 0.
 There is no specific unit, it’s just a value from the target linear range,
 generally in 0–1.</p>
 
+<p class="var">planes</p>
+<p>This array decribes how each plane should be processed.
+It’s similar to the <var>y</var>, <var>u</var> and <var>v</var> parameters
+in Masktools 2.</p>
+<table>
+<tr><td><b>&minus;65535</b><br />to <b>&plus;0.5</b></td><td>All the pixels of the plane will be set to &minus;x (the opposite of the specified value). The range depends on the output data type. Remember, in floating-point YUV, the chroma planes range from &minus;0.5 to &plus;0.5.</td></tr>
+<tr><td><b>1</b></td><td>The plane will not be processed. This means that the content of the output plane is pure garbage.</td></tr>
+<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Range (full or TV) conversions are ignored.</td></tr>
+<tr><td><b>3</b></td><td>The plane will be processed.</td></tr>
+</table>
+
 
 
 <h3><a id="stack16tonative"></a>stack16tonative, nativetostack16</h3>
@@ -1763,6 +1775,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>resample</code>: <var>totalh</var> and <var>totalv</var> are now correctly taken into account, added <var>total</var> parameter too.</li>
 <li><code>resample</code>: added a <var>planes</var> parameter.</li>
 <li><code>transfer</code>: sYCC curve (similar to sRGB) now supports signed values.</li>
+<li><code>transfer</code>: added a <var>planes</var> parameter.</li>
 <li>Added information on functions reading and writing frame properties.</li>
 <li>Added support for 14-bit data.</li>
 <li>Vapoursynth: still uses API v3.6 but can use Python constants from API v4.0.</li>

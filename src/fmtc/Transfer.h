@@ -108,7 +108,6 @@ private:
 	               _logc_ei_s;
 	fmtcl::TransOpLogC::ExpIdx
 	               _logc_ei_d;
-	bool           _loglut_flag;
 
 	vsutl::PlaneProcessor
 	               _plane_processor;

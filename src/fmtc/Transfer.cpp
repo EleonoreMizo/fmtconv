@@ -67,7 +67,6 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 ,	_curve_d (fmtcl::TransCurve_UNDEF)
 ,	_logc_ei_s (fmtcl::TransOpLogC::ExpIdx_800)
 ,	_logc_ei_d (fmtcl::TransOpLogC::ExpIdx_800)
-,	_loglut_flag (false)
 #if defined (_MSC_VER)
 #pragma warning (push)
 #pragma warning (disable : 4355)
