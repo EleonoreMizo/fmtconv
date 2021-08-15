@@ -26,12 +26,15 @@ http://www.wtfpl.net/ for more details.
 
 #include "avsutl/CsPlane.h"
 #include "avsutl/fnc.h"
+#include "avsutl/PlaneProcessor.h"
 #include "fmtcavs/FmtAvs.h"
 #include "fmtcavs/fnc.h"
 #include "fmtcl/fnc.h"
 #include "fmtcl/MatrixProc.h"
 #include "fstb/fnc.h"
 #include "avisynth.h"
+
+#include <algorithm>
 
 #include <cassert>
 
@@ -273,42 +276,65 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFra
 
 
 
-std::vector <double>	extract_array_f (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+std::vector <double>	extract_array_f (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0, double def_val)
 {
 	return extract_array_any <double> (env, arg, filter_and_arg_0, "float",
-		[] (const ::AVSValue &elt) { return elt.IsFloat (); },
-		[] (const ::AVSValue &elt) { return elt.AsFloat (0); }
+		[       ] (const ::AVSValue &elt) { return elt.IsFloat (); },
+		[def_val] (const ::AVSValue &elt) { return elt.AsFloat (float (def_val)); }
 	);
 }
 
 
 
-std::vector <int>	extract_array_i (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+std::vector <int>	extract_array_i (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0, int def_val)
 {
 	return extract_array_any <int> (env, arg, filter_and_arg_0, "int",
-		[] (const ::AVSValue &elt) { return elt.IsInt (); },
-		[] (const ::AVSValue &elt) { return elt.AsInt (0); }
+		[       ] (const ::AVSValue &elt) { return elt.IsInt (); },
+		[def_val] (const ::AVSValue &elt) { return elt.AsInt (def_val); }
 	);
 }
 
 
 
-std::vector <bool>	extract_array_b (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+std::vector <bool>	extract_array_b (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0, bool def_val)
 {
 	return extract_array_any <bool> (env, arg, filter_and_arg_0, "bool",
-		[] (const ::AVSValue &elt) { return elt.IsBool (); },
-		[] (const ::AVSValue &elt) { return elt.AsBool (false); }
+		[       ] (const ::AVSValue &elt) { return elt.IsBool (); },
+		[def_val] (const ::AVSValue &elt) { return elt.AsBool (def_val); }
 	);
 }
 
 
 
-std::vector <std::string>	extract_array_s (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0)
+std::vector <std::string>	extract_array_s (::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0, std::string def_val)
 {
 	return extract_array_any <std::string> (env, arg, filter_and_arg_0, "string",
-		[] (const ::AVSValue &elt) { return elt.IsString (); },
-		[] (const ::AVSValue &elt) { return elt.AsString (""); }
+		[       ] (const ::AVSValue &elt) { return elt.IsString (); },
+		[def_val] (const ::AVSValue &elt) { return elt.AsString (def_val.c_str ()); }
 	);
+}
+
+
+
+void	set_masktools_planes_param (avsutl::PlaneProcessor &pp, ::IScriptEnvironment &env, const ::AVSValue &arg, const char *filter_and_arg_0, double def_val)
+{
+	if (arg.IsString ())
+	{
+		pp.set_proc_mode (arg.AsString ("all"));
+	}
+	else
+	{
+		const auto     plist =
+			extract_array_f (env, arg, filter_and_arg_0, def_val);
+		const auto     plist_last = plist.size () - 1;
+		assert (plist_last >= 0);
+		const auto     nbr_planes = size_t (pp.get_nbr_planes ());
+		for (int p_idx = 0; p_idx < nbr_planes; ++p_idx)
+		{
+			const auto     mode = fmtcl::get_arr_elt (plist, p_idx, def_val);
+			pp.set_proc_mode (p_idx, mode);
+		}
+	}
 }
 
 

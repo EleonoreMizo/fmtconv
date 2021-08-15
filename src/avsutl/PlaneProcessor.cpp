@@ -59,6 +59,9 @@ PlaneProcessor::PlaneProcessor (const ::VideoInfo &vi, PlaneProcCbInterface &cb,
 
 void	PlaneProcessor::set_proc_mode (const std::array <double, _max_nbr_planes> &pm_arr)
 {
+	assert (std::find_if (pm_arr.begin (), pm_arr.end (),
+		[] (double mode) { return ! (mode < PlaneProcMode_NBR_ELT); }
+	) == pm_arr.end ());
 	_proc_mode_arr = pm_arr;
 }
 
@@ -107,6 +110,31 @@ void	PlaneProcessor::set_proc_mode (std::string pmode)
 
 
 
+void	PlaneProcessor::set_proc_mode (int plane_index, double mode)
+{
+	assert (plane_index >= 0);
+	assert (plane_index < _nbr_planes);
+	assert (mode < PlaneProcMode_NBR_ELT);
+	assert (mode != double (PlaneProcMode_ILLEGAL));
+
+	_proc_mode_arr [plane_index] = mode;
+}
+
+
+
+double	PlaneProcessor::get_proc_mode (int plane_index) const noexcept
+{
+	assert (plane_index >= 0);
+	assert (plane_index < _nbr_planes);
+
+	const double   mode = _proc_mode_arr [plane_index];
+	assert (mode != double (PlaneProcMode_ILLEGAL));
+
+	return mode;
+}
+
+
+
 void	PlaneProcessor::set_dst_clip_info (ClipType type)
 {
 	set_clip_info (ClipIdx_DST, {}, type);
@@ -151,6 +179,7 @@ void	PlaneProcessor::process_frame (::PVideoFrame &dst_sptr, int n, ::IScriptEnv
 	for (int plane_index = 0; plane_index < _nbr_planes; ++plane_index)
 	{
 		const double   mode = _proc_mode_arr [plane_index];
+		assert (mode != double (PlaneProcMode_ILLEGAL));
 
 		if (   mode == double (PlaneProcMode_PROCESS)
 		    || _manual_flag)

@@ -32,15 +32,16 @@ namespace avsutl
 
 enum PlaneProcMode
 {
-	PlaneProcMode_FILL = 0,
+	PlaneProcMode_ILLEGAL = -999666 * 256, // Exact representation in float & int
+
+	PlaneProcMode_FILL    = 0,
 	PlaneProcMode_GARBAGE,
 	PlaneProcMode_COPY1,
 	PlaneProcMode_PROCESS,
 	PlaneProcMode_COPY2,
 	PlaneProcMode_COPY3,
 
-	PlaneProcMode_NBR_ELT
-
+	PlaneProcMode_NBR_ELT,
 };	// enum PlaneProcMode
 
 

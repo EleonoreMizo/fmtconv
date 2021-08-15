@@ -40,6 +40,8 @@ namespace avsutl
 
 
 
+class PlaneProcCbInterface;
+
 class PlaneProcessor
 {
 
@@ -96,6 +98,8 @@ public:
 
 	void           set_proc_mode (const std::array <double, _max_nbr_planes> &pm_arr);
 	void           set_proc_mode (std::string pmode);
+	void           set_proc_mode (int plane_index, double mode);
+	double         get_proc_mode (int plane_index) const noexcept;
 
 	void           set_dst_clip_info (ClipType type);
 	void           set_clip_info (ClipIdx index, ::PClip clip_sptr, ClipType type);
