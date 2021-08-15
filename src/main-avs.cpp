@@ -10,6 +10,7 @@
 #include "fmtcavs/Matrix2020CL.h"
 #include "fmtcavs/Primaries.h"
 #include "fmtcavs/Resample.h"
+#include "fmtcavs/Transfer.h"
 #include "fstb/def.h"
 
 #include <windows.h>
@@ -78,6 +79,13 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		"[cplaces]s"    "[cplaced]s" "[interlaced]i" "[interlacedd]i" // 48
 		"[tff]i"        "[tffd]i"    "[flt]b"        "[cpuopt]i"      // 52
 		, &main_avs_create <fmtcavs::Resample>, nullptr
+	);
+	env_ptr->AddFunction (fmtcavs_TRANSFER,
+		"c"           "[transs]s"  "[transd]s"  "[cont]f"   //  0
+		"[gcor]f"     "[bits]i"    "[flt]b"     "[fulls]b"  //  4
+		"[fulld]b"    "[logceis]i" "[logceid]i" "[cpuopt]i" //  8
+		"[blacklvl]f" "[planes]."                           // 12
+		, &main_avs_create <fmtcavs::Transfer>, nullptr
 	);
 
 	return "fmtconv - video format conversion";

@@ -155,6 +155,7 @@
     <ClInclude Include="..\..\..\src\fmtcavs\Primaries.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\ProcAlpha.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\Resample.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Transfer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\avsutl\CsPlane.cpp" />
@@ -171,6 +172,7 @@
     <ClCompile Include="..\..\..\src\fmtcavs\Primaries.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\ProcAlpha.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\Resample.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Transfer.cpp" />
     <ClCompile Include="..\..\..\src\main-avs.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

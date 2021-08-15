@@ -36,7 +36,8 @@ namespace fmtcl
 
 enum TransCurve
 {
-	TransCurve_UNDEF = -1,
+	TransCurve_INVALID   = -2,
+	TransCurve_UNDEF     = -1,
 
 	// ITU-T H.265, High efficiency video coding, 2019-11, p. 422-423
 	// Table E.4 - Transfer characteristics interpretation using the

@@ -1569,7 +1569,9 @@ If it’s not the case, floating point operations are silently used as fallback.
 
 <h3><a id="transfer"></a>transfer</h3>
 
-<pre class="proto">fmtc.transfer (
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.transfer (
 	clip       : clip        ;
 	transs     : data[] : opt;
 	transd     : data[] : opt;
@@ -1584,7 +1586,25 @@ If it’s not the case, floating point operations are silently used as fallback.
 	cpuopt     : int    : opt; (-1)
 	blacklvl   : float  : opt; (0)
 	planes     : float[]: opt; (3)
-)</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_transfer (
+	clip   c,
+	string transs (undefined),
+	string transd (undefined),
+	float  cont (1),
+	float  gcor (1),
+	int    bits (undefined),
+	bool   flt (undefined),
+	bool   fulls (true),
+	bool   fulld (true),
+	int    logceis (800),
+	int    logceid (800),
+	int    cpuopt (-1),
+	float  blacklvl (0),
+	arrayf planes (3)
+)</pre></td>
+</tr>
+</table>
 
 <p>Applies electro-optical and opto-electrical transfer characteristics to the
 video signal to convert between linear and gamma-corrected modes.</p>
@@ -1605,6 +1625,8 @@ bitdepth.</p>
 requirement of the functions.</p>
 <p>The function sets the <code>_ColorRange</code> and <code>_Transfer</code>
 frame properties.</p>
+<p><span class="host">Avisynth+</span>  Colorspaces with an alpha channel are
+supported too, but the channel is left untouched.<p>
 
 <h4>Parameters</h4>
 
@@ -1723,6 +1745,12 @@ in Masktools 2.</p>
 <tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Range (full or TV) conversions are ignored.</td></tr>
 <tr><td><b>3</b></td><td>The plane will be processed.</td></tr>
 </table>
+<p><span class="host">Avisynth+</span>  The alpha channel processing is
+disabled and replaced with a straight copy from the source.
+The parameter value can also be a string, like in the
+<code>fmtc_bitdepth</code> function: <code>"all"</code>, <code>""</code>, or a
+combination of <code>"0"</code>, <code>"1"</code>, <code>"2"</code>,
+<code>"r"</code>, <code>"g"</code> and <code>"b"</code>.<p>
 
 
 
