@@ -39,28 +39,28 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 	AVS_linkage = vectors_ptr;
 
 	env_ptr->AddFunction (fmtcavs_BITDEPTH,
-		"c"          "[bits]i"  "[flt]b"         "[planes]s"    //  0
-		"[fulls]b"   "[fulld]b" "[dmode]i"       "[ampo]f"      //  4
-		"[ampn]f"    "[dyn]b"   "[staticnoise]b" "[cpuopt]i"    //  8
-		"[patsize]i" "[tpdfo]b" "[tpdfn]b"       "[corplane]b", // 12
-		&main_avs_create <fmtcavs::Bitdepth>, nullptr
+		"c"          "[bits]i"  "[flt]b"         "[planes]s"   //  0
+		"[fulls]b"   "[fulld]b" "[dmode]i"       "[ampo]f"     //  4
+		"[ampn]f"    "[dyn]b"   "[staticnoise]b" "[cpuopt]i"   //  8
+		"[patsize]i" "[tpdfo]b" "[tpdfn]b"       "[corplane]b" // 12
+		, &main_avs_create <fmtcavs::Bitdepth>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_MATRIX,
-		"c"          "[mat]s"   "[mats]s"      "[matd]s"    // 0
-		"[fulls]b"   "[fulld]b" "[coef]."      "[csp]s"     // 4
-		"[col_fam]s" "[bits]i"  "[singleout]i" "[cpuopt]i", // 8
-		&main_avs_create <fmtcavs::Matrix>, nullptr
+		"c"          "[mat]s"   "[mats]s"      "[matd]s"   // 0
+		"[fulls]b"   "[fulld]b" "[coef]."      "[csp]s"    // 4
+		"[col_fam]s" "[bits]i"  "[singleout]i" "[cpuopt]i" // 8
+		, &main_avs_create <fmtcavs::Matrix>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_MATRIX2020CL,
 		"c"         "[full]b" "[csp]i" "[bits]i" // 0
-		"[cpuopt]i",                             // 4
-		&main_avs_create <fmtcavs::Matrix2020CL>, nullptr
+		"[cpuopt]i"                              // 4
+		, &main_avs_create <fmtcavs::Matrix2020CL>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_PRIMARIES,
-		"c"     "[rs]."    "[gs]."    "[bs]."      // 0
-		"[ws]." "[rd]."    "[gd]."    "[bd]."      // 4
-		"[wd]." "[prims]s" "[primd]s" "[cpuopt]i", // 8
-		&main_avs_create <fmtcavs::Primaries>, nullptr
+		"c"     "[rs]."    "[gs]."    "[bs]."     // 0
+		"[ws]." "[rd]."    "[gd]."    "[bd]."     // 4
+		"[wd]." "[prims]s" "[primd]s" "[cpuopt]i" // 8
+		, &main_avs_create <fmtcavs::Primaries>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_RESAMPLE,
 		"c"             "[w]i"       "[h]i"          "[sx]."          //  0
