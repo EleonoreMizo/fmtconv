@@ -1146,7 +1146,7 @@ Possible values are:</p>
 	arrayi invkstaps  (4),
 	arrayi invkstapsh (invkstaps),
 	arrayi invkstapsv (invkstaps),
-	int    csp (undefined),
+	string csp (undefined),
 	string css (undefined),
 	arrayf planes (3),
 	int    fulls (depends),
@@ -1291,7 +1291,7 @@ Possible values are:</p>
 <tr><td><b><code>"sinc"</code></b></td><td>Truncated sinc function. Use <var>taps</var> to control its length. Same as <code>SincResize</code>.</td></tr>
 </table>
 
-<p class="var">impulse, impulsew, impulseh</p>
+<p class="var">impulse, impulseh, impulsev</p>
 <p>Offers the possibility to create your own kernel (useful for convolutions).
 Add your coefficents in the array.
 The number of coefficients must be odd.
