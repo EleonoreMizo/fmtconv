@@ -32,6 +32,10 @@ http://www.wtfpl.net/ for more details.
 #include "fstb/def.h"
 #include "fstb/ArrayAlign.h"
 
+#if (fstb_ARCHI == fstb_ARCHI_X86)
+	#include <emmintrin.h>
+#endif // fstb_ARCHI_X86
+
 #include <array>
 #include <memory>
 #include <vector>
