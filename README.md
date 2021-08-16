@@ -1,7 +1,7 @@
-﻿fmtconv — format conversion tools for Vapoursynth
-=================================================
+﻿fmtconv — format conversion tools for Vapoursynth and Avisyth+
+==============================================================
 
-Fmtconv is a format-conversion plug-in for the Vapoursynth video processing engine.
+Fmtconv is a format-conversion plug-in for the Vapoursynth and Avisynth+ video processing engines.
 It does:
 * Resizing.
 * Bitdepth conversion with dithering.

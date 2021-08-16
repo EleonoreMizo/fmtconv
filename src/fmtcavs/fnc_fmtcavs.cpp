@@ -326,9 +326,7 @@ void	set_masktools_planes_param (avsutl::PlaneProcessor &pp, ::IScriptEnvironmen
 	{
 		const auto     plist =
 			extract_array_f (env, arg, filter_and_arg_0, def_val);
-		const auto     plist_last = plist.size () - 1;
-		assert (plist_last >= 0);
-		const auto     nbr_planes = size_t (pp.get_nbr_planes ());
+		const auto     nbr_planes = pp.get_nbr_planes ();
 		for (int p_idx = 0; p_idx < nbr_planes; ++p_idx)
 		{
 			const auto     mode = fmtcl::get_arr_elt (plist, p_idx, def_val);

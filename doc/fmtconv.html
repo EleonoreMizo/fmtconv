@@ -3,22 +3,22 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>fmtconv&nbsp;&mdash;&nbsp;format conversion tools for Vapoursynth</title>
+<title>fmtconv&nbsp;&mdash;&nbsp;format conversion tools for Vapoursynth and Avisynth+</title>
 <link rel="stylesheet" type="text/css" href="vapourdoc.css" />
 </head>
 
 <body><div class="global">
 
-<h1>fmtconv&nbsp;&mdash;&nbsp;format conversion tools for Vapoursynth</h1>
+<h1>fmtconv&nbsp;&mdash;&nbsp;format conversion tools for Vapoursynth and Avisynth+</h1>
 
 <h2>Abstract</h2>
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r23</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r24</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
-<tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a></td></tr>
+<tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a> or <a href="https://avs-plus.net/">Avisynth+ 3.7.0</a></td></tr>
 <tr><td class="n"><b>License:     </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.wtfpl.net/">WTFPL</a></td></tr>
 </table>
 
@@ -31,7 +31,8 @@
 <li class="tcont"><a href="#usage">Usage</a>
 	<ol style="list-style-type:armenian; margin-top:0.5em;">
 	<li><a href="#loading">Loading</a></li>
-	<li><a href="#examples">Examples</a></li>
+	<li><a href="#examples">Examples for Vapoursynth</a></li>
+	<li><a href="#examples">Examples for Avisynth+</a></li>
 	<li><a href="#compiling">Compiling from the source code</a></li>
 	</ol>
 </li>
@@ -55,7 +56,8 @@
 
 <h2><a id="intro"></a>I) Introduction</h2>
 
-<p>Fmtconv is a format-conversion plug-in for the Vapoursynth video processing engine.
+<p>Fmtconv is a format-conversion plug-in for the Vapoursynth and Avisynth+
+video processing engines.
 It does:</p>
 <ul>
 <li>Resizing.</li>
@@ -74,11 +76,13 @@ It does:</p>
 This does not mean it is slow or unoptimized, but fmtconv is clearly not on par with the fastest equivalent 8-bit filters.</p>
 
 
+
 <h2><a id="usage"></a>II) Usage</h2>
 
 <h3><a id="loading"></a>Loading fmtconv</h3>
 
-<p>Using the Python 3.4 interface:</p>
+<p>Using the Python 3.8 interface (or a higher version, it depends on your
+Vapoursynth version):</p>
 
 <pre class="src">import vapoursynth as vs
 core = vs.get_core ()
@@ -88,7 +92,8 @@ core.std.LoadPlugin (path=r'C:\path\fmtconv.dll')</pre>
 plug-in file to the autoloading directory.
 Check the Vapoursynth manual for more information.</p>
 
-<h3><a id="examples"></a>Examples</h3>
+
+<h3><a id="examples-vs"></a>Examples for Vapoursynth</h3>
 
 <h4>A basic example</h4>
 
@@ -201,6 +206,12 @@ c = core.fmtc.primaries (clip=c, prims="2100", primd="srgb")
 c = core.fmtc.transfer (clip=c, transs="linear", transd="srgb")
 c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 
+
+<h3><a id="examples-avs"></a>Examples for Avisynth+</h3>
+
+<p><em>Soon…</em></p>
+
+
 <h3><a id="compiling"></a>Compiling from the source code</h3>
 
 <h4>Visual C++</h4>
@@ -234,6 +245,8 @@ make install</pre>
 <li><code>--enable-debug</code> to activate debugging code</li>
 <li><code>--enable-clang</code> to use Clang instead of the default compiler which is usually GCC</li>
 </ul>
+<p>Only the Vapoursynth plug-in can be built in the GNU-based environment.</p>
+
 
 <h2><a id="description"></a>III) Filters description</h2>
 
@@ -1641,45 +1654,47 @@ Supported input formats:</p>
 
 <p class="var">transs, transd</p>
 <p>Transfer characteristics for input and output, respectively.
-The characteristic is direct or inverted according to where it is applied
-(output or input).
-The curve set is the same as in ISO/IEC 23008-2 (HEVC), with a few
-additions.</p>
+The characteristic may be an OETF (opto-electronic transfer function), an
+EOTF (eletro-optical transfer function), or just remain unspecified.
+It is direct or inverted according to where it is applied, output or input.
+The intermediate state is assumed linear light.
+The curve set is the same as the list in ISO/IEC 23008-2 (HEVC), with a few
+additions from various camera manufacturers or NLE systems.</p>
 <p>Most curves map their value from the 0–1 range to 0–1, but some are for
 high dynamic range or wide gamut signals and locate their value for peak white
 much higher.</p>
 <table>
-<tr><th>Value</th><th>Linear range</th><th>Description</th></tr>
-<tr><td><b><code>&quot;709&quot;       </code></b></td><td>0&hellip;1</td><td>ITU-R BT.709</td></tr>
-<tr><td><b><code>&quot;470m&quot;      </code></b></td><td>0&hellip;1</td><td>ITU-R BT.470-6 System M, FCC (assumed display gamma 2.2)<br />Actually uses the same curve as IEC 61966-2-1.</td></tr>
-<tr><td><b><code>&quot;470bg&quot;     </code></b></td><td>0&hellip;1</td><td>ITU-R BT.470-6 System B, G (assumed display gamma 2.8)</td></tr>
-<tr><td><b><code>&quot;601&quot;       </code></b></td><td>0&hellip;1</td><td>ITU-R BT.601</td></tr>
-<tr><td><b><code>&quot;240&quot;       </code></b></td><td>0&hellip;1</td><td>SMPTE 240M</td></tr>
-<tr><td><b><code>&quot;linear&quot;<br />&quot;&quot;</code></b></td><td>Unspecified</td><td>Linear (bypass)</td></tr>
-<tr><td><b><code>&quot;log100&quot;    </code></b></td><td>0&hellip;1</td><td>Logarithmic transfer characteristic (100:1 range)</td></tr>
-<tr><td><b><code>&quot;log316&quot;    </code></b></td><td>0&hellip;1</td><td>Logarithmic transfer characteristic (100*Sqrt(10):1 range)</td></tr>
-<tr><td><b><code>&quot;61966-2-4&quot; </code></b></td><td>Unspecified</td><td>IEC 61966-2-4, xvYCC. Same as BT.709, but with an extended range, inlcuding negative values.</td></tr>
-<tr><td><b><code>&quot;1361&quot;      </code></b></td><td>&minus;0.25&hellip;1.33</td><td>ITU-R BT.1361 extended colour gamut system</td></tr>
-<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>IEC 61966-2-1, sRGB or sYCC</td></tr>
-<tr><td><b><code>&quot;2020_10&quot;   </code></b></td><td>0&hellip;1</td><td>ITU-R BT.2020 for 10-bit system</td></tr>
-<tr><td><b><code>&quot;2020_12&quot;<br />&quot;2020&quot;</code></b></td><td>0&hellip;1</td><td>ITU-R BT.2020 for 12-bit system</td></tr>
-<tr><td><b><code>&quot;2084&quot;      </code></b></td><td>0&hellip;1</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;428&quot;       </code></b></td><td>0&hellip;1</td><td>SMPTE ST 428-1<br />Linear 1.0 is peak white and corresponds to a display luminance level of 48 cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>ITU-R BT.2100 hybrid log-gamma, ARIB STD-B67</td></tr>
-<tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>ITU-R BT.1886. This is an EOTF for display mimicing CRTs.</td></tr>
-<tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>ITU-R BT.1886, alternative approximation</td></tr>
-<tr><td><b><code>&quot;filmstream&quot;</code></b></td><td>0&hellip;1</td><td>Thomson FilmStream<br />Linear 1.0 is the sensor clipping level, corresponding to 3840 on a linear 12-bit scale.</td></tr>
-<tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
-<tr><td><b><code>&quot;slog2&quot;      </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
-<tr><td><b><code>&quot;slog3&quot;     </code></b></td><td>0&hellip;38.421</td><td>Sony S-Log3.</td></tr>
-<tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 2.x, linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
-<tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 3.x, linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
-<tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
-<tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td>Adobe RGB (1998 and Wide Gamut)</td></tr>
-<tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td>ProPhoto, ROMM</td></tr>
-<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
-<tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>ERIMM</td></tr>
-<tr><td><b><code>&quot;vlog&quot;     </code></b></td><td>0&hellip;1</td><td>Panasonic V-Log</td></tr>
+<tr><th>Value</th><th>Linear range</th><th>Type</th><th>Description</th></tr>
+<tr><td><b><code>&quot;709&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.709</td></tr>
+<tr><td><b><code>&quot;470m&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.470-6 System M, FCC (assumed display gamma 2.2)<br />Actually uses the same curve as IEC 61966-2-1.</td></tr>
+<tr><td><b><code>&quot;470bg&quot;     </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.470-6 System B, G (assumed display gamma 2.8)</td></tr>
+<tr><td><b><code>&quot;601&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.601</td></tr>
+<tr><td><b><code>&quot;240&quot;       </code></b></td><td>0&hellip;1</td><td></td><td>SMPTE 240M</td></tr>
+<tr><td><b><code>&quot;linear&quot;<br />&quot;&quot;</code></b></td><td>Unspecified</td><td></td><td>Linear (bypass)</td></tr>
+<tr><td><b><code>&quot;log100&quot;    </code></b></td><td>0&hellip;1</td><td></td><td>Logarithmic transfer characteristic (100:1 range)</td></tr>
+<tr><td><b><code>&quot;log316&quot;    </code></b></td><td>0&hellip;1</td><td></td><td>Logarithmic transfer characteristic (100*Sqrt(10):1 range)</td></tr>
+<tr><td><b><code>&quot;61966-2-4&quot; </code></b></td><td>Unspecified</td><td>OETF</td><td>IEC 61966-2-4, xvYCC. Same as BT.709, but with an extended range, including negative values.</td></tr>
+<tr><td><b><code>&quot;1361&quot;      </code></b></td><td>&minus;0.25&hellip;1.33</td><td></td><td>ITU-R BT.1361 extended colour gamut system</td></tr>
+<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>IEC 61966-2-1, sRGB or sYCC</td></tr>
+<tr><td><b><code>&quot;2020_10&quot;   </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.2020 for 10-bit system</td></tr>
+<tr><td><b><code>&quot;2020_12&quot;<br />&quot;2020&quot;</code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.2020 for 12-bit system</td></tr>
+<tr><td><b><code>&quot;2084&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;428&quot;       </code></b></td><td>0&hellip;1</td><td></td><td>SMPTE ST 428-1<br />Linear 1.0 is peak white and corresponds to a display luminance level of 48 cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.2100 HLG (hybrid log-gamma), ARIB STD-B67</td></tr>
+<tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>ITU-R BT.1886. Intended to mimicing a CRT display curve.</td></tr>
+<tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>ITU-R BT.1886, alternative approximation</td></tr>
+<tr><td><b><code>&quot;filmstream&quot;</code></b></td><td>0&hellip;1</td><td>OETF?</td><td>Thomson FilmStream<br />Linear 1.0 is the sensor clipping level, corresponding to 3840 on a linear 12-bit scale.</td></tr>
+<tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>OETF?</td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
+<tr><td><b><code>&quot;slog2&quot;      </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>OETF?</td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
+<tr><td><b><code>&quot;slog3&quot;     </code></b></td><td>0&hellip;38.421</td><td>OETF?</td><td>Sony S-Log3.</td></tr>
+<tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>OETF?</td><td>Arri Log C Alexa 2.x, linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
+<tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>OETF?</td><td>Arri Log C Alexa 3.x, linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
+<tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>OETF</td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
+<tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td></td><td>Adobe RGB (1998 and Wide Gamut)</td></tr>
+<tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>ProPhoto, ROMM</td></tr>
+<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
+<tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>OETF</td><td>ERIMM</td></tr>
+<tr><td><b><code>&quot;vlog&quot;     </code></b></td><td>0&hellip;1</td><td></td><td>Panasonic V-Log</td></tr>
 </table>
 
 <p class="var">cont</p>
@@ -1791,7 +1806,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
-<p><b>r24, 202?-??-??</b></p>
+<p><b>r24, 2021-08-16</b></p>
 <ul>
 <li><code>bitdepth</code>: added dithering <var>mode</var> 9: quasirandom sequences.</li>
 <li><code>bitdepth</code>: added a triangular probability distribution function (TPDF) for the dithering patterns and noises, along with the associated parameters <var>tpdfo</var> and <var>tpdfn</var>.</li>
@@ -1804,6 +1819,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>resample</code>: added a <var>planes</var> parameter.</li>
 <li><code>transfer</code>: sYCC curve (similar to sRGB) now supports signed values.</li>
 <li><code>transfer</code>: added a <var>planes</var> parameter.</li>
+<li>Added support for Avisynth+</li>
 <li>Added information on functions reading and writing frame properties.</li>
 <li>Added support for 14-bit data.</li>
 <li>Vapoursynth: still uses API v3.6 but can use Python constants from API v4.0.</li>

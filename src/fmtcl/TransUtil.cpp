@@ -117,7 +117,7 @@ std::unique_ptr <TransLut>	TransUtil::build_lut (PicFmt dst_fmt, TransCurve curv
 	{
 		/*
 		Black level (brightness) and contrast settings as defined
-		in ITU-R BT.1886:
+		in ITU-R BT.1886, and called "b":
 			L = a' * fi (V + b')
 
 		With:
