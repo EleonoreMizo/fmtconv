@@ -156,6 +156,8 @@ commonsrc = \
         ../../src/fmtcl/fnc_fmtcl.cpp \
         ../../src/fmtcl/fnc.h \
         ../../src/fmtcl/fnc.hpp \
+        ../../src/fmtcl/GammaY.cpp \
+        ../../src/fmtcl/GammaY.h \
         ../../src/fmtcl/InterlacingType.h \
         ../../src/fmtcl/KernelData.cpp \
         ../../src/fmtcl/KernelData.h \
@@ -315,6 +317,8 @@ fmtcltest_LDADD =
 noinst_LTLIBRARIES =
 
 fmtcltest_SOURCES =  $(commonsrc) \
+        ../../src/test/TestGammaY.cpp \
+        ../../src/test/TestGammaY.h \
         ../../src/test/main.cpp
 
 

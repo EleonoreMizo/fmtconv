@@ -24,6 +24,7 @@ http://www.wtfpl.net/ for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fstb/def.h"
+#include "test/TestGammaY.h"
 
 #if defined (_MSC_VER)
 #include <crtdbg.h>
@@ -170,7 +171,7 @@ int main (int argc, char *argv [])
 
 	try
 	{
-
+		if (ret_val == 0) { ret_val = TestGammaY::perform_test (); }
 
 
 

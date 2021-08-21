@@ -198,6 +198,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\FilterResize.h" />
     <ClInclude Include="..\..\..\src\fmtcl\fnc.h" />
     <ClInclude Include="..\..\..\src\fmtcl\fnc.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\GammaY.h" />
     <ClInclude Include="..\..\..\src\fmtcl\InterlacingType.h" />
     <ClInclude Include="..\..\..\src\fmtcl\KernelData.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Mat3.h" />
@@ -313,6 +314,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\ErrDifBufFactory.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\FilterResize.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\fnc_fmtcl.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\GammaY.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\KernelData.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\Matrix2020CLProc.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\MatrixProc.cpp" />

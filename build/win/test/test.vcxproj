@@ -130,9 +130,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\test\TestGammaY.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\test\main.cpp" />
+    <ClCompile Include="..\..\..\src\test\TestGammaY.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
