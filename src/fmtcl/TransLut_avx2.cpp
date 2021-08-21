@@ -48,27 +48,37 @@ template <class M>
 class TransLut_FindIndexAvx2
 {
 public:
-	static const int  LINLUT_RES_L2  = TransLut::LINLUT_RES_L2;
-	static const int  LINLUT_MIN_F   = TransLut::LINLUT_MIN_F;
-	static const int  LINLUT_MAX_F   = TransLut::LINLUT_MAX_F;
-	static const int  LINLUT_SIZE_F  = TransLut::LINLUT_SIZE_F;
+	static constexpr int LINLUT_RES_L2 = TransLut::LINLUT_RES_L2;
+	static constexpr int LINLUT_MIN_F  = TransLut::LINLUT_MIN_F;
+	static constexpr int LINLUT_MAX_F  = TransLut::LINLUT_MAX_F;
+	static constexpr int LINLUT_SIZE_F = TransLut::LINLUT_SIZE_F;
 
-	static const int  LOGLUT_MIN_L2  = TransLut::LOGLUT_MIN_L2;
-	static const int  LOGLUT_MAX_L2  = TransLut::LOGLUT_MAX_L2;
-	static const int  LOGLUT_RES_L2  = TransLut::LOGLUT_RES_L2;
-	static const int  LOGLUT_HSIZE   = TransLut::LOGLUT_HSIZE;
-	static const int  LOGLUT_SIZE    = TransLut::LOGLUT_SIZE;
+	static constexpr int LOGLUT_MIN_L2 = TransLut::LOGLUT_MIN_L2;
+	static constexpr int LOGLUT_MAX_L2 = TransLut::LOGLUT_MAX_L2;
+	static constexpr int LOGLUT_RES_L2 = TransLut::LOGLUT_RES_L2;
+	static constexpr int LOGLUT_HSIZE  = TransLut::LOGLUT_HSIZE;
+	static constexpr int LOGLUT_SIZE   = TransLut::LOGLUT_SIZE;
 
 	static inline void
-		            find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac);
+		            find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac) noexcept;
 };
+
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LINLUT_RES_L2;
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LINLUT_MIN_F;
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LINLUT_MAX_F;
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LINLUT_SIZE_F;
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LOGLUT_MIN_L2;
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LOGLUT_MAX_L2;
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LOGLUT_RES_L2;
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LOGLUT_HSIZE;
+template <class M> constexpr int	TransLut_FindIndexAvx2 <M>::LOGLUT_SIZE;
 
 
 
 template <>
-void	TransLut_FindIndexAvx2 <TransLut::MapperLin>::find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
+void	TransLut_FindIndexAvx2 <TransLut::MapperLin>::find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac) noexcept
 {
-	assert (val_arr != 0);
+	assert (val_arr != nullptr);
 
 	const __m256   scale     = _mm256_set1_ps (1 << LINLUT_RES_L2);
 	const __m256i  offset    =
@@ -89,18 +99,18 @@ void	TransLut_FindIndexAvx2 <TransLut::MapperLin>::find_index (const TransLut::F
 
 
 template <>
-void	TransLut_FindIndexAvx2 <TransLut::MapperLog>::find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac)
+void	TransLut_FindIndexAvx2 <TransLut::MapperLog>::find_index (const TransLut::FloatIntMix val_arr [8], __m256i &index, __m256 &frac) noexcept
 {
-	assert (val_arr != 0);
+	assert (val_arr != nullptr);
 
 	// Constants
-	static const int      mant_size = 23;
-	static const int      exp_bias  = 127;
-	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
-	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-//	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
-	static const int      frac_size = mant_size - LOGLUT_RES_L2;
-	static const uint32_t frac_mask = (1 << frac_size) - 1;
+	constexpr int        mant_size = 23;
+	constexpr int        exp_bias  = 127;
+	constexpr uint32_t   base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
+	constexpr float      val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
+//	constexpr float      val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
+	constexpr int        frac_size = mant_size - LOGLUT_RES_L2;
+	constexpr uint32_t   frac_mask = (1 << frac_size) - 1;
 
 	const __m256   zero_f     = _mm256_setzero_ps ();
 	const __m256   one_f      = _mm256_set1_ps (1);
@@ -167,7 +177,7 @@ void	TransLut_FindIndexAvx2 <TransLut::MapperLog>::find_index (const TransLut::F
 
 
 template <class T>
-static fstb_FORCEINLINE void	TransLut_store_avx2 (T *dst_ptr, __m256 val)
+static fstb_FORCEINLINE void	TransLut_store_avx2 (T *dst_ptr, __m256 val) noexcept
 {
 	_mm256_store_si256 (
 		reinterpret_cast <__m256i *> (dst_ptr),
@@ -175,7 +185,7 @@ static fstb_FORCEINLINE void	TransLut_store_avx2 (T *dst_ptr, __m256 val)
 	);
 }
 
-static fstb_FORCEINLINE void	TransLut_store_avx2 (float *dst_ptr, __m256 val)
+static fstb_FORCEINLINE void	TransLut_store_avx2 (float *dst_ptr, __m256 val) noexcept
 {
 	_mm256_store_ps (dst_ptr, val);
 }
@@ -217,10 +227,10 @@ void	TransLut::init_proc_fnc_avx2 (int selector)
 
 
 template <class TD, class M>
-void	TransLut::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
+void	TransLut::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept
 {
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
+	assert (dst_ptr != nullptr);
+	assert (src_ptr != nullptr);
 	assert (stride_dst != 0 || h == 1);
 	assert (stride_src != 0 || h == 1);
 	assert (w > 0);

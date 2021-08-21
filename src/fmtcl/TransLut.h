@@ -52,19 +52,19 @@ public:
 
 	typedef	TransLut	ThisType;
 
-	static const int  LINLUT_RES_L2  = 16; // log2 of the linear table resolution (size of a unity segment)
-	static const int  LINLUT_MIN_F   = -1; // Min value for float LUTs
-	static const int  LINLUT_MAX_F   = 2;  // Max value for float LUTs
+	static constexpr int LINLUT_RES_L2  = 16; // log2 of the linear table resolution (size of a unity segment)
+	static constexpr int LINLUT_MIN_F   = -1; // Min value for float LUTs
+	static constexpr int LINLUT_MAX_F   = 2;  // Max value for float LUTs
 
-	static const int  LINLUT_SIZE_F  = ((LINLUT_MAX_F - LINLUT_MIN_F) << LINLUT_RES_L2) + 1;
+	static constexpr int LINLUT_SIZE_F  = ((LINLUT_MAX_F - LINLUT_MIN_F) << LINLUT_RES_L2) + 1;
 
 	// Log LUT are only for floating point input
-	static const int  LOGLUT_MIN_L2  = -32; // log2(x) for the first index in a log table (negative)
-	static const int  LOGLUT_MAX_L2  = 16;  // log2(x) for the last index in a log table (positive)
-	static const int  LOGLUT_RES_L2  = 10;  // log2 of the log table resolution (size of each [x ; 2*x[ segment).
+	static constexpr int LOGLUT_MIN_L2  = -32; // log2(x) for the first index in a log table (negative)
+	static constexpr int LOGLUT_MAX_L2  = 16;  // log2(x) for the last index in a log table (positive)
+	static constexpr int LOGLUT_RES_L2  = 10;  // log2 of the log table resolution (size of each [x ; 2*x[ segment).
 
-	static const int  LOGLUT_HSIZE   = ((LOGLUT_MAX_L2 - LOGLUT_MIN_L2) << LOGLUT_RES_L2) + 1; // Table made of half-open segments (and whitout x=0) + 1 more value for LOGLUT_MAX, closing the last segment.
-	static const int  LOGLUT_SIZE    = 2 * LOGLUT_HSIZE + 1;   // Negative + 0 + positive
+	static constexpr int LOGLUT_HSIZE   = ((LOGLUT_MAX_L2 - LOGLUT_MIN_L2) << LOGLUT_RES_L2) + 1; // Table made of half-open segments (and whitout x=0) + 1 more value for LOGLUT_MAX, closing the last segment.
+	static constexpr int LOGLUT_SIZE    = 2 * LOGLUT_HSIZE + 1;   // Negative + 0 + positive
 
 	union FloatIntMix
 	{
@@ -75,30 +75,30 @@ public:
 	class MapperLin
 	{
 	public:
-		explicit       MapperLin (int lut_size, double range_beg, double range_lst);
-		inline int     get_lut_size () const { return (_lut_size); }
-		inline double  find_val (int index) const;
+		explicit       MapperLin (int lut_size, double range_beg, double range_lst) noexcept;
+		inline int     get_lut_size () const noexcept { return (_lut_size); }
+		inline double  find_val (int index) const noexcept;
 		static inline void
-		               find_index (const FloatIntMix &val, int &index, float &frac);
+		               find_index (const FloatIntMix &val, int &index, float &frac) noexcept;
 	private:
-		const int      _lut_size;
-		const double   _range_beg;
-		const double   _step;
+		const int      _lut_size  = 0;
+		const double   _range_beg = 0;
+		const double   _step      = 0;
 	};
 
 	class MapperLog
 	{
 	public:
-		inline int     get_lut_size () const { return (LOGLUT_SIZE); }
-		inline double  find_val (int index) const;
+		inline int     get_lut_size () const noexcept { return (LOGLUT_SIZE); }
+		inline double  find_val (int index) const noexcept;
 		static inline void
-		               find_index (const FloatIntMix &val, int &index, float &frac);
+		               find_index (const FloatIntMix &val, int &index, float &frac) noexcept;
 	};
 
 	explicit       TransLut (const TransOpInterface &curve, bool log_flag, SplFmt src_fmt, int src_bits, bool src_full_flag, SplFmt dst_fmt, int dst_bits, bool dst_full_flag, bool sse2_flag, bool avx2_flag);
 	virtual			~TransLut () {}
 
-	void           process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h);
+	void           process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
 
 
 
@@ -117,7 +117,7 @@ private:
 	{
 	public:
 		static inline T
-		               cast (float val);
+		               cast (float val) noexcept;
 	};
 
 	void           generate_lut (const TransOpInterface &curve);
@@ -133,33 +133,38 @@ private:
 #endif
 
 	template <class TS, class TD>
-	void           process_plane_int_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h);
+	void           process_plane_int_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
 	template <class TD, class M>
-	void           process_plane_flt_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h);
+	void           process_plane_flt_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	template <class TD, class M>
-	void           process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h);
+	void           process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
 	template <class TD, class M>
-	void           process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h);
+	void           process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
 #endif
 
-	bool           _loglut_flag;
+	bool           _loglut_flag   = false;
 
-	SplFmt         _src_fmt;         // SplFmt_STACK16 not supported at the moment.
-	int            _src_bits;
-	bool           _src_full_flag;
+	// SplFmt_STACK16 not supported at the moment.
+	SplFmt         _src_fmt       = SplFmt_ILLEGAL;
+	int            _src_bits      = 0;
+	bool           _src_full_flag = false;
 
-	SplFmt         _dst_fmt;         // SplFmt_STACK16 not supported at the moment.
-	int            _dst_bits;
-	bool           _dst_full_flag;
+	// SplFmt_STACK16 not supported at the moment.
+	SplFmt         _dst_fmt       = SplFmt_ILLEGAL;
+	int            _dst_bits      = 0;
+	bool           _dst_full_flag = false;
 
-	bool           _sse2_flag;
-	bool           _avx2_flag;
+	bool           _sse2_flag     = false;
+	bool           _avx2_flag     = false;
 
 	void (ThisType:: *
-	               _process_plane_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h);
+	               _process_plane_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept = nullptr;
 
-	ArrayMultiType _lut;            // Opaque array, contains uint8_t, uint16_t or float depending on the output datatype. Table size is always 256, 65536 or 65536*3+1 (float input, covering -1 to +2 range).
+	// Opaque array, contains uint8_t, uint16_t or float depending on the
+	// output datatype. Table size is always 256, 65536 or 65536*3+1
+	// (float input, covering -1 to +2 range inclusive).
+	ArrayMultiType _lut;
 
 
 
