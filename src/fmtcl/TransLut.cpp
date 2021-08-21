@@ -387,15 +387,15 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 
 	else
 	{
+		assert (! _loglut_flag);
+
 		int            range = 1 << _src_bits;
-		if (_src_bits <= 8)
+		if (_src_fmt == SplFmt_INT8)
 		{
-			_lut.set_type <uint8_t> ();
 			_lut.resize (1 << 8);
 		}
 		else
 		{
-			_lut.set_type <uint16_t> ();
 			_lut.resize (1 << 16);
 		}
 		const int      sb16  = (_src_full_flag) ? 0      :  16 << 8;
@@ -407,6 +407,7 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		const double   r_lst = double (range - 1 - sbn) / sdif;
 		if (_dst_fmt == SplFmt_FLOAT)
 		{
+			_lut.set_type <float> ();
 			MapperLin      mapper (range, r_beg, r_lst);
 			generate_lut_flt <float> (curve, mapper);
 		}
@@ -420,12 +421,14 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 			const double   add  = dbn;
 			if (_dst_bits > 8)
 			{
+				_lut.set_type <uint16_t> ();
 				generate_lut_int <uint16_t> (
 					curve, range, r_beg, r_lst, mul, add
 				);
 			}
 			else
 			{
+				_lut.set_type <uint8_t> ();
 				generate_lut_int <uint8_t> (
 					curve, range, r_beg, r_lst, mul, add
 				);
@@ -473,6 +476,8 @@ void	TransLut::generate_lut_flt (const TransOpInterface &curve, const M &mapper)
 
 void	TransLut::init_proc_fnc ()
 {
+	assert (! _loglut_flag || _src_fmt == SplFmt_FLOAT);
+
 	const int      s =
 		  (_loglut_flag            ) ? 0
 		: (_src_fmt == SplFmt_FLOAT) ? 1
