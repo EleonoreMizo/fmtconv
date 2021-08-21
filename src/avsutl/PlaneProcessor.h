@@ -118,6 +118,7 @@ public:
 	bool           is_manual () const;
 	PlaneProcMode  get_mode (int plane_index) const;
 	double         get_fill_val (int plane_index) const;
+	void           process_plane_default (::PVideoFrame &dst_sptr, int n, ::IScriptEnvironment &env, int plane_index);
 	void           fill_plane (::PVideoFrame &dst_sptr, int n, double val, int plane_index);
 	void           copy_plane (::PVideoFrame &dst_sptr, ClipIdx clip_idx, int n, int plane_index, ::IScriptEnvironment &env);
 
@@ -160,7 +161,7 @@ private:
 	static bool    have_same_height (ClipType t1, ClipType t2);
 	static bool    is_stacked (ClipType type);
 
-	const ::VideoInfo & // For the destination clip. May changed during the filter setup.
+	const ::VideoInfo & // For the destination clip. May be changed during the filter setup.
 	               _vi;
 	PlaneProcCbInterface &
 	               _cb;

@@ -174,8 +174,6 @@ void	PlaneProcessor::process_frame (::PVideoFrame &dst_sptr, int n, ::IScriptEnv
 	assert (dst_sptr->IsWritable ());
 	assert (n >= 0);
 
-	const ClipType	type_dst = _clip_info_arr [0]._type;
-
 	for (int plane_index = 0; plane_index < _nbr_planes; ++plane_index)
 	{
 		const double   mode = _proc_mode_arr [plane_index];
@@ -187,26 +185,9 @@ void	PlaneProcessor::process_frame (::PVideoFrame &dst_sptr, int n, ::IScriptEnv
 			const int      plane_id = get_plane_id (plane_index, ClipIdx_DST);
 			_cb.process_plane (dst_sptr, n, env, plane_index, plane_id, ctx_ptr);
 		}
-
-		else if (   mode >= double (PlaneProcMode_COPY1)
-		         && mode <= double (PlaneProcMode_COPY3))
+		else
 		{
-			static constexpr ClipIdx burp [PlaneProcMode_NBR_ELT] =
-			{
-				ClipIdx_INVALID, ClipIdx_INVALID, ClipIdx_SRC1,
-				ClipIdx_INVALID, ClipIdx_SRC2, ClipIdx_SRC3
-			};
-			const int         mode_i    = fstb::round_int (mode);
-			const ClipIdx     src_index = burp [mode_i];
-			if (_clip_info_arr [src_index]._clip_sptr)
-			{
-				copy (dst_sptr, n, plane_index, type_dst, src_index, env);
-			}
-		}
-
-		else if (mode < double (PlaneProcMode_FILL + 1))
-		{
-			fill (dst_sptr, n, plane_index, type_dst, float (-mode));
+			process_plane_default (dst_sptr, n, env, plane_index);
 		}
 	}
 }
@@ -309,6 +290,46 @@ double	PlaneProcessor::get_fill_val (int plane_index) const
 	assert (val < double (PlaneProcMode_FILL + 1));
 
 	return val;
+}
+
+
+
+void	PlaneProcessor::process_plane_default (::PVideoFrame &dst_sptr, int n, ::IScriptEnvironment &env, int plane_index)
+{
+	assert (plane_index >= 0);
+	assert (plane_index < _nbr_planes);
+
+	const ClipType	type_dst = _clip_info_arr [0]._type;
+
+	const double   mode = _proc_mode_arr [plane_index];
+	assert (mode != double (PlaneProcMode_ILLEGAL));
+
+	if (mode == double (PlaneProcMode_PROCESS))
+	{
+		// We shouldn't be there, but this is not critical.
+		assert (false);
+	}
+
+	else if (   mode >= double (PlaneProcMode_COPY1)
+	         && mode <= double (PlaneProcMode_COPY3))
+	{
+		static constexpr ClipIdx burp [PlaneProcMode_NBR_ELT] =
+		{
+			ClipIdx_INVALID, ClipIdx_INVALID, ClipIdx_SRC1,
+			ClipIdx_INVALID, ClipIdx_SRC2, ClipIdx_SRC3
+		};
+		const int         mode_i    = fstb::round_int (mode);
+		const ClipIdx     src_index = burp [mode_i];
+		if (_clip_info_arr [src_index]._clip_sptr)
+		{
+			copy (dst_sptr, n, plane_index, type_dst, src_index, env);
+		}
+	}
+
+	else if (mode < double (PlaneProcMode_FILL + 1))
+	{
+		fill (dst_sptr, n, plane_index, type_dst, float (-mode));
+	}
 }
 
 
