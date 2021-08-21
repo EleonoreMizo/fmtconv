@@ -13,6 +13,8 @@
 @mkdir "reltmp\build\win\fmtconv"
 @mkdir "reltmp\vapoursynth\win32"
 @mkdir "reltmp\vapoursynth\win64"
+@mkdir "reltmp\avisynth+\win32"
+@mkdir "reltmp\avisynth+\win64"
 @xcopy /I "doc"                                        "reltmp\doc"
 @xcopy /I "src\avs"                                    "reltmp\src\avs"
 @xcopy /I "src\avsutl"                                 "reltmp\src\avsutl"
