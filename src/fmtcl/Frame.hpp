@@ -95,7 +95,7 @@ constexpr bool	Frame <T>::is_valid (int nbr_planes, int h) const noexcept
 
 	for (int p = 0; p < nbr_planes; ++p)
 	{
-		if ((*this) [p].is_valid (h))
+		if (! (*this) [p].is_valid (h))
 		{
 			return false;
 		}
