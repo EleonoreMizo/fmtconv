@@ -25,6 +25,7 @@ http://www.wtfpl.net/ for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "avsutl/fnc.h"
+#include "fmtcavs/FmtAvs.h"
 #include "fmtcavs/Bitdepth.h"
 #include "fmtcavs/CpuOpt.h"
 #include "fmtcavs/fnc.h"
@@ -58,6 +59,7 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Guess the output format if incomplete
+	const FmtAvs   fmt_src (_vi_src);
 	int            res      = args [Param_BITS].AsInt (-1);
 	const auto &   arg_flt  = args [Param_FLT];
 	bool           flt_flag = arg_flt.AsBool ();
@@ -90,16 +92,9 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Builds and validates the output format
-	vi.pixel_type &= ~::VideoInfo::CS_Sample_Bits_Mask;
-	switch (res)
-	{
-	case 8:  vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_8;  break;
-	case 10: vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_10; break;
-	case 12: vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_12; break;
-	case 16: vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_16; break;
-	case 32: vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_32; break;
-	default: assert (false); break;
-	}
+	auto           fmt_dst = fmt_src;
+	fmt_dst.set_bitdepth (res);
+	fmt_dst.conv_to_vi (vi);
 
 	// Conversion-related things
 	_fulls_flag     =
