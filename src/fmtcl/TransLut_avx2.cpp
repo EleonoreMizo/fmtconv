@@ -227,21 +227,17 @@ void	TransLut::init_proc_fnc_avx2 (int selector)
 
 
 template <class TD, class M>
-void	TransLut::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept
+void	TransLut::process_plane_flt_any_avx2 (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr != nullptr);
-	assert (src_ptr != nullptr);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
 	for (int y = 0; y < h; ++y)
 	{
-		const FloatIntMix *  s_ptr =
-			reinterpret_cast <const FloatIntMix *> (src_ptr);
-		TD *                 d_ptr =
-			reinterpret_cast <               TD *> (dst_ptr);
+		const PlaneRO <FloatIntMix>   s { src };
+		const Plane <TD>              d { dst };
 
 		for (int x = 0; x < w; x += 8)
 		{
@@ -251,7 +247,7 @@ void	TransLut::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 				uint32_t           _scal [8];
 			}                  index;
 			__m256             lerp;
-			TransLut_FindIndexAvx2 <M>::find_index (s_ptr + x, index._vect, lerp);
+			TransLut_FindIndexAvx2 <M>::find_index (s._ptr + x, index._vect, lerp);
 #if 1	// Looks as fast as _mm256_set_ps
 			// G++ complains about sizeof() as argument
 			__m256             val = _mm256_i32gather_ps (
@@ -284,11 +280,11 @@ void	TransLut::process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_
 #endif
 			const __m256       dif = _mm256_sub_ps (va2, val);
 			val = _mm256_add_ps (val, _mm256_mul_ps (dif, lerp));
-			TransLut_store_avx2 (&d_ptr [x], val);
+			TransLut_store_avx2 (&d._ptr [x], val);
 		}
 
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
+		src.step_line ();
+		dst.step_line ();
 	}
 
 	_mm256_zeroupper ();	// Back to SSE state

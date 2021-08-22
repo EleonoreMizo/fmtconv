@@ -238,17 +238,15 @@ TransLut::TransLut (const TransOpInterface &curve, bool log_flag, SplFmt src_fmt
 
 
 
-void	TransLut::process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept
+void	TransLut::process_plane (const Plane <> &dst, const PlaneRO <> &src, int w, int h) const noexcept
 {
-	assert (dst_ptr != nullptr);
-	assert (src_ptr != nullptr);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
 	assert (_process_plane_ptr != nullptr);
-	(this->*_process_plane_ptr) (dst_ptr, src_ptr, stride_dst, stride_src, w, h);
+	(this->*_process_plane_ptr) (dst, src, w, h);
 }
 
 
@@ -556,64 +554,58 @@ void	TransLut::init_proc_fnc_sse2 (int selector)
 
 
 template <class TS, class TD>
-void	TransLut::process_plane_int_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept
+void	TransLut::process_plane_int_any_cpp (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr != nullptr);
-	assert (src_ptr != nullptr);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
 	for (int y = 0; y < h; ++y)
 	{
-		const TS *     s_ptr = reinterpret_cast <const TS *> (src_ptr);
-		TD *           d_ptr = reinterpret_cast <      TD *> (dst_ptr);
+		const PlaneRO <TS>   s { src };
+		const Plane <TD>     d { dst };
 
 		for (int x = 0; x < w; ++x)
 		{
-			const int          index = s_ptr [x];
-			d_ptr [x] = _lut.use <TD> (index);
+			const int          index = s._ptr [x];
+			d._ptr [x] = _lut.use <TD> (index);
 		}
 
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
 
 
 template <class TD, class M>
-void	TransLut::process_plane_flt_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept
+void	TransLut::process_plane_flt_any_cpp (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr != nullptr);
-	assert (src_ptr != nullptr);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
 	for (int y = 0; y < h; ++y)
 	{
-		const FloatIntMix *  s_ptr =
-			reinterpret_cast <const FloatIntMix *> (src_ptr);
-		TD *                 d_ptr =
-			reinterpret_cast <               TD *> (dst_ptr);
+		const PlaneRO <FloatIntMix>   s { src };
+		const Plane <TD>              d { dst };
 
 		for (int x = 0; x < w; ++x)
 		{
 			int                index;
 			float              lerp;
-			M::find_index (s_ptr [x], index, lerp);
+			M::find_index (s._ptr [x], index, lerp);
 			const float        p_0  = _lut.use <float> (index    );
 			const float        p_1  = _lut.use <float> (index + 1);
 			const float        dif  = p_1 - p_0;
 			const float        val  = p_0 + lerp * dif;
-			d_ptr [x] = Convert <TD>::cast (val);
+			d._ptr [x] = Convert <TD>::cast (val);
 		}
 
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
@@ -624,21 +616,17 @@ void	TransLut::process_plane_flt_any_cpp (uint8_t *dst_ptr, const uint8_t *src_p
 
 
 template <class TD, class M>
-void	TransLut::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept
+void	TransLut::process_plane_flt_any_sse2 (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr != nullptr);
-	assert (src_ptr != nullptr);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
 	for (int y = 0; y < h; ++y)
 	{
-		const FloatIntMix *  s_ptr =
-			reinterpret_cast <const FloatIntMix *> (src_ptr);
-		TD *                 d_ptr =
-			reinterpret_cast <               TD *> (dst_ptr);
+		const PlaneRO <FloatIntMix>   s { src };
+		const Plane <TD>              d { dst };
 
 		for (int x = 0; x < w; x += 4)
 		{
@@ -648,7 +636,7 @@ void	TransLut::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_
 				uint32_t           _scal [4];
 			}                  index;
 			__m128             lerp;
-			TransLut_FindIndexSse2 <M>::find_index (s_ptr + x, index._vect, lerp);
+			TransLut_FindIndexSse2 <M>::find_index (s._ptr + x, index._vect, lerp);
 			__m128             val = _mm_set_ps (
 				_lut.use <float> (index._scal [3]    ),
 				_lut.use <float> (index._scal [2]    ),
@@ -663,11 +651,11 @@ void	TransLut::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_
 			);
 			const __m128       dif = _mm_sub_ps (va2, val);
 			val = _mm_add_ps (val, _mm_mul_ps (dif, lerp));
-			TransLut_store_sse2 (&d_ptr [x], val);
+			TransLut_store_sse2 (&d._ptr [x], val);
 		}
 
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 

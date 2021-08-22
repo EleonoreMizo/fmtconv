@@ -24,6 +24,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/FrameRO.h"
 #include "fmtcl/GammaY.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
@@ -164,17 +165,15 @@ GammaY::GammaY (SplFmt src_fmt, int src_res, SplFmt dst_fmt, int dst_res, double
 
 
 
-void	GammaY::process_plane (const DstPtrArray &dst_arr, const SrcPtrArray &src_arr, const StrideArray &stride_dst_arr, const StrideArray &stride_src_arr, int w, int h) const noexcept
+void	GammaY::process_plane (const Frame <> &dst_arr, const FrameRO <> &src_arr, int w, int h) const noexcept
 {
-	assert (std::find (dst_arr.begin (), dst_arr.end (), nullptr) == dst_arr.end ());
-	assert (std::find (src_arr.begin (), src_arr.end (), nullptr) == src_arr.end ());
-	assert (h == 1 || std::find (stride_dst_arr.begin (), stride_dst_arr.end (), 0) == stride_dst_arr.end ());
-	assert (h == 1 || std::find (stride_src_arr.begin (), stride_src_arr.end (), 0) == stride_src_arr.end ());
+	assert (dst_arr.is_valid (_nbr_planes, h));
+	assert (src_arr.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
 	assert (_process_plane_ptr != nullptr);
-	(this->*_process_plane_ptr) (dst_arr, src_arr, stride_dst_arr, stride_src_arr, w, h);
+	(this->*_process_plane_ptr) (dst_arr, src_arr, w, h);
 }
 
 
@@ -249,7 +248,7 @@ inline uint16_t GammaY::Conv <uint16_t, float, SHFT>::conv (float x) noexcept
 // FLT_FLAG indicates that the gain is float, whatever in/out datatype.
 // We need it when gain > 1 (consequence of gamma < 1).
 template <typename TS, typename TD, bool FLT_FLAG, int SHFT>
-void	GammaY::process_plane_cpp (DstPtrArray dst_arr, SrcPtrArray src_arr, const StrideArray &stride_dst_arr, const StrideArray &stride_src_arr, int w, int h) const noexcept
+void	GammaY::process_plane_cpp (Frame <> dst_arr, FrameRO <> src_arr, int w, int h) const noexcept
 {
 	typedef typename std::conditional <
 		std::is_floating_point <TS>::value, float, int
@@ -278,16 +277,8 @@ void	GammaY::process_plane_cpp (DstPtrArray dst_arr, SrcPtrArray src_arr, const 
 
 	for (int y = 0; y < h; ++y)
 	{
-		PtrArray <const TS> s_ptr_arr {
-			reinterpret_cast <const TS *> (src_arr [1]),
-			reinterpret_cast <const TS *> (src_arr [2]),
-			reinterpret_cast <const TS *> (src_arr [0])
-		};
-		PtrArray <      TD> d_ptr_arr {
-			reinterpret_cast <      TD *> (dst_arr [1]),
-			reinterpret_cast <      TD *> (dst_arr [2]),
-			reinterpret_cast <      TD *> (dst_arr [0])
-		};
+		FrameRO <TS>   s_arr { src_arr };
+		Frame <TD>     d_arr { dst_arr };
 
 		for (int x_blk = 0; x_blk < w; x_blk += _buf_size)
 		{
@@ -296,41 +287,41 @@ void	GammaY::process_plane_cpp (DstPtrArray dst_arr, SrcPtrArray src_arr, const 
 			// Computes Y (luminance) from the RGB data
 			for (int x = 0; x < blk_len; ++x)
 			{
-				const LumaTmpType r = s_ptr_arr [0] [x];
-				const LumaTmpType g = s_ptr_arr [1] [x];
-				const LumaTmpType b = s_ptr_arr [2] [x];
+				const LumaTmpType r = s_arr [0]._ptr [x];
+				const LumaTmpType g = s_arr [1]._ptr [x];
+				const LumaTmpType b = s_arr [2]._ptr [x];
 				const auto        l = compute_luma (r, g, b);
 				luma [x] = l;
 			}
 
 			// Computes the component gain: alpha * pow (Y, gamma - 1)
 			_pow_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (gain.data ()),
-				reinterpret_cast <const uint8_t *> (luma.data ()),
-				0, 0, blk_len, 1
+				Plane <> {   reinterpret_cast <      uint8_t *> (gain.data ()), 0 },
+				PlaneRO <> { reinterpret_cast <const uint8_t *> (luma.data ()), 0 },
+				blk_len, 1
 			);
 
 			// Amplifies each component
 			for (int x = 0; x < blk_len; ++x)
 			{
 				const auto     m = AmpType (gain [x]);
-				auto           r = AmpType (s_ptr_arr [0] [x]);
-				auto           g = AmpType (s_ptr_arr [1] [x]);
-				auto           b = AmpType (s_ptr_arr [2] [x]);
+				auto           r = AmpType (s_arr [0]._ptr [x]);
+				auto           g = AmpType (s_arr [1]._ptr [x]);
+				auto           b = AmpType (s_arr [2]._ptr [x]);
 				r *= m;
 				g *= m;
 				b *= m;
-				d_ptr_arr [0] [x] = Conv <TD, AmpType, SHFT>::conv (r);
-				d_ptr_arr [1] [x] = Conv <TD, AmpType, SHFT>::conv (g);
-				d_ptr_arr [2] [x] = Conv <TD, AmpType, SHFT>::conv (b);		
+				d_arr [0]._ptr [x] = Conv <TD, AmpType, SHFT>::conv (r);
+				d_arr [1]._ptr [x] = Conv <TD, AmpType, SHFT>::conv (g);
+				d_arr [2]._ptr [x] = Conv <TD, AmpType, SHFT>::conv (b);		
 			}
 
-			move_ptr_arr (s_ptr_arr, blk_len);
-			move_ptr_arr (d_ptr_arr, blk_len);
+			s_arr.step_pix (blk_len);
+			d_arr.step_pix (blk_len);
 		}
 
-		move_ptr_arr (src_arr, stride_src_arr);
-		move_ptr_arr (dst_arr, stride_dst_arr);
+		src_arr.step_line ();
+		dst_arr.step_line ();
 	}
 }
 
@@ -348,28 +339,6 @@ uint16_t	GammaY::compute_luma (int r, int g, int b) const noexcept
 float	GammaY::compute_luma (float r, float g, float b) const noexcept
 {
 	return r * _r2y_f + g * _g2y_f + b * _b2y_f;
-}
-
-
-
-template <typename T>
-void	GammaY::move_ptr_arr (PtrArray <T> &ptr_arr, int step) noexcept
-{
-	for (auto &ptr : ptr_arr)
-	{
-		ptr += step;
-	}
-}
-
-
-
-template <typename T>
-void	GammaY::move_ptr_arr (PtrArray <T> &ptr_arr, const StrideArray &stride_arr) noexcept
-{
-	for (int plane_idx = 0; plane_idx < _nbr_planes; ++plane_idx)
-	{
-		ptr_arr [plane_idx] += stride_arr [plane_idx];
-	}
 }
 
 

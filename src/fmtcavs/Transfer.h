@@ -27,7 +27,7 @@ http://www.wtfpl.net/ for more details.
 #include "avsutl/PlaneProcessor.h"
 #include "avsutl/VideoFilterBase.h"
 #include "fmtcl/TransCurve.h"
-#include "fmtcl/TransLut.h"
+#include "fmtcl/TransModel.h"
 
 #include <array>
 
@@ -102,8 +102,8 @@ private:
 	std::unique_ptr <avsutl::PlaneProcessor>
 	               _plane_proc_uptr;
 
-	std::unique_ptr <fmtcl::TransLut>
-	               _lut_uptr;
+	std::unique_ptr <fmtcl::TransModel>
+	               _model_uptr;
 
 	bool           _fulls_flag = true;
 	bool           _fulld_flag = true;

@@ -24,6 +24,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/PlaneRO.h"
 #include "fmtcl/GammaY.h"
 #include "fstb/fnc.h"
 #include "test/TestGammaY.h"
@@ -39,36 +40,34 @@ http://www.wtfpl.net/ for more details.
 
 
 
-template <typename T, typename P, typename S>
-void	dump_pic (const P &ptr_arr, const S &stride_arr, int w, int h)
+template <typename T>
+void	dump_pic (fmtcl::FrameRO <T> frame, int w, int h, int nbr_planes)
 {
-	assert (ptr_arr.size () == stride_arr.size ());
+	assert (nbr_planes > 0);
+	assert (nbr_planes <= frame.size ());
 
-	const int      nbr_planes = int (ptr_arr.size ());
 	for (int plane_idx = 0; plane_idx < nbr_planes; ++plane_idx)
 	{
+		auto &         plane = frame [plane_idx];
 		if (nbr_planes > 1)
 		{
 			std::cout << "Plane " << plane_idx << ":\n";
 		}
-		const uint8_t* ptr    = ptr_arr [plane_idx];
-		const auto     stride = stride_arr [plane_idx];
 
 		for (int y = 0; y < h; ++y)
 		{
-			const T *      type_ptr = reinterpret_cast <const T *> (ptr);
 			for (int x = 0; x < w; ++x)
 			{
 				const auto     val = static_cast <typename std::conditional <
 					std::is_floating_point <T>::value,
 					double,
 					long long
-				>::type> (type_ptr [x]);
+				>::type> (plane._ptr [x]);
 				std::cout << val << " ";
 			}
 			std::cout << "\n";
 
-			ptr += stride;
+			plane.step_line ();
 		}
 	}
 }
@@ -251,21 +250,18 @@ int	TestGammaY::test_achrom_row (int src_res, int dst_res, double gamma)
 		false, false
 	);
 
-	fmtcl::GammaY::DstPtrArray dst_arr {
-		reinterpret_cast <      uint8_t *> (dst_row_arr [0].data ()),
-		reinterpret_cast <      uint8_t *> (dst_row_arr [1].data ()),
-		reinterpret_cast <      uint8_t *> (dst_row_arr [2].data ())
+	fmtcl::Frame <uint8_t> dst_arr {
+		{ reinterpret_cast <      uint8_t *> (dst_row_arr [0].data ()), 0 },
+		{ reinterpret_cast <      uint8_t *> (dst_row_arr [1].data ()), 0 },
+		{ reinterpret_cast <      uint8_t *> (dst_row_arr [2].data ()), 0 }
 	};
-	fmtcl::GammaY::StrideArray dst_stride_arr {};
-
-	fmtcl::GammaY::SrcPtrArray src_arr {
-		reinterpret_cast <const uint8_t *> (src_row_arr [0].data ()),
-		reinterpret_cast <const uint8_t *> (src_row_arr [1].data ()),
-		reinterpret_cast <const uint8_t *> (src_row_arr [2].data ())
+	fmtcl::Frame <const uint8_t> src_arr {
+		{ reinterpret_cast <const uint8_t *> (src_row_arr [0].data ()), 0 },
+		{ reinterpret_cast <const uint8_t *> (src_row_arr [1].data ()), 0 },
+		{ reinterpret_cast <const uint8_t *> (src_row_arr [2].data ()), 0 }
 	};
-	fmtcl::GammaY::StrideArray src_stride_arr {};
 
-	gammay.process_plane (dst_arr, src_arr, dst_stride_arr, src_stride_arr, w, h);
+	gammay.process_plane (dst_arr, src_arr, w, h);
 
 	const bool     dump_flag = (w <= 10);
 
@@ -273,13 +269,13 @@ int	TestGammaY::test_achrom_row (int src_res, int dst_res, double gamma)
 	if (dump_flag)
 	{
 		printf ("\n");
-		dump_pic <TS> (src_arr, src_stride_arr, w, h);
+		dump_pic (fmtcl::FrameRO <TS> (src_arr), w, h, 1);
 	}
 	printf ("# Output (%2d bits) #", dst_res);
 	if (dump_flag)
 	{
 		printf ("\n");
-		dump_pic <TD> (dst_arr, dst_stride_arr, w, h);
+		dump_pic (fmtcl::FrameRO <TD> (dst_arr), w, h, 1);
 	}
 
 	// Checks the result against the theoretical truth

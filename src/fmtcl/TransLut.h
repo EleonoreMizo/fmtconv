@@ -30,6 +30,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 
 #include "fmtcl/ArrayMultiType.h"
+#include "fmtcl/Plane.h"
+#include "fmtcl/PlaneRO.h"
 #include "fmtcl/SplFmt.h"
 
 #include <cstdint>
@@ -98,7 +100,7 @@ public:
 	explicit       TransLut (const TransOpInterface &curve, bool log_flag, SplFmt src_fmt, int src_bits, bool src_full_flag, SplFmt dst_fmt, int dst_bits, bool dst_full_flag, bool sse2_flag, bool avx2_flag);
 	virtual			~TransLut () {}
 
-	void           process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
+	void           process_plane (const Plane <> &dst, const PlaneRO <> &src, int w, int h) const noexcept;
 
 
 
@@ -133,14 +135,14 @@ private:
 #endif
 
 	template <class TS, class TD>
-	void           process_plane_int_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
+	void           process_plane_int_any_cpp (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept;
 	template <class TD, class M>
-	void           process_plane_flt_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
+	void           process_plane_flt_any_cpp (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept;
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	template <class TD, class M>
-	void           process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
+	void           process_plane_flt_any_sse2 (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept;
 	template <class TD, class M>
-	void           process_plane_flt_any_avx2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept;
+	void           process_plane_flt_any_avx2 (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept;
 #endif
 
 	bool           _loglut_flag   = false;
@@ -159,7 +161,7 @@ private:
 	bool           _avx2_flag     = false;
 
 	void (ThisType:: *
-	               _process_plane_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h) const noexcept = nullptr;
+	               _process_plane_ptr) (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept = nullptr;
 
 	// Opaque array, contains uint8_t, uint16_t or float depending on the
 	// output datatype. Table size is always 256, 65536 or 65536*3+1

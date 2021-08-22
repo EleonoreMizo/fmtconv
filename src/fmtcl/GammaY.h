@@ -34,11 +34,12 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/Frame.h"
+#include "fmtcl/FrameRO.h"
 #include "fmtcl/SplFmt.h"
 #include "fmtcl/TransLut.h"
 #include "fmtcl/TransOpInterface.h"
 
-#include <array>
 #include <memory>
 
 #include <cstdint>
@@ -61,17 +62,10 @@ public:
 
 	typedef GammaY ThisType;
 
-	template <typename T>
-	using PtrArray = std::array <T *, _nbr_planes>;
-
-	typedef PtrArray <const uint8_t> SrcPtrArray;
-	typedef PtrArray <      uint8_t> DstPtrArray;
-	typedef std::array <int, _nbr_planes> StrideArray;
-
 	explicit       GammaY (SplFmt src_fmt, int src_res, SplFmt dst_fmt, int dst_res, double gamma, double alpha, bool sse2_flag, bool avx2_flag);
 	               ~GammaY () = default;
 
-	void           process_plane (const DstPtrArray &dst_arr, const SrcPtrArray &src_arr, const StrideArray &stride_dst_arr, const StrideArray &stride_src_arr, int w, int h) const noexcept;
+	void           process_plane (const Frame <> &dst_arr, const FrameRO <> &src_arr, int w, int h) const noexcept;
 
 
 
@@ -120,18 +114,11 @@ private:
 	};
 
 	template <typename TS, typename TD, bool FLT_FLAG, int SHFT>
-	void           process_plane_cpp (DstPtrArray dst_arr, SrcPtrArray src_arr, const StrideArray &stride_dst_arr, const StrideArray &stride_src_arr, int w, int h) const noexcept;
+	void           process_plane_cpp (Frame <> dst_arr, FrameRO <> src_arr, int w, int h) const noexcept;
 
 	inline uint16_t
 	               compute_luma (int r, int g, int b) const noexcept;
 	inline float   compute_luma (float r, float g, float b) const noexcept;
-
-	template <typename T>
-	static inline void
-	               move_ptr_arr (PtrArray <T> &ptr_arr, int step) noexcept;
-	template <typename T>
-	static inline void
-	               move_ptr_arr (PtrArray <T> &ptr_arr, const StrideArray &stride_arr) noexcept;
 
 	// The LUT implements f (x) = alpha * abs (x) ^ (gamma - 1)
 	// x and f(x) may be scaled depending on the I/O format requirements.
@@ -146,7 +133,7 @@ private:
 	int            _b2y_i = 0;
 
 	void (ThisType:: *
-	               _process_plane_ptr) (DstPtrArray dst_arr, SrcPtrArray src_arr, const StrideArray &stride_dst_arr, const StrideArray &stride_src_arr, int w, int h) const = nullptr;
+	               _process_plane_ptr) (Frame <> dst_arr, FrameRO <> src_arr, int w, int h) const = nullptr;
 
 
 

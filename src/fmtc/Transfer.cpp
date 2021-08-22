@@ -75,7 +75,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 #if defined (_MSC_VER)
 #pragma warning (pop)
 #endif
-,	_lut_uptr ()
+,	_model_uptr ()
 {
 	fstb::conv_to_lower_case (_transs);
 	fstb::conv_to_lower_case (_transd);
@@ -165,7 +165,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 		conv_vsfmt_to_picfmt (*_vi_in.format , _full_range_src_flag);
 	const fmtcl::PicFmt  dst_fmt =
 		conv_vsfmt_to_picfmt (*_vi_out.format, _full_range_dst_flag);
-	_lut_uptr = fmtcl::TransUtil::build_lut (
+	_model_uptr = std::make_unique <fmtcl::TransModel> (
 		dst_fmt, _curve_d, _logc_ei_d,
 		src_fmt, _curve_s, _logc_ei_s,
 		_contrast, _gcor, _lvl_black,
@@ -271,8 +271,10 @@ int	Transfer::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 		uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
 		const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
 
-		_lut_uptr->process_plane (
-			data_dst_ptr, data_src_ptr, stride_dst, stride_src, w, h
+		_model_uptr->process_plane (
+			{ data_dst_ptr, stride_dst },
+			{ data_src_ptr, stride_src },
+			w, h
 		);
 	}
 

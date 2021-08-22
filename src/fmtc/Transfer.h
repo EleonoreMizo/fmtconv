@@ -30,7 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 
 #include "fmtcl/TransCurve.h"
-#include "fmtcl/TransLut.h"
+#include "fmtcl/TransModel.h"
 #include "fmtcl/TransOpInterface.h"
 #include "fmtcl/TransOpLogC.h"
 #include "vsutl/FilterBase.h"
@@ -112,8 +112,8 @@ private:
 	vsutl::PlaneProcessor
 	               _plane_processor;
 
-	std::unique_ptr <fmtcl::TransLut>
-	               _lut_uptr;
+	std::unique_ptr <fmtcl::TransModel>
+	               _model_uptr;
 
 
 

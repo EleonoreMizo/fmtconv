@@ -164,7 +164,7 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 		conv_fmtavs_to_picfmt (fmt_src, _fulls_flag);
 	const fmtcl::PicFmt  dst_picfmt =
 		conv_fmtavs_to_picfmt (fmt_dst, _fulld_flag);
-	_lut_uptr = fmtcl::TransUtil::build_lut (
+	_model_uptr = std::make_unique <fmtcl::TransModel> (
 		dst_picfmt, _curve_d, logc_ei_d,
 		src_picfmt, _curve_s, logc_ei_s,
 		contrast, gcor, lvl_black,
@@ -227,8 +227,10 @@ void	Transfer::do_process_plane (::PVideoFrame &dst_sptr, int n, ::IScriptEnviro
 	const int      h = _plane_proc_uptr->get_height (dst_sptr, plane_id);
 
 	// Standard channel
-	_lut_uptr->process_plane (
-		data_dst_ptr, data_src_ptr, stride_dst, stride_src, w, h
+	_model_uptr->process_plane (
+		{ data_dst_ptr, stride_dst },
+		{ data_src_ptr, stride_src },
+		w, h
 	);
 }
 

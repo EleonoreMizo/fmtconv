@@ -809,19 +809,19 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [_
 			}
 
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (dst_0_ptr),
-				reinterpret_cast <const uint8_t *> (tmp_buf_arr [0].data ()),
-				0, 0, w_work, 1
+				{ reinterpret_cast <      uint8_t *> (dst_0_ptr), 0 },
+				{ reinterpret_cast <const uint8_t *> (tmp_buf_arr [0].data ()), 0 },
+				w_work, 1
 			);
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (tmp_buf_arr [1].data ()),
-				reinterpret_cast <const uint8_t *> (src_2_ptr),
-				0, 0, w_work, 1
+				{ reinterpret_cast <      uint8_t *> (tmp_buf_arr [1].data ()), 0 },
+				{ reinterpret_cast <const uint8_t *> (src_2_ptr), 0 },
+				w_work, 1
 			);
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (tmp_buf_arr [2].data ()),
-				reinterpret_cast <const uint8_t *> (src_0_ptr),
-				0, 0, w_work, 1
+				{ reinterpret_cast <      uint8_t *> (tmp_buf_arr [2].data ()), 0 },
+				{ reinterpret_cast <const uint8_t *> (src_0_ptr), 0 },
+				w_work, 1
 			);
 
 			for (int x = 0; x < w_work; x += 4)
@@ -944,19 +944,19 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [_
 			}
 
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (tmp_buf_arr [0].data ()),
-				reinterpret_cast <const uint8_t *> (src_0_ptr),
-				0, 0, w_work, 1
+				{ reinterpret_cast <      uint8_t *> (tmp_buf_arr [0].data ()), 0 },
+				{ reinterpret_cast <const uint8_t *> (src_0_ptr), 0 },
+				w_work, 1
 			);
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (dst_2_ptr),
-				reinterpret_cast <const uint8_t *> (tmp_buf_arr [1].data ()),
-				0, 0, w_work, 1
+				{ reinterpret_cast <      uint8_t *> (dst_2_ptr), 0 },
+				{ reinterpret_cast <const uint8_t *> (tmp_buf_arr [1].data ()), 0 },
+				w_work, 1
 			);
 			_lut_uptr->process_plane (
-				reinterpret_cast <      uint8_t *> (dst_0_ptr),
-				reinterpret_cast <const uint8_t *> (tmp_buf_arr [2].data ()),
-				0, 0, w_work, 1
+				{ reinterpret_cast <      uint8_t *> (dst_0_ptr), 0 },
+				{ reinterpret_cast <const uint8_t *> (tmp_buf_arr [2].data ()), 0 },
+				w_work, 1
 			);
 
 			for (int x = 0; x < w_work; x += 4)

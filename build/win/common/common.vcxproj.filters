@@ -198,6 +198,12 @@
     <ClCompile Include="..\..\..\src\fmtcl\GammaY.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransModel.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\Cst_fmtcl.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\avstp.h" />
@@ -657,6 +663,30 @@
       <Filter>fmtcl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\fmtcl\GammaY.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\TransModel.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\PlaneRO.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\FrameRO.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\Cst.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\Plane.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\Frame.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\Plane.hpp">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\Frame.hpp">
       <Filter>fmtcl</Filter>
     </ClInclude>
   </ItemGroup>

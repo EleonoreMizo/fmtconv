@@ -140,6 +140,8 @@ commonsrc = \
         ../../src/fmtcl/ContFirSpline.h \
         ../../src/fmtcl/CpuOptBase.cpp \
         ../../src/fmtcl/CpuOptBase.h \
+        ../../src/fmtcl/Cst_fmtcl.cpp \
+        ../../src/fmtcl/Cst.h \
         ../../src/fmtcl/DiscreteFirCustom.cpp \
         ../../src/fmtcl/DiscreteFirCustom.h \
         ../../src/fmtcl/DiscreteFirInterface.cpp \
@@ -153,6 +155,9 @@ commonsrc = \
         ../../src/fmtcl/ErrDifBufFactory.h \
         ../../src/fmtcl/FilterResize.cpp \
         ../../src/fmtcl/FilterResize.h \
+        ../../src/fmtcl/Frame.h \
+        ../../src/fmtcl/Frame.hpp \
+        ../../src/fmtcl/FrameRO.h \
         ../../src/fmtcl/fnc_fmtcl.cpp \
         ../../src/fmtcl/fnc.h \
         ../../src/fmtcl/fnc.hpp \
@@ -176,6 +181,9 @@ commonsrc = \
         ../../src/fmtcl/MatrixWrap.h \
         ../../src/fmtcl/MatrixWrap.hpp \
         ../../src/fmtcl/PicFmt.h \
+        ../../src/fmtcl/Plane.h \
+        ../../src/fmtcl/Plane.hpp \
+        ../../src/fmtcl/PlaneRO.h \
         ../../src/fmtcl/PrimariesPreset.h \
         ../../src/fmtcl/PrimUtil.cpp \
         ../../src/fmtcl/PrimUtil.h \
@@ -211,6 +219,8 @@ commonsrc = \
         ../../src/fmtcl/TransCurve.h \
         ../../src/fmtcl/TransLut.cpp \
         ../../src/fmtcl/TransLut.h \
+        ../../src/fmtcl/TransModel.cpp \
+        ../../src/fmtcl/TransModel.h \
         ../../src/fmtcl/TransOp2084.cpp \
         ../../src/fmtcl/TransOp2084.h \
         ../../src/fmtcl/TransOpAcesCc.cpp \

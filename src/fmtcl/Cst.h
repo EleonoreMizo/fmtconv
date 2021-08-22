@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-        TransUtil.h
+        Cst.h
         Author: Laurent de Soras, 2021
 
 --- Legal stuff ---
@@ -16,19 +16,12 @@ http://www.wtfpl.net/ for more details.
 
 
 #pragma once
-#if ! defined (fmtcl_TransUtil_HEADER_INCLUDED)
-#define fmtcl_TransUtil_HEADER_INCLUDED
+#if ! defined (fmtcl_Cst_HEADER_INCLUDED)
+#define fmtcl_Cst_HEADER_INCLUDED
 
 
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-#include "fmtcl/TransCurve.h"
-#include "fmtcl/TransOpInterface.h"
-#include "fmtcl/TransOpLogC.h"
-
-#include <memory>
-#include <string>
 
 
 
@@ -37,18 +30,14 @@ namespace fmtcl
 
 
 
-class TransUtil
+class Cst
 {
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 public:
 
-	typedef  std::shared_ptr <TransOpInterface> OpSPtr;
-
-	static TransCurve
-	               conv_string_to_curve (const std::string &str);
-	static OpSPtr  conv_curve_to_op (TransCurve c, bool inv_flag, TransOpLogC::ExpIdx logc_ei);
+	static constexpr int _max_nbr_planes = 4;
 
 
 
@@ -68,15 +57,15 @@ private:
 
 private:
 
-	               TransUtil ()                               = delete;
-	               TransUtil (const TransUtil &other)         = delete;
-	               TransUtil (TransUtil &&other)              = delete;
-	TransUtil &    operator = (const TransUtil &other)        = delete;
-	TransUtil &    operator = (TransUtil &&other)             = delete;
-	bool           operator == (const TransUtil &other) const = delete;
-	bool           operator != (const TransUtil &other) const = delete;
+	               Cst ()                               = delete;
+	               Cst (const Cst &other)               = delete;
+	               Cst (Cst &&other)                    = delete;
+	Cst &          operator = (const Cst &other)        = delete;
+	Cst &          operator = (Cst &&other)             = delete;
+	bool           operator == (const Cst &other) const = delete;
+	bool           operator != (const Cst &other) const = delete;
 
-}; // class TransUtil
+}; // class Cst
 
 
 
@@ -84,11 +73,11 @@ private:
 
 
 
-//#include "fmtcl/TransUtil.hpp"
+//#include "fmtcl/Cst.hpp"
 
 
 
-#endif   // fmtcl_TransUtil_HEADER_INCLUDED
+#endif   // fmtcl_Cst_HEADER_INCLUDED
 
 
 
