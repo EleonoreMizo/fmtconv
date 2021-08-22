@@ -31,7 +31,6 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcavs/Matrix.h"
 #include "fmtcl/fnc.h"
 #include "fmtcl/MatrixUtil.h"
-#include "fmtcl/ProcComp3Arg.h"
 #include "fstb/fnc.h"
 
 #include <cassert>

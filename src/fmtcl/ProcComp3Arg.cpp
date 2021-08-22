@@ -43,23 +43,6 @@ constexpr int	ProcComp3Arg::_nbr_planes;
 
 
 
-template <typename T>
-bool	ProcComp3Arg::Planes <T>::is_valid (bool single_plane_flag) const noexcept
-{
-	const int      p_end = (single_plane_flag) ? 1 : _nbr_planes;
-	for (int p_idx = 0; p_idx < p_end; ++p_idx)
-	{
-		if (_ptr_arr [p_idx] == nullptr)
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-
-
 bool	ProcComp3Arg::is_valid (bool single_plane_out_flag) const noexcept
 {
 	if (_w <= 0 || _h <= 0)
@@ -67,9 +50,10 @@ bool	ProcComp3Arg::is_valid (bool single_plane_out_flag) const noexcept
 		return false;
 	}
 
+	const int      nbr_planes_chk = (single_plane_out_flag) ? 1 : _nbr_planes;
 	return (
-		   _dst.is_valid (single_plane_out_flag)
-		&& _src.is_valid (false)
+		   _dst.is_valid (nbr_planes_chk, _h)
+		&& _src.is_valid (_nbr_planes   , _h)
 	);
 }
 

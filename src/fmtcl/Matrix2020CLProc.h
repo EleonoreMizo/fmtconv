@@ -29,6 +29,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/def.h"
 
+#include "fmtcl/Frame.h"
+#include "fmtcl/FrameRO.h"
 #include "fmtcl/SplFmt.h"
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/TransLut.h"
@@ -108,16 +110,16 @@ private:
 	Err            setup_ycbcr_2_rgb ();
 
 	template <typename DST, int DB, class SRC, int SB>
-	void           conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
-	void           conv_rgb_2_ycbcr_cpp_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           conv_rgb_2_ycbcr_cpp_int (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           conv_rgb_2_ycbcr_cpp_flt (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 
 	template <typename DST, int DB, class SRC, int SB>
-	void           conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
-	void           conv_ycbcr_2_rgb_cpp_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           conv_ycbcr_2_rgb_cpp_int (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           conv_ycbcr_2_rgb_cpp_flt (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	void           conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
-	void           conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           conv_rgb_2_ycbcr_sse2_flt (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           conv_ycbcr_2_rgb_sse2_flt (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 #endif   // fstb_ARCHI_X86
 
 	template <typename T>
@@ -158,7 +160,7 @@ private:
 #endif   // fstb_ARCHI_X86
 
 	void (ThisType::*             // 0 = not set
-	               _proc_ptr) (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	               _proc_ptr) (Frame <> dst, FrameRO <> src, int w, int h) const noexcept = nullptr;
 
 	static constexpr std::array <double, _nbr_planes>
 	               _coef_rgb_to_y_dbl { 0.2627, 0.6780, 0.0593 };

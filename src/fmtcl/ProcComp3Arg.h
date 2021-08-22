@@ -23,7 +23,8 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include <array>
+#include "fmtcl/Frame.h"
+#include "fmtcl/FrameRO.h"
 
 #include <cstdint>
 
@@ -42,23 +43,17 @@ public:
 
 	static constexpr int _nbr_planes = 3;
 
-	template <typename T>
-	class Planes
-	{
-	public:
-		bool           is_valid (bool single_plane_flag = false) const noexcept;
-		std::array <T *, _nbr_planes>
-		               _ptr_arr {};
-		std::array <int, _nbr_planes>    // Stride in bytes
-		               _str_arr {};
-	};
+	               ProcComp3Arg ()                          = default;
+	               ProcComp3Arg (const ProcComp3Arg &other) = default;
+	               ProcComp3Arg (ProcComp3Arg &&other)      = default;
+	               ~ProcComp3Arg ()                         = default;
+	ProcComp3Arg & operator = (const ProcComp3Arg &other)   = default;
+	ProcComp3Arg & operator = (ProcComp3Arg &&other)        = default;
 
 	bool           is_valid (bool single_plane_out_flag = false) const noexcept;
 
-	Planes <uint8_t>
-	               _dst;
-	Planes <const uint8_t>
-	               _src;
+	Frame <>       _dst {};
+	FrameRO <>     _src {};
 
 	int            _w = 0; // Pixels, no subsampling
 	int            _h = 0; // Full or half-frame height (required for Stack16 formats)

@@ -30,7 +30,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/fnc.h"
 #include "fmtcl/Mat3.h"
 #include "fmtcl/PrimUtil.h"
-#include "fmtcl/ProcComp3Arg.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/fnc.h"

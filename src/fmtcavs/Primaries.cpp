@@ -31,7 +31,6 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcavs/Primaries.h"
 #include "fmtcl/fnc.h"
 #include "fmtcl/PrimUtil.h"
-#include "fmtcl/ProcComp3Arg.h"
 #include "fstb/fnc.h"
 
 #include <array>

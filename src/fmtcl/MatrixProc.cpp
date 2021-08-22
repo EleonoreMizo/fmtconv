@@ -195,11 +195,7 @@ void	MatrixProc::process (const ProcComp3Arg &arg) const
 	assert (_proc_ptr != nullptr);
 	assert (arg.is_valid (_single_plane_flag));
 
-	(this->*_proc_ptr) (
-		arg._dst._ptr_arr.data (), arg._dst._str_arr.data (),
-		arg._src._ptr_arr.data (), arg._src._str_arr.data (),
-		arg._w, arg._h
-	);
+	(this->*_proc_ptr) (arg._dst, arg._src, arg._w, arg._h);
 }
 
 
@@ -423,12 +419,10 @@ void	MatrixProc::setup_fnc_sse2 (bool int_proc_flag, SplFmt src_fmt, int src_bit
 
 
 template <typename DST, int DB, class SRC, int SB>
-void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_3_int_cpp (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != nullptr);
-	assert (dst_str_arr != nullptr);
-	assert (src_ptr_arr != nullptr);
-	assert (src_str_arr != nullptr);
+	assert (dst.is_valid (_nbr_planes, h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
@@ -437,31 +431,15 @@ void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 	typedef typename SRC::PtrConst::Type SrcPtr;
 	typedef typename DST::Ptr::Type      DstPtr;
 
-	const int      sizeof_st = int (sizeof (typename SRC::PtrConst::DataType));
-	assert (src_str_arr [0] % sizeof_st == 0);
-	assert (src_str_arr [1] % sizeof_st == 0);
-	assert (src_str_arr [2] % sizeof_st == 0);
-	const int      sizeof_dt = int (sizeof (typename DST::Ptr::DataType));
-	assert (dst_str_arr [0] % sizeof_dt == 0);
-	assert (dst_str_arr [1] % sizeof_dt == 0);
-	assert (dst_str_arr [2] % sizeof_dt == 0);
-
-	SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [0], src_str_arr [0], h);
-	SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [1], src_str_arr [1], h);
-	SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [2], src_str_arr [2], h);
-	const int      src_0_str = src_str_arr [0] / sizeof_st - w;
-	const int      src_1_str = src_str_arr [1] / sizeof_st - w;
-	const int      src_2_str = src_str_arr [2] / sizeof_st - w;
-
-	DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst_ptr_arr [0], dst_str_arr [0], h);
-	DstPtr         dst_1_ptr = DST::Ptr::make_ptr (dst_ptr_arr [1], dst_str_arr [1], h);
-	DstPtr         dst_2_ptr = DST::Ptr::make_ptr (dst_ptr_arr [2], dst_str_arr [2], h);
-	const int      dst_0_str = dst_str_arr [0] / sizeof_dt - w;
-	const int      dst_1_str = dst_str_arr [1] / sizeof_dt - w;
-	const int      dst_2_str = dst_str_arr [2] / sizeof_dt - w;
-
 	for (int y = 0; y < h; ++y)
 	{
+		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
+		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
+		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
+		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr, dst [0]._stride, h);
+		DstPtr         dst_1_ptr = DST::Ptr::make_ptr (dst [1]._ptr, dst [1]._stride, h);
+		DstPtr         dst_2_ptr = DST::Ptr::make_ptr (dst [2]._ptr, dst [2]._stride, h);
+
 		for (int x = 0; x < w; ++x)
 		{
 			const int      s0 = SRC::read (src_0_ptr);
@@ -494,25 +472,18 @@ void	MatrixProc::process_3_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 			DST::Ptr::jump (dst_2_ptr, 1);
 		}
 
-		SRC::PtrConst::jump (src_0_ptr, src_0_str);
-		SRC::PtrConst::jump (src_1_ptr, src_1_str);
-		SRC::PtrConst::jump (src_2_ptr, src_2_str);
-
-		DST::Ptr::jump (dst_0_ptr, dst_0_str);
-		DST::Ptr::jump (dst_1_ptr, dst_1_str);
-		DST::Ptr::jump (dst_2_ptr, dst_2_str);
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
 
 
 template <typename DST, int DB, class SRC, int SB>
-void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_1_int_cpp (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != nullptr);
-	assert (dst_str_arr != nullptr);
-	assert (src_ptr_arr != nullptr);
-	assert (src_str_arr != nullptr);
+	assert (dst.is_valid (          1, h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
@@ -521,25 +492,13 @@ void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 	typedef typename SRC::PtrConst::Type SrcPtr;
 	typedef typename DST::Ptr::Type      DstPtr;
 
-	const int      sizeof_st = int (sizeof (typename SRC::PtrConst::DataType));
-	assert (src_str_arr [0] % sizeof_st == 0);
-	assert (src_str_arr [1] % sizeof_st == 0);
-	assert (src_str_arr [2] % sizeof_st == 0);
-	const int      sizeof_dt = int (sizeof (typename DST::Ptr::DataType));
-	assert (dst_str_arr [0] % sizeof_dt == 0);
-
-	SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [0], src_str_arr [0], h);
-	SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [1], src_str_arr [1], h);
-	SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [2], src_str_arr [2], h);
-	const int      src_0_str = src_str_arr [0] / sizeof_st - w;
-	const int      src_1_str = src_str_arr [1] / sizeof_st - w;
-	const int      src_2_str = src_str_arr [2] / sizeof_st - w;
-
-	DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst_ptr_arr [0], dst_str_arr [0], h);
-	const int      dst_0_str = dst_str_arr [0] / sizeof_dt - w;
-
 	for (int y = 0; y < h; ++y)
 	{
+		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
+		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
+		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
+		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr, dst [0]._stride, h);
+
 		for (int x = 0; x < w; ++x)
 		{
 			const int      s0 = SRC::read (src_0_ptr);
@@ -560,55 +519,32 @@ void	MatrixProc::process_1_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 			DST::Ptr::jump (dst_0_ptr, 1);
 		}
 
-		SRC::PtrConst::jump (src_0_ptr, src_0_str);
-		SRC::PtrConst::jump (src_1_ptr, src_1_str);
-		SRC::PtrConst::jump (src_2_ptr, src_2_str);
-
-		DST::Ptr::jump (dst_0_ptr, dst_0_str);
+		src.step_line ();
+		dst [0].step_line ();
 	}
 }
 
 
 
-void	MatrixProc::process_3_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_3_flt_cpp (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != nullptr);
-	assert (dst_str_arr != nullptr);
-	assert (src_ptr_arr != nullptr);
-	assert (src_str_arr != nullptr);
+	assert (dst.is_valid (_nbr_planes, h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
 	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
-	const int      sizeof_xt = int (sizeof (float));
-	assert (src_str_arr [0] % sizeof_xt == 0);
-	assert (src_str_arr [1] % sizeof_xt == 0);
-	assert (src_str_arr [2] % sizeof_xt == 0);
-	assert (dst_str_arr [0] % sizeof_xt == 0);
-	assert (dst_str_arr [1] % sizeof_xt == 0);
-	assert (dst_str_arr [2] % sizeof_xt == 0);
-
-	const float *  src_0_ptr = reinterpret_cast <const float *> (src_ptr_arr [0]);
-	const float *  src_1_ptr = reinterpret_cast <const float *> (src_ptr_arr [1]);
-	const float *  src_2_ptr = reinterpret_cast <const float *> (src_ptr_arr [2]);
-	const int      src_0_str = src_str_arr [0] / sizeof_xt;
-	const int      src_1_str = src_str_arr [1] / sizeof_xt;
-	const int      src_2_str = src_str_arr [2] / sizeof_xt;
-
-	float *        dst_0_ptr = reinterpret_cast <      float *> (dst_ptr_arr [0]);
-	float *        dst_1_ptr = reinterpret_cast <      float *> (dst_ptr_arr [1]);
-	float *        dst_2_ptr = reinterpret_cast <      float *> (dst_ptr_arr [2]);
-	const int      dst_0_str = dst_str_arr [0] / sizeof_xt;
-	const int      dst_1_str = dst_str_arr [1] / sizeof_xt;
-	const int      dst_2_str = dst_str_arr [2] / sizeof_xt;
 
 	for (int y = 0; y < h; ++y)
 	{
+		const FrameRO <float>   s { src };
+		const Frame <float>     d { dst };
+
 		for (int x = 0; x < w; ++x)
 		{
-			const float    s0 = src_0_ptr [x];
-			const float    s1 = src_1_ptr [x];
-			const float    s2 = src_2_ptr [x];
+			const float    s0 = s [0]._ptr [x];
+			const float    s1 = s [1]._ptr [x];
+			const float    s2 = s [2]._ptr [x];
 
 			const float    d0 =   s0 * _coef_flt_arr [ 0]
 			                    + s1 * _coef_flt_arr [ 1]
@@ -623,70 +559,48 @@ void	MatrixProc::process_3_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 			                    + s2 * _coef_flt_arr [10]
 			                    +      _coef_flt_arr [11];
 
-			dst_0_ptr [x] = d0;
-			dst_1_ptr [x] = d1;
-			dst_2_ptr [x] = d2;
+			d [0]._ptr [x] = d0;
+			d [1]._ptr [x] = d1;
+			d [2]._ptr [x] = d2;
 		}
 
-		src_0_ptr += src_0_str;
-		src_1_ptr += src_1_str;
-		src_2_ptr += src_2_str;
-
-		dst_0_ptr += dst_0_str;
-		dst_1_ptr += dst_1_str;
-		dst_2_ptr += dst_2_str;
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
 
 
-void	MatrixProc::process_1_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_1_flt_cpp (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != nullptr);
-	assert (dst_str_arr != nullptr);
-	assert (src_ptr_arr != nullptr);
-	assert (src_str_arr != nullptr);
+	assert (dst.is_valid (          1, h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
 	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
-	const int      sizeof_xt = int (sizeof (float));
-	assert (src_str_arr [0] % sizeof_xt == 0);
-	assert (src_str_arr [1] % sizeof_xt == 0);
-	assert (src_str_arr [2] % sizeof_xt == 0);
-	assert (dst_str_arr [0] % sizeof_xt == 0);
-
-	const float *  src_0_ptr = reinterpret_cast <const float *> (src_ptr_arr [0]);
-	const float *  src_1_ptr = reinterpret_cast <const float *> (src_ptr_arr [1]);
-	const float *  src_2_ptr = reinterpret_cast <const float *> (src_ptr_arr [2]);
-	const int      src_0_str = src_str_arr [0] / sizeof_xt;
-	const int      src_1_str = src_str_arr [1] / sizeof_xt;
-	const int      src_2_str = src_str_arr [2] / sizeof_xt;
-
-	float *        dst_0_ptr = reinterpret_cast <      float *> (dst_ptr_arr [0]);
-	const int      dst_0_str = dst_str_arr [0] / sizeof_xt;
 
 	for (int y = 0; y < h; ++y)
 	{
+		const FrameRO <float>   s { src };
+		const Plane <float>     d { dst [0] };
+
 		for (int x = 0; x < w; ++x)
 		{
-			const float    s0 = src_0_ptr [x];
-			const float    s1 = src_1_ptr [x];
-			const float    s2 = src_2_ptr [x];
+			const float    s0 = s [0]._ptr [x];
+			const float    s1 = s [1]._ptr [x];
+			const float    s2 = s [2]._ptr [x];
 
 			const float    d0 =   s0 * _coef_flt_arr [ 0]
 			                    + s1 * _coef_flt_arr [ 1]
 			                    + s2 * _coef_flt_arr [ 2]
 			                    +      _coef_flt_arr [ 3];
 
-			dst_0_ptr [x] = d0;
+			d._ptr [x] = d0;
 		}
 
-		src_0_ptr += src_0_str;
-		src_1_ptr += src_1_str;
-		src_2_ptr += src_2_str;
-
-		dst_0_ptr += dst_0_str;
+		src.step_line ();
+		dst [0].step_line ();
 	}
 }
 
@@ -698,12 +612,10 @@ void	MatrixProc::process_1_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 // DST and SRC are ProxyRwSse2 classes
 template <class DST, int DB, class SRC, int SB, int NP>
-void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_n_int_sse2 (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != nullptr);
-	assert (dst_str_arr != nullptr);
-	assert (src_ptr_arr != nullptr);
-	assert (src_str_arr != nullptr);
+	assert (dst.is_valid (NP         , h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
@@ -716,10 +628,6 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [_nbr_planes], 
 	typedef typename DST::Ptr::Type      DstPtr;
 
 	const int      packsize  = 8;
-	const int      sizeof_st = int (sizeof (typename SRC::PtrConst::DataType));
-	assert (src_str_arr [0] % sizeof_st == 0);
-	assert (src_str_arr [1] % sizeof_st == 0);
-	assert (src_str_arr [2] % sizeof_st == 0);
 
 	const __m128i  zero     = _mm_setzero_si128 ();
 	const __m128i  mask_lsb = _mm_set1_epi16 (0x00FF);
@@ -730,25 +638,19 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [_nbr_planes], 
 		_coef_simd_arr.use_vect_sse2 (0)
 	);
 
-	// Looping over lines then over planes helps keeping input data
-	// in the cache.
-	const int      wp = (w + (packsize - 1)) & -packsize;
-	SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [0], src_str_arr [0], h);
-	SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [1], src_str_arr [1], h);
-	SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [2], src_str_arr [2], h);
-	const int      src_0_str = src_str_arr [0] / sizeof_st;
-	const int      src_1_str = src_str_arr [1] / sizeof_st;
-	const int      src_2_str = src_str_arr [2] / sizeof_st;
-
 	for (int y = 0; y < h; ++y)
 	{
+		// Looping over lines then over planes helps keeping input data
+		// in the cache.
 		for (int plane_index = 0; plane_index < NP; ++ plane_index)
 		{
-			DstPtr         dst_ptr (DST::Ptr::make_ptr (
-				dst_ptr_arr [plane_index] + y * dst_str_arr [plane_index],
-				dst_str_arr [plane_index],
-				h
-			));
+			SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
+			SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
+			SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
+
+			DstPtr         dst_ptr   = DST::Ptr::make_ptr (
+				dst [plane_index]._ptr, dst [plane_index]._stride, h
+			);
 			const int      cind    = plane_index * _mat_size;
 
 			for (int x = 0; x < w; x += packsize)
@@ -787,51 +689,23 @@ void	MatrixProc::process_n_int_sse2 (uint8_t * const dst_ptr_arr [_nbr_planes], 
 
 				DST::Ptr::jump (dst_ptr, packsize);
 			}
-
-			SRC::PtrConst::jump (src_0_ptr, -wp);
-			SRC::PtrConst::jump (src_1_ptr, -wp);
-			SRC::PtrConst::jump (src_2_ptr, -wp);
 		}
 
-		SRC::PtrConst::jump (src_0_ptr, src_0_str);
-		SRC::PtrConst::jump (src_1_ptr, src_1_str);
-		SRC::PtrConst::jump (src_2_ptr, src_2_str);
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
 
 
-void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_3_flt_sse (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != nullptr);
-	assert (dst_str_arr != nullptr);
-	assert (src_ptr_arr != nullptr);
-	assert (src_str_arr != nullptr);
+	assert (dst.is_valid (_nbr_planes, h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
 	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
-	const int      sizeof_xt = int (sizeof (float));
-	assert (src_str_arr [0] % sizeof_xt == 0);
-	assert (src_str_arr [1] % sizeof_xt == 0);
-	assert (src_str_arr [2] % sizeof_xt == 0);
-	assert (dst_str_arr [0] % sizeof_xt == 0);
-	assert (dst_str_arr [1] % sizeof_xt == 0);
-	assert (dst_str_arr [2] % sizeof_xt == 0);
-
-	const float *  src_0_ptr = reinterpret_cast <const float *> (src_ptr_arr [0]);
-	const float *  src_1_ptr = reinterpret_cast <const float *> (src_ptr_arr [1]);
-	const float *  src_2_ptr = reinterpret_cast <const float *> (src_ptr_arr [2]);
-	const int      src_0_str = src_str_arr [0] / sizeof_xt;
-	const int      src_1_str = src_str_arr [1] / sizeof_xt;
-	const int      src_2_str = src_str_arr [2] / sizeof_xt;
-
-	float *        dst_0_ptr = reinterpret_cast <      float *> (dst_ptr_arr [0]);
-	float *        dst_1_ptr = reinterpret_cast <      float *> (dst_ptr_arr [1]);
-	float *        dst_2_ptr = reinterpret_cast <      float *> (dst_ptr_arr [2]);
-	const int      dst_0_str = dst_str_arr [0] / sizeof_xt;
-	const int      dst_1_str = dst_str_arr [1] / sizeof_xt;
-	const int      dst_2_str = dst_str_arr [2] / sizeof_xt;
 
 	const __m128   c00 = _mm_set1_ps (_coef_flt_arr [ 0]);
 	const __m128   c01 = _mm_set1_ps (_coef_flt_arr [ 1]);
@@ -848,11 +722,14 @@ void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 	for (int y = 0; y < h; ++y)
 	{
+		const FrameRO <float>   s { src };
+		const Frame <float>     d { dst };
+
 		for (int x = 0; x < w; x += 4)
 		{
-			const __m128   s0 = _mm_load_ps (src_0_ptr + x);
-			const __m128   s1 = _mm_load_ps (src_1_ptr + x);
-			const __m128   s2 = _mm_load_ps (src_2_ptr + x);
+			const __m128   s0 = _mm_load_ps (s [0]._ptr + x);
+			const __m128   s1 = _mm_load_ps (s [1]._ptr + x);
+			const __m128   s2 = _mm_load_ps (s [2]._ptr + x);
 
 			const __m128   d0 = _mm_add_ps (_mm_add_ps (_mm_add_ps (
 				_mm_mul_ps (s0, c00),
@@ -870,48 +747,26 @@ void	MatrixProc::process_3_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], c
 				_mm_mul_ps (s2, c10)),
 				                c11);
 
-			_mm_store_ps (dst_0_ptr + x, d0);
-			_mm_store_ps (dst_1_ptr + x, d1);
-			_mm_store_ps (dst_2_ptr + x, d2);
+			_mm_store_ps (d [0]._ptr + x, d0);
+			_mm_store_ps (d [1]._ptr + x, d1);
+			_mm_store_ps (d [2]._ptr + x, d2);
 		}
 
-		src_0_ptr += src_0_str;
-		src_1_ptr += src_1_str;
-		src_2_ptr += src_2_str;
-
-		dst_0_ptr += dst_0_str;
-		dst_1_ptr += dst_1_str;
-		dst_2_ptr += dst_2_str;
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
 
 
-void	MatrixProc::process_1_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_1_flt_sse (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != nullptr);
-	assert (dst_str_arr != nullptr);
-	assert (src_ptr_arr != nullptr);
-	assert (src_str_arr != nullptr);
+	assert (dst.is_valid (          1, h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
 	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
-	const int      sizeof_xt = int (sizeof (float));
-	assert (src_str_arr [0] % sizeof_xt == 0);
-	assert (src_str_arr [1] % sizeof_xt == 0);
-	assert (src_str_arr [2] % sizeof_xt == 0);
-	assert (dst_str_arr [0] % sizeof_xt == 0);
-
-	const float *  src_0_ptr = reinterpret_cast <const float *> (src_ptr_arr [0]);
-	const float *  src_1_ptr = reinterpret_cast <const float *> (src_ptr_arr [1]);
-	const float *  src_2_ptr = reinterpret_cast <const float *> (src_ptr_arr [2]);
-	const int      src_0_str = src_str_arr [0] / sizeof_xt;
-	const int      src_1_str = src_str_arr [1] / sizeof_xt;
-	const int      src_2_str = src_str_arr [2] / sizeof_xt;
-
-	float *        dst_0_ptr = reinterpret_cast <      float *> (dst_ptr_arr [0]);
-	const int      dst_0_str = dst_str_arr [0] / sizeof_xt;
 
 	const __m128   c00 = _mm_set1_ps (_coef_flt_arr [ 0]);
 	const __m128   c01 = _mm_set1_ps (_coef_flt_arr [ 1]);
@@ -920,11 +775,14 @@ void	MatrixProc::process_1_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 	for (int y = 0; y < h; ++y)
 	{
+		const FrameRO <float>   s { src };
+		const Plane <float>     d { dst [0] };
+
 		for (int x = 0; x < w; x += 4)
 		{
-			const __m128   s0 = _mm_load_ps (src_0_ptr + x);
-			const __m128   s1 = _mm_load_ps (src_1_ptr + x);
-			const __m128   s2 = _mm_load_ps (src_2_ptr + x);
+			const __m128   s0 = _mm_load_ps (s [0]._ptr + x);
+			const __m128   s1 = _mm_load_ps (s [1]._ptr + x);
+			const __m128   s2 = _mm_load_ps (s [2]._ptr + x);
 
 			const __m128   d0 = _mm_add_ps (_mm_add_ps (_mm_add_ps (
 				_mm_mul_ps (s0, c00),
@@ -932,14 +790,11 @@ void	MatrixProc::process_1_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], c
 				_mm_mul_ps (s2, c02)),
 				                c03);
 
-			_mm_store_ps (dst_0_ptr + x, d0);
+			_mm_store_ps (d._ptr + x, d0);
 		}
 
-		src_0_ptr += src_0_str;
-		src_1_ptr += src_1_str;
-		src_2_ptr += src_2_str;
-
-		dst_0_ptr += dst_0_str;
+		src.step_line ();
+		dst [0].step_line ();
 	}
 }
 

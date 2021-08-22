@@ -28,7 +28,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/fnc.h"
 #include "fmtc/Matrix2020CL.h"
 #include "fmtcl/ColorSpaceH265.h"
-#include "fmtcl/ProcComp3Arg.h"
 #include "fmtcl/TransCurve.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"

@@ -181,11 +181,11 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VSAPI &vsapi, ::VSFrameRef &dst, con
 	{
 		if (! single_plane_flag || p_idx == 0)
 		{
-			pa._dst._ptr_arr [p_idx] = vsapi.getWritePtr (&dst, p_idx);
-			pa._dst._str_arr [p_idx] = vsapi.getStride (&dst, p_idx);
+			pa._dst [p_idx]._ptr    = vsapi.getWritePtr (&dst, p_idx);
+			pa._dst [p_idx]._stride = vsapi.getStride (&dst, p_idx);
 		}
-		pa._src._ptr_arr [p_idx] = vsapi.getReadPtr (&src, p_idx);
-		pa._src._str_arr [p_idx] = vsapi.getStride (&src, p_idx);
+		pa._src [p_idx]._ptr    = vsapi.getReadPtr (&src, p_idx);
+		pa._src [p_idx]._stride = vsapi.getStride (&src, p_idx);
 	}
 
 	return pa;

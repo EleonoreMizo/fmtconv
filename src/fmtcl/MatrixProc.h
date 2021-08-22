@@ -29,6 +29,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/def.h"
 #include "fmtcl/CoefArrInt.h"
+#include "fmtcl/Frame.h"
+#include "fmtcl/FrameRO.h"
 #include "fmtcl/Mat4.h"
 #include "fmtcl/SplFmt.h"
 
@@ -100,23 +102,23 @@ private:
 #endif   // fstb_ARCHI_X86
 
 	template <typename DST, int DB, class SRC, int SB>
-	void           process_3_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           process_3_int_cpp (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 	template <typename DT, int DB, typename ST, int SB>
-	void           process_1_int_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           process_1_int_cpp (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 
-	void           process_3_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
-	void           process_1_flt_cpp (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           process_3_flt_cpp (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           process_1_flt_cpp (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	template <class DST, int DB, class SRC, int SB, int NP>
-	void           process_n_int_sse2 (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
-	void           process_3_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
-	void           process_1_flt_sse (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           process_n_int_sse2 (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           process_3_flt_sse (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           process_1_flt_sse (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 
 	template <class DST, int DB, class SRC, int SB, int NP>
-	void           process_n_int_avx2 (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
-	void           process_3_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
-	void           process_1_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const;
+	void           process_n_int_avx2 (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           process_3_flt_avx (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           process_1_flt_avx (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 #endif   // fstb_ARCHI_X86
 
 	bool           _sse_flag  = false;
@@ -127,7 +129,7 @@ private:
 	bool           _single_plane_flag = false;
 
 	void (ThisType::*                   // 0 = not set
-	               _proc_ptr) (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const = nullptr;
+	               _proc_ptr) (Frame <> dst, FrameRO <> src, int w, int h) const noexcept = nullptr;
 
 	std::vector <float>
 	               _coef_flt_arr;

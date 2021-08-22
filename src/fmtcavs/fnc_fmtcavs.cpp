@@ -263,12 +263,12 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFra
 		if (! single_plane_flag || p_idx == 0)
 		{
 			const int      pd = avsutl::CsPlane::get_plane_id (p_idx, vi_dst);
-			pa._dst._ptr_arr [p_idx] = dst_sptr->GetWritePtr (pd);
-			pa._dst._str_arr [p_idx] = dst_sptr->GetPitch (pd);
+			pa._dst [p_idx]._ptr    = dst_sptr->GetWritePtr (pd);
+			pa._dst [p_idx]._stride = dst_sptr->GetPitch (pd);
 		}
 		const int      ps = avsutl::CsPlane::get_plane_id (p_idx, vi_src);
-		pa._src._ptr_arr [p_idx] = src_sptr->GetReadPtr (ps);
-		pa._src._str_arr [p_idx] = src_sptr->GetPitch (ps);
+		pa._src [p_idx]._ptr    = src_sptr->GetReadPtr (ps);
+		pa._src [p_idx]._stride = src_sptr->GetPitch (ps);
 	}
 
 	return pa;

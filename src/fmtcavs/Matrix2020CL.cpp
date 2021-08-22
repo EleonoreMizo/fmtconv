@@ -29,7 +29,6 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcavs/Matrix2020CL.h"
 #include "fmtcavs/function_names.h"
 #include "fmtcavs/fnc.h"
-#include "fmtcl/ProcComp3Arg.h"
 #include "fmtcl/TransCurve.h"
 
 #include <cassert>

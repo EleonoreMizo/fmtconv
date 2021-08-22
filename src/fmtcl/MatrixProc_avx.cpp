@@ -70,37 +70,14 @@ void	MatrixProc::setup_fnc_avx (bool int_proc_flag, SplFmt src_fmt, int src_bits
 
 
 
-void	MatrixProc::process_3_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_3_flt_avx (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst.is_valid (_nbr_planes, h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
 	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
-	const int      sizeof_xt = int (sizeof (float));
-	assert (src_str_arr [0] % sizeof_xt == 0);
-	assert (src_str_arr [1] % sizeof_xt == 0);
-	assert (src_str_arr [2] % sizeof_xt == 0);
-	assert (dst_str_arr [0] % sizeof_xt == 0);
-	assert (dst_str_arr [1] % sizeof_xt == 0);
-	assert (dst_str_arr [2] % sizeof_xt == 0);
-
-	const float *  src_0_ptr = reinterpret_cast <const float *> (src_ptr_arr [0]);
-	const float *  src_1_ptr = reinterpret_cast <const float *> (src_ptr_arr [1]);
-	const float *  src_2_ptr = reinterpret_cast <const float *> (src_ptr_arr [2]);
-	const int      src_0_str = src_str_arr [0] / sizeof_xt;
-	const int      src_1_str = src_str_arr [1] / sizeof_xt;
-	const int      src_2_str = src_str_arr [2] / sizeof_xt;
-
-	float *        dst_0_ptr = reinterpret_cast <      float *> (dst_ptr_arr [0]);
-	float *        dst_1_ptr = reinterpret_cast <      float *> (dst_ptr_arr [1]);
-	float *        dst_2_ptr = reinterpret_cast <      float *> (dst_ptr_arr [2]);
-	const int      dst_0_str = dst_str_arr [0] / sizeof_xt;
-	const int      dst_1_str = dst_str_arr [1] / sizeof_xt;
-	const int      dst_2_str = dst_str_arr [2] / sizeof_xt;
 
 	const __m256   c00 = _mm256_set1_ps (_coef_flt_arr [ 0]);
 	const __m256   c01 = _mm256_set1_ps (_coef_flt_arr [ 1]);
@@ -117,11 +94,14 @@ void	MatrixProc::process_3_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 	for (int y = 0; y < h; ++y)
 	{
+		const FrameRO <float>   s { src };
+		const Frame <float>     d { dst };
+
 		for (int x = 0; x < w; x += 8)
 		{
-			const __m256   s0 = _mm256_load_ps (src_0_ptr + x);
-			const __m256   s1 = _mm256_load_ps (src_1_ptr + x);
-			const __m256   s2 = _mm256_load_ps (src_2_ptr + x);
+			const __m256   s0 = _mm256_load_ps (s [0]._ptr + x);
+			const __m256   s1 = _mm256_load_ps (s [1]._ptr + x);
+			const __m256   s2 = _mm256_load_ps (s [2]._ptr + x);
 
 			const __m256   d0 = _mm256_add_ps (_mm256_add_ps (_mm256_add_ps (
 				_mm256_mul_ps (s0, c00),
@@ -139,18 +119,13 @@ void	MatrixProc::process_3_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], c
 				_mm256_mul_ps (s2, c10)),
 				                   c11);
 
-			_mm256_store_ps (dst_0_ptr + x, d0);
-			_mm256_store_ps (dst_1_ptr + x, d1);
-			_mm256_store_ps (dst_2_ptr + x, d2);
+			_mm256_store_ps (d [0]._ptr + x, d0);
+			_mm256_store_ps (d [1]._ptr + x, d1);
+			_mm256_store_ps (d [2]._ptr + x, d2);
 		}
 
-		src_0_ptr += src_0_str;
-		src_1_ptr += src_1_str;
-		src_2_ptr += src_2_str;
-
-		dst_0_ptr += dst_0_str;
-		dst_1_ptr += dst_1_str;
-		dst_2_ptr += dst_2_str;
+		src.step_line ();
+		dst.step_line ();
 	}
 
 	_mm256_zeroupper ();	// Back to SSE state
@@ -158,31 +133,14 @@ void	MatrixProc::process_3_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 
 
-void	MatrixProc::process_1_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_1_flt_avx (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst.is_valid (          1, h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
 	static_assert (_nbr_planes == 3, "Code is hardcoded for 3 planes");
-	const int      sizeof_xt = int (sizeof (float));
-	assert (src_str_arr [0] % sizeof_xt == 0);
-	assert (src_str_arr [1] % sizeof_xt == 0);
-	assert (src_str_arr [2] % sizeof_xt == 0);
-	assert (dst_str_arr [0] % sizeof_xt == 0);
-
-	const float *  src_0_ptr = reinterpret_cast <const float *> (src_ptr_arr [0]);
-	const float *  src_1_ptr = reinterpret_cast <const float *> (src_ptr_arr [1]);
-	const float *  src_2_ptr = reinterpret_cast <const float *> (src_ptr_arr [2]);
-	const int      src_0_str = src_str_arr [0] / sizeof_xt;
-	const int      src_1_str = src_str_arr [1] / sizeof_xt;
-	const int      src_2_str = src_str_arr [2] / sizeof_xt;
-
-	float *        dst_0_ptr = reinterpret_cast <      float *> (dst_ptr_arr [0]);
-	const int      dst_0_str = dst_str_arr [0] / sizeof_xt;
 
 	const __m256   c00 = _mm256_set1_ps (_coef_flt_arr [ 0]);
 	const __m256   c01 = _mm256_set1_ps (_coef_flt_arr [ 1]);
@@ -191,11 +149,14 @@ void	MatrixProc::process_1_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], c
 
 	for (int y = 0; y < h; ++y)
 	{
+		const FrameRO <float>   s { src };
+		const Plane <float>     d { dst [0] };
+
 		for (int x = 0; x < w; x += 4)
 		{
-			const __m256   s0 = _mm256_load_ps (src_0_ptr + x);
-			const __m256   s1 = _mm256_load_ps (src_1_ptr + x);
-			const __m256   s2 = _mm256_load_ps (src_2_ptr + x);
+			const __m256   s0 = _mm256_load_ps (s [0]._ptr + x);
+			const __m256   s1 = _mm256_load_ps (s [1]._ptr + x);
+			const __m256   s2 = _mm256_load_ps (s [2]._ptr + x);
 
 			const __m256   d0 = _mm256_add_ps (_mm256_add_ps (_mm256_add_ps (
 				_mm256_mul_ps (s0, c00),
@@ -203,14 +164,11 @@ void	MatrixProc::process_1_flt_avx (uint8_t * const dst_ptr_arr [_nbr_planes], c
 				_mm256_mul_ps (s2, c02)),
 				                c03);
 
-			_mm256_store_ps (dst_0_ptr + x, d0);
+			_mm256_store_ps (d._ptr + x, d0);
 		}
 
-		src_0_ptr += src_0_str;
-		src_1_ptr += src_1_str;
-		src_2_ptr += src_2_str;
-
-		dst_0_ptr += dst_0_str;
+		src.step_line ();
+		dst [0].step_line ();
 	}
 
 	_mm256_zeroupper ();	// Back to SSE state

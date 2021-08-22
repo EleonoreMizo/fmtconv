@@ -33,7 +33,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/Matrix.h"
 #include "fmtc/fnc.h"
 #include "fmtcl/MatrixUtil.h"
-#include "fmtcl/ProcComp3Arg.h"
 #include "fstb/def.h"
 #include "fstb/fnc.h"
 #include "vsutl/fnc.h"

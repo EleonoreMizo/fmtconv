@@ -94,12 +94,10 @@ void	MatrixProc::setup_fnc_avx2 (bool int_proc_flag, SplFmt src_fmt, int src_bit
 
 // DST and SRC are ProxyRwAvx2 classes
 template <class DST, int DB, class SRC, int SB, int NP>
-void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [_nbr_planes], const int dst_str_arr [_nbr_planes], const uint8_t * const src_ptr_arr [_nbr_planes], const int src_str_arr [_nbr_planes], int w, int h) const
+void	MatrixProc::process_n_int_avx2 (Frame <> dst, FrameRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr_arr != 0);
-	assert (dst_str_arr != 0);
-	assert (src_ptr_arr != 0);
-	assert (src_str_arr != 0);
+	assert (dst.is_valid (NP         , h));
+	assert (src.is_valid (_nbr_planes, h));
 	assert (w > 0);
 	assert (h > 0);
 
@@ -111,11 +109,7 @@ void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [_nbr_planes], 
 	typedef typename SRC::PtrConst::Type SrcPtr;
 	typedef typename DST::Ptr::Type      DstPtr;
 
-	const int      packsize  = 16;
-	const int      sizeof_st = int (sizeof (typename SRC::PtrConst::DataType));
-	assert (src_str_arr [0] % sizeof_st == 0);
-	assert (src_str_arr [1] % sizeof_st == 0);
-	assert (src_str_arr [2] % sizeof_st == 0);
+	const int      packsize = 16;
 
 	const __m256i  zero     = _mm256_setzero_si256 ();
 	const __m256i  mask_lsb = _mm256_set1_epi16 (0x00FF);
@@ -126,25 +120,19 @@ void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [_nbr_planes], 
 		_coef_simd_arr.use_vect_avx2 (0)
 	);
 
-	// Looping over lines then over planes helps keeping input data
-	// in the cache.
-	const int      wp = (w + (packsize - 1)) & -packsize;
-	SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [0], src_str_arr [0], h);
-	SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [1], src_str_arr [1], h);
-	SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src_ptr_arr [2], src_str_arr [2], h);
-	const int      src_0_str = src_str_arr [0] / sizeof_st;
-	const int      src_1_str = src_str_arr [1] / sizeof_st;
-	const int      src_2_str = src_str_arr [2] / sizeof_st;
-
 	for (int y = 0; y < h; ++y)
 	{
+		// Looping over lines then over planes helps keeping input data
+		// in the cache.
 		for (int plane_index = 0; plane_index < NP; ++ plane_index)
 		{
-			DstPtr         dst_ptr (DST::Ptr::make_ptr (
-				dst_ptr_arr [plane_index] + y * dst_str_arr [plane_index],
-				dst_str_arr [plane_index],
-				h
-			));
+			SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
+			SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
+			SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
+
+			DstPtr         dst_ptr   = DST::Ptr::make_ptr (
+				dst [plane_index]._ptr, dst [plane_index]._stride, h
+			);
 			const int      cind = plane_index * _mat_size;
 
 			for (int x = 0; x < w; x += packsize)
@@ -183,15 +171,10 @@ void	MatrixProc::process_n_int_avx2 (uint8_t * const dst_ptr_arr [_nbr_planes], 
 
 				DST::Ptr::jump (dst_ptr, packsize);
 			}
-
-			SRC::PtrConst::jump (src_0_ptr, -wp);
-			SRC::PtrConst::jump (src_1_ptr, -wp);
-			SRC::PtrConst::jump (src_2_ptr, -wp);
 		}
 
-		SRC::PtrConst::jump (src_0_ptr, src_0_str);
-		SRC::PtrConst::jump (src_1_ptr, src_1_str);
-		SRC::PtrConst::jump (src_2_ptr, src_2_str);
+		src.step_line ();
+		dst.step_line ();
 	}
 
 	_mm256_zeroupper ();	// Back to SSE state
