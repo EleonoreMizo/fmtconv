@@ -75,12 +75,12 @@ GammaY::GammaY (SplFmt src_fmt, int src_res, SplFmt dst_fmt, int dst_res, double
 	Fd_raw = E_raw * (alpha * scale_o / scale_i) * pow (Y, gamma - 1)
 	*/
 
-	constexpr auto scale_c     = double (1 << _coef_res);
-	double         scale_i     = 1;
-	double         scale_y     = 1;
-	SplFmt         luma_fmt    = SplFmt_FLOAT;
-	int            luma_res    = 32;
-	double         scale       = 1;
+	constexpr auto scale_c  = double (1 << _coef_res);
+	double         scale_i  = 1;
+	double         scale_y  = 1;
+	SplFmt         luma_fmt = SplFmt_FLOAT;
+	int            luma_res = 32;
+	double         scale    = 1;
 	if (src_fmt != SplFmt_FLOAT)
 	{
 		luma_fmt = SplFmt_INT16;
@@ -94,9 +94,9 @@ GammaY::GammaY (SplFmt src_fmt, int src_res, SplFmt dst_fmt, int dst_res, double
 		scale /= scale_i;
 	}
 
-	SplFmt         lut_out_fmt = SplFmt_FLOAT;
-	int            lut_out_res = 32;
-	int            shft        = 0;
+	SplFmt         lut_out_fmt  = SplFmt_FLOAT;
+	int            lut_out_res  = 32;
+	int            shft         = 0;
 	bool           flt_amp_flag = false;
 	if (dst_fmt != SplFmt_FLOAT)
 	{
@@ -109,18 +109,28 @@ GammaY::GammaY (SplFmt src_fmt, int src_res, SplFmt dst_fmt, int dst_res, double
 		}
 		else if (src_fmt != SplFmt_FLOAT)
 		{
-			// In this case:
-			// out_raw = (in_raw * lut_raw) >> shft
-			// shft = _coef_res - (res_o - res_i)
-			// lut_raw = lut * scale_l
-			// -->
-			// scale_o = (scale_i * lut * scale_l) >> shft
-			// lut = (scale_o << shft) / (scale_i * scale_l)
-			lut_out_fmt  = SplFmt_INT16;
-			lut_out_res  = 16;
-			const double   scale_l = double ((1 << lut_out_res) - 1);
-			shft         = _coef_res + src_res - dst_res;
-			scale        = (scale_o * double (1 << shft)) / (scale_i * scale_l);
+			if (alpha < 0.5 || alpha > 2.0)
+			{
+				// It would be possible to handle an alpha out of this range
+				// using shft to compensate, but this would be a bit complicated
+				// to setup.
+				flt_amp_flag = true;
+			}
+			else
+			{
+				// In this case:
+				// out_raw = (in_raw * lut_raw) >> shft
+				// shft = _coef_res - (res_o - res_i)
+				// lut_raw = lut * scale_l
+				// -->
+				// scale_o = (scale_i * lut * scale_l) >> shft
+				// lut = (scale_o << shft) / (scale_i * scale_l)
+				lut_out_fmt  = SplFmt_INT16;
+				lut_out_res  = 16;
+				const double   scale_l = double ((1 << lut_out_res) - 1);
+				shft         = _coef_res + src_res - dst_res;
+				scale        = (scale_o * double (1 << shft)) / (scale_i * scale_l);
+			}
 		}
 	}
 
