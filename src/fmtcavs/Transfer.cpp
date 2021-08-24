@@ -251,7 +251,14 @@ FmtAvs	Transfer::get_output_colorspace (::IScriptEnvironment &env, const ::AVSVa
 	const bool     flt_def_flag = args [Param_FLT ].Defined ();
 	const bool     res_def_flag = args [Param_BITS].Defined ();
 
-	if (flt_def_flag && ! res_def_flag)
+	if (! flt_def_flag && ! res_def_flag)
+	{
+		if (! flt_flag && res < 16)
+		{
+			fmt_dst.set_bitdepth (16);
+		}
+	}
+	else if (flt_def_flag && ! res_def_flag)
 	{
 		fmt_dst.set_bitdepth (32);
 	}
@@ -266,10 +273,6 @@ FmtAvs	Transfer::get_output_colorspace (::IScriptEnvironment &env, const ::AVSVa
 		env.ThrowError (
 			fmtcavs_TRANSFER ": flt and bits combination not supported."
 		);
-	}
-	else
-	{
-		assert (! flt_def_flag && ! res_def_flag);
 	}
 
 	return fmt_dst;

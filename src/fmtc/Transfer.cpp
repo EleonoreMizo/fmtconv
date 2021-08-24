@@ -316,7 +316,16 @@ const ::VSFormat &	Transfer::get_output_colorspace (const ::VSMap &in, ::VSMap &
 	}
 
 	// Bitdepth
-	if (dst_bits != undef)
+	if (dst_bits == undef)
+	{
+		// Forces output to 16 bits if input clip is low-bitdepth integer and
+		// nothing else is specified
+		if (dst_flt == undef && spl_type == ::stInteger && bits < 16)
+		{
+			bits = 16;
+		}
+	}
+	else
 	{
 		bits = dst_bits;
 		if (dst_flt == undef)
