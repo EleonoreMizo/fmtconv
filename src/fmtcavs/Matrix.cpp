@@ -105,16 +105,6 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 		env, args, fmt_src, _plane_out, force_col_fam_flag
 	);
 
-	if (   fmt_dst.is_float ()     != fmt_src.is_float ()
-	    || fmt_dst.get_bitdepth () <  fmt_src.get_bitdepth ()
-	    || fmt_dst.get_subspl_h () != fmt_src.get_subspl_h ()
-	    || fmt_dst.get_subspl_v () != fmt_src.get_subspl_v ())
-	{
-		env.ThrowError (fmtcavs_MATRIX
-			": specified output colorspace is not compatible with the input."
-		);
-	}
-
 	// Preliminary matrix test: deduces the target color family if unspecified
 	if (   ! force_col_fam_flag
 	    && fmt_dst.get_col_fam () != fmtcl::ColorFamily_GRAY)
@@ -134,12 +124,6 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 			const auto tmp_csp = find_cs_from_mat_str (env, tmp_mat, false);
 			fmt_dst = find_dst_col_fam (tmp_csp, fmt_dst, fmt_src);
 		}
-	}
-
-	// Output format is validated
-	if (fmt_dst.conv_to_vi (vi) != 0)
-	{
-		env.ThrowError (fmtcavs_MATRIX ": illegal output colorspace.");
 	}
 
 	const int      nbr_expected_coef = _nbr_planes_proc * (_nbr_planes_proc + 1);
@@ -254,6 +238,28 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 	default:
 		// Nothing to do
 		break;
+	}
+
+	// Sets the output colorspace accordingly
+	const auto     final_cf =
+		fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, false);
+	fmt_dst.set_col_fam (final_cf);
+
+	// Checks the output colorspace
+	if (   fmt_dst.is_float ()     != fmt_src.is_float ()
+	    || fmt_dst.get_bitdepth () <  fmt_src.get_bitdepth ()
+	    || fmt_dst.get_subspl_h () != fmt_src.get_subspl_h ()
+	    || fmt_dst.get_subspl_v () != fmt_src.get_subspl_v ())
+	{
+		env.ThrowError (fmtcavs_MATRIX
+			": specified output colorspace is not compatible with the input."
+		);
+	}
+
+	// Output format is validated
+	if (fmt_dst.conv_to_vi (vi) != 0)
+	{
+		env.ThrowError (fmtcavs_MATRIX ": illegal output colorspace.");
 	}
 
 	prepare_matrix_coef (

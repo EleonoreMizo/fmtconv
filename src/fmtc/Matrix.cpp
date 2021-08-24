@@ -121,33 +121,6 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		in, out, core, fmt_src, _plane_out, force_col_fam_flag
 	);
 
-	if (   ! vsutl::is_vs_gray (fmt_dst_ptr->colorFamily)
-	    && ! vsutl::is_vs_rgb ( fmt_dst_ptr->colorFamily)
-	    && ! vsutl::is_vs_yuv ( fmt_dst_ptr->colorFamily)
-	    && ::cmYCoCg != fmt_dst_ptr->colorFamily)
-	{
-		throw_inval_arg ("unsupported color family for output.");
-	}
-	if (   (   fmt_dst_ptr->sampleType == ::stInteger
-	        && (   fmt_dst_ptr->bitsPerSample <  8
-	            || fmt_dst_ptr->bitsPerSample > 12)
-	        && fmt_dst_ptr->bitsPerSample != 14
-	        && fmt_dst_ptr->bitsPerSample != 16)
-	    || (   fmt_dst_ptr->sampleType == ::stFloat
-	        && fmt_dst_ptr->bitsPerSample != 32))
-	{
-		throw_inval_arg ("output bitdepth not supported.");
-	}
-	if (   fmt_dst_ptr->sampleType    != fmt_src.sampleType
-	    || fmt_dst_ptr->bitsPerSample <  fmt_src.bitsPerSample
-	    || fmt_dst_ptr->subSamplingW  != fmt_src.subSamplingW
-	    || fmt_dst_ptr->subSamplingH  != fmt_src.subSamplingH)
-	{
-		throw_inval_arg (
-			"specified output colorspace is not compatible with the input."
-		);
-	}
-
 	// Preliminary matrix test: deduces the target color family if unspecified
 	if (   ! force_col_fam_flag
 	    && fmt_dst_ptr->colorFamily != ::cmGray)
@@ -170,10 +143,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		}
 	}
 
-	// Output format is validated.
-	_vi_out.format = fmt_dst_ptr;
 	const ::VSFormat &fmt_dst = *fmt_dst_ptr;
-
 	const int      nbr_expected_coef = _nbr_planes * (_nbr_planes + 1);
 
 	bool           mat_init_flag = false;
@@ -278,6 +248,57 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		// Nothing to do
 		break;
 	}
+
+	// Sets the output colorspace accordingly
+	const auto     final_cf =
+		fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, true);
+	const auto     final_cm =
+		fmtc::conv_fmtcl_colfam_to_vs (final_cf);
+	fmt_dst_ptr = register_format (
+		final_cm,
+		fmt_dst_ptr->sampleType,
+		fmt_dst_ptr->bitsPerSample,
+		fmt_dst_ptr->subSamplingW,
+		fmt_dst_ptr->subSamplingH,
+		core
+	);
+	if (fmt_dst_ptr == nullptr)
+	{
+		throw_rt_err (
+			"couldn\'t get a pixel format identifier for the output clip."
+		);
+	}
+
+	// Checks the output colorspace
+	if (   ! vsutl::is_vs_gray (fmt_dst_ptr->colorFamily)
+	    && ! vsutl::is_vs_rgb ( fmt_dst_ptr->colorFamily)
+	    && ! vsutl::is_vs_yuv ( fmt_dst_ptr->colorFamily)
+	    && ::cmYCoCg != fmt_dst_ptr->colorFamily)
+	{
+		throw_inval_arg ("unsupported color family for output.");
+	}
+	if (   (   fmt_dst_ptr->sampleType == ::stInteger
+	        && (   fmt_dst_ptr->bitsPerSample <  8
+	            || fmt_dst_ptr->bitsPerSample > 12)
+	        && fmt_dst_ptr->bitsPerSample != 14
+	        && fmt_dst_ptr->bitsPerSample != 16)
+	    || (   fmt_dst_ptr->sampleType == ::stFloat
+	        && fmt_dst_ptr->bitsPerSample != 32))
+	{
+		throw_inval_arg ("output bitdepth not supported.");
+	}
+	if (   fmt_dst_ptr->sampleType    != fmt_src.sampleType
+	    || fmt_dst_ptr->bitsPerSample <  fmt_src.bitsPerSample
+	    || fmt_dst_ptr->subSamplingW  != fmt_src.subSamplingW
+	    || fmt_dst_ptr->subSamplingH  != fmt_src.subSamplingH)
+	{
+		throw_inval_arg (
+			"specified output colorspace is not compatible with the input."
+		);
+	}
+
+	// Destination colorspace is validated
+	_vi_out.format = fmt_dst_ptr;
 
 	prepare_matrix_coef (
 		*this, *_proc_uptr, _mat_main,

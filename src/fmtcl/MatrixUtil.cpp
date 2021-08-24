@@ -135,6 +135,51 @@ ColorSpaceH265	MatrixUtil::find_cs_from_mat_str (const std::string &mat, bool al
 
 
 
+// ycgco_flag indicates that YCgCo should be treated as a separate colorspace
+// (not YUV)
+ColorFamily	MatrixUtil::find_cf_from_cs (ColorSpaceH265 cs, bool ycgco_flag)
+{
+	assert (cs >= 0);
+	assert (cs < ColorSpaceH265_NBR_ELT);
+
+	ColorFamily    cf = ColorFamily_INVALID;
+
+	switch (cs)
+	{
+	case ColorSpaceH265_RGB:
+	case ColorSpaceH265_LMS:
+		cf = ColorFamily_RGB;
+		break;
+
+	case ColorSpaceH265_YCGCO:
+		cf = (ycgco_flag) ? ColorFamily_YCGCO: ColorFamily_YUV;
+		break;
+
+	case ColorSpaceH265_BT709:
+	case ColorSpaceH265_FCC:
+	case ColorSpaceH265_BT470BG:
+	case ColorSpaceH265_SMPTE170M:
+	case ColorSpaceH265_SMPTE240M:
+	case ColorSpaceH265_BT2020NCL:
+	case ColorSpaceH265_BT2020CL:
+	case ColorSpaceH265_YDZDX:
+	case ColorSpaceH265_CHRODERNCL:
+	case ColorSpaceH265_CHRODERCL:
+	case ColorSpaceH265_ICTCP:
+	case ColorSpaceH265_ICTCP_PQ:
+	case ColorSpaceH265_ICTCP_HLG:
+		cf = ColorFamily_YUV;
+		break;
+
+	default:
+		assert (false);
+	}
+
+	return cf;
+}
+
+
+
 // Returns -1 if mat is unknown
 int	MatrixUtil::make_mat_from_str (Mat4 &m, const std::string &mat, bool to_rgb_flag)
 {
