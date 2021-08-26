@@ -75,7 +75,7 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		"[totalh]."     "[total]."   "[totalv]."     "[invks]."       // 32
 		"[invksh]."     "[invksv]."  "[invkstaps]."  "[invkstapsh]."  // 36
 		"[invkstapsv]." "[csp]s"     "[css]s"        "[planes]."      // 40
-		"[fulls]i"      "[fulld]i"   "[center]."     "[cplace]s"      // 44
+		"[fulls]b"      "[fulld]b"   "[center]."     "[cplace]s"      // 44
 		"[cplaces]s"    "[cplaced]s" "[interlaced]i" "[interlacedd]i" // 48
 		"[tff]i"        "[tffd]i"    "[flt]b"        "[cpuopt]i"      // 52
 		, &main_avs_create <fmtcavs::Resample>, nullptr
