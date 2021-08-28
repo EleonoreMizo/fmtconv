@@ -1811,6 +1811,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>bitdepth</code>/Avisynth+: fixed I420 input that couldn’t be converted to higher bitdepth. Thanks to StvG for the report.</li>
 <li><code>matrix</code>: fixed the output colorspace autodetection which failed with specific matrix combinations.</li>
 <li><code>resample</code>/Avisynth+: fixed <var>fulls</var> and <var>fulld</var> parameters which were wrongly defined as <code>int</code> instead of <code>bool</code>.</li>
+<li><code>resample</code>/Avisynth+: fixed <var>cplaced</var> which was wrongly copied from <var>cplaces</var>.</li>
 <li><code>transfer</code>: automatically adapts the output format (16-bit integer) if the input is a low-bitdepth clip and nothing is specified in <var>bits</var> nor <var>flt</var>, instead of emitting an error.</li>
 </ul>
 
