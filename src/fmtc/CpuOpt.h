@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtcl/CpuOptBase.h"
 
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 
 

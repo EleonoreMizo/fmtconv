@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
 #include "vsutl/PlaneProcMode.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <algorithm>
 

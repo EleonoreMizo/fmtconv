@@ -32,7 +32,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "vsutl/NodeRefSPtr.h"
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <memory>
 

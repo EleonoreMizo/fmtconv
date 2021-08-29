@@ -85,6 +85,7 @@
     <ClInclude Include="..\..\..\src\fmtc\CpuOpt.h">
       <Filter>fmtc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\vswrap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\fmtc\Bitdepth.cpp">

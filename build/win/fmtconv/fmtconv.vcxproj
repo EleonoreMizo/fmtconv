@@ -154,6 +154,7 @@
     <ClInclude Include="..\..\..\src\vsutl\Redirect.h" />
     <ClInclude Include="..\..\..\src\vsutl\Redirect.hpp" />
     <ClInclude Include="..\..\..\src\VapourSynth.h" />
+    <ClInclude Include="..\..\..\src\vswrap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\fmtc\Bitdepth.cpp" />

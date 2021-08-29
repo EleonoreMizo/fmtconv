@@ -31,7 +31,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/Matrix2020CLProc.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <memory>
 

@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/version.h"
 #include "fstb/def.h"
 #include "vsutl/Redirect.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <algorithm>
 

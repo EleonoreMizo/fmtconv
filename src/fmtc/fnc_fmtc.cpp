@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/MatrixProc.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/fnc.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <algorithm>
 

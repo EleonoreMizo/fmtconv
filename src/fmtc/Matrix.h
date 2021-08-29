@@ -35,7 +35,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/AllocAlign.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include <emmintrin.h>

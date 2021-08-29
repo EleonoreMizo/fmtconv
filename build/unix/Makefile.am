@@ -279,6 +279,7 @@ libfmtconv_la_SOURCES = $(commonsrc) \
         ../../src/main-vs.cpp \
         ../../src/types.h \
         ../../src/VapourSynth.h \
+        ../../src/vswrap.h \
         ../../src/fmtc/Bitdepth.cpp \
         ../../src/fmtc/Bitdepth.h \
         ../../src/fmtc/Convert.cpp \
