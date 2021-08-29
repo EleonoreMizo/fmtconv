@@ -1813,6 +1813,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>resample</code>/Avisynth+: fixed <var>fulls</var> and <var>fulld</var> parameters which were wrongly defined as <code>int</code> instead of <code>bool</code>.</li>
 <li><code>resample</code>/Avisynth+: fixed <var>cplaced</var> which was wrongly copied from <var>cplaces</var>.</li>
 <li><code>transfer</code>: automatically adapts the output format (16-bit integer) if the input is a low-bitdepth clip and nothing is specified in <var>bits</var> nor <var>flt</var>, instead of emitting an error.</li>
+<li><code>transfer</code>: fixed the BT.2100 HLG curve that was inverted.</li>
 </ul>
 
 <p><b>r24, 2021-08-16</b></p>

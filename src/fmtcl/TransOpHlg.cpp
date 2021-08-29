@@ -83,21 +83,21 @@ double	TransOpHlg::get_max () const
 double	TransOpHlg::compute_direct (double x) const
 {
 	const double   y =
-		  (x <= 0.5)
-		? x * x / 3
-		: (exp ((x - _c) / _a) + _b) / 12;
+		  (x <= 1.0 / 12)
+		? sqrt (x * 3)
+		: _a * log (x * 12 - _b) + _c;
 
-	return (y);
+	return y;
 }
 
 double	TransOpHlg::compute_inverse (double x) const
 {
 	const double   y =
-		  (x <= 1.0 / 12)
-		? sqrt (x * 3)
-		: _a * log (x * 12 - _b) + _c;
+		  (x <= 0.5)
+		? x * x / 3
+		: (exp ((x - _c) / _a) + _b) / 12;
 
-	return (y);
+	return y;
 }
 
 
