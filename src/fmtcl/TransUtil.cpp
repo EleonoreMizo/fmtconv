@@ -238,9 +238,11 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 				  (pow (alpha, gamma) * pow (gamma - 1, gamma - 1))
 				/ (pow (alpha - 1, gamma - 1) * pow (gamma, gamma));
 			const double   pwr   = 1.0 / gamma;
-			const double   r_neg = (c == TransCurve_SRGB) ? -1.0 : 0.0;
+			// IEC 61966-2-1, annex G allows values out of [0 ; 1], but specifies
+			// the range only in the coded space (-384/510 inclusive to 640/510
+			// exclusive). The equivalent linear range falls within -1 and 2.
 			ptr = OpSPtr (new TransOpLinPow (
-				inv_flag, alpha, k0 / phi, pwr, phi, r_neg, 1, 1, pwr
+				inv_flag, alpha, k0 / phi, pwr, phi, -1, 2
 			));
 		}
 #else
