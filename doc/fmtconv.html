@@ -15,7 +15,7 @@
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r24</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r25</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
 <tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a> or <a href="https://avs-plus.net/">Avisynth+ 3.7.0</a></td></tr>
@@ -1806,12 +1806,12 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
-<p><b>r25, 202x-xx-xx</b></p>
+<p><b>r25, 2021-09-19</b></p>
 <ul>
 <li><code>bitdepth</code>/Avisynth+: fixed I420 input that couldn’t be converted to higher bitdepth. Thanks to StvG for the report.</li>
 <li><code>matrix</code>: fixed the output colorspace autodetection which failed with specific matrix combinations.</li>
 <li><code>resample</code>/Avisynth+: fixed <var>fulls</var> and <var>fulld</var> parameters which were wrongly defined as <code>int</code> instead of <code>bool</code>.</li>
-<li><code>resample</code>/Avisynth+: fixed <var>cplaced</var> which was wrongly copied from <var>cplaces</var>.</li>
+<li><code>resample</code>/Avisynth+: fixed <var>cplaced</var> which was wrongly copied from <var>cplaces</var>. Thanks to TbtBI for the report.</li>
 <li><code>transfer</code>: automatically adapts the output format (16-bit integer) if the input is a low-bitdepth clip and nothing is specified in <var>bits</var> nor <var>flt</var>, instead of emitting an error.</li>
 <li><code>transfer</code>: fixed the BT.2100 HLG curve that was inverted.</li>
 <li><code>transfer</code>: fixed the sRGB curve linear part and extended its positive range. Thanks to poisondeathray for the report.</li>
@@ -1826,7 +1826,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>bitdepth</code>: fixed crash when trying to change the range (full or TV) without reducing the bitdepth.</li>
 <li><code>matrix</code>: deletes the <code>_Matrix</code> and <code>_ColorSpace</code> properties if a non-standard matrix is used.</li>
 <li><code>matrix2020cl</code>: sets the <code>_Matrix</code> and <code>_Transfer</code> frame properties.</li>
-<li><code>matrix2020cl</code>: fixed hideous colors with slightly out-of-colorspace values when converting from integer Y’Cb’Cr’ to integer linear RGB.</li>
+<li><code>matrix2020cl</code>: fixed hideous colors when converting slightly out-of-colorspace values from integer Y’Cb’Cr’ to integer linear RGB.</li>
 <li><code>resample</code>: <var>totalh</var> and <var>totalv</var> are now correctly taken into account, added <var>total</var> parameter too.</li>
 <li><code>resample</code>: added a <var>planes</var> parameter.</li>
 <li><code>transfer</code>: sYCC curve (similar to sRGB) now supports signed values.</li>
