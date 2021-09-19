@@ -50,6 +50,9 @@
 @copy     "COPYING"                                    "reltmp"
 
 @cd reltmp
+
+del /S *.lo *.o *.dirstamp
+
 @echo fmtconv - Format conversion tools for Vapoursynth and Avisynth+. | "C:\Program Files (x86)\Infozip\zip.exe" -r -o -9 -z "..\releases\fmtconv-rnew.zip" "*.*"
 @cd ..
 
