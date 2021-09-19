@@ -1815,6 +1815,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>transfer</code>: automatically adapts the output format (16-bit integer) if the input is a low-bitdepth clip and nothing is specified in <var>bits</var> nor <var>flt</var>, instead of emitting an error.</li>
 <li><code>transfer</code>: fixed the BT.2100 HLG curve that was inverted.</li>
 <li><code>transfer</code>: fixed the sRGB curve linear part and extended its positive range. Thanks to poisondeathray for the report.</li>
+<li>Avisynth+: fixed a crash occuring when using data bitdepths between 9 and 14. Thanks to tormento for the report.</li>
 </ul>
 
 <p><b>r24, 2021-08-16</b></p>

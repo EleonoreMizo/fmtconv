@@ -233,7 +233,7 @@ int	PlaneProcessor::get_width (const ::PVideoFrame &frame_sptr, int plane_id, Cl
 	const auto &   vi          = use_vi (clip_idx);
 	const int      width_bytes = frame_sptr->GetRowSize (plane_id);
 	const int      bits        = vi.BitsPerComponent ();
-	const int      width       = width_bytes / (bits >> 3);
+	const int      width       = width_bytes / ((bits + 7) >> 3);
 
 	return width;
 }
