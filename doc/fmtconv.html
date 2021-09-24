@@ -1303,6 +1303,7 @@ Possible values are:</p>
 <tr><td><b><code>"spline"</code></b></td><td>Generic <em>natural</em> cubic splines, number of sample points is twice the <var>taps</var> parameter, so you can use <var>taps&nbsp;= 6</var> to get a more or less <code>Spline144Resize</code> equivalent.</td></tr>
 <tr><td><b><code>"gauss"</code></b> or<br /><b><code>"gaussian"</code></b></td><td>Gaussian kernel. The p parameter is mapped on <var>a1</var> and controls the curve width. The higher p, the sharper. It is set to 30 by default. This resizer is the same as <code>GaussResize</code>, but <var>taps</var> offers a control on the filter impulse length. For low p values (soft and blurry), it’s better to increase the number of taps to avoid truncating the gaussian curve too early and creating artifacts.</td></tr>
 <tr><td><b><code>"sinc"</code></b></td><td>Truncated sinc function. Use <var>taps</var> to control its length. Same as <code>SincResize</code>.</td></tr>
+<tr><td><b><code>"impulse"</code></b></td><td>Custom kernel. See the <var>impulse</var> parameter.</td></tr>
 </table>
 
 <p class="var">impulse, impulseh, impulsev</p>
@@ -1310,7 +1311,8 @@ Possible values are:</p>
 Add your coefficents in the array.
 The number of coefficients must be odd.
 The curve is linearly interpolated between the provided points.
-You can oversample the impulse by setting <var>kovrspl</var> to a value &gt; 1.</p>
+You can oversample the impulse by setting <var>kovrspl</var> to a value &gt; 1.
+To activate the custom kernel, set <code>kernel="impulse"</code>.</p>
 
 <p class="var">taps, tapsh, tapsv</p>
 <p>Some kernels have a variable number of sample points, given by this
