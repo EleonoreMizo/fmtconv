@@ -266,13 +266,17 @@ FmtAvs	Transfer::get_output_colorspace (::IScriptEnvironment &env, const ::AVSVa
 	{
 		fmt_dst.set_bitdepth (res);
 	}
-	else if (   flt_def_flag && res_def_flag
-	         && (   (  flt_flag && res != 32)
-	             || (! flt_flag && res >  16)))
+	else
 	{
-		env.ThrowError (
-			fmtcavs_TRANSFER ": flt and bits combination not supported."
-		);
+		assert (flt_def_flag && res_def_flag);
+		if (   (  flt_flag && res != 32)
+		    || (! flt_flag && res >  16))
+		{
+			env.ThrowError (
+				fmtcavs_TRANSFER ": flt and bits combination not supported."
+			);
+		}
+		fmt_dst.set_bitdepth (res);
 	}
 
 	return fmt_dst;
