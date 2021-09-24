@@ -174,7 +174,9 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 		_clip_src_sptr,
 		avsutl::PlaneProcessor::ClipType_NORMAL
 	);
-	_plane_proc_uptr->set_proc_mode (args [Param_PLANES].AsString ("all"));
+	_plane_proc_uptr->set_proc_mode (
+		args [Param_PLANES], env, fmtcavs_RESAMPLE ", planes"
+	);
 
 	const auto     src_picfmt = conv_fmtavs_to_picfmt (_fmt_src, _fulls_flag);
 	const auto     dst_picfmt = conv_fmtavs_to_picfmt (_fmt_dst, _fulld_flag);

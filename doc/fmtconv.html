@@ -1163,7 +1163,7 @@ Possible values are:</p>
 	arrayi invkstapsv (invkstaps),
 	string csp (undefined),
 	string css (undefined),
-	arrayf planes (3),
+	arrayf planes (all),
 	int    fulls (depends),
 	int    fulld (fulls),
 	arrayb center (true),
@@ -1422,8 +1422,12 @@ in Masktools 2.</p>
 <tr><td><b>&minus;65535</b><br />to <b>&plus;0.5</b></td><td>All the pixels of the plane will be set to &minus;x (the opposite of the specified value). The range depends on the output data type. Remember, in floating-point YUV, the chroma planes range from &minus;0.5 to &plus;0.5.</td></tr>
 <tr><td><b>1</b></td><td>The plane will not be processed. This means that the content of the output plane is pure garbage.</td></tr>
 <tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Areas out of the input picture are left unprocessed (garbage). Range (full or TV) conversions are ignored.</td></tr>
-<tr><td><b>3</b></td><td>The plane will be processed.</td></tr>
+<tr><td><b>3</b></td><td>The plane will be processed (default).</td></tr>
 </table>
+<p><span class="host">Avisynth+</span> The parameter can also be specified as
+a string.
+See the <var>planes</var> parameter from the <code>fmtc_bitdepth</code>
+function for more details.</p>
 
 <p class="var">fulls, fulld</p>
 <p>Indicates if the clip is full-range (True) or TV-range (False).
@@ -1807,6 +1811,11 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 
 <h2><a id="changelog"></a>V) Changelog</h2>
+
+<p><b>r26, 202x-xx-xx</b></p>
+<ul>
+<li><code>resample</code>: fixed the <var>planes</var> parameter.</li>
+</ul>
 
 <p><b>r25, 2021-09-19</b></p>
 <ul>

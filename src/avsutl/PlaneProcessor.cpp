@@ -57,6 +57,59 @@ PlaneProcessor::PlaneProcessor (const ::VideoInfo &vi, PlaneProcCbInterface &cb,
 
 
 
+void	PlaneProcessor::set_proc_mode (const ::AVSValue &arg, ::IScriptEnvironment &env, const char *filter_and_arg_0)
+{
+	if (! arg.Defined () || arg.IsString ())
+	{
+		set_proc_mode (arg.AsString ("all"));
+	}
+
+	else if (arg.IsArray ())
+	{
+		constexpr auto def_int = PlaneProcMode_PROCESS;
+		constexpr auto def_flt = double (def_int);
+		auto           pm_arr { fstb::make_array <_max_nbr_planes> (def_flt) };
+
+		const int      nbr_val = arg.ArraySize ();
+		if (nbr_val > _max_nbr_planes)
+		{
+			env.ThrowError ("%s: too many values.", filter_and_arg_0);
+		}
+		
+		for (int pos = 0; pos < nbr_val; ++pos)
+		{
+			auto &      arg_elt = arg [pos];
+			if (arg_elt.Defined ())
+			{
+				if (arg_elt.IsFloat ())
+				{
+					pm_arr [pos] = arg_elt.AsFloat (def_flt);
+				}
+				else if (arg_elt.IsInt ())
+				{
+					pm_arr [pos] = double (arg_elt.AsInt (def_int));
+				}
+				else
+				{
+					env.ThrowError (
+						"%s: element %d (base 0) should be an int or float.",
+						filter_and_arg_0, pos
+					);
+				}
+			}
+		}
+
+		set_proc_mode (pm_arr);
+	}
+
+	else
+	{
+		env.ThrowError ("%s: unexpected argument type.", filter_and_arg_0);
+	}
+}
+
+
+
 void	PlaneProcessor::set_proc_mode (const std::array <double, _max_nbr_planes> &pm_arr)
 {
 	assert (std::find_if (pm_arr.begin (), pm_arr.end (),

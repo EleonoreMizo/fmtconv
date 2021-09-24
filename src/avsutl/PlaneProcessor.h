@@ -96,6 +96,7 @@ public:
 	explicit       PlaneProcessor (const ::VideoInfo &vi, PlaneProcCbInterface &cb, bool manual_flag);
 	virtual        ~PlaneProcessor () = default;
 
+	void           set_proc_mode (const ::AVSValue &arg, ::IScriptEnvironment &env, const char *filter_and_arg_0);
 	void           set_proc_mode (const std::array <double, _max_nbr_planes> &pm_arr);
 	void           set_proc_mode (std::string pmode);
 	void           set_proc_mode (int plane_index, double mode);
