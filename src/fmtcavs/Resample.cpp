@@ -31,6 +31,8 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/BitBltConv.h"
 #include "fmtcl/fnc.h"
 
+#include <stdexcept>
+
 #include <cassert>
 
 
@@ -414,25 +416,36 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 		}
 
 		// Serious stuff now
-		plane_data._kernel_arr [fmtcl::FilterResize::Dir_H].create_kernel (
-			kernel_fnc_h, impulse_h, taps_h,
-			(a1_flag || a1_h_flag), a1_h,
-			(a2_flag || a2_h_flag), a2_h,
-			(a3_flag || a3_h_flag), a3_h,
-			kovrspl,
-			invks_h_flag,
-			invks_taps_h
-		);
+		try
+		{
+			plane_data._kernel_arr [fmtcl::FilterResize::Dir_H].create_kernel (
+				kernel_fnc_h, impulse_h, taps_h,
+				(a1_flag || a1_h_flag), a1_h,
+				(a2_flag || a2_h_flag), a2_h,
+				(a3_flag || a3_h_flag), a3_h,
+				kovrspl,
+				invks_h_flag,
+				invks_taps_h
+			);
 
-		plane_data._kernel_arr [fmtcl::FilterResize::Dir_V].create_kernel (
-			kernel_fnc_v, impulse_v, taps_v,
-			(a1_flag || a1_v_flag), a1_v,
-			(a2_flag || a2_v_flag), a2_v,
-			(a3_flag || a3_v_flag), a3_v,
-			kovrspl,
-			invks_v_flag,
-			invks_taps_v
-		);
+			plane_data._kernel_arr [fmtcl::FilterResize::Dir_V].create_kernel (
+				kernel_fnc_v, impulse_v, taps_v,
+				(a1_flag || a1_v_flag), a1_v,
+				(a2_flag || a2_v_flag), a2_v,
+				(a3_flag || a3_v_flag), a3_v,
+				kovrspl,
+				invks_v_flag,
+				invks_taps_v
+			);
+		}
+		catch (const std::exception &e)
+		{
+			env.ThrowError (fmtcavs_RESAMPLE ": %s", e.what ());
+		}
+		catch (...)
+		{
+			env.ThrowError (fmtcavs_RESAMPLE ": failed to create kernel.");
+		}
 	}
 
 	create_all_plane_specs (_fmt_dst, _fmt_src);
