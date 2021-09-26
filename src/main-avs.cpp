@@ -48,7 +48,7 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 	);
 	env_ptr->AddFunction (fmtcavs_MATRIX,
 		"c"          "[mat]s"   "[mats]s"      "[matd]s"   // 0
-		"[fulls]b"   "[fulld]b" "[coef]."      "[csp]s"    // 4
+		"[fulls]b"   "[fulld]b" "[coef].+"     "[csp]s"    // 4
 		"[col_fam]s" "[bits]i"  "[singleout]i" "[cpuopt]i" // 8
 		, &main_avs_create <fmtcavs::Matrix>, nullptr
 	);
@@ -58,26 +58,26 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		, &main_avs_create <fmtcavs::Matrix2020CL>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_PRIMARIES,
-		"c"     "[rs]."    "[gs]."    "[bs]."     // 0
-		"[ws]." "[rd]."    "[gd]."    "[bd]."     // 4
-		"[wd]." "[prims]s" "[primd]s" "[cpuopt]i" // 8
+		"c"      "[rs].+"   "[gs].+"   "[bs].+"    // 0
+		"[ws].+" "[rd].+"   "[gd].+"   "[bd].+"    // 4
+		"[wd].+" "[prims]s" "[primd]s" "[cpuopt]i" // 8
 		, &main_avs_create <fmtcavs::Primaries>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_RESAMPLE,
-		"c"             "[w]i"       "[h]i"          "[sx]."          //  0
-		"[sy]."         "[sw]."      "[sh]."         "[scale]f"       //  4
-		"[scaleh]f"     "[scalev]f"  "[kernel]s"     "[kernelh]s"     //  8
-		"[kernelv]s"    "[impulse]." "[impulseh]."   "[impulsev]."    // 12
-		"[taps]."       "[tapsh]."   "[tapsv]."      "[a1]."          // 16
-		"[a2]."         "[a3]."      "[a1h]."        "[a2h]."         // 20
-		"[a3h]."        "[a1v]."     "[a2v]."        "[a3v]."         // 24
-		"[kovrspl]i"    "[fh]."      "[fv]."         "[cnorm]b"       // 28
-		"[totalh]."     "[total]."   "[totalv]."     "[invks]."       // 32
-		"[invksh]."     "[invksv]."  "[invkstaps]."  "[invkstapsh]."  // 36
-		"[invkstapsv]." "[csp]s"     "[css]s"        "[planes]."      // 40
-		"[fulls]b"      "[fulld]b"   "[center]."     "[cplace]s"      // 44
-		"[cplaces]s"    "[cplaced]s" "[interlaced]i" "[interlacedd]i" // 48
-		"[tff]i"        "[tffd]i"    "[flt]b"        "[cpuopt]i"      // 52
+		"c"              "[w]i"        "[h]i"          "[sx].+"         //  0
+		"[sy].+"         "[sw].+"      "[sh].+"        "[scale]f"       //  4
+		"[scaleh]f"      "[scalev]f"   "[kernel]s"     "[kernelh]s"     //  8
+		"[kernelv]s"     "[impulse].+" "[impulseh].+"  "[impulsev].+"   // 12
+		"[taps].+"       "[tapsh].+"   "[tapsv].+"     "[a1].+"         // 16
+		"[a2].+"         "[a3].+"      "[a1h].+"       "[a2h].+"        // 20
+		"[a3h].+"        "[a1v].+"     "[a2v].+"       "[a3v].+"        // 24
+		"[kovrspl]i"     "[fh].+"      "[fv].+"        "[cnorm]b"       // 28
+		"[total].+"      "[totalh].+"  "[totalv].+"    "[invks].+"      // 32
+		"[invksh].+"     "[invksv].+"  "[invkstaps].+" "[invkstapsh].+" // 36
+		"[invkstapsv].+" "[csp]s"      "[css]s"        "[planes].*"     // 40
+		"[fulls]b"       "[fulld]b"    "[center].+"    "[cplace]s"      // 44
+		"[cplaces]s"     "[cplaced]s"  "[interlaced]i" "[interlacedd]i" // 48
+		"[tff]i"         "[tffd]i"     "[flt]b"        "[cpuopt]i"      // 52
 		, &main_avs_create <fmtcavs::Resample>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_TRANSFER,

@@ -252,21 +252,21 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 	// Per-plane parameters
 	const auto impulse   =
 		extract_array_f (env, args [Param_IMPULSE ], fmtcavs_RESAMPLE ", impulse");
-	auto impulse_h = args [Param_IMPULSEH].Defined ()
+	const auto impulse_h = is_array_defined (args [Param_IMPULSEH])
 		? extract_array_f (env, args [Param_IMPULSEH], fmtcavs_RESAMPLE ", impulseh")
 		: impulse;
-	const auto impulse_v = args [Param_IMPULSEV].Defined ()
+	const auto impulse_v = is_array_defined (args [Param_IMPULSEV])
 		? extract_array_f (env, args [Param_IMPULSEV], fmtcavs_RESAMPLE ", impulsev")
 		: impulse;
-	const bool a1_flag   = args [Param_A1 ].Defined ();
-	const bool a2_flag   = args [Param_A2 ].Defined ();
-	const bool a3_flag   = args [Param_A3 ].Defined ();
-	const bool a1_h_flag = args [Param_A1H].Defined ();
-	const bool a2_h_flag = args [Param_A2H].Defined ();
-	const bool a3_h_flag = args [Param_A3H].Defined ();
-	const bool a1_v_flag = args [Param_A1V].Defined ();
-	const bool a2_v_flag = args [Param_A2V].Defined ();
-	const bool a3_v_flag = args [Param_A3V].Defined ();
+	const bool a1_flag   = is_array_defined (args [Param_A1 ]);
+	const bool a2_flag   = is_array_defined (args [Param_A2 ]);
+	const bool a3_flag   = is_array_defined (args [Param_A3 ]);
+	const bool a1_h_flag = is_array_defined (args [Param_A1H]);
+	const bool a2_h_flag = is_array_defined (args [Param_A2H]);
+	const bool a3_h_flag = is_array_defined (args [Param_A3H]);
+	const bool a1_v_flag = is_array_defined (args [Param_A1V]);
+	const bool a2_v_flag = is_array_defined (args [Param_A2V]);
+	const bool a3_v_flag = is_array_defined (args [Param_A3V]);
 	const auto sx_arr         = extract_array_f (env, args [Param_SX        ], fmtcavs_RESAMPLE ", sx");
 	const auto sy_arr         = extract_array_f (env, args [Param_SY        ], fmtcavs_RESAMPLE ", sy");
 	const auto sw_arr         = extract_array_f (env, args [Param_SW        ], fmtcavs_RESAMPLE ", sw");

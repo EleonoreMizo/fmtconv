@@ -63,18 +63,26 @@ std::vector <T>	extract_array_any (::IScriptEnvironment &env, const ::AVSValue &
 
 		else if (arg.IsArray ())
 		{
-			const int      sz = arg.ArraySize ();
-			for (int k = 0; k < sz; ++k)
+			if (arg.ArraySize () == 1 && arg [0].IsString ())
 			{
-				const ::AVSValue &   elt = arg [k];
-				if (! fnc_test (elt))
+				val_arr = fmtcl::conv_str_to_arr <T> (arg [0].AsString (""));
+			}
+
+			else
+			{
+				const int      sz = arg.ArraySize ();
+				for (int k = 0; k < sz; ++k)
 				{
-					env.ThrowError (
-						"%s: element %d (base 0) should be a %s.",
-						filter_and_arg_0, k, typename_0
-					);
+					const ::AVSValue &   elt = arg [k];
+					if (! fnc_test (elt))
+					{
+						env.ThrowError (
+							"%s: element %d (base 0) should be a %s.",
+							filter_and_arg_0, k, typename_0
+						);
+					}
+					val_arr.push_back (fnc_read (elt));
 				}
-				val_arr.push_back (fnc_read (elt));
 			}
 		}
 
@@ -272,6 +280,19 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFra
 	}
 
 	return pa;
+}
+
+
+
+// For ".+" and ".*" arguments
+// Assumes the argument is not defined if the array is empty.
+bool is_array_defined (const ::AVSValue &arg)
+{
+	return (
+		   arg.Defined ()
+		&& (   ! arg.IsArray ()
+		    || (arg.ArraySize () > 0 && arg [0].Defined ()))
+	);
 }
 
 
