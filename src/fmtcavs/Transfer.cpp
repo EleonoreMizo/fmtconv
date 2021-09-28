@@ -31,6 +31,7 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcavs/Transfer.h"
 #include "fmtcl/TransOpLogC.h"
 #include "fmtcl/TransUtil.h"
+#include "fstb/fnc.h"
 
 #include <cassert>
 
@@ -116,13 +117,16 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Other parameters
-	const std::string transs  = args [Param_TRANSS  ].AsString ("");
-	const std::string transd  = args [Param_TRANSD  ].AsString ("");
+	std::string    transs     = args [Param_TRANSS  ].AsString ("");
+	std::string    transd     = args [Param_TRANSD  ].AsString ("");
 	const double   contrast   = args [Param_CONT    ].AsFloat (1);
 	const double   gcor       = args [Param_GCOR    ].AsFloat (1);
 	const double   lvl_black  = args [Param_BLACKLVL].AsFloat (0);
 	const int      logc_ei_raw_s = args [Param_LOGCEIS].AsInt (800);
 	const int      logc_ei_raw_d = args [Param_LOGCEID].AsInt (800);
+
+	fstb::conv_to_lower_case (transs);
+	fstb::conv_to_lower_case (transd);
 
 	_curve_s = fmtcl::TransUtil::conv_string_to_curve (transs);
 	if (_curve_s == fmtcl::TransCurve_UNDEF)
