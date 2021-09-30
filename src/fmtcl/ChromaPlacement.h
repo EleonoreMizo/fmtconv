@@ -39,9 +39,10 @@ enum ChromaPlacement
 	ChromaPlacement_INVALID = -2,
 	ChromaPlacement_UNDEF   = -1,
 
-	ChromaPlacement_MPEG1   = 0,
-	ChromaPlacement_MPEG2,
+	ChromaPlacement_MPEG1   = 0, // Type 1
+	ChromaPlacement_MPEG2,       // Type 0
 	ChromaPlacement_DV,
+	ChromaPlacement_T_L,         // Type 2 (top left)
 
 	ChromaPlacement_NBR_ELT
 };

@@ -35,6 +35,29 @@ namespace fmtcl
 
 
 
+/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+// Fixes the vertical chroma placement when the picture is interlaced.
+// ofs = ordinate to skip between TFF and BFF, relative to the chroma grid. A
+// single line of full-res picture is 0.25.
+static inline void	ChromaPlacement_fix_itl (double &cp_v, bool interlaced_flag, bool top_flag, double ofs = 0.5)
+{
+	assert (cp_v >= 0);
+
+	if (interlaced_flag)
+	{
+		cp_v *= 0.5;
+		if (! top_flag)
+		{
+			cp_v += ofs;
+		}
+	}
+}
+
+
+
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
@@ -62,15 +85,7 @@ void	ChromaPlacement_compute_cplace (double &cp_h, double &cp_v, ChromaPlacement
 	// Generic case for luma, non-subsampled chroma and MPEG-1 chroma.
 	cp_h = 0.5;
 	cp_v = 0.5;
-
-	if (interlaced_flag)
-	{
-		cp_v *= 0.5;
-		if (! top_flag)
-		{
-			cp_v += 0.5;
-		}
-	}
+	ChromaPlacement_fix_itl (cp_v, interlaced_flag, top_flag);
 
 	// Subsampled chroma
 	if (! rgb_flag && plane_index > 0)
@@ -78,7 +93,8 @@ void	ChromaPlacement_compute_cplace (double &cp_h, double &cp_v, ChromaPlacement
 		if (ss_h > 0)
 		{
 			if (   cplace == ChromaPlacement_MPEG2
-			    || cplace == ChromaPlacement_DV)
+			    || cplace == ChromaPlacement_DV
+			    || cplace == ChromaPlacement_T_L)
 			{
 				cp_h = 0.5 / (1 << ss_h);
 			}
@@ -88,33 +104,16 @@ void	ChromaPlacement_compute_cplace (double &cp_h, double &cp_v, ChromaPlacement
 		{
 			if (cplace == ChromaPlacement_MPEG2)
 			{
-				if (interlaced_flag)
-				{
-					cp_v = 0.25;
-					if (! top_flag)
-					{
-						cp_v = 0.75;
-					}
-				}
-				else
-				{
-					cp_v = 0.5;
-				}
+				cp_v = 0.5;
+				ChromaPlacement_fix_itl (cp_v, interlaced_flag, top_flag);
 			}
-			else if (cplace == ChromaPlacement_DV)
+			else if (   cplace == ChromaPlacement_DV
+			         || cplace == ChromaPlacement_T_L)
 			{
 				cp_v = 0.25;
+				ChromaPlacement_fix_itl (cp_v, interlaced_flag, top_flag, 0.25);
 
-				if (interlaced_flag)
-				{
-					cp_v *= 0.5;
-					if (! top_flag)
-					{
-						cp_v += 0.25;
-					}
-				}
-
-				if (plane_index == 2)
+				if (cplace == ChromaPlacement_DV && plane_index == 2)
 				{
 					cp_v += 0.5;
 				}
@@ -122,14 +121,6 @@ void	ChromaPlacement_compute_cplace (double &cp_h, double &cp_v, ChromaPlacement
 		}  // ss_v == 1
 	}
 }
-
-
-
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 

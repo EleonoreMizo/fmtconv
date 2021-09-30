@@ -534,6 +534,10 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 			{
 				cl_val = 1; // Center
 			}
+			else if (_cplace_d == fmtcl::ChromaPlacement_T_L)
+			{
+				cl_val = 2; // Top-left
+			}
 
 			if (cl_val >= 0)
 			{

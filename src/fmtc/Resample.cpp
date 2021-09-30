@@ -545,6 +545,10 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 				{
 					cl_val = 1; // Center
 				}
+				else if (_cplace_d == fmtcl::ChromaPlacement_T_L)
+				{
+					cl_val = 2; // Top-left
+				}
 
 				if (cl_val >= 0)
 				{

@@ -58,17 +58,21 @@ ChromaPlacement	ResampleUtil::conv_str_to_chroma_placement (std::string cplace)
 	ChromaPlacement   cp_val = ChromaPlacement_INVALID;
 
 	fstb::conv_to_lower_case (cplace);
-	if (cplace == "mpeg1")
+	if (cplace == "mpeg1" || cplace == "jpeg" || cplace == "center")
 	{
 		cp_val = ChromaPlacement_MPEG1;
 	}
-	else if (cplace == "mpeg2")
+	else if (cplace == "mpeg2" || cplace == "left")
 	{
 		cp_val = ChromaPlacement_MPEG2;
 	}
 	else if (cplace == "dv")
 	{
 		cp_val = ChromaPlacement_DV;
+	}
+	else if (cplace == "top_left" || cplace == "tl")
+	{
+		cp_val = ChromaPlacement_T_L;
 	}
 
 	return cp_val;

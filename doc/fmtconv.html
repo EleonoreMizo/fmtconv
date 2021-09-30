@@ -1464,9 +1464,10 @@ pixels.</p>
 destination clip.
 Can be one of these strings:</p>
 <table>
-<tr><td><b><code>&quot;MPEG1&quot;</code></b></td><td>4:2:0 subsampling used in MPEG-1 and JPEG. Chroma samples are located on the center of each group of 4 pixels.</td></tr>
-<tr><td><b><code>&quot;MPEG2&quot;</code></b></td><td>Subsampling used in MPEG-2 4:2:x and most other formats. Chroma samples are located on the left pixel column of the group.</td></tr>
+<tr><td><b><code>&quot;MPEG1&quot;<br />&quot;JPEG&quot;<br />&quot;center&quot;</code></b></td><td>4:2:0 subsampling used in MPEG-1 and JPEG. Chroma samples are located on the center of each group of 4 pixels.</td></tr>
+<tr><td><b><code>&quot;MPEG2&quot;<br />&quot;left&quot;</code></b></td><td>Subsampling used in MPEG-2 4:2:x and most other formats. Chroma samples are located on the left pixel column of the group.</td></tr>
 <tr><td><b><code>&quot;DV&quot;</code></b></td><td>For 4:2:0 modes, it’s like MPEG-2 but U and V channels are &ldquo;co-sited&rdquo; vertically: V on the top row, and U on the bottom row. For 4:1:1, chroma is located on the leftmost column.</td></tr>
+<tr><td><b><code>&quot;top_left&quot;<br />&quot;tl&quot;</code></b></td><td>Chroma samples are located on the top-left luma sample of each pixel group.</td></tr>
 </table>
 <p>The chroma placement is ignored when <var>center</var> is set to
 <code>False</code> or <var>kernel</var> to <code>&quot;point&quot;</code>.
@@ -1502,6 +1503,10 @@ StackVertical (
 \	StackHorizontal (
 \		show_chroma_ss ("YV16",  "MPEG2", "4:2:2",         true,  0),
 \		show_chroma_ss ("YV16",  "MPEG2", "4:2:2",         true,  1)
+\	),
+\	StackHorizontal (
+\		show_chroma_ss ("YV16",  "MPEG1", "4:2:2 MPEG-1",   false, 0),
+\		show_chroma_ss ("YV12",  "TL",    "4:2:0 Top-left", false, 0)
 \	)
 \ )
 
@@ -1533,12 +1538,12 @@ Function show_chroma_ss (string colorspace, string cplace, string dispname, bool
 	AddBorders (bor, bor, bor, bor, bkg)
 	w = Width ()
 	h = Height ()
-	Dither_convert_8_to_16 ()
 	(itl) ? AssumeFrameBased ().AssumeTFF ().SeparateFields () : last
 	fx = (shrp) ? 8 : 1
-	Dither_resize16 (w * scale, h * scale, kernel="gaussian", a1=80, fh=fx, fv=fx, cplace=cplace)
+	fmtc_resample (w * scale, h * scale, kernel="gaussian", a1=80, fh=fx, fv=fx, cplace=cplace, css="444", fulls=false, fulld=false)
 	(itl) ? SelectEvery (2, field) : last
-	Dither_convert_yuv_to_rgb (lsb_in=true, mode=0, ampn=0, chromak="point")
+	(IsY ()) ? ConvertToPlanarRGB (matrix="Rec601") : fmtc_matrix (mat="601", fulls=false, fulld=true)
+	fmtc_bitdepth (bits=8, dmode=1)
 	bs = bor * scale
 	mask = Crop (bs, bs, -bs, -bs)
 	mask = mask.BlankClip (color=$000000)
@@ -1820,6 +1825,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>matrix</code>: fixed the output colorspace when using <var>singleout</var>.</li>
 <li><code>resample</code>: fixed empty custom impulse that could cause a crash.</li>
+<li><code>resample</code>: added top-left chroma location.</li>
 <li><code>resample</code>/Avisynth+: interlacing detection now uses the global stream information when the frame properties are not available.</li>
 <li><code>resample</code>/Avisynth+: fixed the <var>planes</var> parameter.</li>
 <li><code>transfer</code>/Avisynth+: fixed <var>flt</var> + <var>bits</var> combination that was ignored. Thanks to DTL for the report.</li>
