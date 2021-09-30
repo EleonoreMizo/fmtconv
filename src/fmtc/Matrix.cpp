@@ -250,23 +250,26 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	}
 
 	// Sets the output colorspace accordingly
-	const auto     final_cf =
-		fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, true);
-	const auto     final_cm =
-		fmtc::conv_fmtcl_colfam_to_vs (final_cf);
-	fmt_dst_ptr = register_format (
-		final_cm,
-		fmt_dst_ptr->sampleType,
-		fmt_dst_ptr->bitsPerSample,
-		fmt_dst_ptr->subSamplingW,
-		fmt_dst_ptr->subSamplingH,
-		core
-	);
-	if (fmt_dst_ptr == nullptr)
+	if (_plane_out < 0)
 	{
-		throw_rt_err (
-			"couldn\'t get a pixel format identifier for the output clip."
+		const auto     final_cf =
+			fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, true);
+		const auto     final_cm =
+			fmtc::conv_fmtcl_colfam_to_vs (final_cf);
+		fmt_dst_ptr = register_format (
+			final_cm,
+			fmt_dst_ptr->sampleType,
+			fmt_dst_ptr->bitsPerSample,
+			fmt_dst_ptr->subSamplingW,
+			fmt_dst_ptr->subSamplingH,
+			core
 		);
+		if (fmt_dst_ptr == nullptr)
+		{
+			throw_rt_err (
+				"couldn\'t get a pixel format identifier for the output clip."
+			);
+		}
 	}
 
 	// Checks the output colorspace

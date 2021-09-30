@@ -241,9 +241,12 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Sets the output colorspace accordingly
-	const auto     final_cf =
-		fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, false);
-	fmt_dst.set_col_fam (final_cf);
+	if (_plane_out < 0)
+	{
+		const auto     final_cf =
+			fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, false);
+		fmt_dst.set_col_fam (final_cf);
+	}
 
 	// Checks the output colorspace
 	if (   fmt_dst.is_float ()     != fmt_src.is_float ()
