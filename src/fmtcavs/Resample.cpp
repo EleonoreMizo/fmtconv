@@ -460,6 +460,16 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 
 	Ru::FieldBased prop_fieldbased = Ru::FieldBased_INVALID;
 	Ru::Field      prop_field      = Ru::Field_INVALID;
+
+	// Default property values based on VideoInfo
+	const bool     interlaced_flag = (vi.IsFieldBased () && vi.IsParityKnown ());
+	if (interlaced_flag)
+	{
+		const bool     top_flag = vi.IsTFF (); // or _src_clip_sptr->GetParity(n)?
+		prop_fieldbased = (top_flag) ? Ru::FieldBased_TFF : Ru::FieldBased_BFF;
+	}
+
+	// Now reads the existing frame properties
 	if (supports_props ())
 	{
 		const ::AVSMap *  props_ptr = env_ptr->getFramePropsRO (src_sptr);
@@ -467,14 +477,14 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 		int64_t        prop_val = -1;
 		prop_val = env_ptr->propGetInt (props_ptr, "_FieldBased", 0, &err);
 		prop_fieldbased =
-				(err      != 0) ? Ru::FieldBased_INVALID
+			  (err      != 0) ? prop_fieldbased
 			: (prop_val == 0) ? Ru::FieldBased_FRAMES
 			: (prop_val == 1) ? Ru::FieldBased_BFF
 			: (prop_val == 2) ? Ru::FieldBased_TFF
 			:                   Ru::FieldBased_INVALID;
 		prop_val = env_ptr->propGetInt (props_ptr, "_Field", 0, &err);
 		prop_field =
-				(err      != 0) ? Ru::Field_INVALID
+			  (err      != 0) ? prop_field
 			: (prop_val == 0) ? Ru::Field_BOT
 			: (prop_val == 1) ? Ru::Field_TOP
 			:                   Ru::Field_INVALID;

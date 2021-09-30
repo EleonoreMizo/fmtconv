@@ -1219,6 +1219,10 @@ double rate then reinterlacing.
 Simple field resampling is more or less equivalent to this method, using a
 naive bob.</p>
 
+<p><span class="host">Avisynth+</span> Interlacing parameters are automatically
+detected with global clip information which can be overriden by frame
+properties.</p>
+
 <p>The function can also be used to compute horizontal and vertical 
 convolutions.
 If you do so, don’t forget to set:</p>
@@ -1816,6 +1820,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>matrix</code>: fixed the output colorspace when using <var>singleout</var>.</li>
 <li><code>resample</code>: fixed empty custom impulse that could cause a crash.</li>
+<li><code>resample</code>/Avisynth+: interlacing detection now uses the global stream information when the frame properties are not available.</li>
 <li><code>resample</code>/Avisynth+: fixed the <var>planes</var> parameter.</li>
 <li><code>transfer</code>/Avisynth+: fixed <var>flt</var> + <var>bits</var> combination that was ignored. Thanks to DTL for the report.</li>
 <li><code>transfer</code>/Avisynth+: fixed case sensitivity to <var>transs</var> and <var>transd</var>.</li>
