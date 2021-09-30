@@ -94,7 +94,10 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 	// Builds and validates the output format
 	auto           fmt_dst = fmt_src;
 	fmt_dst.set_bitdepth (res);
-	fmt_dst.conv_to_vi (vi);
+	if (fmt_dst.conv_to_vi (vi) != 0)
+	{
+		env.ThrowError (fmtcavs_BITDEPTH ": illegal output colorspace.");
+	}
 
 	// Conversion-related things
 	_fulls_flag     =

@@ -152,7 +152,10 @@ Matrix2020CL::Matrix2020CL (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Output format is validated.
-	fmt_dst.conv_to_vi (vi);
+	if (fmt_dst.conv_to_vi (vi) != 0)
+	{
+		env.ThrowError (fmtcavs_MATRIX2020CL ": illegal output colorspace.");
+	}
 	_to_yuv_flag = (col_fam_dst == fmtcl::ColorFamily_YUV);
 
 	// Range
