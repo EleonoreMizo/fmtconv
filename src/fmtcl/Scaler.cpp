@@ -44,6 +44,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include <cassert>
 #include <climits>
+#include <cmath>
 
 
 
@@ -823,8 +824,28 @@ void	Scaler::build_scale_data ()
 			{
 				n = _norm_val;
 			}
-			assert (! fstb::is_null (n));
-			amp = 1.0 / fabs (n);
+			if (fstb::is_null (n))
+			{
+				// This shouldn't happen in normal use. However with an extremely
+				// sharp gaussian kernel, it is possible that the kernel is made
+				// of just a single tiny coefficient. This test should be able to
+				// make it work as expected. However a simple "box" filter is more
+				// suited for this kind of use.
+				if (coef_tmp.size () == 1)
+				{
+					coef_tmp [0] = std::copysign (1.0, coef_tmp [0]);
+					sum          = coef_tmp [0];
+				}
+				else
+				{
+					// Nothing to save here.
+					assert (false);
+				}
+			}
+			else
+			{
+				amp = 1.0 / fabs (n);
+			}
 		}
 
 		amp *= _gain;
