@@ -252,10 +252,14 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	// Sets the output colorspace accordingly
 	if (_plane_out < 0)
 	{
-		const auto     final_cf =
-			fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, true);
-		const auto     final_cm =
-			fmtc::conv_fmtcl_colfam_to_vs (final_cf);
+		auto          final_cm = fmt_dst_ptr->colorFamily;
+		if (_csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED)
+		{
+			const auto     final_cf =
+				fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, true);
+			final_cm = fmtc::conv_fmtcl_colfam_to_vs (final_cf);
+		}
+
 		fmt_dst_ptr = register_format (
 			final_cm,
 			fmt_dst_ptr->sampleType,
