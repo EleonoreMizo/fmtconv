@@ -100,8 +100,7 @@ int	FmtAvs::conv_from_str (std::string fmt_str)
 
 		if (fmt_str.front () == 'a')
 		{
-			_planar_flag = true;
-			_alpha_flag  = true;
+			_alpha_flag = true;
 			fmt_str.erase (0, 1);
 			if (fmt_str.empty ())
 			{
@@ -112,6 +111,7 @@ int	FmtAvs::conv_from_str (std::string fmt_str)
 		// Planar
 		if (check_planar_bits_and_eat (fmt_str, _bitdepth))
 		{
+			_planar_flag = true;
 			if (_bitdepth < 0)
 			{
 				return -1; // Ill-formed string or invalid bitdepth
