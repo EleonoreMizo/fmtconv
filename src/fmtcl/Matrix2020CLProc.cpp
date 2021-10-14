@@ -131,7 +131,7 @@ Matrix2020CLProc::Err	Matrix2020CLProc::configure (bool to_yuv_flag, SplFmt src_
 
 
 
-void	Matrix2020CLProc::process (const ProcComp3Arg &arg) const
+void	Matrix2020CLProc::process (const ProcComp3Arg &arg) const noexcept
 {
 	assert (_src_fmt != SplFmt_ILLEGAL);
 	assert (_dst_fmt != SplFmt_ILLEGAL);

@@ -79,7 +79,7 @@ public:
 	// All stride values are in bytes
 	// h must be the frame height too, not only the processed stripe height
 	// (required for Stack16 formats to compute the lsb offset)
-	void           process (const ProcComp3Arg &arg) const;
+	void           process (const ProcComp3Arg &arg) const noexcept;
 
 
 
