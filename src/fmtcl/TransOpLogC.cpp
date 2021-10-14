@@ -42,13 +42,13 @@ namespace fmtcl
 
 
 
-TransOpLogC::TransOpLogC (bool inv_flag, Type type, ExpIdx ei)
+TransOpLogC::TransOpLogC (bool inv_flag, LType type, ExpIdx ei)
 :	_inv_flag (inv_flag)
-,	_n ((type == Type_VLOG) ? 0 : _noise_margin)
+,	_n ((type == LType_VLOG) ? 0 : _noise_margin)
 ,	_curve (
-		  (type == Type_VLOG   ) ? _vlog
-		: (type == Type_LOGC_V2) ? _v2_table [ei]
-		:                          _v3_table [ei]
+		  (type == LType_VLOG   ) ? _vlog
+		: (type == LType_LOGC_V2) ? _v2_table [ei]
+		:                           _v3_table [ei]
 	)
 {
 	assert (ei >= 0);

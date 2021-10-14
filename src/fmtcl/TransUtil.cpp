@@ -285,12 +285,12 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 		break;
 	case TransCurve_LOGC2:
 		ptr = OpSPtr (new TransOpLogC (
-			inv_flag, TransOpLogC::Type_LOGC_V2, logc_ei
+			inv_flag, TransOpLogC::LType_LOGC_V2, logc_ei
 		));
 		break;
 	case TransCurve_LOGC3:
 		ptr = OpSPtr (new TransOpLogC (
-			inv_flag, TransOpLogC::Type_LOGC_V3, logc_ei
+			inv_flag, TransOpLogC::LType_LOGC_V3, logc_ei
 		));
 		break;
 	case TransCurve_CANONLOG:
@@ -315,7 +315,7 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 		ptr = OpSPtr (new TransOpSLog3 (inv_flag));
 		break;
 	case TransCurve_VLOG:
-		ptr = OpSPtr (new TransOpLogC (inv_flag, TransOpLogC::Type_VLOG));
+		ptr = OpSPtr (new TransOpLogC (inv_flag, TransOpLogC::LType_VLOG));
 		break;
 	default:
 		assert (false);

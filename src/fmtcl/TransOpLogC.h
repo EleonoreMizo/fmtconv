@@ -51,13 +51,13 @@ class TransOpLogC
 
 public:
 
-	enum Type
+	enum LType
 	{
-		Type_LOGC_V3 = 0,
-		Type_LOGC_V2,
-		Type_VLOG,
+		LType_LOGC_V3 = 0,
+		LType_LOGC_V2,
+		LType_VLOG,
 
-		Type_NBR_ELT
+		LType_NBR_ELT
 	};
 
 	// Exposure Index (EI)
@@ -80,7 +80,7 @@ public:
 		ExpIdx_NBR_ELT
 	};
 
-	explicit       TransOpLogC (bool inv_flag, Type type, ExpIdx ei = ExpIdx_800);
+	explicit       TransOpLogC (bool inv_flag, LType type, ExpIdx ei = ExpIdx_800);
 	virtual        ~TransOpLogC () {}
 
 	// TransOpInterface
