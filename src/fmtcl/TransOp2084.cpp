@@ -55,11 +55,11 @@ double	TransOp2084::operator () (double x) const
 	x = fstb::limit (x, 0.0, 1.0);
 	double         y = x;
 
-	static const double  c1 =   1.0  * 3424 / 4096;
-	static const double  c2 =  32.0  * 2413 / 4096;
-	static const double  c3 =  32.0  * 2392 / 4096;
-	static const double  m  = 128.0  * 2523 / 4096;
-	static const double  n  =   0.25 * 2610 / 4096;
+	constexpr double  c1 =   1.0  * 3424 / 4096;
+	constexpr double  c2 =  32.0  * 2413 / 4096;
+	constexpr double  c3 =  32.0  * 2392 / 4096;
+	constexpr double  m  = 128.0  * 2523 / 4096;
+	constexpr double  n  =   0.25 * 2610 / 4096;
 
 	// Makes sure that f(0) = 0
 	if (x > 0)
@@ -88,7 +88,7 @@ double	TransOp2084::operator () (double x) const
 		}
 	}
 
-	return (y);
+	return y;
 }
 
 
