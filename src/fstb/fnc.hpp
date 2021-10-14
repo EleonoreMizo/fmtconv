@@ -974,7 +974,7 @@ constexpr T	lerp (T v0, T v1, T p) noexcept
 // The points must not be aligned so the extremum exists.
 // It is not necessariy located between -1 and 1.
 template <class T>
-inline constexpr T       find_extremum_pos_parabolic (T r1, T r2, T r3)
+constexpr T	find_extremum_pos_parabolic (T r1, T r2, T r3) noexcept
 {
 	const T        den = T (2) * r2 - (r3 + r1);
 	assert (den != T (0));
@@ -982,6 +982,36 @@ inline constexpr T       find_extremum_pos_parabolic (T r1, T r2, T r3)
 	const T        pos = (r3 - r1) * T (0.5) / den;
 
 	return pos;
+}
+
+
+
+// Uses the full data width
+template <class T>
+constexpr T	rotl (T x, int k) noexcept
+{
+	static_assert (std::is_integral <T>::value, "T must be integer");
+	static_assert (std::is_unsigned <T>::value, "T must be unsigned");
+	constexpr int  bitdepth = sizeof (T) * CHAR_BIT;
+	assert (k >= 0);
+	assert (k < bitdepth);
+
+	return (x << k) | (x >> (bitdepth - k));
+}
+
+
+
+// Uses the full data width
+template <class T>
+constexpr T	rotr (T x, int k) noexcept
+{
+	static_assert (std::is_integral <T>::value, "T must be integer");
+	static_assert (std::is_unsigned <T>::value, "T must be unsigned");
+	constexpr int  bitdepth = sizeof (T) * CHAR_BIT;
+	assert (k >= 0);
+	assert (k < bitdepth);
+
+	return (x >> k) | (x << (bitdepth - k));
 }
 
 
