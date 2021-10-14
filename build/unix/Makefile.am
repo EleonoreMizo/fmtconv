@@ -216,6 +216,8 @@ commonsrc = \
         ../../src/fmtcl/ScalerCopy.h \
         ../../src/fmtcl/SplFmt.h \
         ../../src/fmtcl/SplFmt.hpp \
+        ../../src/fmtcl/TransCst.cpp \
+        ../../src/fmtcl/TransCst.h \
         ../../src/fmtcl/TransCurve.h \
         ../../src/fmtcl/TransLut.cpp \
         ../../src/fmtcl/TransLut.h \

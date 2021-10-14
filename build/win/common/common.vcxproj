@@ -248,6 +248,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\ScalerCopy.h" />
     <ClInclude Include="..\..\..\src\fmtcl\SplFmt.h" />
     <ClInclude Include="..\..\..\src\fmtcl\SplFmt.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransCst.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransCurve.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransLut.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransModel.h" />
@@ -346,6 +347,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\Scaler_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransCst.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransLut.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransLut_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
