@@ -47,7 +47,7 @@ public:
 	//  beta         <= L                 : V =    alpha * pow ( L        , p1) - (alpha - 1)
 	// -beta / scneg <  L <   beta        : V =            pow ( L * slope, p2)
 	//                  L <= -beta / scneg: V = - (alpha * pow (-L * scneg, p1) - (alpha - 1)) / scneg
-	explicit       TransOpLinPow (bool inv_flag, double alpha, double beta, double p1, double slope, double lb = 0, double ub = 1, double scneg = 1, double p2 = 1);
+	explicit       TransOpLinPow (bool inv_flag, double alpha, double beta, double p1, double slope, double lb = 0, double ub = 1, double scneg = 1, double p2 = 1, double scale_cdm2 = 0, double wpeak_cdm2 = 0);
 	virtual        ~TransOpLinPow () {}
 
 	// TransOpInterface
@@ -67,14 +67,20 @@ protected:
 private:
 
 	const bool     _inv_flag;
+
+	// Direct values (linear to coded)
 	const double   _alpha;
 	const double   _beta;
 	const double   _p1;
 	const double   _slope;
-	const double   _lb;
-	const double   _ub;
+	const double   _lb;    // Lower bound for clipping, linear range
+	const double   _ub;    // Upper bound for clipping, linear range
 	const double   _scneg;
 	const double   _p2;
+	const double   _scale_cdm2; // White luminance in cd/m^2 for 1.0 in linear range. 0 = unknown.
+	const double   _wpeak_cdm2; // Peak luminance in cd/m^2
+
+	// Inverse values (coded to linear)
 	double         _alpha_m1;
 	double         _beta_n;
 	double         _beta_i;

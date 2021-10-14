@@ -44,7 +44,7 @@ class TransOpPow
 
 public:
 
-	explicit       TransOpPow (bool inv_flag, double p_i, double alpha = 1, double val_max = 1);
+	explicit       TransOpPow (bool inv_flag, double p_i, double alpha = 1, double val_max = 1, double scale_cdm2 = 0, double wpeak_cdm2 = 0);
 	virtual        ~TransOpPow () {}
 
 	// TransOpInterface
@@ -67,7 +67,9 @@ private:
 	const double   _p_i;
 	const double   _alpha;
 	const double   _p;
-	const double   _val_max;	// linear
+	const double   _val_max;      // linear
+	const double   _scale_cdm2;   // Value in cd/m^2 for linear 1.0. 0 = unknown
+	const double   _wpeak_cdm2;   // Value in cd/m^2 for linear 1.0. 0 = unknown
 
 
 

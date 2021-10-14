@@ -41,7 +41,7 @@ namespace fmtcl
 
 
 
-TransOpLinPow::TransOpLinPow (bool inv_flag, double alpha, double beta, double p1, double slope, double lb, double ub, double scneg, double p2)
+TransOpLinPow::TransOpLinPow (bool inv_flag, double alpha, double beta, double p1, double slope, double lb, double ub, double scneg, double p2, double scale_cdm2, double wpeak_cdm2)
 :	_inv_flag (inv_flag)
 ,	_alpha (alpha)
 ,	_beta (beta)
@@ -51,6 +51,8 @@ TransOpLinPow::TransOpLinPow (bool inv_flag, double alpha, double beta, double p
 ,	_ub (ub)
 ,	_scneg (scneg)
 ,	_p2 (p2)
+,	_scale_cdm2 (scale_cdm2)
+,	_wpeak_cdm2 (wpeak_cdm2)
 {
 	_alpha_m1 = _alpha - 1;
 	_beta_n   =       -_beta / _scneg;
