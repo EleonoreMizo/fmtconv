@@ -74,7 +74,7 @@ double	TransOpPow::operator () (double x) const
 		y = _alpha * pow (x, _p);
 	}
 
-	return (y);
+	return y;
 }
 
 

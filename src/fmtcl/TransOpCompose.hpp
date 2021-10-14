@@ -50,7 +50,7 @@ double	TransOpCompose::operator () (double x) const
 	x = (*_op_1_sptr) (x);
 	x = (*_op_2_sptr) (x);
 
-	return (x);
+	return x;
 }
 
 

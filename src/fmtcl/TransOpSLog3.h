@@ -63,7 +63,11 @@ protected:
 
 private:
 
+	static double  log_to_lin (double x);
+	static double  lin_to_log (double x);
+
 	const bool     _inv_flag;
+
 
 
 /*\\\ FORBIDDEN MEMBER FUNCTIONS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/

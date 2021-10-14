@@ -63,6 +63,16 @@ protected:
 
 private:
 
+	static constexpr double  _a  = 0.037584;
+	static constexpr double  _b  = 0.432699;
+	static constexpr double  _c1 = 0.616596;
+	static constexpr double  _c2 = 0.03;
+	static constexpr double  _c  = _c1 + _c2;
+	static constexpr double  _d  = 5.0;
+	static constexpr double  _s2 = 219.0 / 155.0;
+
+	double         compute_direct (double x) const;
+	double         compute_inverse (double x) const;
 	const bool     _inv_flag;
 	const bool     _slog2_flag;
 

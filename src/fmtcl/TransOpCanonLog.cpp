@@ -53,9 +53,9 @@ TransOpCanonLog::TransOpCanonLog (bool inv_flag)
 // 1.08676 is log peak white, at 8.00903 in linear scale.
 double	TransOpCanonLog::operator () (double x) const
 {
-	static const double  a = 10.1596;
-	static const double  b = 0.529136;
-	static const double  c = 0.0730597;
+	static constexpr double a = 10.1596;
+	static constexpr double b =  0.529136;
+	static constexpr double c =  0.0730597;
 
 	double         y = x;
 	if (_inv_flag)
@@ -67,7 +67,7 @@ double	TransOpCanonLog::operator () (double x) const
 		y = b * log10 (std::max (x, -0.0452664) * a + 1) + c;
 	}
 
-	return (y);
+	return y;
 }
 
 

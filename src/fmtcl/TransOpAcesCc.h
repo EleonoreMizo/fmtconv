@@ -63,6 +63,8 @@ protected:
 
 private:
 
+	static constexpr double _max_val = 65504.0;
+
 	const bool     _inv_flag;
 
 

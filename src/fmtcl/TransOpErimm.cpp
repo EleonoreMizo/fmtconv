@@ -97,7 +97,7 @@ double	TransOpErimm::operator () (double x) const
 		}
 	}
 
-	return (y);
+	return y;
 }
 
 

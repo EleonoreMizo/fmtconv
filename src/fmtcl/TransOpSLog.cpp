@@ -54,53 +54,14 @@ TransOpSLog::TransOpSLog (bool inv_flag, bool slog2_flag)
 // 1 lin is reference white, peak white at 10 lin.
 double	TransOpSLog::operator () (double x) const
 {
-	static const double  a  = 0.037584;
-	static const double  b  = 0.432699;
-	static const double  c1 = 0.616596;
-	static const double  c2 = 0.03;
-	static const double  c  = c1 + c2;
-	static const double  s2 = 219.0 / 155.0;
-
-	double         y = x;
-	if (_inv_flag)
-	{
-		if (x < c2)
-		{
-			y = (x - c2) / 5.0;
-		}
-		else
-		{
-			y = pow (10, (y - c) / b) - a;
-		}
-		if (_slog2_flag)
-		{
-			y *= s2;
-		}
-	}
-	else
-	{
-		if (_slog2_flag)
-		{
-			y /= s2;
-		}
-		if (x < 0)
-		{
-			y = x * 5 + c2;
-		}
-		else
-		{
-			y = b * log10 (x + a) + c;
-		}
-	}
-
-	return (y);
+	return (_inv_flag) ? compute_inverse (x) : compute_direct (x);
 }
 
 
 
 double	TransOpSLog::get_max () const
 {
-	return (_slog2_flag) ? 10.0 * 219 / 155 : 10.0;
+	return (_slog2_flag) ? 10.0 * _s2 : 10.0;
 }
 
 
@@ -110,6 +71,58 @@ double	TransOpSLog::get_max () const
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr double	TransOpSLog::_a;
+constexpr double	TransOpSLog::_b;
+constexpr double	TransOpSLog::_c1;
+constexpr double	TransOpSLog::_c2;
+constexpr double	TransOpSLog::_c;
+constexpr double	TransOpSLog::_d;
+constexpr double	TransOpSLog::_s2;
+
+
+
+double	TransOpSLog::compute_direct (double x) const
+{
+	if (_slog2_flag)
+	{
+		x /= _s2;
+	}
+	double         y = x;
+	if (x < 0)
+	{
+		y = x * _d + _c2;
+	}
+	else
+	{
+		y = _b * log10 (x + _a) + _c;
+	}
+
+	return y;
+}
+
+
+
+double	TransOpSLog::compute_inverse (double x) const
+{
+	double         y = x;
+	if (x < _c2)
+	{
+		y = (x - _c2) / _d;
+	}
+	else
+	{
+		y = pow (10, (x - _c) / _b) - _a;
+	}
+	if (_slog2_flag)
+	{
+		y *= _s2;
+	}
+
+	return y;
+}
 
 
 
