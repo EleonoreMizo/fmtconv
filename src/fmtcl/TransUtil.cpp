@@ -212,6 +212,8 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 			TransCst::_bt709_slope
 		));
 		break;
+	case TransCurve_470M:
+		ptr = OpSPtr (new TransOpPow (inv_flag, 2.2));
 		break;
 	case TransCurve_470BG:
 		ptr = OpSPtr (new TransOpPow (inv_flag, 2.8));
@@ -252,7 +254,6 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 			-0.25, 1.33, 4
 		));
 		break;
-	case TransCurve_470M:	// Assumed display gamma 2.2, almost like sRGB.
 	case TransCurve_SRGB:
 #if 1
 		// Accurate values giving full C1 continuity
