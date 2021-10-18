@@ -362,27 +362,24 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 		_proc_uptr->process (pa);
 
 		// Output frame properties
-		if (_range_set_dst_flag || _csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED)
+		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+
+		if (_range_set_dst_flag)
 		{
-			::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+			const int      cr_val = (_full_range_dst_flag) ? 0 : 1;
+			_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
+		}
 
-			if (_range_set_dst_flag)
-			{
-				const int      cr_val = (_full_range_dst_flag) ? 0 : 1;
-				_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
-			}
-
-			if (   _csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED
-			    && _csp_out <= fmtcl::ColorSpaceH265_ISO_RANGE_LAST)
-			{
-				_vsapi.propSetInt (&dst_prop, "_Matrix"    , int (_csp_out), ::paReplace);
-				_vsapi.propSetInt (&dst_prop, "_ColorSpace", int (_csp_out), ::paReplace);
-			}
-			else
-			{
-				_vsapi.propDeleteKey (&dst_prop, "_Matrix");
-				_vsapi.propDeleteKey (&dst_prop, "_ColorSpace");
-			}
+		if (   _csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED
+		    && _csp_out <= fmtcl::ColorSpaceH265_ISO_RANGE_LAST)
+		{
+			_vsapi.propSetInt (&dst_prop, "_Matrix"    , int (_csp_out), ::paReplace);
+			_vsapi.propSetInt (&dst_prop, "_ColorSpace", int (_csp_out), ::paReplace);
+		}
+		else
+		{
+			_vsapi.propDeleteKey (&dst_prop, "_Matrix");
+			_vsapi.propDeleteKey (&dst_prop, "_ColorSpace");
 		}
 	}
 

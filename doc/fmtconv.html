@@ -1828,6 +1828,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>matrix</code>: fixed the output colorspace when using <var>singleout</var>.</li>
 <li><code>matrix</code>: fixed the output colorspace when using a custom matrix. Thanks to vxzms for the report.</li>
+<li><code>matrix</code>/Vapoursynth: <code>_Matrix</code> and <code>_ColorSpace</code> frame properties are actually deleted when a custom matrix is used or the final colorspace is unknown.</li>
 <li><code>resample</code>: fixed empty custom impulse that could cause a crash.</li>
 <li><code>resample</code>: added top-left chroma location.</li>
 <li><code>resample</code>/Avisynth+: interlacing detection now uses the global stream information when the frame properties are not available.</li>
