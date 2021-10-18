@@ -170,15 +170,6 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 		mat_init_flag = true;
 	}
 
-	// Range
-	_fulls_flag     = args [Param_FULLS].AsBool (
-		fmtcl::is_full_range_default (fmt_src.get_col_fam ())
-	);
-	_fulld_flag     = args [Param_FULLD].AsBool (
-		fmtcl::is_full_range_default (fmt_dst.get_col_fam ())
-	);
-	_range_def_flag = args [Param_FULLD].Defined ();
-
 	// Alpha plane processing, if any
 	_proc_alpha_uptr = std::make_unique <fmtcavs::ProcAlpha> (
 		fmt_dst, fmt_src, vi.width, vi.height, cpu_opt
@@ -267,6 +258,15 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 	{
 		env.ThrowError (fmtcavs_MATRIX ": illegal output colorspace.");
 	}
+
+	// Range
+	_fulls_flag     = args [Param_FULLS].AsBool (
+		fmtcl::is_full_range_default (fmt_src.get_col_fam ())
+	);
+	_fulld_flag     = args [Param_FULLD].AsBool (
+		fmtcl::is_full_range_default (fmt_dst.get_col_fam ())
+	);
+	_range_def_flag = args [Param_FULLD].Defined ();
 
 	prepare_matrix_coef (
 		env, *_proc_uptr, mat_main,

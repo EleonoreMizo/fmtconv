@@ -143,16 +143,15 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		}
 	}
 
-	const ::VSFormat &fmt_dst = *fmt_dst_ptr;
 	const int      nbr_expected_coef = _nbr_planes * (_nbr_planes + 1);
 
 	bool           mat_init_flag = false;
 
 	// Matrix presets
 	std::string    mat (get_arg_str (in, out, "mat", ""));
-	std::string    mats ((   vsutl::is_vs_yuv ( fmt_src.colorFamily)) ? mat : "");
-	std::string    matd ((   vsutl::is_vs_yuv ( fmt_dst.colorFamily)
-	                      || vsutl::is_vs_gray (fmt_dst.colorFamily)) ? mat : "");
+	std::string    mats ((   vsutl::is_vs_yuv ( fmt_src.colorFamily     )) ? mat : "");
+	std::string    matd ((   vsutl::is_vs_yuv ( fmt_dst_ptr->colorFamily)
+	                      || vsutl::is_vs_gray (fmt_dst_ptr->colorFamily)) ? mat : "");
 	mats = get_arg_str (in, out, "mats", mats);
 	matd = get_arg_str (in, out, "matd", matd);
 	if (! mats.empty () || ! matd.empty ())
@@ -160,7 +159,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		fstb::conv_to_lower_case (mats);
 		fstb::conv_to_lower_case (matd);
 		const auto     col_fam_src = fmtc::conv_vsfmt_to_colfam (fmt_src);
-		const auto     col_fam_dst = fmtc::conv_vsfmt_to_colfam (fmt_dst);
+		const auto     col_fam_dst = fmtc::conv_vsfmt_to_colfam (*fmt_dst_ptr);
 		fmtcl::MatrixUtil::select_def_mat (mats, col_fam_src);
 		fmtcl::MatrixUtil::select_def_mat (matd, col_fam_dst);
 
@@ -181,18 +180,6 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		mat_init_flag = true;
 	}
 
-	// Range
-	_full_range_src_flag = (get_arg_int (
-		in, out, "fulls" ,
-		vsutl::is_full_range_default (fmt_src) ? 1 : 0,
-		0, &_range_set_src_flag
-	) != 0);
-	_full_range_dst_flag = (get_arg_int (
-		in, out, "fulld",
-		vsutl::is_full_range_default (fmt_dst) ? 1 : 0,
-		0, &_range_set_dst_flag
-	) != 0);
-
 	// Custom coefficients
 	const int      nbr_coef = _vsapi.propNumElements (&in, "coef");
 	const bool     custom_mat_flag = (nbr_coef > 0);
@@ -210,7 +197,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 				_mat_main [y] [x] = (x == y) ? 1 : 0;
 
 				if (   (x < fmt_src.numPlanes || x == _nbr_planes)
-				    &&  y < fmt_dst.numPlanes)
+				    &&  y < fmt_dst_ptr->numPlanes)
 				{
 					int            err = 0;
 					const int      index = y * (fmt_src.numPlanes + 1) + x;
@@ -307,10 +294,22 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	// Destination colorspace is validated
 	_vi_out.format = fmt_dst_ptr;
 
+	// Range
+	_full_range_src_flag = (get_arg_int (
+		in, out, "fulls" ,
+		vsutl::is_full_range_default (fmt_src) ? 1 : 0,
+		0, &_range_set_src_flag
+	) != 0);
+	_full_range_dst_flag = (get_arg_int (
+		in, out, "fulld",
+		vsutl::is_full_range_default (*fmt_dst_ptr) ? 1 : 0,
+		0, &_range_set_dst_flag
+	) != 0);
+
 	prepare_matrix_coef (
 		*this, *_proc_uptr, _mat_main,
-		fmt_dst, _full_range_dst_flag,
-		fmt_src, _full_range_src_flag,
+		*fmt_dst_ptr, _full_range_dst_flag,
+		fmt_src     , _full_range_src_flag,
 		_csp_out, _plane_out
 	);
 
