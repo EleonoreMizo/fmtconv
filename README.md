@@ -1,5 +1,5 @@
-﻿fmtconv — format conversion tools for Vapoursynth and Avisyth+
-==============================================================
+﻿fmtconv — format conversion tools for Vapoursynth and Avisynth+
+===============================================================
 
 Fmtconv is a format-conversion plug-in for the Vapoursynth and Avisynth+ video processing engines.
 It does:
@@ -17,4 +17,4 @@ This does not mean it is slow or unoptimized, but fmtconv is clearly not on par 
 
 See `doc/fmtconv.html` for more information.
 
-Support on the [Doom9](http://forum.doom9.org/showthread.php?t=166504) forums.
+Support on the Doom9 forums: [Vapoursynth](http://forum.doom9.org/showthread.php?t=166504) and [Avisynth+](https://forum.doom9.org/showthread.php?t=183139).
