@@ -77,7 +77,7 @@ public:
 	explicit       PlaneProcessor (const ::VSAPI &vsapi, PlaneProcCbInterface &cb, const char filter_name_0 [], bool manual_flag);
 	virtual        ~PlaneProcessor () {}
 
-	void           set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVideoInfo &vi_out, bool simple_flag = false, int max_def_planes = 3, const char *prop_name_0 = "planes", const char *clip_name_0 = "clip");
+	void           set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVideoInfo &vi_out, bool simple_flag = false, int max_def_planes = MAX_NBR_PLANES, const char *prop_name_0 = "planes", const char *clip_name_0 = "clip");
 
 	const ::VSFrameRef *
 	               try_initial (::VSCore &core);
