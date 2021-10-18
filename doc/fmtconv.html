@@ -85,7 +85,7 @@ This does not mean it is slow or unoptimized, but fmtconv is clearly not on par 
 Vapoursynth version):</p>
 
 <pre class="src">import vapoursynth as vs
-core = vs.get_core ()
+core = vs.core
 core.std.LoadPlugin (path=r'C:\path\fmtconv.dll')</pre>
 
 <p>Of course you can avoid the <code>LoadPlugin</code> command by copying the
@@ -101,7 +101,7 @@ Check the Vapoursynth manual for more information.</p>
 
 <pre class="src"># Load Vapoursynth
 import vapoursynth as vs
-core = vs.get_core ()
+core = vs.core
 
 # Load the plug-ins
 core.std.LoadPlugin (path=r'C:\path\fmtconv.dll')
@@ -670,7 +670,8 @@ IC<sub>T</sub>C<sub>P</sub> transforms from R’G’B’ require the following s
 <li>Convert from linear LMS to L’M’S’ using <code>transfer</code> with <code>"2084"</code> or <code>"hlg"</code>.</li>
 <li>Convert from L’M’S’ to IC<sub>T</sub>C<sub>P</sub> using <code>matrix</code> with <code>"ICtCp_PQ"</code> or <code>"ICtCp_HLG"</code>, respectively.</li>
 </ul>
-<p>For the inverse conversion, reverse the steps.</p>
+<p>For the inverse conversion, reverse the steps.
+Beware, chromatic information for pixels of the highest luminance range cannot be represented in integer IC<sub>T</sub>C<sub>P</sub> and will be clipped because of the large matrix coefficients.</p>
 
 <p class="var">fulls, fulld</p>
 <p>Indicates if the clip is full-range (True) or TV-range (False).
@@ -1561,7 +1562,9 @@ Function show_chroma_ss (string colorspace, string cplace, string dispname, bool
 \	)
 }
 -->
-<p style="text-align: center;"><img src="colorspace-subsampling.png" alt="Chroma placement" /></p>
+<figure>
+<img src="colorspace-subsampling.png" alt="Chroma placement" />
+</figure>
 
 <p class="var">interlaced, interlacedd</p>
 <p>Specifies if the clip is made of frames or fields.
@@ -1832,7 +1835,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>transfer</code>: BT.470M characteristic is now a pure power curve, instead of a copy of the sRGB curve.</li>
 <li><code>transfer</code>/Avisynth+: fixed <var>flt</var> + <var>bits</var> combination that was ignored. Thanks to DTL for the report.</li>
 <li><code>transfer</code>/Avisynth+: fixed case sensitivity to <var>transs</var> and <var>transd</var>.</li>
-<li><code>transfer</code>/vapoursynth: fixed <var>logceis</var> and <var>logceid</var> that were missing from the function registration since their introduction in r23… Thanks to groucho86 for the report.</li>
+<li><code>transfer</code>/Vapoursynth: fixed <var>logceis</var> and <var>logceid</var> that were missing from the function registration since their introduction in r23… Thanks to groucho86 for the report.</li>
 <li>Fixed compatibility with Avisynth+ 3.7.1.</li>
 <li>Avisynth+: fixed <code>"RGBPxx"</code> colorspace values that weren’t correctly interpreted as planar.</li>
 </ul>
@@ -1880,7 +1883,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <p><b>r22, 2019-12-11</b></p>
 <ul>
 <li><code>bitdepth</code>: upconversions for full range data now scale to the maximum value instead of shifting bits. Thanks to Z4ST1N for the report.</li>
-<li><code>matrix</code>: added support for the YDzDx, ICtCp-PQ and ICtCp-HLG colorspaces.</li>
+<li><code>matrix</code>: added support for the Y’D’<sub>Z</sub>D’<sub>X</sub>, IC<sub>T</sub>C<sub>P</sub>-PQ and IC<sub>T</sub>C<sub>P</sub>-HLG colorspaces.</li>
 <li><code>matrix</code>: fixed a case issue for matrix identifiers.</li>
 <li><code>primaries</code>: added support for P3-DCI, P3-D65 and P3-D60. The old DCI-P3 was actually P3-D65. The code "dcip3" remains for backward compatibility but is deprecated.</li>
 <li><code>primaries</code>: added support for the EBU 3213-E colorspace.</li>

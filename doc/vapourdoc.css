@@ -79,3 +79,6 @@ strong    { font-family: Courier, mono; font-weight: bold; color: #FFFF66; font-
 cite      { border: 1px #3030A0 dotted; padding-left: 4px; padding-right: 4px; padding-top: 2px; padding-bottom: 2px; }
 kbd       { color: #808000; font-family: Verdana, Arial, Helvetica, sans-serif; font-weight: normal; font-size: 10px; font-style: normal; }
 
+figure { margin-left: 2em; margin-right: 0em; text-align:center; padding: 0em; border: 0em; }
+figcaption { margin: 0em; text-align:center; font-style: italic; padding: 0em; border: 0em; }
+
