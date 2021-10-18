@@ -29,6 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/def.h"
 
+#include "fmtcl/Cst.h"
 #include "fmtcl/TransLut.h"
 #include "fmtcl/TransOpInterface.h"
 #include "fstb/fnc.h"
@@ -408,8 +409,8 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		{
 			_lut.resize (1 << 16);
 		}
-		const int      sb16  = (_src_full_flag) ? 0      :  16 << 8;
-		const int      sw16  = (_src_full_flag) ? 0xFFFF : 235 << 8;
+		const int      sb16  = (_src_full_flag) ? 0      : Cst::_rtv_lum_blk << 8;
+		const int      sw16  = (_src_full_flag) ? 0xFFFF : Cst::_rtv_lum_wht << 8;
 		int            sbn   = sb16 >> (16 - _src_bits);
 		int            swn   = sw16 >> (16 - _src_bits);
 		const int      sdif  = swn - sbn;
@@ -423,8 +424,8 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		}
 		else
 		{
-			const int      db16 = (_dst_full_flag) ? 0      :  16 << 8;
-			const int      dw16 = (_dst_full_flag) ? 0xFFFF : 235 << 8;
+			const int      db16 = (_dst_full_flag) ? 0      : Cst::_rtv_lum_blk << 8;
+			const int      dw16 = (_dst_full_flag) ? 0xFFFF : Cst::_rtv_lum_wht << 8;
 			int            dbn  = db16 >> (16 - _dst_bits);
 			int            dwn  = dw16 >> (16 - _dst_bits);
 			const double   mul  = dwn - dbn;

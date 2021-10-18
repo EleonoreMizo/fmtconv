@@ -37,7 +37,15 @@ class Cst
 
 public:
 
-	static constexpr int _max_nbr_planes = 4;
+	static constexpr int _max_nbr_planes = 4; // RGB or YUV + alpha
+
+	// TV ranges in 8-bit scale
+	static constexpr int _rtv_imin       = 1;   // Minimum legal val, inclusive
+	static constexpr int _rtv_emax       = 255; // Maximum legal val, exclusive
+	static constexpr int _rtv_lum_blk    = 16;  // Black level
+	static constexpr int _rtv_lum_wht    = 235; // White level
+	static constexpr int _rtv_chr_gry    = 128; // Chroma neutral (grey) value
+	static constexpr int _rtv_chr_dep    = _rtv_chr_gry - 16; // Chroma depth
 
 
 

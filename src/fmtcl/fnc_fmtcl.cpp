@@ -24,6 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/Cst.h"
 #include "fmtcl/fnc.h"
 #include "fmtcl/Mat4.h"
 #include "fmtcl/MatrixProc.h"
@@ -188,11 +189,12 @@ double	compute_pix_scale (const PicFmt &fmt, int plane_index)
 		}
 		else if (is_chroma_plane (fmt._col_fam, plane_index))
 		{
-			scale = double ((uint64_t (224)) << bps_m8);
+			scale = double ((uint64_t (Cst::_rtv_chr_dep * 2)) << bps_m8);
 		}
 		else
 		{
-			scale = double ((uint64_t (219)) << bps_m8);
+			constexpr auto range = Cst::_rtv_lum_wht - Cst::_rtv_lum_blk;
+			scale = double ((uint64_t (range)) << bps_m8);
 		}
 	}
 
@@ -206,18 +208,19 @@ double	get_pix_min (const PicFmt &fmt, int plane_index)
 	assert (fmt.is_valid ());
 	assert (plane_index >= 0);
 
-	double         add_val = 0;
+	double         add_val     = 0;
+	const bool     chroma_flag = is_chroma_plane (fmt._col_fam, plane_index);
 
 	if (fmt._sf == SplFmt_FLOAT)
 	{
-		if (is_chroma_plane (fmt._col_fam, plane_index))
+		if (chroma_flag)
 		{
 			add_val = -0.5;
 		}
 	}
 	else if (fmt._full_flag)
 	{
-		if (is_chroma_plane (fmt._col_fam, plane_index))
+		if (chroma_flag)
 		{
 			// So the neutral value (0) is exactly: 1 << (nbr_bits - 1)
 			add_val = 0.5;
@@ -225,7 +228,15 @@ double	get_pix_min (const PicFmt &fmt, int plane_index)
 	}
 	else if (plane_index < 3)
 	{
-		add_val = double ((uint64_t (16)) << (fmt._res - 8));
+		if (chroma_flag)
+		{
+			constexpr auto min_val = Cst::_rtv_chr_gry - Cst::_rtv_chr_dep;
+			add_val = double ((uint64_t (min_val)) << (fmt._res - 8));
+		}
+		else
+		{
+			add_val = double ((uint64_t (Cst::_rtv_lum_blk)) << (fmt._res - 8));
+		}
 	}
 
 	return add_val;

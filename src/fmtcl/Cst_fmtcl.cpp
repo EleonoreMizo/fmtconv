@@ -41,6 +41,13 @@ namespace fmtcl
 
 constexpr int	Cst::_max_nbr_planes;
 
+constexpr int	Cst::_rtv_imin;
+constexpr int	Cst::_rtv_emax;
+constexpr int	Cst::_rtv_lum_blk;
+constexpr int	Cst::_rtv_lum_wht;
+constexpr int	Cst::_rtv_chr_gry;
+constexpr int	Cst::_rtv_chr_dep;
+
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
