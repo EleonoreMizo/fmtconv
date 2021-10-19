@@ -111,10 +111,10 @@ core.std.LoadPlugin (path=r'C:\path\ffms2.dll')
 c = core.ffms2.Source (source=r'C:\path\video.mkv')
 
 # Change the resolution. The output clip is now in 16 bits.
-c = core.fmtc.resample (clip=c, w=1280, h=720)
+c = c.fmtc.resample (w=1280, h=720)
 
 # Dither the result, back to 8 bits
-c = core.fmtc.bitdepth (clip=c, bits=8)
+c = c.fmtc.bitdepth (bits=8)
 
 # Send the processed clip to the calling process
 c.set_output ()</pre>
@@ -124,76 +124,76 @@ c.set_output ()</pre>
 
 <p>Simple resize with 16- or 32-bit output:</p>
 
-<pre class="src">c = core.fmtc.resample (clip=c, w=1280, h=720)</pre>
+<pre class="src">c = c.fmtc.resample (w=1280, h=720)</pre>
 
 <p>Bobbing an interlaced stream (here, Top Field First):</p>
 
-<pre class="src">c = core.std.SeparateFields (clip=c, tff=True)
-c = core.fmtc.resample (clip=c, scalev=2, kernel="cubic", interlaced=True, interlacedd=False)</pre>
+<pre class="src">c = c.std.SeparateFields (tff=True)
+c = c.fmtc.resample (scalev=2, kernel="cubic", interlaced=True, interlacedd=False)</pre>
 
 <p>Converting a progressive stream from YUV 4:2:2 to 4:2:0 and back to 8 bits:</p>
 
-<pre class="src">c = core.fmtc.resample (clip=c, css="420")
-c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+<pre class="src">c = c.fmtc.resample (css="420")
+c = c.fmtc.bitdepth (bits=8)</pre>
 
 <p>Same as above, with interlaced content:</p>
 
 <pre class="src">tff = True
-c = core.std.SeparateFields (clip=c, tff=tff)
-c = core.fmtc.resample (clip=c, css="420", interlaced=True)
-c = core.fmtc.bitdepth (clip=c, bits=8)
-c = core.std.DoubleWeave (clip=c, tff=tff)
-c = core.std.SelectEvery (clip=c, cycle=2, offsets=0)</pre>
+c = c.std.SeparateFields (tff=tff)
+c = c.fmtc.resample (css="420", interlaced=True)
+c = c.fmtc.bitdepth (bits=8)
+c = c.std.DoubleWeave (tff=tff)
+c = c.std.SelectEvery (cycle=2, offsets=0)</pre>
 
 
 <h4>Colorspace conversions</h4>
 
 <p>Y’Cb’Cr’ 4:2:0 to R’G’B’:</p>
 
-<pre class="src">c = core.fmtc.resample (clip=c, css="444")
-c = core.fmtc.matrix (clip=c, mat="601", col_fam=vs.RGB)
-c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+<pre class="src">c = c.fmtc.resample (css="444")
+c = c.fmtc.matrix (mat="601", col_fam=vs.RGB)
+c = c.fmtc.bitdepth (bits=8)</pre>
 
 <p>R’G’B’ to Y’Cb’Cr’ 4:2:0:</p>
 
-<pre class="src">c = core.fmtc.matrix (clip=c, mat="601", col_fam=vs.YUV, bits=16)
-c = core.fmtc.resample (clip=c, css="420")
-c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+<pre class="src">c = c.fmtc.matrix (mat="601", col_fam=vs.YUV, bits=16)
+c = c.fmtc.resample (css="420")
+c = c.fmtc.bitdepth (bits=8)</pre>
 
 <p>Y’Cb’Cr colormatrix conversion from BT. 601 to BT. 709.
 For example to insert a PAL DVD content into an HDTV stream.
 Note that we need to convert the clip to 4:4:4 in an intermediate step
 because <code>matrix</code> can only process 4:4:4.</p>
 
-<pre class="src">c = core.fmtc.resample (clip=c, css="444")
-c = core.fmtc.matrix (clip=c, mats="601", matd="709")
-c = core.fmtc.resample (clip=c, css="420")
-c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+<pre class="src">c = c.fmtc.resample (css="444")
+c = c.fmtc.matrix (mats="601", matd="709")
+c = c.fmtc.resample (css="420")
+c = c.fmtc.bitdepth (bits=8)</pre>
 
 <p>Same as above, but with a 525-line content, requiring a gamut conversion.
 We have to insert an intermediate step in linear RGB.
 For this, we use the BT. 1886 transfer curve in both directions:</p>
 
-<pre class="src">c = core.fmtc.resample (clip=c, css="444")
-c = core.fmtc.matrix (clip=c, mats="601")
-c = core.fmtc.transfer (clip=c, transs="1886", transd="linear")
-c = core.fmtc.primaries (clip=c, prims="601-525", primd="709")
-c = core.fmtc.transfer (clip=clip, transs="linear", transd="1886")
-c = core.fmtc.matrix (clip=clip, mat="709")
-c = core.fmtc.resample (clip=c, css="420")
-c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+<pre class="src">c = c.fmtc.resample (css="444")
+c = c.fmtc.matrix (mats="601")
+c = c.fmtc.transfer (transs="1886", transd="linear")
+c = c.fmtc.primaries (prims="601-525", primd="709")
+c = c.fmtc.transfer (transs="linear", transd="1886")
+c = c.fmtc.matrix (mat="709")
+c = c.fmtc.resample (css="420")
+c = c.fmtc.bitdepth (bits=8)</pre>
 
 <p>Conversion from full range to TV-range:</p>
 
-<pre class="src">c = core.fmtc.bitdepth (clip=c, fulls=True, fulld=False)</pre>
+<pre class="src">c = c.fmtc.bitdepth (fulls=True, fulld=False)</pre>
 
 <p>Displaying an anamorphic 1440x1080 HDTV content on a standard computer
 display:</p>
 
-<pre class="src">c = core.fmtc.resample (clip=c, w=1920, h=1080, css="444")
-c = core.fmtc.matrix (clip=c, mat="709", col_fam=vs.RGB)
-c = core.fmtc.transfer (clip=c, transs="1886", transd="srgb")
-c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+<pre class="src">c = c.fmtc.resample (w=1920, h=1080, css="444")
+c = c.fmtc.matrix (mat="709", col_fam=vs.RGB)
+c = c.fmtc.transfer (transs="1886", transd="srgb")
+c = c.fmtc.bitdepth (bits=8)</pre>
 
 <p>Displaying a UHDTV HDR content encoded with BT.2100 ICtCp-PQ on a standard
 computer display:</p>
@@ -1828,7 +1828,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>matrix</code>: fixed the output colorspace when using <var>singleout</var>.</li>
 <li><code>matrix</code>: fixed the output colorspace when using a custom matrix. Thanks to vxzms for the report.</li>
-<li><code>matrix</code>/Vapoursynth: <code>_Matrix</code> and <code>_ColorSpace</code> frame properties are actually deleted when a custom matrix is used or the final colorspace is unknown.</li>
+<li><code>matrix</code>/Vapoursynth: <code>_Matrix</code> and <code>_ColorSpace</code> frame properties are actually deleted when a custom matrix is used or the final colorspace is unknown. Thanks to mysteryx93 for the report.</li>
 <li><code>resample</code>: fixed empty custom impulse that could cause a crash.</li>
 <li><code>resample</code>: added top-left chroma location.</li>
 <li><code>resample</code>/Avisynth+: interlacing detection now uses the global stream information when the frame properties are not available.</li>
