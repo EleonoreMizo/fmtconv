@@ -195,16 +195,24 @@ c = c.fmtc.matrix (mat="709", col_fam=vs.RGB)
 c = c.fmtc.transfer (transs="1886", transd="srgb")
 c = c.fmtc.bitdepth (bits=8)</pre>
 
-<p>Displaying a UHDTV HDR content encoded with BT.2100 ICtCp-PQ on a standard
-computer display:</p>
+<p>Displaying a UHDTV HDR content encoded with BT.2100
+IC<sub>T</sub>C<sub>P</sub>-PQ on a standard computer display.
+Conversion to sRGB (SDR) is done by reducing the contrast from an arbitrary
+factor and clipping the pixel values at the end.
+Obviously this is a poor solution, a tone mapping algorithm would be more
+suited for this task.
+With PQ, the linear values go way above 1.0 which is 203&nbsp;cd/m<sup>2</sup>
+for the reference white, so even if we reduce the contrast, we convert data
+to float to prevent information loss during the subsequent color conversion
+steps (this is optional):</p>
 
-<pre class="src">c = core.fmtc.resample (clip=c, css="444")
-c = core.fmtc.matrix (clip=c, mats="ICtCp_PQ", matd="rgb")
-c = core.fmtc.transfer (clip=c, transs="2084", transd="linear")
-c = core.fmtc.matrix (clip=c, mats="lms", matd="rgb")
-c = core.fmtc.primaries (clip=c, prims="2100", primd="srgb")
-c = core.fmtc.transfer (clip=c, transs="linear", transd="srgb")
-c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
+<pre class="src">c = c.fmtc.resample (css="444")
+c = c.fmtc.matrix (mats="ICtCp_PQ", matd="rgb")
+c = c.fmtc.transfer (transs="2084", transd="linear", cont=0.2, flt=True)
+c = c.fmtc.matrix (mats="lms", matd="rgb")
+c = c.fmtc.primaries (prims="2100", primd="srgb")
+c = c.fmtc.transfer (transs="linear", transd="srgb")
+c = c.fmtc.bitdepth (bits=8)</pre>
 
 
 <h3><a id="examples-avs"></a>Examples for Avisynth+</h3>
@@ -1603,20 +1611,28 @@ If it’s not the case, floating point operations are silently used as fallback.
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.transfer (
-	clip       : clip        ;
-	transs     : data[] : opt;
-	transd     : data[] : opt;
-	cont       : float  : opt;
-	gcor       : float  : opt;
-	bits       : int    : opt;
-	flt        : int    : opt;
-	fulls      : int    : opt; (True)
-	fulld      : int    : opt; (True)
-	logceis    : int    : opt; (800)
-	logceid    : int    : opt; (800)
-	cpuopt     : int    : opt; (-1)
-	blacklvl   : float  : opt; (0)
-	planes     : float[]: opt; (3)
+	clip    : clip        ;
+	transs  : data[] : opt;
+	transd  : data[] : opt;
+	cont    : float  : opt;
+	gcor    : float  : opt;
+	bits    : int    : opt;
+	flt     : int    : opt;
+	fulls   : int    : opt; (True)
+	fulld   : int    : opt; (True)
+	logceis : int    : opt; (800)
+	logceid : int    : opt; (800)
+	cpuopt  : int    : opt; (-1)
+	blacklvl: float  : opt; (0)
+	sceneref: int    : opt; (undefined)
+	lb      : float  : opt;
+	lw      : float  : opt;
+	lw_s    : float  : opt; (lw)
+	lw_d    : float  : opt; (lw)
+	ambient : float  : opt;
+	match   : int    : opt; (1)
+	gy      : int    : opt;
+	debug   : int    : opt; (0)
 )</pre></td>
 <td class="n"><pre class="proto">fmtc_transfer (
 	clip   c,
@@ -1632,7 +1648,15 @@ If it’s not the case, floating point operations are silently used as fallback.
 	int    logceid (800),
 	int    cpuopt (-1),
 	float  blacklvl (0),
-	arrayf planes (3)
+	bool   sceneref (undefined),
+	float  lb (undefined),
+	float  lw (undefined),
+	float  lw_s (lw),
+	float  lw_d (lw),
+	float  ambient (undefined),
+	int    match (1),
+	bool   gy (undefined),
+	int    debug (0)
 )</pre></td>
 </tr>
 </table>
@@ -1641,23 +1665,49 @@ If it’s not the case, floating point operations are silently used as fallback.
 video signal to convert between linear and gamma-corrected modes.</p>
 <p>The function offers four conversions in a row; all are optional:</p>
 <ul>
-<li>an electro-optical transfer function (EOTF) or an inverse opto-electrical transfer function (OETF<sup>&minus;1</sup>) converting the signal to linear,</li>
+<li>an electro-optical transfer function (EOTF) or an inverse opto-electrical transfer function (OETF<sup>&minus;1</sup>) converting the signal from gamma-compressed to linear light (scene or display),</li>
 <li>a contrast adjustement,</li>
 <li>a gamma correction operating on the linear signal,</li>
 <li>and an opto-electrical transfer function (OETF) or an inverse electro-optical transfer function (EOTF<sup>&minus;1</sup>) to encode the signal back to a non-linear
 domain.</li>
 </ul>
+<p>It is possible to specify the linear step as scene-referred or
+display-referred.
+The latter is the default.</p>
+<p>By default, the function tries to match the reference white levels between
+the transfer functions by automatically scaling the linear light values.
+In the linear range, reference white is generally associated to the normalised
+value 1.0, peak white might be much higher.
+This is important to remember when dealing with HDR content, especially when
+using integer data types which do not allow overflow (normalised values above
+1.0).
+An additional contrast step might be required to fit the content into the
+desired range, when linear values are used as input or output.
+Please refer to the <a href="#transfer-curve-table">curve table below</a> to
+check the luminance information.</p>
+<p>This function is for simple conversions only, it doesn’t do sophisticated
+tone mapping.</p>
 <p>As input, the function accepts only RGB and grayscale colorspaces.</p>
 <p>As output, the data type can be changed while the colorspace is kept.
 Only 16-bit integer and 32-bit float are supported.
 Use <code>bitdepth</code> to properly convert the output to a lower
 bitdepth.</p>
-<p>The signal is clipped depending on the transfer specification or the domain
-requirement of the functions.</p>
+<p>The signal may be clipped depending on the transfer specification or the
+domain requirement of the functions.</p>
 <p>The function sets the <code>_ColorRange</code> and <code>_Transfer</code>
 frame properties.</p>
 <p><span class="host">Avisynth+</span>  Colorspaces with an alpha channel are
 supported too, but the channel is left untouched.<p>
+
+<figure>
+<img src="transfer-diag-display.svg" alt="Processing diagram for the display-referred mode" />
+<figcaption>Processing diagram for the display-referred mode.</figcaption>
+</figure>
+
+<figure>
+<img src="transfer-diag-scene.svg" alt="Processing diagram for the scene-referred mode" />
+<figcaption>Processing diagram for the scene-referred mode</figcaption>
+</figure>
 
 <h4>Parameters</h4>
 
@@ -1672,47 +1722,48 @@ Supported input formats:</p>
 
 <p class="var">transs, transd</p>
 <p>Transfer characteristics for input and output, respectively.
-The characteristic may be an OETF (opto-electronic transfer function), an
-EOTF (eletro-optical transfer function), or just remain unspecified.
+The characteristic may be an OETF, an EOTF, or just remain unspecified.
 It is direct or inverted according to where it is applied, output or input.
 The intermediate state is assumed linear light.
 The curve set is the same as the list in ISO/IEC 23008-2 (HEVC), with a few
 additions from various camera manufacturers or NLE systems.</p>
 <p>Most curves map their value from the 0–1 range to 0–1, but some are for
 high dynamic range or wide gamut signals and locate their value for peak white
-much higher.</p>
-<table>
-<tr><th>Value</th><th>Linear range</th><th>Type</th><th>Description</th></tr>
-<tr><td><b><code>&quot;709&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.709</td></tr>
-<tr><td><b><code>&quot;470m&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.470-6 System M, FCC (assumed display gamma 2.2)<br />Actually uses the same curve as IEC 61966-2-1.</td></tr>
-<tr><td><b><code>&quot;470bg&quot;     </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.470-6 System B, G (assumed display gamma 2.8)</td></tr>
-<tr><td><b><code>&quot;601&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.601</td></tr>
-<tr><td><b><code>&quot;240&quot;       </code></b></td><td>0&hellip;1</td><td></td><td>SMPTE 240M</td></tr>
-<tr><td><b><code>&quot;linear&quot;<br />&quot;&quot;</code></b></td><td>Unspecified</td><td></td><td>Linear (bypass)</td></tr>
-<tr><td><b><code>&quot;log100&quot;    </code></b></td><td>0&hellip;1</td><td></td><td>Logarithmic transfer characteristic (100:1 range)</td></tr>
-<tr><td><b><code>&quot;log316&quot;    </code></b></td><td>0&hellip;1</td><td></td><td>Logarithmic transfer characteristic (100*Sqrt(10):1 range)</td></tr>
-<tr><td><b><code>&quot;61966-2-4&quot; </code></b></td><td>Unspecified</td><td>OETF</td><td>IEC 61966-2-4, xvYCC. Same as BT.709, but with an extended range, including negative values.</td></tr>
-<tr><td><b><code>&quot;1361&quot;      </code></b></td><td>&minus;0.25&hellip;1.33</td><td></td><td>ITU-R BT.1361 extended colour gamut system</td></tr>
-<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>IEC 61966-2-1, sRGB or sYCC</td></tr>
-<tr><td><b><code>&quot;2020_10&quot;   </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.2020 for 10-bit system</td></tr>
-<tr><td><b><code>&quot;2020_12&quot;<br />&quot;2020&quot;</code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.2020 for 12-bit system</td></tr>
-<tr><td><b><code>&quot;2084&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;428&quot;       </code></b></td><td>0&hellip;1</td><td></td><td>SMPTE ST 428-1<br />Linear 1.0 is peak white and corresponds to a display luminance level of 48 cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.2100 HLG (hybrid log-gamma), ARIB STD-B67</td></tr>
-<tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>ITU-R BT.1886. Intended to mimicing a CRT display curve.</td></tr>
-<tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>ITU-R BT.1886, alternative approximation</td></tr>
-<tr><td><b><code>&quot;filmstream&quot;</code></b></td><td>0&hellip;1</td><td>OETF?</td><td>Thomson FilmStream<br />Linear 1.0 is the sensor clipping level, corresponding to 3840 on a linear 12-bit scale.</td></tr>
-<tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>OETF?</td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
-<tr><td><b><code>&quot;slog2&quot;      </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>OETF?</td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
-<tr><td><b><code>&quot;slog3&quot;     </code></b></td><td>0&hellip;38.421</td><td>OETF?</td><td>Sony S-Log3.</td></tr>
-<tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>OETF?</td><td>Arri Log C Alexa 2.x, linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
-<tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>OETF?</td><td>Arri Log C Alexa 3.x, linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
-<tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>OETF</td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
-<tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td></td><td>Adobe RGB (1998 and Wide Gamut)</td></tr>
-<tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>ProPhoto, ROMM</td></tr>
-<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
-<tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>OETF</td><td>ERIMM</td></tr>
-<tr><td><b><code>&quot;vlog&quot;     </code></b></td><td>0&hellip;1</td><td></td><td>Panasonic V-Log</td></tr>
+much higher.
+Generally, display-referred linear scales are mapped to a known range in
+cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
+<a id="transfer-curve-table"></a><table>
+<tr><th>Value</th><th>Linear range</th><th>Type</th><th>Range</th><th>Description</th></tr>
+<tr><td><b><code>&quot;709&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>SDR</td><td>ITU-R BT.709</td></tr>
+<tr><td><b><code>&quot;470m&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ITU-R BT.470-6 System M, FCC (assumed display gamma 2.2)<br />Actually uses the same curve as IEC 61966-2-1.</td></tr>
+<tr><td><b><code>&quot;470bg&quot;     </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ITU-R BT.470-6 System B, G (assumed display gamma 2.8)</td></tr>
+<tr><td><b><code>&quot;601&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>SDR</td><td>ITU-R BT.601</td></tr>
+<tr><td><b><code>&quot;240&quot;       </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>SMPTE 240M</td></tr>
+<tr><td><b><code>&quot;linear&quot;<br />&quot;&quot;</code></b></td><td>Unspecified</td><td></td><td></td><td>Linear (bypass)</td></tr>
+<tr><td><b><code>&quot;log100&quot;    </code></b></td><td>0&hellip;1</td><td></td><td></td><td>Logarithmic transfer characteristic (100:1 range)</td></tr>
+<tr><td><b><code>&quot;log316&quot;    </code></b></td><td>0&hellip;1</td><td></td><td></td><td>Logarithmic transfer characteristic (100&radic;10:1 range)</td></tr>
+<tr><td><b><code>&quot;61966-2-4&quot; </code></b></td><td>Unspecified</td><td>OETF</td><td>SDR</td><td>IEC 61966-2-4, xvYCC. Same as BT.709, but with an extended range, including negative values.</td></tr>
+<tr><td><b><code>&quot;1361&quot;      </code></b></td><td>&minus;0.25&hellip;1.33</td><td></td><td></td><td>ITU-R BT.1361 extended colour gamut system</td></tr>
+<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>IEC 61966-2-1, sRGB or sYCC</td></tr>
+<tr><td><b><code>&quot;2020_10&quot;   </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ITU-R BT.2020 for 10-bit system</td></tr>
+<tr><td><b><code>&quot;2020_12&quot;<br />&quot;2020&quot;</code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ITU-R BT.2020 for 12-bit system</td></tr>
+<tr><td><b><code>&quot;pq&quot;<br />&quot;2084&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>HDR</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>. Reference white is 203 cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;428&quot;<br />&quot;428-1&quot;</code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>SMPTE ST 428-1<br />Linear 48&nbsp;/&nbsp;52.37 corresponds to a reference display luminance level of 48&nbsp;cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>HDR</td><td>ITU-R BT.2100 HLG (hybrid log-gamma), ARIB STD-B67<br />Reference white is at 75&nbsp;% of the coding range, giving 203&nbsp;cd/m<sup>2</sup> when peak white is set to 1000&nbsp;cd/m<sup>2</sup>. Set <var>lw</var> to specify explicitely the peak white luminance.</td></tr>
+<tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>ITU-R BT.1886. Intended to mimicing a CRT display curve. Peak white is 100 cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>ITU-R BT.1886, alternative approximation</td></tr>
+<tr><td><b><code>&quot;filmstream&quot;</code></b></td><td>0&hellip;1</td><td>OETF</td><td></td><td>Thomson FilmStream<br />Linear 1.0 is the sensor clipping level, corresponding to 3840 on a linear 12-bit scale.</td></tr>
+<tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>OETF</td><td></td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
+<tr><td><b><code>&quot;slog2&quot;      </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>OETF</td><td></td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
+<tr><td><b><code>&quot;slog3&quot;     </code></b></td><td>0&hellip;38.421</td><td>OETF</td><td></td><td>Sony S-Log3.</td></tr>
+<tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>OETF</td><td></td><td>Arri Log C Alexa 2.x, linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
+<tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>OETF</td><td></td><td>Arri Log C Alexa 3.x, linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
+<tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>OETF</td><td></td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
+<tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>Adobe RGB (1998 and Wide Gamut).<br />Reference white is 160&nbsp;cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ProPhoto, ROMM.<br />Reference white is 142&nbsp;cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td></td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
+<tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>OETF</td><td></td><td>ERIMM</td></tr>
+<tr><td><b><code>&quot;vlog&quot;      </code></b></td><td>0&hellip;1</td><td></td><td></td><td>Panasonic V-Log</td></tr>
 </table>
 
 <p class="var">cont</p>
@@ -1725,8 +1776,10 @@ reference.</p>
 
 <p class="var">gcor</p>
 <p>Optional gamma correction to apply to the linear signal.
-This is a power value, 1 is neutral.
-Comes after contrast adjustment.</p>
+This is a power value, 1 is a bypass.
+Comes after contrast adjustment.
+In display-referred mode, the invariant (neutral) point of the correction
+is the reference white.</p>
 
 <p class="var">bits</p>
 <p>Sets the output bitdepth.
@@ -1759,6 +1812,8 @@ Allowed values are:
 10: limit to AVX2.</p>
 
 <p class="var">blacklvl</p>
+<p><em>This parameter is deprecated, please use <var>lb</var> and <var>lw</var>
+instead.</em></p>
 <p>Black level value (linear range) for the electro-optical transfer function.
 It shifts and stretches the transfer curve in order to make the black value in
 gamma-encoded range match the specified level in linear range.
@@ -1766,24 +1821,78 @@ Raising the black level is equivalent to increasing the brightness setting
 combined with a slight contrast reduction not to alter the white.
 The parameter should be &ge; 0.
 There is no specific unit, it’s just a value from the target linear range,
-generally in 0–1.</p>
+generally in 0–1.
+Internally, it is converted to <var>lb</var>, so it uses <var>lw</var> as
+reference.
+If the latter is not specified by the user, it uses 100 cd/m<sup>2</sup>, even
+if the transfer function is HDR.
+Ignored when the linear light is scene-referred.</p>
 
-<p class="var">planes</p>
-<p>This array decribes how each plane should be processed.
-It’s similar to the <var>y</var>, <var>u</var> and <var>v</var> parameters
-in Masktools 2.</p>
+<p class="var">sceneref</p>
+<p>Indicates that the linear light step is scene-referred.
+When set to <code>False</code>, the linear light is display-referred.
+This helps removing ambiguity when BT.2100 transfer functions (PQ and HLG)
+are used.
+Direct or inverse OOTFs are switched as required.</p>
+
+<p class="var">lb</p>
+<p>Indicate the black level for the source transfer function, in
+cd/m<sup>2</sup>.
+This parameters is taken into account when display-referred transfer
+functions are used.
+The EOTF (source) function uses <var>lb</var> as brightness setting.</p>
+
+<p class="var">lw, lws, lwd</p>
+<p>Indicate the peak white levels in cd/m<sup>2</sup>.
+<var>lws</var> is for the source transfer function, and <var>lwd</var>
+for the destination one.
+These parameters are taken into account when display-referred transfer
+functions are used.
+Minimum <var>lw</var> value is 0.1&nbsp;cd/m<sup>2</sup>.
+System gamma may be changed according to the <var>lw</var> parameter.
+Unless specified, HDR functions use a peak white of 1000&nbsp;cd/m<sup>2</sup>.
+Similarly, SDR and other functions use 100&nbsp;cd/m<sup>2</sup> by default.
+It is strongly recommended to manually set <var>lw</var> when using the HLG
+curve, otherwise the automatic L<sub>W</sub> estimation could result in
+something unexpected.</p>
+
+<p class="var">ambient</p>
+<p>Default ambient luminance for display-referred transfer functions, in
+cd/m<sup>2</sup>.
+This adapts automatically the OOTF system gamma.</p>
+
+<p class="var">match</p>
+<p>Selects the luminance matching between the transfer functions.</p>
 <table>
-<tr><td><b>&minus;65535</b><br />to <b>&plus;0.5</b></td><td>All the pixels of the plane will be set to &minus;x (the opposite of the specified value). The range depends on the output data type. Remember, in floating-point YUV, the chroma planes range from &minus;0.5 to &plus;0.5.</td></tr>
-<tr><td><b>1</b></td><td>The plane will not be processed. This means that the content of the output plane is pure garbage.</td></tr>
-<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Range (full or TV) conversions are ignored.</td></tr>
-<tr><td><b>3</b></td><td>The plane will be processed.</td></tr>
+<tr><td><b>0</b></td><td>No specific match. Linear values are not scaled.</td></tr>
+<tr><td><b>1</b></td><td>Matches the reference white. 1 is the reference white level.</td></tr>
+<tr><td><b>2</b></td><td>Tries to match the display luminance.</td></tr>
 </table>
-<p><span class="host">Avisynth+</span>  The alpha channel processing is
-disabled and replaced with a straight copy from the source.
-The parameter value can also be a string, like in the
-<code>fmtc_bitdepth</code> function: <code>"all"</code>, <code>""</code>, or a
-combination of <code>"0"</code>, <code>"1"</code>, <code>"2"</code>,
-<code>"r"</code>, <code>"g"</code> and <code>"b"</code>.<p>
+<p>Display luminance matching is available only for display-referred
+transfers.
+It is automatically disabled when <var>sceneref</var> is <code>True</code>.
+Linear scale in luminance match is at least 100&nbsp;cd/m<sup>2</sup>, but the
+exact value is unspecified and depends on the involved transfer functions.</p>
+
+<p class="var">gy</p>
+<p>Overrides default gamma processing.
+When set to <code>False</code>, gamma is applied on each component separately.
+Processing is fast, but possibly distorts the colors.
+When set to <code>True</code>, gamma is applied to the luminance only, leaving
+the colors undistorted.
+When the parameter is unspecified, the gamma processing is selected depending
+on the transfer functions.
+More specifically, the HLG OOTF curve requires applying the gamma on luminance.
+Other curves use standard gamma processing.</p>
+
+<p class="var">debug</p>
+<p>When this parameter is not null, a property is attached to the processed
+frames.
+It contains a text string with debugging information about light levels and
+system gamma used at each stage of the processing.
+The name of the property is <code>"FmtcTransferDbg"</code> followed with the
+parameter value, so multiple calls to <code>transfer</code> can be checked
+simultaneously.</p>
 
 
 
@@ -1833,6 +1942,10 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>resample</code>: added top-left chroma location.</li>
 <li><code>resample</code>/Avisynth+: interlacing detection now uses the global stream information when the frame properties are not available.</li>
 <li><code>resample</code>/Avisynth+: fixed the <var>planes</var> parameter.</li>
+<li><code>transfer</code>: Linear light can now be display- or scene-referred. Added <var>sceneref</var>, <var>lw</var>, <var>lws</var>, <var>lwd</var>, <var>lb</var>, <var>ambiant</var> and deprecated <var>blacklvl</var>.</li>
+<li><code>transfer</code>: By default, automatically matches the reference white levels for source and destination transfer curves. This may cause some backward incompatibilities. <var>match</var> parameter added.</li>
+<li><code>transfer</code>: Removed the <var>planes</var> parameter introduced in r24 because planes are no longer independent of each other.</li>
+<li><code>transfer</code>: <var>debug</var> provides information about the transfer operation and levels as a frame property.</li>
 <li><code>transfer</code>: BT.470M characteristic is now a pure power curve, instead of a copy of the sRGB curve.</li>
 <li><code>transfer</code>/Avisynth+: fixed <var>flt</var> + <var>bits</var> combination that was ignored. Thanks to DTL for the report.</li>
 <li><code>transfer</code>/Avisynth+: fixed case sensitivity to <var>transs</var> and <var>transd</var>.</li>

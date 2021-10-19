@@ -50,7 +50,11 @@ TransOpSLog3::TransOpSLog3 (bool inv_flag)
 
 
 
-double	TransOpSLog3::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpSLog3::do_convert (double x) const
 {
 	x = std::max (x, 0.0);
 
@@ -59,7 +63,16 @@ double	TransOpSLog3::operator () (double x) const
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpSLog3::do_get_info () const
+{
+	return {
+		Type::UNDEF,
+		Range::UNDEF,
+		log_to_lin (1.0),
+		log_to_lin (598.0 / 1023.0),
+		0.0, 0.0
+	};
+}
 
 
 

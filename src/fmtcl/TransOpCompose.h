@@ -52,15 +52,15 @@ public:
 	               TransOpCompose (OpSPtr op_1_sptr, OpSPtr op_2_sptr);
 	virtual        ~TransOpCompose () {}
 
-	// TransOpInterface
-	virtual inline double
-	               operator () (double x) const;
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	inline double  do_convert (double x) const override;
+	LinInfo        do_get_info () const override { return _unbounded; }
 
 
 

@@ -47,15 +47,15 @@ public:
 	explicit       TransOpFilmStream (bool inv_flag);
 	virtual        ~TransOpFilmStream () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const;
-	virtual double get_max () const { return (1.0); }
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override;
 
 
 

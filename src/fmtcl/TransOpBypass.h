@@ -47,14 +47,15 @@ public:
 	               TransOpBypass () = default;
 	virtual        ~TransOpBypass () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const { return (x); }
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override { return x; }
+	LinInfo        do_get_info () const override { return _unbounded; }
 
 
 

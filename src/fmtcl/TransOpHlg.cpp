@@ -49,7 +49,11 @@ TransOpHlg::TransOpHlg (bool inv_flag)
 
 
 
-double	TransOpHlg::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpHlg::do_convert (double x) const
 {
 	x = fstb::limit (x, 0.0, 1.0);
 	if (_inv_flag)
@@ -65,14 +69,15 @@ double	TransOpHlg::operator () (double x) const
 	return x;
 }
 
-double	TransOpHlg::get_max () const
+
+
+TransOpInterface::LinInfo	TransOpHlg::do_get_info () const
 {
-	return (compute_inverse (1.0));
+	const double   w_ref = compute_inverse (0.75);
+
+	// Peak luminance is not fixed and depends on the actual hardware.
+	return { Type::OETF, Range::HDR, 1.0, w_ref, 0.0, 0.0 };
 }
-
-
-
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 

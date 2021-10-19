@@ -73,7 +73,11 @@ TransOpLinPow::TransOpLinPow (bool inv_flag, double alpha, double beta, double p
 
 
 
-double	TransOpLinPow::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpLinPow::do_convert (double x) const
 {
 	double         y = x;
 
@@ -138,7 +142,10 @@ double	TransOpLinPow::operator () (double x) const
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpLinPow::do_get_info () const
+{
+	return { Type::UNDEF, Range::UNDEF, 1.0, 1.0, _scale_cdm2, _wpeak_cdm2 };
+}
 
 
 

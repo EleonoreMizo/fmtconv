@@ -51,22 +51,28 @@ TransOpSLog::TransOpSLog (bool inv_flag, bool slog2_flag)
 
 
 
-// 1 lin is reference white, peak white at 10 lin.
-double	TransOpSLog::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpSLog::do_convert (double x) const
 {
 	return (_inv_flag) ? compute_inverse (x) : compute_direct (x);
 }
 
 
 
-double	TransOpSLog::get_max () const
+TransOpInterface::LinInfo	TransOpSLog::do_get_info () const
 {
-	return (_slog2_flag) ? 10.0 * _s2 : 10.0;
+	const int      white = (_slog2_flag) ? 582 : 636;
+	return {
+		Type::UNDEF,
+		Range::UNDEF,
+		compute_inverse (double (1023  - 64) / double (940 - 64)),
+		compute_inverse (double (white - 64) / double (940 - 64)),
+		0.0, 0.0
+	};
 }
-
-
-
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 

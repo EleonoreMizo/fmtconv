@@ -81,10 +81,12 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		, &main_avs_create <fmtcavs::Resample>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_TRANSFER,
-		"c"           "[transs]s"  "[transd]s"  "[cont]f"   //  0
-		"[gcor]f"     "[bits]i"    "[flt]b"     "[fulls]b"  //  4
-		"[fulld]b"    "[logceis]i" "[logceid]i" "[cpuopt]i" //  8
-		"[blacklvl]f" "[planes]."                           // 12
+		"c"           "[transs]s"   "[transd]s"  "[cont]f"   //  0
+		"[gcor]f"     "[bits]i"     "[flt]b"     "[fulls]b"  //  4
+		"[fulld]b"    "[logceis]i"  "[logceid]i" "[cpuopt]i" //  8
+		"[blacklvl]f" "[sceneref]b" "[lb]f"      "[lw]f"     // 12
+		"[lws]f"      "[lwd]f"      "[ambient]f" "[match]i"  // 16
+		"[gy]b"       "[debug]i"                             // 20
 		, &main_avs_create <fmtcavs::Transfer>, nullptr
 	);
 

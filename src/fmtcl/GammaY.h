@@ -93,8 +93,9 @@ private:
 	{
 	public:
 		explicit       Op (double gamma, double alpha);
-		double         operator () (double x) const override;
-		double         get_max () const override;
+	protected:
+		double         do_convert (double x) const override;
+		LinInfo        do_get_info () const override;
 	private:
 		double         _gamma = 1;
 		double         _alpha = 1;

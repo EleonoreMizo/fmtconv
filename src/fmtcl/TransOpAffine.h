@@ -47,14 +47,15 @@ public:
 	explicit       TransOpAffine (double a, double b);
 	virtual        ~TransOpAffine () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const;
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override { return _unbounded; }
 
 
 

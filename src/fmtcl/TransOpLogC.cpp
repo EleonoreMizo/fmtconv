@@ -57,19 +57,6 @@ TransOpLogC::TransOpLogC (bool inv_flag, LType type, ExpIdx ei)
 
 
 
-// 1 is log peak white.
-double	TransOpLogC::operator () (double x) const
-{
-	return (_inv_flag) ? compute_inverse (x) : compute_direct (x);
-}
-
-double	TransOpLogC::get_max () const
-{
-	return compute_inverse (1.0);
-}
-
-
-
 TransOpLogC::ExpIdx	TransOpLogC::conv_logc_ei (int val_raw)
 {
 	ExpIdx         ei = ExpIdx_INVALID;
@@ -98,6 +85,24 @@ TransOpLogC::ExpIdx	TransOpLogC::conv_logc_ei (int val_raw)
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+// 1 is log peak white.
+double	TransOpLogC::do_convert (double x) const
+{
+	return (_inv_flag) ? compute_inverse (x) : compute_direct (x);
+}
+
+
+
+TransOpInterface::LinInfo	TransOpLogC::do_get_info () const
+{
+	const double  grey18 = compute_inverse (400.0 / 1023.0);
+	const double  white  = grey18 * 100.0 / 18.0; // 100 or 90?
+
+	return { Type::OETF, Range::UNDEF, compute_inverse (1.0), white, 0.0, 0.0 };
+}
 
 
 

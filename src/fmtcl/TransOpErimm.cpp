@@ -53,7 +53,11 @@ TransOpErimm::TransOpErimm (bool inv_flag)
 
 
 
-double	TransOpErimm::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpErimm::do_convert (double x) const
 {
 	double         y = x;
 
@@ -102,7 +106,10 @@ double	TransOpErimm::operator () (double x) const
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpErimm::do_get_info () const
+{
+	return { Type::OETF, Range::UNDEF, _eclip, 1.0, 0.0, 0.0 };
+}
 
 
 

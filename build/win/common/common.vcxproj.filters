@@ -204,6 +204,9 @@
     <ClCompile Include="..\..\..\src\fmtcl\Cst_fmtcl.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpInterface.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\fmtcl\TransCst.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
@@ -693,6 +696,9 @@
       <Filter>fmtcl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\fmtcl\TransCst.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\LumMatch.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
   </ItemGroup>

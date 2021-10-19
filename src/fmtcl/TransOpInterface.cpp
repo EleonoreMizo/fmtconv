@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-        TransOpAffine.cpp
-        Author: Laurent de Soras, 2015
+        TransOpInterface.cpp
+        Author: Laurent de Soras, 2021
 
 --- Legal stuff ---
 
@@ -9,7 +9,7 @@ This program is free software. It comes without any warranty, to
 the extent permitted by applicable law. You can redistribute it
 and/or modify it under the terms of the Do What The Fuck You Want
 To Public License, Version 2, as published by Sam Hocevar. See
-http://sam.zoy.org/wtfpl/COPYING for more details.
+http://www.wtfpl.net/ for more details.
 
 *Tab=3***********************************************************************/
 
@@ -24,8 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/TransOpAffine.h"
-#include "fstb/fnc.h"
+#include "fmtcl/TransOpInterface.h"
 
 #include <cassert>
 
@@ -40,11 +39,27 @@ namespace fmtcl
 
 
 
-TransOpAffine::TransOpAffine (double a, double b)
-:	_a (a)
-,	_b (b)
+constexpr TransOpInterface::LinInfo	TransOpInterface::_unbounded;
+
+
+
+double	TransOpInterface::operator () (double x) const
 {
-	assert (! fstb::is_null (a));
+	return do_convert (x);
+}
+
+
+
+TransOpInterface::LinInfo	TransOpInterface::get_info () const
+{
+	const auto     info = do_get_info ();
+
+	assert (info._vmax >= 1.0);
+	assert (info._wref > 0);
+	assert (info._scale_cdm2 >= 0);
+	assert (info._wpeak_cdm2 >= 0);
+
+	return info;
 }
 
 
@@ -53,18 +68,7 @@ TransOpAffine::TransOpAffine (double a, double b)
 
 
 
-double	TransOpAffine::do_convert (double x) const
-{
-	return x * _a + _b;
-}
-
-
-
-/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-}	// namespace fmtcl
+}  // namespace fmtcl
 
 
 

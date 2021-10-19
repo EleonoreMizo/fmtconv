@@ -47,15 +47,15 @@ public:
 	explicit       TransOpSLog3 (bool inv_flag);
 	virtual        ~TransOpSLog3 () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const;
-	virtual double get_max () const { return (38.420934337202536904496058731147); }
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override;
 
 
 

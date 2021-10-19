@@ -47,7 +47,11 @@ TransOpAcesCc::TransOpAcesCc (bool inv_flag)
 
 
 
-double	TransOpAcesCc::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpAcesCc::do_convert (double x) const
 {
 	double         y = x;
 
@@ -92,11 +96,18 @@ double	TransOpAcesCc::operator () (double x) const
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpAcesCc::do_get_info () const
+{
+	return { Type::UNDEF, Range::UNDEF, _max_val, 1.0, 0.0, 0.0 };
+}
 
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr double	TransOpAcesCc::_max_val;
 
 
 

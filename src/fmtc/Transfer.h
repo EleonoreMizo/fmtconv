@@ -35,8 +35,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/TransOpLogC.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
-#include "vsutl/PlaneProcCbInterface.h"
-#include "vsutl/PlaneProcessor.h"
 #include "vswrap.h"
 
 #include <memory>
@@ -50,7 +48,6 @@ namespace fmtc
 
 class Transfer
 :	public vsutl::FilterBase
-,	public vsutl::PlaneProcCbInterface
 {
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
@@ -71,9 +68,6 @@ public:
 
 protected:
 
-	// vsutl::PlaneProcCbInterface
-	virtual int    do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr);
-
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
@@ -91,29 +85,28 @@ private:
 	               _vi_in;     // Input. Must be declared after _clip_src_sptr because of initialisation order.
 	::VSVideoInfo  _vi_out;    // Output. Must be declared after _vi_in.
 
-	bool           _sse2_flag;
-	bool           _avx2_flag;
+	bool           _sse2_flag = false;
+	bool           _avx2_flag = false;
 	std::string    _transs;
 	std::string    _transd;
-	double         _contrast;
-	double         _gcor;
-	double         _lvl_black;
-	bool           _full_range_src_flag;
-	bool           _full_range_dst_flag;
+	double         _contrast  = 1;
+	double         _gcor      = 1;
+	bool           _full_range_src_flag = true;
+	bool           _full_range_dst_flag = true;
 	fmtcl::TransCurve
-	               _curve_s;
+	               _curve_s = fmtcl::TransCurve_UNDEF;
 	fmtcl::TransCurve
-	               _curve_d;
+	               _curve_d = fmtcl::TransCurve_UNDEF;
 	fmtcl::TransOpLogC::ExpIdx // Exposure Index for the Arri Log C curves
-	               _logc_ei_s;
+	               _logc_ei_s = fmtcl::TransOpLogC::ExpIdx_800;
 	fmtcl::TransOpLogC::ExpIdx
-	               _logc_ei_d;
-
-	vsutl::PlaneProcessor
-	               _plane_processor;
+	               _logc_ei_d = fmtcl::TransOpLogC::ExpIdx_800;
 
 	std::unique_ptr <fmtcl::TransModel>
 	               _model_uptr;
+
+	bool           _dbg_flag = false;
+	std::string    _dbg_name;     // Property name
 
 
 

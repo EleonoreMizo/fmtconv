@@ -47,15 +47,15 @@ public:
 	explicit       TransOpSLog (bool inv_flag, bool slog2_flag);
 	virtual        ~TransOpSLog () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const;
-	virtual double get_max () const;
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override;
 
 
 
@@ -73,6 +73,7 @@ private:
 
 	double         compute_direct (double x) const;
 	double         compute_inverse (double x) const;
+
 	const bool     _inv_flag;
 	const bool     _slog2_flag;
 

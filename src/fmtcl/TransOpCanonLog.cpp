@@ -50,8 +50,12 @@ TransOpCanonLog::TransOpCanonLog (bool inv_flag)
 
 
 
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
 // 1.08676 is log peak white, at 8.00903 in linear scale.
-double	TransOpCanonLog::operator () (double x) const
+double	TransOpCanonLog::do_convert (double x) const
 {
 	static constexpr double a = 10.1596;
 	static constexpr double b =  0.529136;
@@ -72,7 +76,10 @@ double	TransOpCanonLog::operator () (double x) const
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpCanonLog::do_get_info () const
+{
+	return { Type::OETF, Range::UNDEF, 8.00903, 1.0, 0.0, 0.0 };
+}
 
 
 

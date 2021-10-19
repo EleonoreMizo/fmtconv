@@ -214,16 +214,16 @@ GammaY::Op::Op (double gamma, double alpha)
 
 
 
-double	GammaY::Op::operator () (double x) const
+double	GammaY::Op::do_convert (double x) const
 {
 	return (x == 0) ? 0 : _alpha * pow (fabs (x), _gamma - 1);
 }
 
 
 
-double	GammaY::Op::get_max () const
+TransOpInterface::LinInfo	GammaY::Op::do_get_info () const
 {
-	return _alpha;
+	return { Type::UNDEF, Range::UNDEF, _alpha, 0 };
 }
 
 

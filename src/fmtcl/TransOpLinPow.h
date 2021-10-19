@@ -50,15 +50,15 @@ public:
 	explicit       TransOpLinPow (bool inv_flag, double alpha, double beta, double p1, double slope, double lb = 0, double ub = 1, double scneg = 1, double p2 = 1, double scale_cdm2 = 0, double wpeak_cdm2 = 0);
 	virtual        ~TransOpLinPow () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const;
-	virtual double get_max () const { return (_ub); }
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override;
 
 
 

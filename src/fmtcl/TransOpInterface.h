@@ -41,18 +41,63 @@ class TransOpInterface
 
 public:
 
+	enum class Type
+	{
+		UNDEF = 0, // Unknown, unspecified or not applicable (but still valid)
+		OETF,
+		EOTF
+	};
+
+	enum class Range
+	{
+		UNDEF = 0,
+		SDR,
+		HDR
+	};
+
+	// Information about the linear scale
+	class LinInfo
+	{
+	public:
+		Type           _type       = Type::UNDEF;
+		Range          _range      = Range::UNDEF;
+
+		// Maximum supported linear value, for 16-bit coding. Should be >= 1.0.
+		double         _vmax       = 1.0;
+
+		// Reference white level, linear scale. > 0. Set to 1.0 when unknown.
+		double         _wref       = 1.0;
+
+		// Luminance corresponding to linear 1.0, in cd/m^2.
+		// Not necessarily the peak white nor the reference white.
+		// Dedicated to EOTFs, but not mandatory. 0 = unknown/unspecified
+		double         _scale_cdm2 = 0;
+
+		// Peak white, in cd/m^2.
+		// Dedicated to EOTFs, but not mandatory. 0 = unknown/unspecified
+		double         _wpeak_cdm2 = 0;
+	};
+
+	// Return this if nothing is known (modifiers)
+	static constexpr LinInfo   _unbounded { Type::UNDEF, Range::UNDEF, 1e9, 1, 0, 0 };
+
 	virtual        ~TransOpInterface () {}
 
 	// It is the operator responsibility to clip the input and output
 	// (input domain or spec requirement).
-	virtual double operator () (double x) const = 0;
-	virtual double get_max () const { return (1e9); }  // Linear
+	double         operator () (double x) const;
+
+	LinInfo        get_info () const;
 
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	virtual double do_convert (double x) const = 0;
+	virtual LinInfo
+	               do_get_info () const { return { }; }
 
 
 

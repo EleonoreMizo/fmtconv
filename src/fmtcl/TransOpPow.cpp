@@ -58,7 +58,11 @@ TransOpPow::TransOpPow (bool inv_flag, double p_i, double alpha, double val_max,
 
 
 
-double	TransOpPow::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpPow::do_convert (double x) const
 {
 	x = std::max (x, 0.0);
 	double         y = x;
@@ -79,7 +83,10 @@ double	TransOpPow::operator () (double x) const
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpPow::do_get_info () const
+{
+	return { Type::UNDEF, Range::SDR, _val_max, 1.0, _scale_cdm2, _wpeak_cdm2 };
+}
 
 
 

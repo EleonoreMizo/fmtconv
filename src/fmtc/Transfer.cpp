@@ -29,6 +29,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/CpuOpt.h"
 #include "fmtc/Transfer.h"
 #include "fmtc/fnc.h"
+#include "fmtcl/TransModel.h"
+#include "fmtcl/TransOpLogC.h"
 #include "fmtcl/TransUtil.h"
 #include "fstb/fnc.h"
 #include "vsutl/fnc.h"
@@ -54,28 +56,12 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 ,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
-,	_sse2_flag (false)
-,	_avx2_flag (false)
 ,	_transs (get_arg_str (in, out, "transs", ""))
 ,	_transd (get_arg_str (in, out, "transd", ""))
 ,	_contrast (get_arg_flt (in, out, "cont", 1))
 ,	_gcor (get_arg_flt (in, out, "gcor", 1))
-,	_lvl_black (get_arg_flt (in, out, "blacklvl", 0))
 ,	_full_range_src_flag (get_arg_int (in, out, "fulls", 1) != 0)
 ,	_full_range_dst_flag (get_arg_int (in, out, "fulld", 1) != 0)
-,	_curve_s (fmtcl::TransCurve_UNDEF)
-,	_curve_d (fmtcl::TransCurve_UNDEF)
-,	_logc_ei_s (fmtcl::TransOpLogC::ExpIdx_800)
-,	_logc_ei_d (fmtcl::TransOpLogC::ExpIdx_800)
-#if defined (_MSC_VER)
-#pragma warning (push)
-#pragma warning (disable : 4355)
-#endif // 'this': used in base member initializer list
-,	_plane_processor (vsapi, *this, "transfer", true)
-#if defined (_MSC_VER)
-#pragma warning (pop)
-#endif
-,	_model_uptr ()
 {
 	fstb::conv_to_lower_case (_transs);
 	fstb::conv_to_lower_case (_transd);
@@ -155,9 +141,87 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 	{
 		throw_inval_arg ("invalid gcor value.");
 	}
-	if (_lvl_black < 0)
+
+	const bool     scene_flag = (get_arg_int (in, out, "sceneref", 0) != 0);
+
+	bool           lw_def_flag  = false;
+	bool           lws_def_flag = false;
+	double         lw  = get_arg_flt (in, out, "lw"  , 0 , 0, &lw_def_flag);
+	double         lws = get_arg_flt (in, out, "lws", lw, 0, &lws_def_flag);
+	double         lwd = get_arg_flt (in, out, "lwd", lw);
+	if (lws > 0 && lws < fmtcl::TransModel::_min_luminance)
+	{
+		throw_inval_arg ("lws must be >= 0.1.");
+	}
+	if (lwd > 0 && lwd < fmtcl::TransModel::_min_luminance)
+	{
+		throw_inval_arg ("lwd must be >= 0.1.");
+	}
+
+	// Lb Lw mess
+	bool           bl_def_flag = false; // lvl_black
+	bool           lb_def_flag = false;
+	double         lvl_black   =
+		get_arg_flt (in, out, "blacklvl", 0, 0, &bl_def_flag);
+	double         lb = get_arg_flt (in, out, "lb", 0, 0, &lb_def_flag);
+	if (lvl_black < 0)
 	{
 		throw_inval_arg ("invalid blacklvl value.");
+	}
+	if (lw > 0 && lb >= lws)
+	{
+		throw_inval_arg ("invalid lb/lw combination.");
+	}
+	if (   bl_def_flag
+	    && lb_def_flag
+	    && (lws_def_flag || lw_def_flag))
+	{
+		throw_inval_arg (
+			"you can define at most two of these parameters: "
+			"blacklvl, lb and (lw or lws)."
+		);
+	}
+	else if (! lb_def_flag)
+	{
+		if (lw_def_flag || lws_def_flag)
+		{
+			lb = lvl_black * lws;
+		}
+		else
+		{
+			lb = lvl_black * 100;
+		}
+	}
+
+	const double   lamb = get_arg_flt (in, out, "ambient", 5);
+	if (lamb < fmtcl::TransModel::_min_luminance)
+	{
+		throw_inval_arg ("ambient luminance must be >= 0.1.");
+	}
+
+	const auto     match = fmtcl::LumMatch (
+		get_arg_int (in, out, "match", fmtcl::LumMatch_REF_WHITE)
+	);
+	if (match < 0 || match >= fmtcl::LumMatch_NBR_ELT)
+	{
+		throw_inval_arg ("invalid match value.");
+	}
+
+	const int      gy_val  = get_arg_int (in, out, "gy", -1);
+	const auto     gy_proc =
+		  (gy_val == 0) ? fmtcl::TransModel::GyProc::OFF
+		: (gy_val == 1) ? fmtcl::TransModel::GyProc::ON
+		:                 fmtcl::TransModel::GyProc::UNDEF;
+
+	const int      dbg = get_arg_int (in, out, "debug", 0);
+	if (dbg < 0)
+	{
+		throw_inval_arg ("debug must be >= 0.");
+	}
+	_dbg_flag = (dbg > 0);
+	if (_dbg_flag)
+	{
+		_dbg_name = fmtcl::TransUtil::gen_degub_prop_name (dbg);
 	}
 
 	// Finally...
@@ -168,7 +232,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 	_model_uptr = std::make_unique <fmtcl::TransModel> (
 		dst_fmt, _curve_d, _logc_ei_d,
 		src_fmt, _curve_s, _logc_ei_s,
-		_contrast, _gcor, _lvl_black,
+		_contrast, _gcor, lb, lws, lwd, lamb, scene_flag, match, gy_proc,
 		_sse2_flag, _avx2_flag
 	);
 }
@@ -177,16 +241,17 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 
 void	Transfer::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
 {
-	fstb::unused (core);
+	fstb::unused (in, out, core);
 
 	_vsapi.setVideoInfo (&_vi_out, 1, &node);
-	_plane_processor.set_filter (in, out, _vi_out);
 }
 
 
 
 const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
+	fstb::unused (frame_data_ptr);
+
 	assert (n >= 0);
 
 	::VSFrameRef *    dst_ptr = 0;
@@ -209,30 +274,29 @@ const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &
 		const int         h  =  _vsapi.getFrameHeight (&src, 0);
 		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
 
-		const int      ret_val = _plane_processor.process_frame (
-			*dst_ptr, n, frame_data_ptr, frame_ctx, core, _clip_src_sptr
-		);
+		const auto     pa { build_mat_proc (_vsapi, *dst_ptr, src) };
+		_model_uptr->process_frame (pa);
 
-		if (ret_val == 0)
+		// Output frame properties
+		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+
+		const int      cr_val = (_full_range_dst_flag) ? 0 : 1;
+		_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
+
+		int            transfer = fmtcl::TransCurve_UNSPECIFIED;
+		if (_curve_d >= 0 && _curve_d <= fmtcl::TransCurve_ISO_RANGE_LAST)
 		{
-			// Output frame properties
-			::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
-
-			const int      cr_val = (_full_range_dst_flag) ? 0 : 1;
-			_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
-
-			int            transfer = fmtcl::TransCurve_UNSPECIFIED;
-			if (_curve_d >= 0 && _curve_d <= fmtcl::TransCurve_ISO_RANGE_LAST)
-			{
-				transfer = _curve_d;
-			}
-			_vsapi.propSetInt (&dst_prop, "_Transfer", transfer, ::paReplace);
+			transfer = _curve_d;
 		}
+		_vsapi.propSetInt (&dst_prop, "_Transfer", transfer, ::paReplace);
 
-		if (ret_val != 0)
+		if (_dbg_flag)
 		{
-			_vsapi.freeFrame (dst_ptr);
-			dst_ptr = 0;
+			const std::string &  txt = _model_uptr->get_debug_text ();
+			_vsapi.propSetData (
+				&dst_prop, _dbg_name.c_str (),
+				txt.c_str (), int (txt.length () + 1), ::paReplace
+			);
 		}
 	}
 
@@ -242,44 +306,6 @@ const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-int	Transfer::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
-{
-	fstb::unused (frame_data_ptr, core, src_node2_sptr, src_node3_sptr);
-	assert (src_node1_sptr.get () != 0);
-
-	int            ret_val = 0;
-
-	const vsutl::PlaneProcMode proc_mode =
-		_plane_processor.get_mode (plane_index);
-
-	if (proc_mode == vsutl::PlaneProcMode_PROCESS)
-	{
-		vsutl::FrameRefSPtr	src_sptr (
-			_vsapi.getFrameFilter (n, src_node1_sptr.get (), &frame_ctx),
-			_vsapi
-		);
-		const ::VSFrameRef & src = *src_sptr;
-
-		const int      w = _vsapi.getFrameWidth (&src, plane_index);
-		const int      h = _vsapi.getFrameHeight (&src, plane_index);
-
-		const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-		const int      stride_src   = _vsapi.getStride (&src, plane_index);
-		uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
-		const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
-
-		_model_uptr->process_plane (
-			{ data_dst_ptr, stride_dst },
-			{ data_src_ptr, stride_src },
-			w, h
-		);
-	}
-
-	return (ret_val);
-}
 
 
 

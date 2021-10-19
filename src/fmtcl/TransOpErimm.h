@@ -47,15 +47,15 @@ public:
 	explicit       TransOpErimm (bool inv_flag);
 	virtual        ~TransOpErimm () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const;
-	virtual double get_max () const { return (_eclip); }
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override;
 
 
 

@@ -29,6 +29,7 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcavs/function_names.h"
 #include "fmtcavs/FmtAvs.h"
 #include "fmtcavs/Transfer.h"
+#include "fmtcl/TransModel.h"
 #include "fmtcl/TransOpLogC.h"
 #include "fmtcl/TransUtil.h"
 #include "fstb/fnc.h"
@@ -88,42 +89,40 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Output format is validated.
-	fmt_dst.conv_to_vi (vi);
-
-	// Configures the plane processor
-	_plane_proc_uptr =
-		std::make_unique <avsutl::PlaneProcessor> (vi, *this, false);
-	_plane_proc_uptr->set_dst_clip_info (avsutl::PlaneProcessor::ClipType_NORMAL);
-	_plane_proc_uptr->set_clip_info (
-		avsutl::PlaneProcessor::ClipIdx_SRC1,
-		_clip_src_sptr,
-		avsutl::PlaneProcessor::ClipType_NORMAL
-	);
-	set_masktools_planes_param (
-		*_plane_proc_uptr, env, args [Param_PLANES], fmtcavs_TRANSFER ", planes"
-	);
-
-	// Alpha plane is copied instead of processed
-	const int      nbr_proc_planes = fmt_dst.get_nbr_comp_non_alpha ();
-	if (nbr_proc_planes < vi.NumComponents ())
+	if (fmt_dst.conv_to_vi (vi) != 0)
 	{
-		const double   mode = _plane_proc_uptr->get_proc_mode (nbr_proc_planes);
-		if (mode == double (avsutl::PlaneProcMode_PROCESS))
-		{
-			_plane_proc_uptr->set_proc_mode (
-				nbr_proc_planes, avsutl::PlaneProcMode_COPY1
-			);
-		}
+		env.ThrowError (fmtcavs_TRANSFER ": illegal output colorspace.");
 	}
+
+	// Alpha plane processing, if any
+	_proc_alpha_uptr = std::make_unique <fmtcavs::ProcAlpha> (
+		fmt_dst, fmt_src, vi.width, vi.height, cpu_opt
+	);
 
 	// Other parameters
 	std::string    transs     = args [Param_TRANSS  ].AsString ("");
 	std::string    transd     = args [Param_TRANSD  ].AsString ("");
 	const double   contrast   = args [Param_CONT    ].AsFloat (1);
 	const double   gcor       = args [Param_GCOR    ].AsFloat (1);
-	const double   lvl_black  = args [Param_BLACKLVL].AsFloat (0);
+	double         lvl_black  = args [Param_BLACKLVL].AsFloat (0);
+	double         lb         = args [Param_LB      ].AsFloat (0);
+	const double   lw         = args [Param_LW      ].AsFloat (0);
+	const double   lws        = args [Param_LWS     ].AsDblDef (lw);
+	const double   lwd        = args [Param_LWD     ].AsDblDef (lw);
+	const double   lamb       = args [Param_AMBIENT ].AsFloat (5);
+	const bool     scene_flag = args [Param_SCENEREF].AsBool (false);
 	const int      logc_ei_raw_s = args [Param_LOGCEIS].AsInt (800);
 	const int      logc_ei_raw_d = args [Param_LOGCEID].AsInt (800);
+	const auto     match      = fmtcl::LumMatch (
+		args [Param_MATCH].AsInt (fmtcl::LumMatch_REF_WHITE)
+	);
+	const int      dbg        = args [Param_DEBUG   ].AsInt (0);
+	const bool     gydef_flag = args [Param_GY      ].Defined ();
+	const bool     gy_flag    = args [Param_GY      ].AsBool (false);
+	const auto     gy_proc    =
+		  (! gydef_flag) ? fmtcl::TransModel::GyProc::UNDEF
+		: gy_flag        ? fmtcl::TransModel::GyProc::ON
+		:                  fmtcl::TransModel::GyProc::OFF;
 
 	fstb::conv_to_lower_case (transs);
 	fstb::conv_to_lower_case (transd);
@@ -158,10 +157,66 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 	{
 		env.ThrowError (fmtcavs_TRANSFER ": invalid gcor value.");
 	}
+
+	if (lws > 0 && lws < fmtcl::TransModel::_min_luminance)
+	{
+		env.ThrowError (fmtcavs_TRANSFER ": lws must be 0 or >= 0.1.");
+	}
+	if (lwd > 0 && lwd < fmtcl::TransModel::_min_luminance)
+	{
+		env.ThrowError (fmtcavs_TRANSFER ": lwd must be 0 or >= 0.1.");
+	}
+
+	// Lb Lw mess
 	if (lvl_black < 0)
 	{
 		env.ThrowError (fmtcavs_TRANSFER ": invalid blacklvl value.");
 	}
+	if (lws > 0 && lb >= lws)
+	{
+		env.ThrowError (fmtcavs_TRANSFER ": invalid lb/lws combination.");
+	}
+	if (   args [Param_BLACKLVL].Defined ()
+	    && args [Param_LB      ].Defined ()
+	    && (args [Param_LWS].Defined () || args [Param_LW].Defined ()))
+	{
+		env.ThrowError (fmtcavs_TRANSFER
+			": you can define at most two of these parameters:\n"
+			"blacklvl, lb and (lw or lws)."
+		);
+	}
+	else if (! args [Param_LB].Defined ())
+	{
+		if (args [Param_LW].Defined () || args [Param_LWS].Defined ())
+		{
+			lb = lvl_black * lws;
+		}
+		else
+		{
+			lb = lvl_black * 100;
+		}
+	}
+
+	if (lamb < fmtcl::TransModel::_min_luminance)
+	{
+		env.ThrowError (fmtcavs_TRANSFER ": ambient luminance must be > 0.1.");
+	}
+
+	if (match < 0 || match >= fmtcl::LumMatch_NBR_ELT)
+	{
+		env.ThrowError (fmtcavs_TRANSFER ": invalid match value.");
+	}
+
+	if (dbg < 0)
+	{
+		env.ThrowError (fmtcavs_TRANSFER ": debug must be >= 0.");
+	}
+	_dbg_flag = (dbg > 0);
+	if (_dbg_flag)
+	{
+		_dbg_name = fmtcl::TransUtil::gen_degub_prop_name (dbg);
+	}
+
 
 	// Finally...
 	const fmtcl::PicFmt  src_picfmt =
@@ -171,7 +226,7 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 	_model_uptr = std::make_unique <fmtcl::TransModel> (
 		dst_picfmt, _curve_d, logc_ei_d,
 		src_picfmt, _curve_s, logc_ei_s,
-		contrast, gcor, lvl_black,
+		contrast, gcor, lb, lws, lwd, lamb, scene_flag, match, gy_proc,
 		sse2_flag, avx2_flag
 	);
 }
@@ -183,7 +238,11 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 	::PVideoFrame  src_sptr = _clip_src_sptr->GetFrame (n, env_ptr);
 	::PVideoFrame	dst_sptr = build_new_frame (*env_ptr, vi, &src_sptr);
 
-	_plane_proc_uptr->process_frame (dst_sptr, n, *env_ptr, nullptr);
+	const auto     pa { build_mat_proc (vi, dst_sptr, _vi_src, src_sptr) };
+	_model_uptr->process_frame (pa);
+
+	// Alpha plane now
+	_proc_alpha_uptr->process_plane (dst_sptr, src_sptr);
 
 	// Frame properties
 	if (supports_props ())
@@ -203,6 +262,15 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 		env_ptr->propSetInt (
 			props_ptr, "_Transfer", transfer, ::PROPAPPENDMODE_REPLACE
 		);
+
+		if (_dbg_flag)
+		{
+			const std::string &  txt = _model_uptr->get_debug_text ();
+			env_ptr->propSetData (
+				props_ptr, _dbg_name.c_str (),
+				txt.c_str (), int (txt.length () + 1), ::PROPAPPENDMODE_REPLACE
+			);
+		}
 	}
 
 	return dst_sptr;
@@ -211,32 +279,6 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-void	Transfer::do_process_plane (::PVideoFrame &dst_sptr, int n, ::IScriptEnvironment &env, int plane_index, int plane_id, void *ctx_ptr)
-{
-	fstb::unused (plane_index, ctx_ptr);
-	assert (plane_index < _max_nbr_planes_proc);
-
-	::PVideoFrame  src_sptr     = _clip_src_sptr->GetFrame (n, &env);
-
-	uint8_t *      data_dst_ptr = dst_sptr->GetWritePtr (plane_id);
-	const int      stride_dst   = dst_sptr->GetPitch (plane_id);
-	const uint8_t* data_src_ptr = src_sptr->GetReadPtr (plane_id);
-	const int      stride_src   = src_sptr->GetPitch (plane_id);
-	const int      w = _plane_proc_uptr->get_width (
-		dst_sptr, plane_id, avsutl::PlaneProcessor::ClipIdx_DST
-	);
-	const int      h = _plane_proc_uptr->get_height (dst_sptr, plane_id);
-
-	// Standard channel
-	_model_uptr->process_plane (
-		{ data_dst_ptr, stride_dst },
-		{ data_src_ptr, stride_src },
-		w, h
-	);
-}
 
 
 

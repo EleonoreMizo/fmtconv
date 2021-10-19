@@ -43,14 +43,14 @@ TransOpContrast::TransOpContrast (double cont)
 
 
 
-double	TransOpContrast::operator () (double x) const
-{
-	return (x * _cont);
-}
-
-
-
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpContrast::do_convert (double x) const
+{
+	return x * _cont;
+}
 
 
 

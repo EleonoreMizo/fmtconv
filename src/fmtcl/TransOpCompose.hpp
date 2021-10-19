@@ -45,17 +45,17 @@ TransOpCompose::TransOpCompose (OpSPtr op_1_sptr, OpSPtr op_2_sptr)
 
 
 
-double	TransOpCompose::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpCompose::do_convert (double x) const
 {
 	x = (*_op_1_sptr) (x);
 	x = (*_op_2_sptr) (x);
 
 	return x;
 }
-
-
-
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 

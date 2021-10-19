@@ -46,9 +46,12 @@ public:
 
 	typedef  std::shared_ptr <TransOpInterface> OpSPtr;
 
+	static std::string
+	               gen_degub_prop_name (int dbg);
 	static TransCurve
 	               conv_string_to_curve (const std::string &str);
 	static OpSPtr  conv_curve_to_op (TransCurve c, bool inv_flag, TransOpLogC::ExpIdx logc_ei);
+	static double  compute_hlg_gamma (double lw, double lamb);
 
 
 

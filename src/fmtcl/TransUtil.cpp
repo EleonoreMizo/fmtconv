@@ -55,6 +55,18 @@ namespace fmtcl
 
 
 
+std::string	TransUtil::gen_degub_prop_name (int dbg)
+{
+	assert (dbg >= 0);
+
+	char           txt_0 [127+1];
+	fstb::snprintf4all (txt_0, sizeof (txt_0), "FmtcTransferDbg%d", dbg);
+
+	return txt_0;
+}
+
+
+
 // str should be already converted to lower case
 TransCurve	TransUtil::conv_string_to_curve (const std::string &str)
 {
@@ -226,7 +238,7 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 		}
 		break;
 	case TransCurve_LINEAR:
-		ptr = OpSPtr (new TransOpBypass);
+		// Nothing
 		break;
 	case TransCurve_LOG100:
 		ptr = OpSPtr (new TransOpLogTrunc (inv_flag, 0.5, 0.01));
@@ -379,6 +391,32 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 	}
 
 	return ptr;
+}
+
+
+
+// System gamma taking surround luminance into account
+// lw: peak white luminance in cd/m^2
+// lamb: surround luminance in cd/m^2
+double	TransUtil::compute_hlg_gamma (double lw, double lamb)
+{
+	assert (lw   > 1e-6);
+	assert (lamb > 1e-6);
+
+	// BT.2390-9 p. 29
+	constexpr double  gref  = 1.2;  // Gamma at reference luminance
+
+	constexpr double  lref  = 1000; // Display reference luminance
+	constexpr double  kappa = 1.111;
+
+	constexpr double  lsref = 5;    // Surround reference luminance
+	constexpr double  mu    = 0.98;
+
+	const double      dfact = pow (kappa, log2 (lw   / lref ));
+	const double      sfact = pow (mu   , log2 (lamb / lsref));
+	const double      gamma = gref * dfact * sfact;
+
+	return gamma;
 }
 
 

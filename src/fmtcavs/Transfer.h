@@ -23,9 +23,8 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "avsutl/PlaneProcCbInterface.h"
-#include "avsutl/PlaneProcessor.h"
 #include "avsutl/VideoFilterBase.h"
+#include "fmtcavs/ProcAlpha.h"
 #include "fmtcl/TransCurve.h"
 #include "fmtcl/TransModel.h"
 
@@ -40,7 +39,6 @@ namespace fmtcavs
 
 class Transfer
 :	public avsutl::VideoFilterBase
-,	public avsutl::PlaneProcCbInterface
 {
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
@@ -64,7 +62,15 @@ public:
 		Param_LOGCEID, // 10
 		Param_CPUOPT,
 		Param_BLACKLVL,
-		Param_PLANES,
+		Param_SCENEREF,
+		Param_LB,
+		Param_LW,
+		Param_LWS,
+		Param_LWD,
+		Param_AMBIENT,
+		Param_MATCH,
+		Param_GY, // 20
+		Param_DEBUG,
 
 		Param_NBR_ELT,
 	};
@@ -82,16 +88,13 @@ public:
 
 protected:
 
-	// PlaneProcCbInterface
-	void           do_process_plane (::PVideoFrame &dst_sptr, int n, ::IScriptEnvironment &env, int plane_index, int plane_id, void *ctx_ptr) override;
-
-	static constexpr int _max_nbr_planes_proc = 3;
-
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 private:
+
+	static constexpr int _max_nbr_planes_proc = 3;
 
 	FmtAvs         get_output_colorspace (::IScriptEnvironment &env, const ::AVSValue &args, const FmtAvs &fmt_src);
 
@@ -99,8 +102,8 @@ private:
 	const ::VideoInfo
 	               _vi_src;
 
-	std::unique_ptr <avsutl::PlaneProcessor>
-	               _plane_proc_uptr;
+	std::unique_ptr <fmtcavs::ProcAlpha>
+	               _proc_alpha_uptr;
 
 	std::unique_ptr <fmtcl::TransModel>
 	               _model_uptr;
@@ -111,6 +114,9 @@ private:
 	               _curve_s    = fmtcl::TransCurve_INVALID;
 	fmtcl::TransCurve
 	               _curve_d    = fmtcl::TransCurve_INVALID;
+
+	bool           _dbg_flag   = false;
+	std::string    _dbg_name;     // Property name
 
 
 

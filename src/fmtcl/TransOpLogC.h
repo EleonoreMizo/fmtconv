@@ -83,10 +83,6 @@ public:
 	explicit       TransOpLogC (bool inv_flag, LType type, ExpIdx ei = ExpIdx_800);
 	virtual        ~TransOpLogC () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const;
-	virtual double get_max () const;
-
 	static ExpIdx  conv_logc_ei (int val_raw);
 
 
@@ -94,6 +90,10 @@ public:
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override;
 
 
 

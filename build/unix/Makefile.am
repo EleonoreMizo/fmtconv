@@ -166,6 +166,7 @@ commonsrc = \
         ../../src/fmtcl/InterlacingType.h \
         ../../src/fmtcl/KernelData.cpp \
         ../../src/fmtcl/KernelData.h \
+        ../../src/fmtcl/LumMatch.h \
         ../../src/fmtcl/Mat3.h \
         ../../src/fmtcl/Mat3.hpp \
         ../../src/fmtcl/Mat4.h \
@@ -242,6 +243,7 @@ commonsrc = \
         ../../src/fmtcl/TransOpFilmStream.h \
         ../../src/fmtcl/TransOpHlg.cpp \
         ../../src/fmtcl/TransOpHlg.h \
+        ../../src/fmtcl/TransOpInterface.cpp \
         ../../src/fmtcl/TransOpInterface.h \
         ../../src/fmtcl/TransOpLinPow.cpp \
         ../../src/fmtcl/TransOpLinPow.h \
