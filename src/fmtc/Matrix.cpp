@@ -149,9 +149,13 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 
 	// Matrix presets
 	std::string    mat (get_arg_str (in, out, "mat", ""));
-	std::string    mats ((   vsutl::is_vs_yuv ( fmt_src.colorFamily     )) ? mat : "");
-	std::string    matd ((   vsutl::is_vs_yuv ( fmt_dst_ptr->colorFamily)
-	                      || vsutl::is_vs_gray (fmt_dst_ptr->colorFamily)) ? mat : "");
+	const bool     mats_default_flag = vsutl::is_vs_yuv ( fmt_src.colorFamily);
+	const bool     matd_default_flag =
+		(         vsutl::is_vs_yuv ( fmt_dst_ptr->colorFamily)
+		 || (     vsutl::is_vs_gray (fmt_dst_ptr->colorFamily)
+		     && ! vsutl::is_vs_yuv ( fmt_src.colorFamily     )));
+	std::string    mats ((mats_default_flag) ? mat : "");
+	std::string    matd ((matd_default_flag) ? mat : "");
 	mats = get_arg_str (in, out, "mats", mats);
 	matd = get_arg_str (in, out, "matd", matd);
 	if (! mats.empty () || ! matd.empty ())

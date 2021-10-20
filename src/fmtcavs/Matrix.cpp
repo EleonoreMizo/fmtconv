@@ -133,13 +133,14 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 
 	// Matrix presets
 	std::string    mat (args [Param_MAT].AsString (""));
-	std::string    mats ((
-		fmt_src.get_col_fam () == fmtcl::ColorFamily_YUV ) ? mat : ""
-	);
-	std::string    matd (
-		(   fmt_dst.get_col_fam () == fmtcl::ColorFamily_YUV
-		 || fmt_dst.get_col_fam () == fmtcl::ColorFamily_GRAY) ? mat : ""
-	);
+	const bool     mats_default_flag =
+		(fmt_src.get_col_fam () == fmtcl::ColorFamily_YUV);
+	const bool     matd_default_flag =
+		(       fmt_dst.get_col_fam () == fmtcl::ColorFamily_YUV
+		 || (   fmt_dst.get_col_fam () == fmtcl::ColorFamily_GRAY
+		     && fmt_src.get_col_fam () != fmtcl::ColorFamily_YUV));
+	std::string    mats ((mats_default_flag) ? mat : "");
+	std::string    matd ((matd_default_flag) ? mat : "");
 	mats = args [Param_MATS].AsString (mats.c_str ());
 	matd = args [Param_MATD].AsString (matd.c_str ());
 	_csp_out = fmtcl::ColorSpaceH265_UNSPECIFIED;
