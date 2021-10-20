@@ -86,47 +86,37 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	const auto     s_info = op_s->get_info ();
 	const auto     d_info = op_d->get_info ();
 
-	// Linear or log LUT?
-	bool           loglut_flag = false;
-	if (   SplFmt_is_float (src_fmt._sf)
-	    && curve_s == TransCurve_LINEAR)
+	// Ranges for the function input.
+	// Indicates that input values may be out of the [-1 ; 2] range.
+	bool           large_range_s_flag = false;
+	bool           large_range_d_flag = false;
+
+	if (   curve_s == TransCurve_LINEAR
+	    || curve_s == TransCurve_ACESCC)
 	{
-		// Curves with extended range or with fast-evolving slope at 0.
-		// Actually we could just use the log LUT for all the curves...?
-		// 10 bits per stop + interpolation should be enough for all of them.
-		// What about the speed?
-		if (   curve_d == TransCurve_470M
-		    || curve_d == TransCurve_470BG
-		    || curve_d == TransCurve_LINEAR
-		    || curve_d == TransCurve_61966_2_4
-		    || curve_d == TransCurve_2084
-		    || curve_d == TransCurve_428
-		    || curve_d == TransCurve_HLG
-		    || curve_d == TransCurve_1886
-		    || curve_d == TransCurve_1886A
-		    || curve_d == TransCurve_SLOG
-		    || curve_d == TransCurve_SLOG2
-		    || curve_d == TransCurve_SLOG3
-		    || curve_d == TransCurve_LOGC2
-		    || curve_d == TransCurve_LOGC3
-		    || curve_d == TransCurve_CANONLOG
-		    || curve_d == TransCurve_ACESCC
-		    || curve_d == TransCurve_ERIMM)
-		{
-			loglut_flag = true;
-		}
-		if (gcor < 0.5)
-		{
-			loglut_flag = true;
-		}
-		if (fabs (contrast) >= 3.0/2 || fabs (contrast) <= 2.0/3)
-		{
-			loglut_flag = true;
-		}
+		large_range_s_flag = true;
 	}
 
-	_dbg_txt += "LUT = ";
-	_dbg_txt += ((loglut_flag) ? "log" : "lin");
+	// HDR curves may have a huge linear range
+	// Also, other curves with extended range
+	if (   d_info._range == TransOpInterface::Range::HDR
+	    || (curve_d == TransCurve_LINEAR && large_range_s_flag)
+	    || curve_d == TransCurve_SLOG
+	    || curve_d == TransCurve_SLOG2
+	    || curve_d == TransCurve_SLOG3
+	    || curve_d == TransCurve_LOGC2
+	    || curve_d == TransCurve_LOGC3
+	    || curve_d == TransCurve_CANONLOG
+	    || curve_d == TransCurve_ACESCC
+	    || curve_d == TransCurve_ERIMM)
+	{
+		large_range_d_flag = true;
+	}
+
+	_dbg_txt += "range_s = ";
+	_dbg_txt += (large_range_s_flag) ? "large" : "std";
+	_dbg_txt += ", range_d = ";
+	_dbg_txt += (large_range_d_flag) ? "large" : "std";
 
 	// We try to estimate lw in cd/m^2 if not provided by the user
 	if (! scene_flag)
@@ -428,6 +418,11 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 
 	if (op_s.get () != nullptr)
 	{
+		bool           loglut_flag = TransLut::is_loglut_req (*op_s);
+		loglut_flag |= large_range_s_flag;
+		_dbg_txt += ", lut_s = ";
+		_dbg_txt += (loglut_flag) ? "log" : "lin";
+
 		const bool     fulld_flag = (dst_fmt._full_flag || gammay_flag);
 		_lut_s_uptr = std::make_unique <TransLut> (
 			*op_s, loglut_flag,
@@ -449,6 +444,11 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	}
 	if (op_d.get () != nullptr)
 	{
+		bool           loglut_flag = TransLut::is_loglut_req (*op_d);
+		loglut_flag |= large_range_d_flag;
+		_dbg_txt += ", lut_d = ";
+		_dbg_txt += (loglut_flag) ? "log" : "lin";
+
 		const bool     fulls_flag = (src_fmt._full_flag || gammay_flag);
 		_lut_d_uptr = std::make_unique <TransLut> (
 			*op_d, loglut_flag,

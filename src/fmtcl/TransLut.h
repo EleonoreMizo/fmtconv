@@ -54,14 +54,14 @@ public:
 
 	typedef	TransLut	ThisType;
 
-	static constexpr int LINLUT_RES_L2  = 16; // log2 of the linear table resolution (size of a unity segment)
+	static constexpr int LINLUT_RES_L2  = 14; // log2 of the linear table resolution (size of a unity segment)
 	static constexpr int LINLUT_MIN_F   = -1; // Min value for float LUTs
 	static constexpr int LINLUT_MAX_F   = 2;  // Max value for float LUTs
 
 	static constexpr int LINLUT_SIZE_F  = ((LINLUT_MAX_F - LINLUT_MIN_F) << LINLUT_RES_L2) + 1;
 
 	// Log LUT are only for floating point input
-	static constexpr int LOGLUT_MIN_L2  = -32; // log2(x) for the first index in a log table (negative)
+	static constexpr int LOGLUT_MIN_L2  = -16; // log2(x) for the first index in a log table (negative)
 	static constexpr int LOGLUT_MAX_L2  = 16;  // log2(x) for the last index in a log table (positive)
 	static constexpr int LOGLUT_RES_L2  = 10;  // log2 of the log table resolution (size of each [x ; 2*x[ segment).
 
@@ -101,6 +101,8 @@ public:
 	virtual			~TransLut () {}
 
 	void           process_plane (const Plane <> &dst, const PlaneRO <> &src, int w, int h) const noexcept;
+
+	static bool    is_loglut_req (const TransOpInterface &curve);
 
 
 
