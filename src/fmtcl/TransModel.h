@@ -52,7 +52,7 @@ class TransModel
 
 public:
 
-	static constexpr int _nbr_planes = ProcComp3Arg::_nbr_planes;
+	static constexpr int _max_nbr_planes = ProcComp3Arg::_nbr_planes;
 
 	// Minimum accepted luminance in cd/m^2 for peak luminance or ambient
 	// surround luminance. Always > 0.
@@ -97,7 +97,7 @@ private:
 	};
 
 	typedef std::array <uint8_t, _max_seg_len> Segment;
-	typedef std::array <Segment, _nbr_planes> SegArray;
+	typedef std::array <Segment, _max_nbr_planes> SegArray;
 
 	void           process_frame_direct (const ProcComp3Arg &arg) const noexcept;
 	void           process_frame_sg (const ProcComp3Arg &arg) const noexcept;
@@ -110,8 +110,9 @@ private:
 	static OpSPtr  build_pq_ootf_inv ();
 	static double  compute_pq_sceneref_range_709 ();
 
-	Proc           _proc_mode = Proc::DIRECT;
-	int            _max_len   = 0; // Pixels
+	Proc           _proc_mode  = Proc::DIRECT;
+	int            _max_len    = 0; // Pixels
+	int            _nbr_planes = _max_nbr_planes;
 
 	// At least one of these functions must be populated
 	std::unique_ptr <TransLut>

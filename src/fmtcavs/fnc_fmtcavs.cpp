@@ -266,7 +266,13 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VideoInfo &vi_dst, const ::PVideoFra
 	pa._w = vi_dst.width;
 	pa._h = vi_dst.height;
 
-	for (int p_idx = 0; p_idx < fmtcl::ProcComp3Arg::_nbr_planes; ++p_idx)
+	const int      nbr_active_planes = std::min <int> (
+		fmtcl::ProcComp3Arg::_nbr_planes,
+		avsutl::get_nbr_comp_non_alpha (vi_src)
+	);
+	assert (nbr_active_planes == 1 || nbr_active_planes == 3);
+
+	for (int p_idx = 0; p_idx < nbr_active_planes; ++p_idx)
 	{
 		if (! single_plane_flag || p_idx == 0)
 		{

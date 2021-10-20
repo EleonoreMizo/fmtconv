@@ -78,6 +78,15 @@ bool has_alpha (const ::VideoInfo &vi)
 
 
 
+int get_nbr_comp_non_alpha (const ::VideoInfo &vi)
+{
+	const int      nbr_alpha = has_alpha (vi) ? 1 : 0;
+	const int      nbr_comp  = vi.NumComponents ();
+
+	return nbr_comp - nbr_alpha;
+}
+
+
 bool is_rgb (const ::VideoInfo &vi)
 {
 	return (

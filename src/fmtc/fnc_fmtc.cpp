@@ -199,7 +199,13 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VSAPI &vsapi, ::VSFrameRef &dst, con
 	pa._w = vsapi.getFrameWidth (&dst, 0);
 	pa._h = vsapi.getFrameHeight (&dst, 0);
 
-	for (int p_idx = 0; p_idx < fmtcl::ProcComp3Arg::_nbr_planes; ++p_idx)
+	const int      nbr_active_planes = std::min <int> (
+		fmtcl::ProcComp3Arg::_nbr_planes,
+		vsapi.getFrameFormat (&src)->numPlanes
+	);
+	assert (nbr_active_planes == 1 || nbr_active_planes == 3);
+
+	for (int p_idx = 0; p_idx < nbr_active_planes; ++p_idx)
 	{
 		if (! single_plane_flag || p_idx == 0)
 		{

@@ -49,7 +49,7 @@ namespace fmtcl
 
 
 
-constexpr int	TransModel::_nbr_planes;
+constexpr int	TransModel::_max_nbr_planes;
 constexpr double	TransModel::_min_luminance;
 
 
@@ -61,6 +61,7 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	assert (logc_ei_d >= 0);
 	assert (logc_ei_d < TransOpLogC::ExpIdx_NBR_ELT);
 	assert (src_fmt.is_valid ());
+	assert (src_fmt._col_fam == dst_fmt._col_fam);
 	assert (TransCurve_is_valid (curve_s));
 	assert (logc_ei_s >= 0);
 	assert (logc_ei_s < TransOpLogC::ExpIdx_NBR_ELT);
@@ -72,6 +73,9 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	assert (lamb > _min_luminance);
 	assert (match >= 0);
 	assert (match < LumMatch_NBR_ELT);
+
+	_nbr_planes =
+		(dst_fmt._col_fam == fmtcl::ColorFamily_GRAY) ? 1 : _max_nbr_planes;
 
 	char           txt_0 [127+1];
 
@@ -343,7 +347,7 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	OpSPtr         op_l;
 
 	// Do we really need a GammaY stage?
-	if (fstb::is_eq (gamma, 1.0))
+	if (fstb::is_eq (gamma, 1.0) || _nbr_planes < 3)
 	{
 		gammay_flag = false;
 	}
@@ -502,6 +506,7 @@ void	TransModel::process_frame_direct (const ProcComp3Arg &arg) const noexcept
 
 void	TransModel::process_frame_sg (const ProcComp3Arg &arg) const noexcept
 {
+	assert (_nbr_planes == _max_nbr_planes);
 	assert (_lut_s_uptr.get ()   != nullptr);
 	assert (_gamma_y_uptr.get () != nullptr);
 
@@ -544,6 +549,7 @@ void	TransModel::process_frame_sg (const ProcComp3Arg &arg) const noexcept
 
 void	TransModel::process_frame_gd (const ProcComp3Arg &arg) const noexcept
 {
+	assert (_nbr_planes == _max_nbr_planes);
 	assert (_gamma_y_uptr.get () != nullptr);
 	assert (_lut_d_uptr.get ()   != nullptr);
 
@@ -586,6 +592,7 @@ void	TransModel::process_frame_gd (const ProcComp3Arg &arg) const noexcept
 
 void	TransModel::process_frame_sgd (const ProcComp3Arg &arg) const noexcept
 {
+	assert (_nbr_planes == _max_nbr_planes);
 	assert (_lut_s_uptr.get ()   != nullptr);
 	assert (_gamma_y_uptr.get () != nullptr);
 	assert (_lut_d_uptr.get ()   != nullptr);
