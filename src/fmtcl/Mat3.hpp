@@ -58,9 +58,11 @@ Mat3::Mat3 (double filler, Preset preset)
 
 
 
-Mat3::Mat3 (const double content [VECT_SIZE] [VECT_SIZE])
+constexpr Mat3::Mat3 (const double content [VECT_SIZE] [VECT_SIZE])
+:	Inherited ({{ Vec3 { content [0] }, Vec3 { content [1] }, Vec3 { content [2] } }})
 {
-	assert (content != 0);
+	assert (content != nullptr);
+#if 0
 
 	for (int y = 0; y < VECT_SIZE; ++y)
 	{
@@ -69,11 +71,12 @@ Mat3::Mat3 (const double content [VECT_SIZE] [VECT_SIZE])
 			(*this) [y] [x] = content [y] [x];
 		}
 	}
+#endif
 }
 
 
 
-Mat3::Mat3 (const Vec3 &v0, const Vec3 &v1, const Vec3 &v2)
+constexpr Mat3::Mat3 (const Vec3 &v0, const Vec3 &v1, const Vec3 &v2)
 :	Inherited ({ { v0, v1, v2 } })
 {
 	// Nothing
@@ -157,7 +160,7 @@ Mat3 &	Mat3::operator *= (double scale)
 
 
 
-double	Mat3::det () const
+constexpr double	Mat3::det () const
 {
 	const Mat3 &   m = *this;
 	return
@@ -171,23 +174,29 @@ double	Mat3::det () const
 
 
 
-Mat3	Mat3::compute_inverse () const
+constexpr Mat3	Mat3::compute_inverse () const
 {
 	const double   d3 = det ();
 	assert (d3 != 0);
 	const Mat3 &   m = *this;
-	Mat3           r;
-	r [0] [0] = (m [1] [1] * m [2] [2] - m [1] [2] * m [2] [1]) / d3;
-	r [0] [1] = (m [0] [2] * m [2] [1] - m [0] [1] * m [2] [2]) / d3;
-	r [0] [2] = (m [0] [1] * m [1] [2] - m [0] [2] * m [1] [1]) / d3;
-	r [1] [0] = (m [1] [2] * m [2] [0] - m [1] [0] * m [2] [2]) / d3;
-	r [1] [1] = (m [0] [0] * m [2] [2] - m [0] [2] * m [2] [0]) / d3;
-	r [1] [2] = (m [0] [2] * m [1] [0] - m [0] [0] * m [1] [2]) / d3;
-	r [2] [0] = (m [1] [0] * m [2] [1] - m [1] [1] * m [2] [0]) / d3;
-	r [2] [1] = (m [0] [1] * m [2] [0] - m [0] [0] * m [2] [1]) / d3;
-	r [2] [2] = (m [0] [0] * m [1] [1] - m [0] [1] * m [1] [0]) / d3;
 
-	return r;
+	return {
+		Vec3 {
+			(m [1] [1] * m [2] [2] - m [1] [2] * m [2] [1]) / d3,
+			(m [0] [2] * m [2] [1] - m [0] [1] * m [2] [2]) / d3,
+			(m [0] [1] * m [1] [2] - m [0] [2] * m [1] [1]) / d3
+		},
+		Vec3 {
+			(m [1] [2] * m [2] [0] - m [1] [0] * m [2] [2]) / d3,
+			(m [0] [0] * m [2] [2] - m [0] [2] * m [2] [0]) / d3,
+			(m [0] [2] * m [1] [0] - m [0] [0] * m [1] [2]) / d3
+		},
+		Vec3 {
+			(m [1] [0] * m [2] [1] - m [1] [1] * m [2] [0]) / d3,
+			(m [0] [1] * m [2] [0] - m [0] [0] * m [2] [1]) / d3,
+			(m [0] [0] * m [1] [1] - m [0] [1] * m [1] [0]) / d3
+		}
+	};
 }
 
 
@@ -287,7 +296,7 @@ Vec3	operator * (const Mat3 &lhs, const Vec3 &rhs)
 
 Mat3	operator * (const Mat3 &lhs, double rhs)
 {
-	return (Mat3 (lhs) *= rhs);
+	return Mat3 (lhs) *= rhs;
 }
 
 

@@ -58,18 +58,15 @@ Mat4::Mat4 (double filler, Preset preset)
 
 
 
-Mat4::Mat4 (const double content [4] [4])
-:	_data ()
+constexpr Mat4::Mat4 (const double content [VECT_SIZE] [VECT_SIZE])
+:	_data ({{
+		Row4 { content [0] [0], content [0] [1], content [0] [2], content [0] [3] },
+		Row4 { content [1] [0], content [1] [1], content [1] [2], content [1] [3] },
+		Row4 { content [2] [0], content [2] [1], content [2] [2], content [2] [3] },
+		Row4 { content [3] [0], content [3] [1], content [3] [2], content [3] [3] }
+	}})
 {
-	assert (content != 0);
-
-	for (int y = 0; y < VECT_SIZE; ++y)
-	{
-		for (int x = 0; x < VECT_SIZE; ++x)
-		{
-			_data [y] [x] = content [y] [x];
-		}
-	}
+	assert (content != nullptr);
 }
 
 
@@ -85,7 +82,7 @@ bool	Mat4::operator == (const Mat4 &other) const
 		}
 	}
 
-	return (eq_flag);
+	return eq_flag;
 }
 
 
@@ -107,7 +104,7 @@ Mat4 &	Mat4::operator += (const Mat4 &other)
 		}
 	}
 
-	return (*this);
+	return *this;
 }
 
 
@@ -122,7 +119,7 @@ Mat4 &	Mat4::operator -= (const Mat4 &other)
 		}
 	}
 
-	return (*this);
+	return *this;
 }
 
 
@@ -131,7 +128,7 @@ Mat4 &	Mat4::operator *= (const Mat4 &other)
 {
 	*this = *this * other;
 
-	return (*this);
+	return *this;
 }
 
 
@@ -146,7 +143,7 @@ Mat4 &	Mat4::operator *= (double scale)
 		}
 	}
 
-	return (*this);
+	return *this;
 }
 
 
@@ -171,7 +168,7 @@ Mat4 &	Mat4::clean3 (double diag)
 	                                                         _data [2] [3] = 0;
 	_data [3] [0] = 0; _data [3] [1] = 0; _data [3] [2] = 0; _data [3] [3] = diag;
 
-	return (*this);
+	return *this;
 }
 
 
@@ -181,7 +178,7 @@ const Mat4::Row4 &	Mat4::operator [] (long pos) const
 	assert (pos >= 0);
 	assert (pos < VECT_SIZE);
 
-	return (_data [pos]);
+	return _data [pos];
 }
 
 
@@ -191,21 +188,21 @@ Mat4::Row4 &	Mat4::operator [] (long pos)
 	assert (pos >= 0);
 	assert (pos < VECT_SIZE);
 
-	return (_data [pos]);
+	return _data [pos];
 }
 
 
 
 Mat4	operator + (const Mat4 &lhs, const Mat4 &rhs)
 {
-	return (Mat4 (lhs) += rhs);
+	return Mat4 (lhs) += rhs;
 }
 
 
 
 Mat4	operator - (const Mat4 &lhs, const Mat4 &rhs)
 {
-	return (Mat4 (lhs) -= rhs);
+	return Mat4 (lhs) -= rhs;
 }
 
 
@@ -226,14 +223,14 @@ Mat4	operator * (const Mat4 &lhs, const Mat4 &rhs)
 		}
 	}
 
-	return (tmp);
+	return tmp;
 }
 
 
 
 Mat4	operator * (const Mat4 &lhs, double rhs)
 {
-	return (Mat4 (lhs) *= rhs);
+	return Mat4 (lhs) *= rhs;
 }
 
 

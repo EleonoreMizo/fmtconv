@@ -48,11 +48,17 @@ public:
 
 	static const int  VECT_SIZE = 3;
 
-	               Vec3 () = default;
-	inline explicit
+	               Vec3 ()                        = default;
+	constexpr      Vec3 (const Vec3 &other)       = default;
+	               Vec3 (Vec3 &&other)            = default;
+	inline constexpr explicit
 	               Vec3 (double c0, double c1, double c2);
-	inline explicit
+	inline constexpr explicit
 	               Vec3 (const double arr [VECT_SIZE]);
+	               ~Vec3 ()                       = default;
+
+	Vec3 &         operator = (const Vec3 &other) = default;
+	Vec3 &         operator = (Vec3 &&other)      = default;
 
 	inline bool    operator == (const Vec3 &other) const;
 	inline bool    operator != (const Vec3 &other) const;

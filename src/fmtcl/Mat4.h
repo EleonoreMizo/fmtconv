@@ -60,7 +60,8 @@ public:
 	inline         Mat4 ()                        = default;
 	inline explicit
 	               Mat4 (double filler, Preset preset = Preset_SOLID);
-	inline         Mat4 (const double content [4] [4]);
+	inline constexpr
+	               Mat4 (const double content [VECT_SIZE] [VECT_SIZE]);
 	inline         Mat4 (const Mat4 &other)       = default;
 	virtual        ~Mat4 () {}
 	inline Mat4 &  operator = (const Mat4 &other) = default;

@@ -33,7 +33,7 @@ namespace fmtcl
 
 
 
-Vec3::Vec3 (double c0, double c1, double c2)
+constexpr Vec3::Vec3 (double c0, double c1, double c2)
 :	Inherited ({ { c0, c1, c2 } })
 {
 	// Nothing
@@ -41,13 +41,15 @@ Vec3::Vec3 (double c0, double c1, double c2)
 
 
 
-Vec3::Vec3 (const double arr [VECT_SIZE])
-:	Inherited ()
+constexpr Vec3::Vec3 (const double arr [VECT_SIZE])
+:	Inherited ({ { arr [0], arr [1], arr [2] } })
 {
+#if 0
 	for (int x = 0; x < VECT_SIZE; ++x)
 	{
 		(*this) [x] = arr [x];
 	}
+#endif
 }
 
 

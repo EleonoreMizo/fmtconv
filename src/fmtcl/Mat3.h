@@ -58,14 +58,20 @@ public:
 		Preset_NBR_ELT
 	};
 
-	inline         Mat3 ()                        = default;
+	               Mat3 ()                        = default;
 	inline explicit
 	               Mat3 (double filler, Preset preset = Preset_SOLID);
-	inline         Mat3 (const double content [VECT_SIZE] [VECT_SIZE]);
-	inline         Mat3 (const Vec3 &v0, const Vec3 &v1, const Vec3 &v2);
-	inline         Mat3 (const Mat3 &other)       = default;
-	virtual        ~Mat3 () {}
+	inline constexpr
+	               Mat3 (const double content [VECT_SIZE] [VECT_SIZE]);
+	inline constexpr
+	               Mat3 (const Vec3 &v0, const Vec3 &v1, const Vec3 &v2);
+	inline constexpr
+	               Mat3 (const Mat3 &other)       = default;
+	inline         Mat3 (Mat3 &&other)            = default;
+	               ~Mat3 ()                       = default;
+
 	inline Mat3 &  operator = (const Mat3 &other) = default;
+	inline Mat3 &  operator = (Mat3 &&other)      = default;
 
 	inline bool    operator == (const Mat3 &other) const;
 	inline bool    operator != (const Mat3 &other) const;
@@ -75,8 +81,10 @@ public:
 	inline Mat3 &  operator *= (const Mat3 &other);
 	inline Mat3 &  operator *= (double scale);
 
-	inline double  det () const;
-	inline Mat3    compute_inverse () const;
+	inline constexpr double
+	               det () const;
+	inline constexpr Mat3
+	               compute_inverse () const;
 	inline Mat3 &  invert ();
 
 	inline Mat3 &  set_col (int pos, const Vec3 &other);
@@ -105,11 +113,11 @@ private:
 
 
 
-inline Mat3	operator + (const Mat3 &lhs, const Mat3 &rhs);
-inline Mat3	operator - (const Mat3 &lhs, const Mat3 &rhs);
-inline Mat3	operator * (const Mat3 &lhs, const Mat3 &rhs);
-inline Vec3	operator * (const Mat3 &lhs, const Vec3 &rhs);
-inline Mat3	operator * (const Mat3 &lhs, double rhs);
+inline Mat3   operator + (const Mat3 &lhs, const Mat3 &rhs);
+inline Mat3   operator - (const Mat3 &lhs, const Mat3 &rhs);
+inline Mat3   operator * (const Mat3 &lhs, const Mat3 &rhs);
+inline Vec3   operator * (const Mat3 &lhs, const Vec3 &rhs);
+inline Mat3   operator * (const Mat3 &lhs, double rhs);
 
 
 
