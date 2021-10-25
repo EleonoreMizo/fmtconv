@@ -98,7 +98,7 @@ ColorSpaceH265	MatrixUtil::find_cs_from_mat_str (const std::string &mat, bool al
 	{
 		cs = ColorSpaceH265_YCGCO;
 	}
-	else if (mat == "2020")
+	else if (mat == "2020" || mat == "2100")
 	{
 		cs = ColorSpaceH265_BT2020NCL;
 	}
