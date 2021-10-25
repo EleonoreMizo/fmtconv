@@ -24,6 +24,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fmtcl/MatXyz2Lms.h"
 #include "fmtcl/PrimUtil.h"
 #include "fstb/fnc.h"
 
@@ -103,12 +104,7 @@ Mat3	PrimUtil::compute_chroma_adapt (const RgbSystem &prim_s, const RgbSystem &p
 	const Vec3     white_s = conv_xy_to_xyz (prim_s._white);
 	const Vec3     white_d = conv_xy_to_xyz (prim_d._white);
 
-	// Bradford adaptation
-	const Mat3     ma ({
-		Vec3 {  0.8951,  0.2664, -0.1614 },
-		Vec3 { -0.7502,  1.7135,  0.0367 },
-		Vec3 {  0.0389, -0.0685,  1.0296 }
-	});
+	const Mat3     ma { MatXyz2Lms::_bradford };
 
 	Vec3    crd_s = ma * white_s;
 	Vec3    crd_d = ma * white_d;

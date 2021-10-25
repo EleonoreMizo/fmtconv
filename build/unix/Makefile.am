@@ -181,6 +181,8 @@ commonsrc = \
         ../../src/fmtcl/MatrixUtil.h \
         ../../src/fmtcl/MatrixWrap.h \
         ../../src/fmtcl/MatrixWrap.hpp \
+        ../../src/fmtcl/MatXyz2Lms.cpp \
+        ../../src/fmtcl/MatXyz2Lms.h \
         ../../src/fmtcl/PicFmt.h \
         ../../src/fmtcl/Plane.h \
         ../../src/fmtcl/Plane.hpp \
