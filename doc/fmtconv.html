@@ -206,10 +206,10 @@ for the reference white, so even if we reduce the contrast, we convert data
 to float to prevent information loss during the subsequent color conversion
 steps (this is optional):</p>
 
-<pre class="src">c = c.fmtc.resample (css="444")
-c = c.fmtc.matrix (mats="ICtCp_PQ", matd="rgb")
-c = c.fmtc.transfer (transs="2084", transd="linear", cont=0.2, flt=True)
-c = c.fmtc.matrix (mats="lms", matd="rgb")
+<pre class="src">c = c.fmtc.resample (css="444") # -> I'Ct'Cp' 4:4:4
+c = c.fmtc.matrix (mats="ICtCp_PQ", matd="rgb") # -> L'M'S'
+c = c.fmtc.transfer (transs="2084", transd="linear", cont=0.2, flt=True) # -> LMS
+c = c.fmtc.matrix (mats="lms", matd="rgb") # -> RGB
 c = c.fmtc.primaries (prims="2100", primd="srgb")
 c = c.fmtc.transfer (transs="linear", transd="srgb")
 c = c.fmtc.bitdepth (bits=8)</pre>
@@ -1937,7 +1937,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>matrix</code>: fixed coefficient errors when using <var>singleout</var>.</li>
 <li><code>transfer</code>: better selection between linear and logarithmic input for LUTs, LUT size reduced.</li>
-<li><code>transfer</code>: fixed crash with grey colorspace.</li>
+<li><code>transfer</code>: fixed crash with grey colorspace. Thanks to vxzms for the report.</li>
 </ul>
 
 <p><b>r26, 2021-10-19</b></p>

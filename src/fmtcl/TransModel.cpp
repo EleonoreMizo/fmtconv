@@ -337,7 +337,7 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	OpSPtr         op_l;
 
 	// Do we really need a GammaY stage?
-	if (fstb::is_eq (gamma, 1.0) || _nbr_planes < 3)
+	if (fstb::is_eq (gamma, 1.0) || _nbr_planes < _max_nbr_planes)
 	{
 		gammay_flag = false;
 	}
