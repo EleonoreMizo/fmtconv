@@ -102,6 +102,10 @@ int32_t	Interlocked::cas (int32_t volatile &dest, int32_t excg, int32_t comp) no
 
 #elif defined (__GNUC__)
 
+	static_assert (
+		__atomic_always_lock_free (sizeof (dest), nullptr),
+		"32-bit atomic operations are not lock-free"
+	);
 	return (__sync_val_compare_and_swap (&dest, comp, excg));
 
 #elif defined (__APPLE__)
@@ -216,6 +220,10 @@ int64_t	Interlocked::cas (int64_t volatile &dest, int64_t excg, int64_t comp) no
 
 #elif defined (__GNUC__)
 
+	static_assert (
+		__atomic_always_lock_free (sizeof (dest), nullptr),
+		"64-bit atomic operations are not lock-free"
+	);
 	return (__sync_val_compare_and_swap (&dest, comp, excg));
 
 #elif defined (__APPLE__)
@@ -258,7 +266,7 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 {
 	assert (is_ptr_aligned_nz (&dest));
 
-#if defined (__APPLE__) || (defined (__CYGWIN__) && conc_WORD_SIZE == 64)
+#if (defined (__APPLE__) && conc_ARCHI == conc_ARCHI_X86) || (defined (__CYGWIN__) && conc_WORD_SIZE == 64)
 
 	old = comp;
 	__asm__ __volatile__
@@ -294,7 +302,15 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 
 	#elif defined (__GNUC__)
 
-		old = __sync_val_compare_and_swap (&dest, comp, excg);
+		static_assert (
+			__atomic_always_lock_free (sizeof (dest), nullptr),
+			"128-bit atomic operations are not lock-free"
+		);
+		old = comp;
+		__atomic_compare_exchange_n (
+			&dest, &old, excg,
+			false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST
+		);
 
 	#else
 
@@ -309,7 +325,15 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 
 #elif defined (__GNUC__)
 
-	old = __sync_val_compare_and_swap (&dest, comp, excg);
+	static_assert (
+		__atomic_always_lock_free (sizeof (dest), nullptr),
+		"128-bit atomic operations are not lock-free"
+	);
+	old = comp;
+	__atomic_compare_exchange_n (
+		&dest, &old, excg,
+		false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST
+	);
 
 #else
 
