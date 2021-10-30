@@ -278,6 +278,10 @@ PrimariesPreset	PrimUtil::conv_string_to_primaries (const std::string &str)
 	{
 		preset = PrimariesPreset_EBU3213E;
 	}
+	else if (   str == "p22")
+	{
+		preset = PrimariesPreset_P22;
+	}
 
 	return preset;
 }

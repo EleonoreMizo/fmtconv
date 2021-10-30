@@ -57,6 +57,7 @@ public:
 		Vec3 {  0.0    , 0.0    ,  0.91822 }
 	};
 
+	// Not the CIE XYZ 1931, but the CIE 170-2:2015 XFYFZF colorspace
 	static constexpr Mat3 _stockman_sharpe { Mat3 {
 		Vec3 { 1.94735469, -1.41445123, 0.36476327 },
 		Vec3 { 0.68990272,  0.34832189, 0.0        },

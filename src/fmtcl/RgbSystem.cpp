@@ -217,6 +217,11 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_rgb [2] = { 0.150  , 0.060   };
 		_white   = { 0.32168, 0.33767 };
 		break;
+	case PrimariesPreset_P22:
+		_rgb [0] = { 0.625  , 0.340   };
+		_rgb [1] = { 0.280  , 0.595   };
+		_rgb [2] = { 0.155  , 0.070   };
+		_white   = { 0.28315, 0.29711 };
 	default:
 		assert (false);
 		found_flag = false;

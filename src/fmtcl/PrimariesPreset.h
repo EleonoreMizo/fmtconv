@@ -66,6 +66,7 @@ enum PrimariesPreset
 	PrimariesPreset_ALEXA,
 	PrimariesPreset_VGAMUT,
 	PrimariesPreset_P3D60,
+	PrimariesPreset_P22,
 
 	PrimariesPreset_NBR_ELT_CUSTOM
 }; // enum PrimariesPreset
