@@ -308,10 +308,8 @@ bool	Primaries::read_coord_tuple (fmtcl::RgbSystem::Vec2 &c, const vsutl::Filter
 			);
 			filter.throw_inval_arg (filter._filter_error_msg_0);
 		}
-		double            sum = 0;
 		for (size_t k = 0; k < c_v.size (); ++k)
 		{
-			sum += c_v [k];
 			c [k] = c_v [k];
 		}
 		if (c [1] == 0)

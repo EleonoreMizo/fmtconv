@@ -102,10 +102,6 @@ int32_t	Interlocked::cas (int32_t volatile &dest, int32_t excg, int32_t comp) no
 
 #elif defined (__GNUC__)
 
-	static_assert (
-		__atomic_always_lock_free (sizeof (dest), nullptr),
-		"32-bit atomic operations are not lock-free"
-	);
 	return (__sync_val_compare_and_swap (&dest, comp, excg));
 
 #elif defined (__APPLE__)
@@ -220,10 +216,6 @@ int64_t	Interlocked::cas (int64_t volatile &dest, int64_t excg, int64_t comp) no
 
 #elif defined (__GNUC__)
 
-	static_assert (
-		__atomic_always_lock_free (sizeof (dest), nullptr),
-		"64-bit atomic operations are not lock-free"
-	);
 	return (__sync_val_compare_and_swap (&dest, comp, excg));
 
 #elif defined (__APPLE__)
@@ -302,6 +294,43 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 
 	#elif defined (__GNUC__)
 
+		#if (conc_ARCHI == conc_ARCHI_X86)
+
+			old = __sync_val_compare_and_swap (&dest, comp, excg);
+
+		#else
+
+			static_assert (
+				__atomic_always_lock_free (sizeof (dest), nullptr),
+				"128-bit atomic operations are not lock-free"
+			);
+			old = comp;
+			__atomic_compare_exchange_n (
+				&dest, &old, excg,
+				false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST
+			);
+
+		#endif // conc_ARCHI
+
+	#else
+
+	::InterlockedCompareExchange128 (
+		reinterpret_cast <volatile int64_t *> (&dest),
+		excg_hi,
+		excg_lo,
+		reinterpret_cast <int64_t *> (&old)
+	);
+
+	#endif
+
+#elif defined (__GNUC__)
+
+	#if (conc_ARCHI == conc_ARCHI_X86)
+
+		old = __sync_val_compare_and_swap (&dest, comp, excg);
+
+	#else
+
 		static_assert (
 			__atomic_always_lock_free (sizeof (dest), nullptr),
 			"128-bit atomic operations are not lock-free"
@@ -312,28 +341,7 @@ void	Interlocked::cas (Data128 &old, volatile Data128 &dest, const Data128 &excg
 			false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST
 		);
 
-	#else
-
-	::InterlockedCompareExchange128 (
-			reinterpret_cast <volatile int64_t *> (&dest),
-			excg_hi,
-			excg_lo,
-			reinterpret_cast <int64_t *> (&old)
-		);
-
-	#endif
-
-#elif defined (__GNUC__)
-
-	static_assert (
-		__atomic_always_lock_free (sizeof (dest), nullptr),
-		"128-bit atomic operations are not lock-free"
-	);
-	old = comp;
-	__atomic_compare_exchange_n (
-		&dest, &old, excg,
-		false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST
-	);
+	#endif // conc_ARCHI
 
 #else
 
