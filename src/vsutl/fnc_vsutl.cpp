@@ -76,10 +76,16 @@ bool	is_constant_format (const ::VSVideoInfo &vi)
 
 
 
+bool	has_chroma (int cf)
+{
+	return (is_vs_yuv (cf) || cf == ::cmYCoCg);
+}
+
+
+
 bool	has_chroma (const ::VSFormat &fmt)
 {
-	return (   is_vs_yuv (fmt.colorFamily)
-	        || fmt.colorFamily == ::cmYCoCg);
+	return has_chroma (fmt.colorFamily);
 }
 
 

@@ -43,6 +43,7 @@ bool     is_vs_yuv (int cf);
 bool     is_vs_same_colfam (int lhs, int rhs);
 
 bool     is_constant_format (const ::VSVideoInfo &vi);
+bool     has_chroma (int cf);
 bool     has_chroma (const ::VSFormat &fmt);
 bool     is_chroma_plane (const ::VSFormat &fmt, int plane_index);
 bool     is_full_range_default (const ::VSFormat &fmt);

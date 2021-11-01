@@ -702,6 +702,13 @@ const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &
 	if (! css.empty ())
 	{
 		conv_str_to_chroma_subspl (*this, ssh, ssv, css);
+		if (   (ssh > 0 || ssv > 0)
+		    && ! vsutl::has_chroma (col_fam))
+		{
+			throw_rt_err (
+				"chroma subsampling not compatible with the output format."
+			);
+		}
 	}
 
 	// Combines the modified parameters and validates the format

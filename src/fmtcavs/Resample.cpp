@@ -666,6 +666,13 @@ FmtAvs	Resample::get_output_colorspace (::IScriptEnvironment &env, const ::AVSVa
 	if (! css.empty ())
 	{
 		conv_str_to_chroma_subspl (env, ssh, ssv, css);
+		if (   (ssh > 0 || ssv > 0)
+		    && ! fmtcl::has_chroma (fmt_dst.get_col_fam ()))
+		{
+			env.ThrowError (fmtcavs_RESAMPLE
+				": chroma subsampling not compatible with the output format."
+			);
+		}
 		fmt_dst.set_subspl_h (ssh);
 		fmt_dst.set_subspl_v (ssv);
 	}
