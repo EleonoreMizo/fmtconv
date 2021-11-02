@@ -275,6 +275,8 @@ commonsrc = \
         ../../src/fstb/fnc_fstb.cpp \
         ../../src/fstb/fnc.h \
         ../../src/fstb/fnc.hpp \
+        ../../src/fstb/Hash.h \
+        ../../src/fstb/Hash.hpp \
         ../../src/fstb/SingleObj.h \
         ../../src/fstb/SingleObj.hpp \
         ../../src/avstp.h \

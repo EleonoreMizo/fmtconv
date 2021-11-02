@@ -282,6 +282,8 @@
     <ClInclude Include="..\..\..\src\fstb\ArrayAlign.h" />
     <ClInclude Include="..\..\..\src\fstb\ArrayAlign.hpp" />
     <ClInclude Include="..\..\..\src\fstb\CpuId.h" />
+    <ClInclude Include="..\..\..\src\fstb\Hash.h" />
+    <ClInclude Include="..\..\..\src\fstb\Hash.hpp" />
     <ClInclude Include="..\..\..\src\fstb\SingleObj.h" />
     <ClInclude Include="..\..\..\src\fstb\SingleObj.hpp" />
     <ClInclude Include="..\..\..\src\fstb\ToolsAvx2.h" />
