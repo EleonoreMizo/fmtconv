@@ -351,7 +351,7 @@ void	Dither::build_dither_pat_void_and_cluster (int w)
 {
 	assert (_max_pat_width % w == 0);
 	VoidAndCluster   vc_gen;
-	MatrixWrap <uint16_t> pat_raw (w, w);
+	MatrixWrap <VoidAndCluster::Rank> pat_raw (w, w);
 	vc_gen.create_matrix (pat_raw);
 
 	PatData &      pat_data = _dither_pat_arr [0];

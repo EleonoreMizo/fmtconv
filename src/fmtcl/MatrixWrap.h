@@ -3,6 +3,8 @@
         MatrixWrap.h
         Author: Laurent de Soras, 2015
 
+Only accepts power-of-2 sizes.
+
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to
@@ -44,13 +46,19 @@ class MatrixWrap
 
 public:
 
+	typedef T DataType;
+
 	explicit       MatrixWrap (int w, int h);
 	               MatrixWrap (const MatrixWrap &other) = default;
-	virtual        ~MatrixWrap () {}
+	               MatrixWrap (MatrixWrap &&other)      = default;
+	               ~MatrixWrap ()                       = default;
+
+	MatrixWrap &   operator = (const MatrixWrap &other) = default;
+	MatrixWrap &   operator = (MatrixWrap &&other)      = default;
 
 	void           clear (T fill_val = 0);
-	int            get_w () const { return (_w); }
-	int            get_h () const { return (_h); }
+	int            get_w () const { return _w; }
+	int            get_h () const { return _h; }
 	T &            operator () (int x, int y);
 	const T &      operator () (int x, int y) const;
 
@@ -66,10 +74,10 @@ protected:
 
 private:
 
-	enum {         MARGIN = 1024 };
-
 	int            _w;
 	int            _h;
+	int            _msk_x;
+	int            _msk_y;
 	std::vector <T>
 	               _mat;
 
@@ -79,7 +87,6 @@ private:
 private:
 
 	               MatrixWrap ()                               = delete;
-	MatrixWrap &   operator = (const MatrixWrap &other)        = delete;
 	bool           operator == (const MatrixWrap &other) const = delete;
 	bool           operator != (const MatrixWrap &other) const = delete;
 

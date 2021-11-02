@@ -26,6 +26,9 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtcl/VoidAndCluster.h"
 #include "fstb/fnc.h"
+#include "fstb/Hash.h"
+
+#include <limits>
 
 #include <cassert>
 #include <cmath>
@@ -41,14 +44,15 @@ namespace fmtcl
 
 
 
-void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
+void	VoidAndCluster::create_matrix (MatrixWrap <Rank> &vnc)
 {
 	const int      w   = vnc.get_w ();
 	const int      h   = vnc.get_h ();
+	assert (w * h <= std::numeric_limits <Rank>::max ());
 	const int      ks  = KERNEL_MAX_RAD * 2 + 1;
 	_kernel_gauss_uptr = create_gauss_kernel (ks, ks, 1.5);
 
-	MatrixWrap <uint16_t>   mat_base (w, h);
+	MatrixWrap <Rank> mat_base (w, h);
 	generate_initial_mat (mat_base);
 	homogenize_initial_mat (mat_base);
 
@@ -56,30 +60,28 @@ void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 
 	{
 		int            rank = count_elt (mat_base, 1);
-		MatrixWrap <uint16_t>   mat (mat_base);
+		MatrixWrap <Rank>    mat (mat_base);
+		std::vector <Coord>  c_arr;
 		while (rank > 0)
 		{
 			-- rank;
-			std::vector <std::pair <int, int> > c_arr;
 			find_cluster_kernel (c_arr, mat, 1, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
-			const int      x = c_arr [0].first;
-			const int      y = c_arr [0].second;
-			mat (x, y) = 0;
-			vnc (x, y) = uint16_t (rank);
+			const auto &   c = pick_one (c_arr, uint32_t (rank));
+			mat (c._x, c._y) = 0;
+			vnc (c._x, c._y) = Rank (rank);
 		}
 	}
 
 	{
 		int            rank = count_elt (mat_base, 1);
-		MatrixWrap <uint16_t>   mat (mat_base);
+		MatrixWrap <Rank>    mat (mat_base);
+		std::vector <Coord>  v_arr;
 		while (rank < w * h)
 		{
-			std::vector <std::pair <int, int> > v_arr;
 			find_cluster_kernel (v_arr, mat, 0, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
-			const int      x = v_arr [0].first;
-			const int      y = v_arr [0].second;
-			mat (x, y) = 1;
-			vnc (x, y) = uint16_t (rank);
+			const auto &   v = pick_one (v_arr, uint32_t (rank));
+			mat (v._x, v._y) = 1;
+			vnc (v._x, v._y) = Rank (rank);
 			++ rank;
 		}
 	}
@@ -95,38 +97,46 @@ void	VoidAndCluster::create_matrix (MatrixWrap <uint16_t> &vnc)
 
 
 
-void	VoidAndCluster::homogenize_initial_mat (MatrixWrap <uint16_t> &m) const
+void	VoidAndCluster::homogenize_initial_mat (MatrixWrap <Rank> &m) const
 {
-	int            cx;
-	int            cy;
-	int            vx;
-	int            vy;
-	std::vector <std::pair <int, int> > c_arr;
-	std::vector <std::pair <int, int> > v_arr;
+	int            cx    = 0;
+	int            cy    = 0;
+	int            vx    = 0;
+	int            vy    = 0;
+	uint32_t       count = 0;
+	std::vector <Coord> c_arr;
+	std::vector <Coord> v_arr;
 	do
 	{
 		find_cluster_kernel (c_arr, m, 1, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
-		cx = c_arr [0].first;
-		cy = c_arr [0].second;
+		const auto &   c = pick_one (c_arr, count);
+		cx = c._x;
+		cy = c._y;
 		m (cx, cy) = 0;
+		++ count;
+
 		find_cluster_kernel (v_arr, m, 0, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
-		vx = v_arr [0].first;
-		vy = v_arr [0].second;
+		const auto &   v = pick_one (v_arr, count);
+		vx = v._x;
+		vy = v._y;
 		m (vx, vy) = 1;
+		++ count;
 	}
 	while (cx != vx || cy != vy);
 }
 
 
 
-void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &pos_arr, const MatrixWrap <uint16_t> &m, int color, int kw, int kh) const
+void	VoidAndCluster::find_cluster_kernel (std::vector <Coord> &pos_arr, const MatrixWrap <Rank> &m, int color, int kw, int kh) const
 {
 	assert (kw <= _kernel_gauss_uptr->get_w ());
 	assert (kh <= _kernel_gauss_uptr->get_h ());
 
 	pos_arr.clear ();
 
-	double         max_v = -1;
+	typedef typename Kernel::DataType SumType;
+
+	SumType        max_v = -1;
 	const int      w     = m.get_w ();
 	const int      h     = m.get_h ();
 	const int      kw2   = (kw - 1) / 2;
@@ -138,7 +148,7 @@ void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &p
 			const int      cur_c = m (x, y);
 			if (cur_c == color)
 			{
-				double         sum = 0;
+				SumType        sum = 0;
 				for (int j = -kh2; j <= kh2; ++j)
 				{
 					for (int i = -kw2; i <= kw2; ++i)
@@ -146,7 +156,7 @@ void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &p
 						const int      a = m (x + i, y + j);
 						if (a == color)
 						{
-							const double   c = (*_kernel_gauss_uptr) (i, j);
+							const auto     c = (*_kernel_gauss_uptr) (i, j);
 							sum += c;
 						}
 					}
@@ -158,7 +168,7 @@ void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &p
 						pos_arr.clear ();
 					}
 					max_v = sum;
-					pos_arr.push_back (std::make_pair (x, y));
+					pos_arr.push_back ({ x, y });
 				}
 			}
 		}
@@ -169,20 +179,38 @@ void	VoidAndCluster::find_cluster_kernel (std::vector <std::pair <int, int> > &p
 
 
 
-std::unique_ptr <MatrixWrap <double> >	VoidAndCluster::create_gauss_kernel (int w, int h, double sigma)
+const VoidAndCluster::Coord &	VoidAndCluster::pick_one (std::vector <Coord> &pos_arr, uint32_t seed) const
 {
-	std::unique_ptr <MatrixWrap <double> >   ker_uptr (
-		new MatrixWrap <double> (w, h)
-	);
-	MatrixWrap <double> &   ker = *ker_uptr;
+	assert (! pos_arr.empty ());
+
+	const auto     nbr_elt = int (pos_arr.size ());
+	if (nbr_elt == 1)
+	{
+		return pos_arr.front ();
+	}
+
+	const auto     pos = fstb::Hash::hash (seed) % nbr_elt;
+
+	return pos_arr [pos];
+}
+
+
+
+std::unique_ptr <VoidAndCluster::Kernel>	VoidAndCluster::create_gauss_kernel (int w, int h, double sigma)
+{
+	const auto     w2 = 1 << fstb::get_next_pow_2 (w);
+	const auto     h2 = 1 << fstb::get_next_pow_2 (h);
+	auto           ker_uptr = std::make_unique <Kernel> (w2, h2);
+	auto &         ker      = *ker_uptr;
 
 	const int      kw2 = (w - 1) / 2;
 	const int      kh2 = (h - 1) / 2;
+	const auto     mul = -1.0 / (2 * sigma * sigma);
 	for (int j = 0; j <= kh2; ++j)
 	{
 		for (int i = 0; i <= kw2; ++i)
 		{
-			const double   c = exp (-(i * i + j * j) / (2 * sigma * sigma));
+			const auto     c = exp ((i * i + j * j) * mul);
 			ker ( i,  j) = c;
 			ker (-i,  j) = c;
 			ker ( i, -j) = c;
@@ -190,12 +218,12 @@ std::unique_ptr <MatrixWrap <double> >	VoidAndCluster::create_gauss_kernel (int 
 		}
 	}
 
-	return (ker_uptr);
+	return ker_uptr;
 }
 
 
 
-void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
+void	VoidAndCluster::generate_initial_mat (MatrixWrap <Rank> &m)
 {
 	const double   thr = 0.1;
 
@@ -217,7 +245,7 @@ void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
 				const double   val = thr + err;
 				const int      qnt = fstb::round_int (val);
 				assert (qnt >= 0 && qnt <= 1);
-				m (x, y) = uint16_t (qnt);
+				m (x, y) = Rank (qnt);
 				err = val - double (qnt);
 				// Filter-Lite error diffusion
 				const double   e2 = err * 0.5;
@@ -234,7 +262,7 @@ void	VoidAndCluster::generate_initial_mat (MatrixWrap <uint16_t> &m)
 
 
 
-int	VoidAndCluster::count_elt (const MatrixWrap <uint16_t> &m, int val)
+int	VoidAndCluster::count_elt (const MatrixWrap <Rank> &m, int val)
 {
 	int            total = 0;
 	const int      w     = m.get_w ();
@@ -251,7 +279,7 @@ int	VoidAndCluster::count_elt (const MatrixWrap <uint16_t> &m, int val)
 		}
 	}
 
-	return (total);
+	return total;
 }
 
 

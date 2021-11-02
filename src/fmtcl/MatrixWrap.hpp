@@ -22,6 +22,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/fnc.h"
+
 #include <cassert>
 
 
@@ -39,10 +41,14 @@ template <class T>
 MatrixWrap <T>::MatrixWrap (int w, int h)
 :	_w (w)
 ,	_h (h)
+,	_msk_x (w - 1)
+,	_msk_y (h - 1)
 ,	_mat (w * h, 0)
 {
 	assert (w > 0);
 	assert (h > 0);
+	assert (fstb::is_pow_2 (w));
+	assert (fstb::is_pow_2 (h));
 }
 
 
@@ -58,11 +64,8 @@ void	MatrixWrap <T>::clear (T fill_val)
 template <class T>
 T &	MatrixWrap <T>::operator () (int x, int y)
 {
-	assert (x >= -MARGIN * _w);
-	assert (y >= -MARGIN * _h);
-
-	x = (x + _w * MARGIN) % _w;
-	y = (y + _h * MARGIN) % _h;
+	x &= _msk_x;
+	y &= _msk_y;
 
 	return (_mat [y * _w + x]);
 }
@@ -72,11 +75,8 @@ T &	MatrixWrap <T>::operator () (int x, int y)
 template <class T>
 const T &	MatrixWrap <T>::operator () (int x, int y) const
 {
-	assert (x >= -MARGIN * _w);
-	assert (y >= -MARGIN * _h);
-
-	x = (x + _w * MARGIN) % _w;
-	y = (y + _h * MARGIN) % _h;
+	x &= _msk_x;
+	y &= _msk_y;
 
 	return (_mat [y * _w + x]);
 }
