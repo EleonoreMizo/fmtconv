@@ -336,9 +336,11 @@ fmtcltest_LDADD =
 noinst_LTLIBRARIES =
 
 fmtcltest_SOURCES =  $(commonsrc) \
+        ../../src/test/main.cpp \
+        ../../src/test/PrecalcVoidAndCluster.cpp \
+        ../../src/test/PrecalcVoidAndCluster.h \
         ../../src/test/TestGammaY.cpp \
-        ../../src/test/TestGammaY.h \
-        ../../src/test/main.cpp
+        ../../src/test/TestGammaY.h
 
 
 if X86
