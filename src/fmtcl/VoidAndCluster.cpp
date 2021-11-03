@@ -35,6 +35,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
+// Enables a bug that has a very aesthetical side effect
+#undef fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
+
+
+
 namespace fmtcl
 {
 
@@ -341,12 +346,14 @@ void	VoidAndCluster::apply_kernel (Filtered &pat_filt, Coord pos, F op) const
 	op (pat_filt (pos._x, pos._y), _kernel._m (0, 0));
 	for (int j = 1; j <= kh2; ++j)
 	{
+#if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
 		const auto     vx = _kernel._m (j, 0);
 		const auto     vy = _kernel._m (0, j);
 		op (pat_filt (pos._x + j, pos._y    ), vx);
 		op (pat_filt (pos._x - j, pos._y    ), vx);
 		op (pat_filt (pos._x    , pos._y + j), vy);
 		op (pat_filt (pos._x    , pos._y - j), vy);
+#endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
 		for (int i = 1; i <= kw2; ++i)
 		{
 			const auto     vk = _kernel._m (i, j);
@@ -408,12 +415,14 @@ void	VoidAndCluster::filter_pat (PatState &state)
 				state._pat_filt (x, y) += _kernel._m (0, 0);
 				for (int j = 1; j <= kh2; ++j)
 				{
+#if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
 					const auto     vx = _kernel._m (j, 0);
 					const auto     vy = _kernel._m (0, j);
 					state._pat (x + j, y    ) += vx;
 					state._pat (x - j, y    ) += vx;
 					state._pat (x    , y + j) += vy;
 					state._pat (x    , y - j) += vy;
+#endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
 					for (int i = 1; i <= kw2; ++i)
 					{
 						const auto     vk = _kernel._m (i, j);
@@ -428,12 +437,14 @@ void	VoidAndCluster::filter_pat (PatState &state)
 			auto           sum = state._pat (x, y) * _kernel._m (0, 0);
 			for (int j = 1; j <= kh2; ++j)
 			{
+#if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
 				const auto     vx = _kernel._m (j, 0);
 				const auto     vy = _kernel._m (0, j);
 				sum += state._pat (x + j, y    ) * vx;
 				sum += state._pat (x - j, y    ) * vx;
 				sum += state._pat (x    , y + j) * vy;
 				sum += state._pat (x    , y - j) * vy;
+#endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
 				for (int i = 1; i <= kw2; ++i)
 				{
 					const auto     vk = _kernel._m (i, j);
