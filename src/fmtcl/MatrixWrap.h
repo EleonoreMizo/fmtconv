@@ -29,6 +29,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "fstb/AllocAlign.h"
+
 #include <vector>
 
 #include <cstddef>
@@ -100,7 +102,7 @@ private:
 	int            _msk_x = 0;
 	int            _msk_y = 0;
 	int            _shft  = 0;
-	std::vector <T>
+	std::vector <T, fstb::AllocAlign <T, 16> >
 	               _mat;
 
 

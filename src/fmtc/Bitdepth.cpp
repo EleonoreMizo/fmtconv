@@ -171,9 +171,10 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		throw_inval_arg ("ampn cannot be negative.");
 	}
 
-	const int      pat_size =
-		get_arg_int (in, out, "patsize", fmtcl::Dither::_max_pat_width);
-	if (pat_size < 4 || fmtcl::Dither::_max_pat_width % pat_size != 0)
+	const int      pat_size = get_arg_int (in, out, "patsize", 32);
+	if (   pat_size < 4
+	    || pat_size > fmtcl::Dither::_pat_max_size
+	    || ! fstb::is_pow_2 (pat_size))
 	{
 		throw_inval_arg ("Wrong value for patsize.");
 	}

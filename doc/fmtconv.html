@@ -448,7 +448,8 @@ and remains the same every frame.</p>
 
 <p class="var">patsize</p>
 <p>Width of the pattern used in the Void and cluster algorithm.
-The only valid values are 4, 8, 16 and 32.</p>
+The only valid values are power of 2 ranging from 4 to 1024:
+4, 8, 16, 32, 64, 128, 256, 512 and 1024.</p>
 
 <p class="var">tpdfo</p>
 <p>Set it to 1 to enable the triangular probability distribution function
@@ -1936,7 +1937,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <p><b>r28, 2021-xx-xx</b></p>
 <ul>
-<li><code>bitdepth</code>: faster void and cluster pattern generation.</li>
+<li><code>bitdepth</code>: faster void and cluster pattern generation. Larger patterns are allowed.</li>
 <li><code>primaries</code>: fixed Sony P22 primaries.</li>
 </ul>
 

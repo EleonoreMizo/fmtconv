@@ -53,7 +53,7 @@ namespace fmtcl
 
 
 constexpr int	Dither::_max_nbr_planes;
-constexpr int	Dither::_max_pat_width;
+constexpr int	Dither::_pat_max_size;
 
 
 
@@ -111,7 +111,8 @@ Dither::Dither (
 	assert (dmode >= 0);
 	assert (dmode < DMode_NBR_ELT);
 	assert (pat_size >= 4);
-	assert (_max_pat_width % pat_size == 0);
+	assert (pat_size <= _pat_max_size);
+	assert (fstb::is_pow_2 (pat_size));
 	assert (ampo >= 0);
 	assert (ampn >= 0);
 
@@ -253,6 +254,7 @@ void	Dither::process_plane (uint8_t *dst_ptr, int dst_stride, const uint8_t *src
 
 
 constexpr int	Dither::_pat_period;
+constexpr int	Dither::_pat_min_size;
 constexpr int	Dither::_amp_bits;
 constexpr int	Dither::_err_res;
 constexpr int	Dither::_max_unk_width;
@@ -285,7 +287,7 @@ void	Dither::build_dither_pat ()
 		break;
 
 	case DMode_VOIDCLUST:
-		build_dither_pat_void_and_cluster (_pat_size);
+		build_dither_pat_void_and_cluster ();
 		break;
 
 	case DMode_QUASIRND:
@@ -298,15 +300,10 @@ void	Dither::build_dither_pat ()
 
 void	Dither::build_dither_pat_round ()
 {
-	PatData &      pat_data = _dither_pat_arr [0];
-	for (int y = 0; y < _max_pat_width; ++y)
-	{
-		for (int x = 0; x < _max_pat_width; ++x)
-		{
-			pat_data [y] [x] = 0;
-		}
-	}
+	auto           pat_data = PatData { _pat_size, _pat_size };
+	pat_data.clear (0);
 
+	expand_dither_pat (pat_data);
 	build_next_dither_pat ();
 }
 
@@ -314,72 +311,101 @@ void	Dither::build_dither_pat_round ()
 
 void	Dither::build_dither_pat_bayer ()
 {
-	assert (fstb::is_pow_2 (int (_max_pat_width)));
+	assert (fstb::is_pow_2 (int (_pat_size)));
 
-	PatData &      pat_data = _dither_pat_arr [0];
-	for (int y = 0; y < _max_pat_width; ++y)
+	auto           pat_data = PatData { _pat_size, _pat_size };
+	for (int y = 0; y < _pat_size; ++y)
 	{
-		for (int x = 0; x < _max_pat_width; ++x)
+		for (int x = 0; x < _pat_size; ++x)
 		{
-			pat_data [y] [x] = -128;
+			pat_data (x, y) = -128;
 		}
 	}
 
-	for (int dith_size = 2; dith_size <= _max_pat_width; dith_size <<= 1)
+	for (int dith_size = 2; dith_size <= _pat_size; dith_size <<= 1)
 	{
-		for (int y = 0; y < _max_pat_width; y += 2)
+		for (int y = 0; y < _pat_size; y += 2)
 		{
-			for (int x = 0; x < _max_pat_width; x += 2)
+			for (int x = 0; x < _pat_size; x += 2)
 			{
-				const int      xx = (x >> 1) + (_max_pat_width >> 1);
-				const int      yy = (y >> 1) + (_max_pat_width >> 1);
-				const int      val = (pat_data [yy] [xx] + 128) >> 2;
-				pat_data [y    ] [x    ] = int16_t (val +   0-128);
-				pat_data [y    ] [x + 1] = int16_t (val + 128-128);
-				pat_data [y + 1] [x    ] = int16_t (val + 192-128);
-				pat_data [y + 1] [x + 1] = int16_t (val +  64-128);
+				const int      xx = (x >> 1) + (_pat_size >> 1);
+				const int      yy = (y >> 1) + (_pat_size >> 1);
+				const int      val = (pat_data (xx, yy) + 128) >> 2;
+				pat_data (x    , y    ) = PatDataType (val +   0-128);
+				pat_data (x + 1, y    ) = PatDataType (val + 128-128);
+				pat_data (x    , y + 1) = PatDataType (val + 192-128);
+				pat_data (x + 1, y + 1) = PatDataType (val +  64-128);
 			}
 		}
 	}
 
+	expand_dither_pat (pat_data);
 	build_next_dither_pat ();
 }
 
 
 
-void	Dither::build_dither_pat_void_and_cluster (int w)
+void	Dither::build_dither_pat_void_and_cluster ()
 {
-	assert (_max_pat_width % w == 0);
 	VoidAndCluster   vc_gen;
-	MatrixWrap <VoidAndCluster::Rank> pat_raw (w, w);
+	MatrixWrap <VoidAndCluster::Rank> pat_raw (_pat_size, _pat_size);
 	vc_gen.create_matrix (pat_raw);
 
-	PatData &      pat_data = _dither_pat_arr [0];
-	const int      area = w * w;
-	for (int y = 0; y < _max_pat_width; ++y)
+	auto           pat_data = PatData { _pat_size, _pat_size };
+	const int      area = _pat_size * _pat_size;
+	for (int y = 0; y < _pat_size; ++y)
 	{
-		for (int x = 0; x < _max_pat_width; ++x)
+		for (int x = 0; x < _pat_size; ++x)
 		{
-			pat_data [y] [x] = int16_t (pat_raw (x, y) * 256 / area - 128);
+			pat_data (x, y) = PatDataType (pat_raw (x, y) * 256 / area - 128);
 		}
 	}
 
+	expand_dither_pat (pat_data);
 	build_next_dither_pat ();
+}
+
+
+
+void	Dither::expand_dither_pat (const PatData &small)
+{
+	PatData &      big = _dither_pat_arr [0];
+
+	if (_pat_size >= _pat_min_size)
+	{
+		big = small;
+	}
+
+	else
+	{
+		big = PatData { _pat_min_size, _pat_min_size };
+		for (int y = 0; y < _pat_min_size; ++y)
+		{
+			for (int x = 0; x < _pat_min_size; ++x)
+			{
+				big (x, y) = small (x, y);
+			}
+		}
+	}
 }
 
 
 
 void	Dither::build_next_dither_pat ()
 {
+	auto &         pat = _dither_pat_arr [0];
+	const int      w   = pat.get_w ();
+	const int      h   = pat.get_h ();
+
 	if (_tpdfo_flag)
 	{
-		for (int y = 0; y < _max_pat_width; ++y)
+		for (int y = 0; y < h; ++y)
 		{
-			for (int x = 0; x < _max_pat_width; ++x)
+			for (int x = 0; x < w; ++x)
 			{
-				const int      r = _dither_pat_arr [0] [y] [x];
+				const int      r = _dither_pat_arr [0] (x, y);
 				const int      t = remap_tpdf_scalar (r);
-				_dither_pat_arr [0] [y] [x] = int16_t (t);
+				pat (x, y) = PatDataType (t);
 			}
 		}
 	}
@@ -387,11 +413,7 @@ void	Dither::build_next_dither_pat ()
 	for (int seq = 1; seq < _pat_period; ++seq)
 	{
 		const int      angle = (_dyn_flag) ? seq & 3 : 0;
-		copy_dither_pat_rotate (
-			_dither_pat_arr [seq],
-			_dither_pat_arr [0],
-			angle
-		);
+		copy_dither_pat_rotate (_dither_pat_arr [seq], pat, angle);
 	}
 }
 
@@ -402,21 +424,22 @@ void	Dither::copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle
 	assert (angle >= 0);
 	assert (angle < 4);
 
+	const int      w = src.get_w ();
+	const int      h = src.get_h ();
+	assert (h == w);
+	dst = PatData { w, h };
 	static const int  sin_arr [4] = { 0, 1, 0, -1 };
 	const int      s = sin_arr [ angle         ];
 	const int      c = sin_arr [(angle + 1) & 3];
 
-	assert (fstb::is_pow_2 (int (_max_pat_width)));
-	const int		mask = _max_pat_width - 1;
-
-	for (int y = 0; y < _max_pat_width; ++y)
+	for (int y = 0; y < h; ++y)
 	{
-		for (int x = 0; x < _max_pat_width; ++x)
+		for (int x = 0; x < w; ++x)
 		{
-			const int		xs = (x * c - y * s) & mask;
-			const int		ys = (x * s + y * c) & mask;
+			const int		xs = x * c - y * s;
+			const int		ys = x * s + y * c;
 
-			dst [y] [x] = src [ys] [xs];
+			dst (x, y) = src (xs, ys);
 		}
 	}
 }
@@ -1051,14 +1074,15 @@ void	Dither::process_seg_fast_flt_int_sse2 (uint8_t * fstb_RESTRICT dst_ptr, con
 template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 void	Dither::process_seg_ord_int_int_cpp (uint8_t * fstb_RESTRICT dst_ptr, const uint8_t * fstb_RESTRICT src_ptr, int w, SegContext &ctx) noexcept
 {
-	const PatRow & fstb_RESTRICT  pattern = ctx.extract_pattern_row ();
+	auto * const fstb_RESTRICT pat_row_ptr = ctx.extract_pattern_row ();
+	const int      pat_x_mask = ctx._pattern_ptr->get_w () - 1;
 
 	process_seg_common_int_int_cpp <
 		S_FLAG, TN_FLAG, DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS
 	> (dst_ptr, src_ptr, w, ctx,
-		[&] (int pos)
+		[pat_row_ptr, pat_x_mask] (int pos)
 		{
-			return pattern [pos & (_max_pat_width - 1)];
+			return pat_row_ptr [pos & pat_x_mask];
 		}
 	);
 }
@@ -1068,14 +1092,15 @@ void	Dither::process_seg_ord_int_int_cpp (uint8_t * fstb_RESTRICT dst_ptr, const
 template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
 void	Dither::process_seg_ord_flt_int_cpp (uint8_t * fstb_RESTRICT dst_ptr, const uint8_t * fstb_RESTRICT src_ptr, int w, SegContext &ctx) noexcept
 {
-	const PatRow & fstb_RESTRICT  pattern = ctx.extract_pattern_row ();
+	auto * const fstb_RESTRICT pat_row_ptr = ctx.extract_pattern_row ();
+	const int      pat_x_mask = ctx._pattern_ptr->get_w () - 1;
 
 	process_seg_common_flt_int_cpp <
 		S_FLAG, TN_FLAG, DST_TYPE, DST_BITS, SRC_TYPE
 	> (dst_ptr, src_ptr, w, ctx,
-		[&] (int pos)
+		[pat_row_ptr, pat_x_mask] (int pos)
 		{
-			return pattern [pos & (_max_pat_width - 1)];
+			return pat_row_ptr [pos & pat_x_mask];
 		}
 	);
 }
@@ -1089,15 +1114,16 @@ void	Dither::process_seg_ord_flt_int_cpp (uint8_t * fstb_RESTRICT dst_ptr, const
 template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, SplFmt DST_FMT, int DST_BITS, SplFmt SRC_FMT, int SRC_BITS>
 void	Dither::process_seg_ord_int_int_sse2 (uint8_t * fstb_RESTRICT dst_ptr, const uint8_t * fstb_RESTRICT src_ptr, int w, SegContext &ctx) noexcept
 {
-	const PatRow & fstb_RESTRICT  pattern = ctx.extract_pattern_row ();
+	auto * const fstb_RESTRICT pat_row_ptr = ctx.extract_pattern_row ();
+	const int      pat_x_mask = ctx._pattern_ptr->get_w () - 1;
 
 	process_seg_common_int_int_sse2 <
 		S_FLAG, TN_FLAG, DST_FMT, DST_BITS, SRC_FMT, SRC_BITS
 	> (dst_ptr, src_ptr, w, ctx,
-		[&] (int pos)
+		[pat_row_ptr, pat_x_mask] (int pos)
 		{
 			return _mm_load_si128 (reinterpret_cast <const __m128i *> (
-				&pattern [pos & (_max_pat_width - 1)]
+				pat_row_ptr + (pos & pat_x_mask)
 			)); // 8 s16 [-128 ; +127]
 		}
 	);
@@ -1108,15 +1134,16 @@ void	Dither::process_seg_ord_int_int_sse2 (uint8_t * fstb_RESTRICT dst_ptr, cons
 template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, SplFmt DST_FMT, int DST_BITS, SplFmt SRC_FMT>
 void	Dither::process_seg_ord_flt_int_sse2 (uint8_t * fstb_RESTRICT dst_ptr, const uint8_t * fstb_RESTRICT src_ptr, int w, SegContext &ctx) noexcept
 {
-	const PatRow & fstb_RESTRICT  pattern = ctx.extract_pattern_row ();
+	auto * const fstb_RESTRICT pat_row_ptr = ctx.extract_pattern_row ();
+	const int      pat_x_mask = ctx._pattern_ptr->get_w () - 1;
 
 	process_seg_common_flt_int_sse2 <
 		S_FLAG, TN_FLAG, DST_FMT, DST_BITS, SRC_FMT
 	> (dst_ptr, src_ptr, w, ctx,
-		[&] (int pos)
+		[pat_row_ptr, pat_x_mask] (int pos)
 		{
 			return _mm_load_si128 (reinterpret_cast <const __m128i *> (
-				&pattern [pos & (_max_pat_width - 1)]
+				pat_row_ptr + (pos & pat_x_mask)
 			)); // 8 s16 [-128 ; +127]
 		}
 	);
@@ -1942,12 +1969,12 @@ void	Dither::generate_rnd_eol (uint32_t &state) noexcept
 
 
 
-const Dither::PatRow &	Dither::SegContext::extract_pattern_row () const noexcept
+const Dither::PatDataType *	Dither::SegContext::extract_pattern_row () const noexcept
 {
 	assert (_pattern_ptr != nullptr);
 	assert (_y >= 0);
 
-	return ((*_pattern_ptr) [_y & (_max_pat_width - 1)]);
+	return &(_pattern_ptr->at (0, _pattern_ptr->wrap_y (_y)));
 }
 
 

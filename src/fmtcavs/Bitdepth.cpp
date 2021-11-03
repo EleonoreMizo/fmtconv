@@ -143,9 +143,10 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 		env.ThrowError (fmtcavs_BITDEPTH ": ampn cannot be negative.");
 	}
 
-	const int      pat_size =
-		args [Param_PATSIZE].AsInt (fmtcl::Dither::_max_pat_width);
-	if (pat_size < 4 || fmtcl::Dither::_max_pat_width % pat_size != 0)
+	const int      pat_size = args [Param_PATSIZE].AsInt (32);
+	if (   pat_size < 4
+	    || pat_size > fmtcl::Dither::_pat_max_size
+	    || ! fstb::is_pow_2 (pat_size))
 	{
 		env.ThrowError (fmtcavs_BITDEPTH ": wrong value for patsize.");
 	}

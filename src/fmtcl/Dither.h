@@ -28,6 +28,7 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/BitBltConv.h"
 #include "fmtcl/ErrDifBuf.h"
 #include "fmtcl/ErrDifBufFactory.h"
+#include "fmtcl/MatrixWrap.h"
 #include "fmtcl/SplFmt.h"
 #include "fstb/def.h"
 #include "fstb/ArrayAlign.h"
@@ -55,7 +56,9 @@ class Dither
 public:
 
 	static constexpr int _max_nbr_planes = 4;
-	static constexpr int _max_pat_width = 32;   // Number of pixels for halftone dithering
+
+	// Maximum width in pixels for the halftone patterns. Must be a power of 2.
+	static constexpr int _pat_max_size   = 1024;
 
 	enum DMode
 	{
@@ -98,10 +101,24 @@ protected:
 
 private:
 
-	static constexpr int _pat_period    =     4; // Must be a power of 2 (because cycled with & as modulo)
-	static constexpr int _amp_bits      =     5; // Bit depth of the amplitude fractionnal part. The whole thing is 7 bits, and we need a few bits for the integer part.
-	static constexpr int _err_res       =    24; // Resolution (bits) of the temporary data for error diffusion when source bitdepth is not high enough (relative to the destination bitdepth) to guarantee an accurate error diffusion.
-	static constexpr int _max_unk_width = 65536; // Maximum width (pixels) for variable formats
+	// Must be a power of 2 (because cycled with & as modulo)
+	static constexpr int _pat_period    =     4;
+
+	// Minimum pattern size to execute operations, constrained by SIMD vector
+	// sizes. Original pattern can be smaller. Must be a power of 2
+	static constexpr int _pat_min_size  =     8;
+
+	// Bit depth of the amplitude fractionnal part. The whole thing is 7 bits,
+	// and we need a few bits for the integer part.
+	static constexpr int _amp_bits      =     5;
+
+	// Resolution (bits) of the temporary data for error diffusion when source
+	// bitdepth is not high enough (relative to the destination bitdepth) to
+	// guarantee an accurate error diffusion.
+	static constexpr int _err_res       =    24;
+
+	// Maximum width (pixels) for variable formats
+	static constexpr int _max_unk_width = 65536;
 
 	class SclInf
 	{
@@ -112,9 +129,9 @@ private:
 		               _ptr = 0;
 	};
 
-	typedef int16_t PatRow [_max_pat_width];  // Contains data in [-128; +127]
-	typedef PatRow  PatData [_max_pat_width]; // [y] [x]
-	typedef fstb::ArrayAlign <PatData, _pat_period, 16> PatDataArray;
+	typedef int16_t PatDataType;
+	typedef MatrixWrap <PatDataType> PatData;
+	typedef std::array <PatData, _pat_period> PatDataArray;
 
 	class AmpInfo
 	{
@@ -129,7 +146,7 @@ private:
 	class SegContext
 	{
 	public:
-		inline const PatRow &
+		inline const PatDataType *
 		               extract_pattern_row () const noexcept;
 		const PatData* _pattern_ptr = nullptr; // Ordered dithering
 		uint32_t       _rnd_state   = 0;       // Anything excepted fast mode
@@ -145,7 +162,8 @@ private:
 	void           build_dither_pat ();
 	void           build_dither_pat_round ();
 	void           build_dither_pat_bayer ();
-	void           build_dither_pat_void_and_cluster (int w);
+	void           build_dither_pat_void_and_cluster ();
+	void           expand_dither_pat (const PatData &small);
 	void           build_next_dither_pat ();
 	void           copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle) noexcept;
 	void           init_fnc_fast () noexcept;
@@ -396,7 +414,7 @@ private:
 	bool           _range_def_flag = false;
 
 	int            _dmode    = DMode_FAST;
-	int            _pat_size = _max_pat_width;  // Must be a divisor of _max_pat_width
+	int            _pat_size = 32;         // Must be a power of 2
 	double         _ampo     = 1;
 	double         _ampn     = 0;
 	bool           _dyn_flag = false;
