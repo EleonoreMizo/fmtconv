@@ -80,6 +80,8 @@ int	PrecalcVoidAndCluster::generate_mat (int size_l2)
 
 	printf ("Duration: %.3f s\n", dur.count ());
 
+	fflush (stdout);
+
 	return 0;
 }
 

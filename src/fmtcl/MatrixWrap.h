@@ -31,6 +31,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include <vector>
 
+#include <cstddef>
+
 
 
 namespace fmtcl
@@ -47,6 +49,7 @@ class MatrixWrap
 public:
 
 	typedef T DataType;
+	typedef size_t PosType;
 
 	explicit       MatrixWrap (int w, int h);
 	               MatrixWrap ()                        = default;
@@ -58,10 +61,27 @@ public:
 	MatrixWrap &   operator = (MatrixWrap &&other)      = default;
 
 	void           clear (T fill_val = 0);
-	int            get_w () const { return _w; }
-	int            get_h () const { return _h; }
-	T &            operator () (int x, int y);
-	const T &      operator () (int x, int y) const;
+
+	inline int     get_w () const { return _w; }
+	inline int     get_h () const { return _h; }
+
+	inline T &     operator () (int x, int y);
+	inline const T &
+	               operator () (int x, int y) const;
+	inline T &     at (int x, int y);
+	inline const T &
+	               at (int x, int y) const;
+	inline T &     at (PosType pos);
+	inline const T &
+	               at (PosType pos) const;
+
+	inline int     wrap_x (int x) const;
+	inline int     wrap_y (int y) const;
+
+	inline PosType encode_coord (int x, int y) const;
+	inline int     decode_x (PosType pos) const;
+	inline int     decode_y (PosType pos) const;
+
 
 
 
@@ -79,6 +99,7 @@ private:
 	int            _h     = 0;
 	int            _msk_x = 0;
 	int            _msk_y = 0;
+	int            _shft  = 0;
 	std::vector <T>
 	               _mat;
 

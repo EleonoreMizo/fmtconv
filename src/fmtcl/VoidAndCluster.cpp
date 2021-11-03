@@ -115,6 +115,38 @@ bool	VoidAndCluster::Coord::operator != (const Coord &other) const
 	return ! (*this == other);
 }
 
+bool	VoidAndCluster::Coord::operator < (const Coord &other) const
+{
+	return (std::tie (_y, _x) < std::tie (other._y, other._x));
+}
+
+
+
+void	VoidAndCluster::create_kernel (int w, int h, double sigma)
+{
+	const auto     w2 = 1 << fstb::get_next_pow_2 (w);
+	const auto     h2 = 1 << fstb::get_next_pow_2 (h);
+	_kernel._m = KernelData (w2, h2);
+	_kernel._w = w;
+	_kernel._h = h;
+
+	const int      kw2 = (_kernel._w - 1) / 2;
+	const int      kh2 = (_kernel._h - 1) / 2;
+	const auto     mul = -1.0 / (2 * sigma * sigma);
+	for (int j = 0; j <= kh2; ++j)
+	{
+		for (int i = 0; i <= kw2; ++i)
+		{
+			const auto     cf = exp ((i * i + j * j) * mul);
+			const auto     ci = int64_t (cf * _kscale + 0.5);
+			_kernel._m ( i,  j) = ci;
+			_kernel._m (-i,  j) = ci;
+			_kernel._m ( i, -j) = ci;
+			_kernel._m (-i, -j) = ci;
+		}
+	}
+}
+
 
 
 void	VoidAndCluster::generate_initial_mat ()
@@ -181,117 +213,95 @@ void	VoidAndCluster::homogenize_initial_mat ()
 
 
 
-void	VoidAndCluster::find_cluster_kernel (std::vector <Coord> &pos_arr, const PatState &state, int color) const
+void	VoidAndCluster::filter_pat (PatState &state)
 {
-	pos_arr.clear ();
+	state._pat_filt.clear ();
+	state._histo.clear ();
 
-	SampleType     max_v = 0;
-	const int      w     = state._pat.get_w ();
-	const int      h     = state._pat.get_h ();
-	const int      kw2   = (_kernel._w - 1) / 2;
-	const int      kh2   = (_kernel._h - 1) / 2;
+	const int      w = state._pat.get_w ();
+	const int      h = state._pat.get_h ();
+
+	const int      kw2 = (_kernel._w - 1) / 2;
+	const int      kh2 = (_kernel._h - 1) / 2;
+
 	for (int y = 0; y < h; ++y)
 	{
 		for (int x = 0; x < w; ++x)
 		{
-			const int      cur_c = state._pat (x, y);
-			if (cur_c == color)
+			auto           sum = state._pat (x, y) * _kernel._m (0, 0);
+			for (int j = 1; j <= kh2; ++j)
 			{
-				SampleType     sum = 0;
-				for (int j = -kh2; j <= kh2; ++j)
+#if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
+				const auto     vx = _kernel._m (j, 0);
+				const auto     vy = _kernel._m (0, j);
+				sum += state._pat (x + j, y    ) * vx;
+				sum += state._pat (x - j, y    ) * vx;
+				sum += state._pat (x    , y + j) * vy;
+				sum += state._pat (x    , y - j) * vy;
+#endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
+				for (int i = 1; i <= kw2; ++i)
 				{
-					for (int i = -kw2; i <= kw2; ++i)
-					{
-						const int      a = state._pat (x + i, y + j);
-						if (a == color)
-						{
-							const auto     c = _kernel._m (i, j);
-							sum += c;
-						}
-					}
-				}
-				if (color != 0)
-				{
-					assert (sum == state._pat_filt (x, y));
-				}
-				if (sum >= max_v)
-				{
-					if (sum > max_v)
-					{
-						pos_arr.clear ();
-					}
-					max_v = sum;
-					pos_arr.push_back ({ x, y });
+					const auto     vk = _kernel._m (i, j);
+					sum += state._pat (x + i, y + j) * vk;
+					sum += state._pat (x - i, y + j) * vk;
+					sum += state._pat (x + i, y - j) * vk;
+					sum += state._pat (x - i, y - j) * vk;
 				}
 			}
+			state._pat_filt (x, y) = sum;
+			const auto     index = state._pat_filt.encode_coord (x, y);
+			state._histo.insert (std::make_tuple (sum, index));
 		}
 	}
-
-	assert (! pos_arr.empty ());
 }
 
 
 
 void	VoidAndCluster::PatState::find_cluster (std::vector <Coord> &pos_arr) const
 {
-	pos_arr.clear ();
-
-	auto           max_v = std::numeric_limits <SampleType>::min ();
-	const int      w     = _pat.get_w ();
-	const int      h     = _pat.get_h ();
-	for (int y = 0; y < h; ++y)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-			const int      cur_c = _pat (x, y);
-			if (cur_c != 0)
-			{
-				const SampleType  sum = _pat_filt (x, y);
-				if (sum >= max_v)
-				{
-					if (sum > max_v)
-					{
-						pos_arr.clear ();
-					}
-					max_v = sum;
-					pos_arr.push_back ({ x, y });
-				}
-			}
-		}
-	}
-
-	assert (! pos_arr.empty ());
+	find_void_or_cluster <1> (pos_arr, _histo.rbegin (), _histo.rend ());
 }
 
 
 
 void	VoidAndCluster::PatState::find_void (std::vector <Coord> &pos_arr) const
 {
+	find_void_or_cluster <0> (pos_arr, _histo.begin (), _histo.end ());
+}
+
+
+
+template <typename VoidAndCluster::Monochrome::DataType V, class IT>
+void VoidAndCluster::PatState::find_void_or_cluster (std::vector <Coord> &pos_arr, IT it_beg, IT it_end) const
+{
 	pos_arr.clear ();
 
-	auto           min_v = std::numeric_limits <SampleType>::max ();
-	const int      w     = _pat.get_w ();
-	const int      h     = _pat.get_h ();
-	for (int y = 0; y < h; ++y)
+	auto           it = it_beg;
+	while (_pat.at (std::get <1> (*it)) != V)
 	{
-		for (int x = 0; x < w; ++x)
-		{
-			const int      cur_c = _pat (x, y);
-			if (cur_c == 0)
-			{
-				const SampleType  sum = _pat_filt (x, y);
-				if (sum <= min_v)
-				{
-					if (sum < min_v)
-					{
-						pos_arr.clear ();
-					}
-					min_v = sum;
-					pos_arr.push_back ({ x, y });
-				}
-			}
-		}
+		++ it;
+		assert (it != it_end);
 	}
+	const auto     val_ref = std::get <0> (*it);
+
+	do
+	{
+		const auto     val_tst = std::get <0> (*it);
+		if (val_tst != val_ref)
+		{
+			break;
+		}
+		const auto     idx = std::get <1> (*it);
+		if (_pat.at (idx) == V)
+		{
+			const auto     x = _pat_filt.decode_x (idx);
+			const auto     y = _pat_filt.decode_y (idx);
+			pos_arr.push_back ({ x, y });
+		}
+
+		++ it;
+	}
+	while (it != it_end);
 
 	assert (! pos_arr.empty ());
 }
@@ -323,14 +333,14 @@ void	VoidAndCluster::set_pix (PatState &state, Coord pos)
 	state._pat (pos._x, pos._y) = V;
 	if (V > 0)
 	{
-		apply_kernel (state._pat_filt, pos,
-			[] (SampleType &a, SampleType vk) { a += vk; }
+		apply_kernel (
+			state, pos, [] (SampleType a, SampleType b) { return a + b; }
 		);
 	}
 	else
 	{
-		apply_kernel (state._pat_filt, pos,
-			[] (SampleType &a, SampleType vk) { a -= vk; }
+		apply_kernel (
+			state, pos, [] (SampleType a, SampleType b) { return a - b; }
 		);
 	}
 }
@@ -338,126 +348,52 @@ void	VoidAndCluster::set_pix (PatState &state, Coord pos)
 
 
 template <typename F>
-void	VoidAndCluster::apply_kernel (Filtered &pat_filt, Coord pos, F op) const
+void	VoidAndCluster::apply_kernel (PatState &state, Coord pos, F op) const
 {
 	const int      kw2 = (_kernel._w - 1) / 2;
 	const int      kh2 = (_kernel._h - 1) / 2;
 
-	op (pat_filt (pos._x, pos._y), _kernel._m (0, 0));
+	update_filtered (state, pos, op, _kernel._m (0, 0));
 	for (int j = 1; j <= kh2; ++j)
 	{
 #if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
 		const auto     vx = _kernel._m (j, 0);
 		const auto     vy = _kernel._m (0, j);
-		op (pat_filt (pos._x + j, pos._y    ), vx);
-		op (pat_filt (pos._x - j, pos._y    ), vx);
-		op (pat_filt (pos._x    , pos._y + j), vy);
-		op (pat_filt (pos._x    , pos._y - j), vy);
+		update_filtered (state, { pos._x + j, pos._y     }, op, vx);
+		update_filtered (state, { pos._x - j, pos._y     }, op, vx);
+		update_filtered (state, { pos._x    , pos._y + j }, op, vy);
+		update_filtered (state, { pos._x    , pos._y - j }, op, vy);
 #endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
 		for (int i = 1; i <= kw2; ++i)
 		{
 			const auto     vk = _kernel._m (i, j);
-			op (pat_filt (pos._x + i, pos._y + j), vk);
-			op (pat_filt (pos._x - i, pos._y + j), vk);
-			op (pat_filt (pos._x + i, pos._y - j), vk);
-			op (pat_filt (pos._x - i, pos._y - j), vk);
+			update_filtered (state, { pos._x + i, pos._y + j }, op, vk);
+			update_filtered (state, { pos._x - i, pos._y + j }, op, vk);
+			update_filtered (state, { pos._x + i, pos._y - j }, op, vk);
+			update_filtered (state, { pos._x - i, pos._y - j }, op, vk);
 		}
 	}
 }
 
 
 
-void	VoidAndCluster::create_kernel (int w, int h, double sigma)
+template <typename F>
+void	VoidAndCluster::update_filtered (PatState &state, Coord pos, F op, SampleType delta) const
 {
-	const auto     w2 = 1 << fstb::get_next_pow_2 (w);
-	const auto     h2 = 1 << fstb::get_next_pow_2 (h);
-	_kernel._m = KernelData (w2, h2);
-	_kernel._w = w;
-	_kernel._h = h;
+	const auto     x       = state._pat_filt.wrap_x (pos._x);
+	const auto     y       = state._pat_filt.wrap_y (pos._y);
+	const auto     index   = state._pat_filt.encode_coord (x, y);
 
-	const int      kw2 = (_kernel._w - 1) / 2;
-	const int      kh2 = (_kernel._h - 1) / 2;
-	const auto     mul = -1.0 / (2 * sigma * sigma);
-	for (int j = 0; j <= kh2; ++j)
-	{
-		for (int i = 0; i <= kw2; ++i)
-		{
-			const auto     cf = exp ((i * i + j * j) * mul);
-			const auto     ci = int64_t (cf * _kscale + 0.5);
-			_kernel._m ( i,  j) = ci;
-			_kernel._m (-i,  j) = ci;
-			_kernel._m ( i, -j) = ci;
-			_kernel._m (-i, -j) = ci;
-		}
-	}
-}
+	const auto     val_old = state._pat_filt.at (index);
+	const auto     key_old = std::make_tuple (val_old, index);
+	const auto     it_old  = state._histo.find (key_old);
+	assert (it_old != state._histo.end ());
+	state._histo.erase (it_old);
 
-
-
-void	VoidAndCluster::filter_pat (PatState &state)
-{
-	state._pat_filt.clear ();
-
-	const int      w = state._pat.get_w ();
-	const int      h = state._pat.get_h ();
-
-	const int      kw2 = (_kernel._w - 1) / 2;
-	const int      kh2 = (_kernel._h - 1) / 2;
-
-	for (int y = 0; y < h; ++y)
-	{
-		for (int x = 0; x < w; ++x)
-		{
-#if 0
-			const auto     val = state._pat (x, y);
-			if (val != 0)
-			{
-				state._pat_filt (x, y) += _kernel._m (0, 0);
-				for (int j = 1; j <= kh2; ++j)
-				{
-#if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
-					const auto     vx = _kernel._m (j, 0);
-					const auto     vy = _kernel._m (0, j);
-					state._pat (x + j, y    ) += vx;
-					state._pat (x - j, y    ) += vx;
-					state._pat (x    , y + j) += vy;
-					state._pat (x    , y - j) += vy;
-#endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
-					for (int i = 1; i <= kw2; ++i)
-					{
-						const auto     vk = _kernel._m (i, j);
-						state._pat_filt (x + i, y + j) += vk;
-						state._pat_filt (x - i, y + j) += vk;
-						state._pat_filt (x + i, y - j) += vk;
-						state._pat_filt (x - i, y - j) += vk;
-					}
-				}
-			}
-#else
-			auto           sum = state._pat (x, y) * _kernel._m (0, 0);
-			for (int j = 1; j <= kh2; ++j)
-			{
-#if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
-				const auto     vx = _kernel._m (j, 0);
-				const auto     vy = _kernel._m (0, j);
-				sum += state._pat (x + j, y    ) * vx;
-				sum += state._pat (x - j, y    ) * vx;
-				sum += state._pat (x    , y + j) * vy;
-				sum += state._pat (x    , y - j) * vy;
-#endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
-				for (int i = 1; i <= kw2; ++i)
-				{
-					const auto     vk = _kernel._m (i, j);
-					sum += state._pat (x + i, y + j) * vk;
-					sum += state._pat (x - i, y + j) * vk;
-					sum += state._pat (x + i, y - j) * vk;
-					sum += state._pat (x - i, y - j) * vk;
-				}
-			}
-			state._pat_filt (x, y) = sum;
-#endif
-		}
-	}
+	const auto     val_new = op (val_old, delta);
+	state._pat_filt.at (index) = val_new;
+	const auto     key_new = std::make_tuple (val_new, index);
+	state._histo.insert (key_new);
 }
 
 

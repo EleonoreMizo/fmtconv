@@ -9,6 +9,19 @@ The Void-And-Cluster Method for Dither Array Generation
 Proc. SPIE, Human Vision, Visual Processing, and Digital Display IV,
 vol. 1913, pp. 332-343, Feb. 1-4, 1993
 
+Optimisations:
+
+- The generating binary matrix is attached with a filtered version, updated
+along with the main matrix. So the search process hasn't to filter each
+location before testing it. This optimisation is particularly interesting for
+larger kernels, the complexity component caused by the filtering goes from
+O(s_k^2) to O(1), s_k being the kernel size.
+
+- An ordered list (std::set) is also maintained, using the filtered values
+as key. The matrix update is more costly but peaking the minimum or maximum
+is achievable in O(1) instead of O(s_p^2), s_p being the pattern size. This
+is a huge gain for large patterns.
+
 *** TO DO: implement:
 Hakan Ancin, Anoop K. Bhattacharjya, Joseph Shou-Pyng Shu,
 New void-and-cluster method for improved halftone uniformity,
@@ -44,6 +57,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include <cstdint>
 
 #include <memory>
+#include <set>
+#include <tuple>
 #include <vector>
 
 
@@ -88,6 +103,7 @@ private:
 		int            _y;
 		inline bool    operator == (const Coord &other) const;
 		inline bool    operator != (const Coord &other) const;
+		inline bool    operator < (const Coord &other) const;
 	};
 
 	typedef MatrixWrap <uint8_t> Monochrome; // Contains only 0 or 1
@@ -97,6 +113,10 @@ private:
 
 	typedef MatrixWrap <SampleType> KernelData;
 	typedef MatrixWrap <SampleType> Filtered;
+
+	typedef typename Filtered::PosType Index;
+	typedef std::tuple <SampleType, Index> HistoKey;
+	typedef std::set <HistoKey> Histogram;
 
 	class Kernel
 	{
@@ -111,21 +131,25 @@ private:
 	public:
 		void           find_cluster (std::vector <Coord> &pos_arr) const;
 		void           find_void (std::vector <Coord> &pos_arr) const;
+		template <typename Monochrome::DataType V, class IT>
+		void           find_void_or_cluster (std::vector <Coord> &pos_arr, IT it_beg, IT it_end) const;
 		Monochrome     _pat;
 		Filtered       _pat_filt;
+		Histogram      _histo;
 	};
 
+	void           create_kernel (int w, int h, double sigma);
 	void           generate_initial_mat ();
 	void           homogenize_initial_mat ();
-	void           find_cluster_kernel (std::vector <Coord> &pos_arr, const PatState &state, int color) const;
+	void           filter_pat (PatState &state);
+
 	const Coord &  pick_one (std::vector <Coord> &pos_arr, uint32_t seed) const;
 	template <typename Monochrome::DataType V>
 	void           set_pix (PatState &state, Coord pos);
 	template <typename F>
-	inline void    apply_kernel (Filtered &pat_filt, Coord pos, F op) const;
-
-	void           create_kernel (int w, int h, double sigma);
-	void           filter_pat (PatState &state);
+	inline void    apply_kernel (PatState &state, Coord pos, F op) const;
+	template <typename F>
+	inline void    update_filtered (PatState &state, Coord pos, F op, SampleType delta) const;
 
 	static int     count_elt (const Monochrome &m, int val);
 

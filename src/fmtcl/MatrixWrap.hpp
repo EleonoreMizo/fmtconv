@@ -43,6 +43,7 @@ MatrixWrap <T>::MatrixWrap (int w, int h)
 ,	_h (h)
 ,	_msk_x (w - 1)
 ,	_msk_y (h - 1)
+,	_shft (fstb::get_prev_pow_2 (w))
 ,	_mat (w * h, 0)
 {
 	assert (w > 0);
@@ -64,10 +65,7 @@ void	MatrixWrap <T>::clear (T fill_val)
 template <class T>
 T &	MatrixWrap <T>::operator () (int x, int y)
 {
-	x &= _msk_x;
-	y &= _msk_y;
-
-	return (_mat [y * _w + x]);
+	return at (wrap_x (x), wrap_y (y));
 }
 
 
@@ -75,10 +73,94 @@ T &	MatrixWrap <T>::operator () (int x, int y)
 template <class T>
 const T &	MatrixWrap <T>::operator () (int x, int y) const
 {
-	x &= _msk_x;
-	y &= _msk_y;
+	return at (wrap_x (x), wrap_y (y));
+}
 
-	return (_mat [y * _w + x]);
+
+
+template <class T>
+T &	MatrixWrap <T>::at (int x, int y)
+{
+	const auto     pos = encode_coord (x, y);
+
+	return at (pos);
+}
+
+
+
+template <class T>
+const T &	MatrixWrap <T>::at (int x, int y) const
+{
+	const auto     pos = encode_coord (x, y);
+
+	return at (pos);
+}
+
+
+
+template <class T>
+T &	MatrixWrap <T>::at (PosType pos)
+{
+	assert (pos >= 0);
+	assert (pos < _mat.size ());
+
+	return _mat [pos];
+}
+
+
+
+template <class T>
+const T &	MatrixWrap <T>::at (PosType pos) const
+{
+	assert (pos >= 0);
+	assert (pos < _mat.size ());
+
+	return _mat [pos];
+}
+
+
+
+template <class T>
+int	MatrixWrap <T>::wrap_x (int x) const
+{
+	return x & _msk_x;
+}
+
+
+
+template <class T>
+int	MatrixWrap <T>::wrap_y (int y) const
+{
+	return y & _msk_y;
+}
+
+
+
+template <class T>
+typename MatrixWrap <T>::PosType	MatrixWrap <T>::encode_coord (int x, int y) const
+{
+	assert (x >= 0);
+	assert (x < _w);
+	assert (y >= 0);
+	assert (y < _h);
+
+	return size_t (y) * size_t (_w) + size_t (x);
+}
+
+
+
+template <class T>
+int	MatrixWrap <T>::decode_x (PosType pos) const
+{
+	return int (pos) & _msk_x;
+}
+
+
+
+template <class T>
+int	MatrixWrap <T>::decode_y (PosType pos) const
+{
+	return int (pos >> _shft);
 }
 
 
