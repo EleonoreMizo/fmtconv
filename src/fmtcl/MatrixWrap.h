@@ -49,6 +49,7 @@ public:
 	typedef T DataType;
 
 	explicit       MatrixWrap (int w, int h);
+	               MatrixWrap ()                        = default;
 	               MatrixWrap (const MatrixWrap &other) = default;
 	               MatrixWrap (MatrixWrap &&other)      = default;
 	               ~MatrixWrap ()                       = default;
@@ -74,10 +75,10 @@ protected:
 
 private:
 
-	int            _w;
-	int            _h;
-	int            _msk_x;
-	int            _msk_y;
+	int            _w     = 0;
+	int            _h     = 0;
+	int            _msk_x = 0;
+	int            _msk_y = 0;
 	std::vector <T>
 	               _mat;
 
@@ -86,7 +87,6 @@ private:
 
 private:
 
-	               MatrixWrap ()                               = delete;
 	bool           operator == (const MatrixWrap &other) const = delete;
 	bool           operator != (const MatrixWrap &other) const = delete;
 

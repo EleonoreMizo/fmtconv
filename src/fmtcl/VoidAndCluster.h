@@ -60,7 +60,7 @@ class VoidAndCluster
 
 public:
 
-	typedef uint16_t Rank; // May be signed or unsigned.
+	typedef int32_t Rank; // May be signed or unsigned.
 
 	               VoidAndCluster () = default;
 	virtual			~VoidAndCluster () {}
@@ -79,30 +79,59 @@ protected:
 
 private:
 
-	static const int  KERNEL_MAX_RAD  = 4;
-	static const int  KERNEL_DEF_SIZE = KERNEL_MAX_RAD * 2 + 1;
+	static constexpr int  _kernel_def_rad = 4;
 
 	class Coord
 	{
 	public:
 		int            _x;
 		int            _y;
+		inline bool    operator == (const Coord &other) const;
+		inline bool    operator != (const Coord &other) const;
 	};
 
-	typedef MatrixWrap <double> Kernel;
-	static constexpr int64_t   _kscale = int64_t (1) << 32;
+	typedef MatrixWrap <uint8_t> Monochrome; // Contains only 0 or 1
 
-	void           homogenize_initial_mat (MatrixWrap <Rank> &m) const;
-	void           find_cluster_kernel (std::vector <Coord> &pos_arr, const MatrixWrap <Rank> &m, int color, int kw, int kh) const;
+	typedef int64_t SampleType;
+	static constexpr SampleType  _kscale = SampleType (1) << 32;
+
+	typedef MatrixWrap <SampleType> KernelData;
+	typedef MatrixWrap <SampleType> Filtered;
+
+	class Kernel
+	{
+	public:
+		KernelData     _m;
+		int            _w = 0; // Kernel width, odd. 0 = not initialized
+		int            _h = 0; // Kernel height, odd. 0 = not initialized
+	};
+
+	class PatState
+	{
+	public:
+		void           find_cluster (std::vector <Coord> &pos_arr) const;
+		void           find_void (std::vector <Coord> &pos_arr) const;
+		Monochrome     _pat;
+		Filtered       _pat_filt;
+	};
+
+	void           generate_initial_mat ();
+	void           homogenize_initial_mat ();
+	void           find_cluster_kernel (std::vector <Coord> &pos_arr, const PatState &state, int color) const;
 	const Coord &  pick_one (std::vector <Coord> &pos_arr, uint32_t seed) const;
+	template <typename Monochrome::DataType V>
+	void           set_pix (PatState &state, Coord pos);
+	template <typename F>
+	inline void    apply_kernel (Filtered &pat_filt, Coord pos, F op) const;
 
-	static std::unique_ptr <Kernel>
-	               create_gauss_kernel (int w, int h, double sigma);
-	static void    generate_initial_mat (MatrixWrap <Rank> &m);
-	static int     count_elt (const MatrixWrap <Rank> &m, int val);
+	void           create_kernel (int w, int h, double sigma);
+	void           filter_pat (PatState &state);
 
-	std::unique_ptr <Kernel>
-	               _kernel_gauss_uptr;
+	static int     count_elt (const Monochrome &m, int val);
+
+	Kernel         _kernel;
+	PatState       _base;
+	PatState       _cur;
 
 
 

@@ -49,41 +49,39 @@ void	VoidAndCluster::create_matrix (MatrixWrap <Rank> &vnc)
 	const int      w   = vnc.get_w ();
 	const int      h   = vnc.get_h ();
 	assert (w * h <= std::numeric_limits <Rank>::max ());
-	const int      ks  = KERNEL_MAX_RAD * 2 + 1;
-	_kernel_gauss_uptr = create_gauss_kernel (ks, ks, 1.5);
+	const int      ks  = _kernel_def_rad * 2 + 1;
+	create_kernel (ks, ks, 1.5);
 
-	MatrixWrap <Rank> mat_base (w, h);
-	generate_initial_mat (mat_base);
-	homogenize_initial_mat (mat_base);
+	_base._pat      = Monochrome { w, h };
+	_base._pat_filt = Filtered { w, h };
+	generate_initial_mat ();
+	homogenize_initial_mat ();
 
 	vnc.clear ();
 
+	const int      rank_base = count_elt (_base._pat, 1);
+	std::vector <Coord>  coord_arr;
+
+	int            rank = rank_base;
+	_cur = _base;
+	while (rank > 0)
 	{
-		int            rank = count_elt (mat_base, 1);
-		MatrixWrap <Rank>    mat (mat_base);
-		std::vector <Coord>  c_arr;
-		while (rank > 0)
-		{
-			-- rank;
-			find_cluster_kernel (c_arr, mat, 1, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
-			const auto &   c = pick_one (c_arr, uint32_t (rank));
-			mat (c._x, c._y) = 0;
-			vnc (c._x, c._y) = Rank (rank);
-		}
+		-- rank;
+		_cur.find_cluster (coord_arr);
+		const auto &   c = pick_one (coord_arr, uint32_t (rank));
+		set_pix <0> (_cur, c);
+		vnc (c._x, c._y) = Rank (rank);
 	}
 
+	rank = rank_base;
+	_cur = _base;
+	while (rank < w * h)
 	{
-		int            rank = count_elt (mat_base, 1);
-		MatrixWrap <Rank>    mat (mat_base);
-		std::vector <Coord>  v_arr;
-		while (rank < w * h)
-		{
-			find_cluster_kernel (v_arr, mat, 0, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
-			const auto &   v = pick_one (v_arr, uint32_t (rank));
-			mat (v._x, v._y) = 1;
-			vnc (v._x, v._y) = Rank (rank);
-			++ rank;
-		}
+		_cur.find_void (coord_arr);
+		const auto &   v = pick_one (coord_arr, uint32_t (rank));
+		set_pix <1> (_cur, v);
+		vnc (v._x, v._y) = Rank (rank);
+		++ rank;
 	}
 }
 
@@ -97,69 +95,119 @@ void	VoidAndCluster::create_matrix (MatrixWrap <Rank> &vnc)
 
 
 
-void	VoidAndCluster::homogenize_initial_mat (MatrixWrap <Rank> &m) const
-{
-	int            cx    = 0;
-	int            cy    = 0;
-	int            vx    = 0;
-	int            vy    = 0;
-	uint32_t       count = 0;
-	std::vector <Coord> c_arr;
-	std::vector <Coord> v_arr;
-	do
-	{
-		find_cluster_kernel (c_arr, m, 1, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
-		const auto &   c = pick_one (c_arr, count);
-		cx = c._x;
-		cy = c._y;
-		m (cx, cy) = 0;
-		++ count;
+constexpr int	VoidAndCluster::_kernel_def_rad;
+constexpr VoidAndCluster::SampleType	VoidAndCluster::_kscale;
 
-		find_cluster_kernel (v_arr, m, 0, KERNEL_DEF_SIZE, KERNEL_DEF_SIZE);
-		const auto &   v = pick_one (v_arr, count);
-		vx = v._x;
-		vy = v._y;
-		m (vx, vy) = 1;
-		++ count;
-	}
-	while (cx != vx || cy != vy);
+
+
+bool	VoidAndCluster::Coord::operator == (const Coord &other) const
+{
+	return (_x == other._x && _y == other._y);
+}
+
+bool	VoidAndCluster::Coord::operator != (const Coord &other) const
+{
+	return ! (*this == other);
 }
 
 
 
-void	VoidAndCluster::find_cluster_kernel (std::vector <Coord> &pos_arr, const MatrixWrap <Rank> &m, int color, int kw, int kh) const
+void	VoidAndCluster::generate_initial_mat ()
 {
-	assert (kw <= _kernel_gauss_uptr->get_w ());
-	assert (kh <= _kernel_gauss_uptr->get_h ());
+	constexpr double  thr = 0.1;
 
+	const int      w = _base._pat.get_w ();
+	const int      h = _base._pat.get_h ();
+	MatrixWrap <double>  err_mat (w, h);
+	err_mat.clear ();
+	int            dir = 1;
+	for (int pass = 0; pass < 2; ++pass)
+	{
+		for (int y = 0; y < h; ++y)
+		{
+			const int      x_beg = (dir < 0) ? w - 1 : 0;
+			const int      x_end = (dir < 0) ?    -1 : w;
+			for (int x = x_beg; x != x_end; x += dir)
+			{
+				double         err = err_mat (x, y);
+				err_mat (x, y) = 0;
+				const double   val = thr + err;
+				const int      qnt = fstb::round_int (val);
+				assert (qnt >= 0 && qnt <= 1);
+				_base._pat (x, y) = typename Monochrome::DataType (qnt);
+				err = val - double (qnt);
+				// Filter-Lite error diffusion
+				const double   e2 = err * 0.5;
+				const double   e4 = err * 0.25;
+				err_mat (x + dir, y    ) += e2;
+				err_mat (x - dir, y + 1) += e4;
+				err_mat (x      , y + 1) += e4;
+			}
+
+			dir = -dir;
+		}
+	}
+
+	filter_pat (_base);
+}
+
+
+
+void	VoidAndCluster::homogenize_initial_mat ()
+{
+	Coord          c { 0, 0 };
+	Coord          v { 0, 0 };
+	uint32_t       count = 0;
+	std::vector <Coord> coord_arr;
+	do
+	{
+		_base.find_cluster (coord_arr);
+		c = pick_one (coord_arr, count);
+		set_pix <0> (_base, c);
+		++ count;
+
+		_base.find_void (coord_arr);
+		v = pick_one (coord_arr, count);
+		set_pix <1> (_base, v);
+		++ count;
+	}
+	while (c != v);
+}
+
+
+
+void	VoidAndCluster::find_cluster_kernel (std::vector <Coord> &pos_arr, const PatState &state, int color) const
+{
 	pos_arr.clear ();
 
-	typedef typename Kernel::DataType SumType;
-
-	SumType        max_v = -1;
-	const int      w     = m.get_w ();
-	const int      h     = m.get_h ();
-	const int      kw2   = (kw - 1) / 2;
-	const int      kh2   = (kh - 1) / 2;
+	SampleType     max_v = 0;
+	const int      w     = state._pat.get_w ();
+	const int      h     = state._pat.get_h ();
+	const int      kw2   = (_kernel._w - 1) / 2;
+	const int      kh2   = (_kernel._h - 1) / 2;
 	for (int y = 0; y < h; ++y)
 	{
 		for (int x = 0; x < w; ++x)
 		{
-			const int      cur_c = m (x, y);
+			const int      cur_c = state._pat (x, y);
 			if (cur_c == color)
 			{
-				SumType        sum = 0;
+				SampleType     sum = 0;
 				for (int j = -kh2; j <= kh2; ++j)
 				{
 					for (int i = -kw2; i <= kw2; ++i)
 					{
-						const int      a = m (x + i, y + j);
+						const int      a = state._pat (x + i, y + j);
 						if (a == color)
 						{
-							const auto     c = (*_kernel_gauss_uptr) (i, j);
+							const auto     c = _kernel._m (i, j);
 							sum += c;
 						}
 					}
+				}
+				if (color != 0)
+				{
+					assert (sum == state._pat_filt (x, y));
 				}
 				if (sum >= max_v)
 				{
@@ -168,6 +216,72 @@ void	VoidAndCluster::find_cluster_kernel (std::vector <Coord> &pos_arr, const Ma
 						pos_arr.clear ();
 					}
 					max_v = sum;
+					pos_arr.push_back ({ x, y });
+				}
+			}
+		}
+	}
+
+	assert (! pos_arr.empty ());
+}
+
+
+
+void	VoidAndCluster::PatState::find_cluster (std::vector <Coord> &pos_arr) const
+{
+	pos_arr.clear ();
+
+	auto           max_v = std::numeric_limits <SampleType>::min ();
+	const int      w     = _pat.get_w ();
+	const int      h     = _pat.get_h ();
+	for (int y = 0; y < h; ++y)
+	{
+		for (int x = 0; x < w; ++x)
+		{
+			const int      cur_c = _pat (x, y);
+			if (cur_c != 0)
+			{
+				const SampleType  sum = _pat_filt (x, y);
+				if (sum >= max_v)
+				{
+					if (sum > max_v)
+					{
+						pos_arr.clear ();
+					}
+					max_v = sum;
+					pos_arr.push_back ({ x, y });
+				}
+			}
+		}
+	}
+
+	assert (! pos_arr.empty ());
+}
+
+
+
+void	VoidAndCluster::PatState::find_void (std::vector <Coord> &pos_arr) const
+{
+	pos_arr.clear ();
+
+	auto           min_v = std::numeric_limits <SampleType>::max ();
+	const int      w     = _pat.get_w ();
+	const int      h     = _pat.get_h ();
+	for (int y = 0; y < h; ++y)
+	{
+		for (int x = 0; x < w; ++x)
+		{
+			const int      cur_c = _pat (x, y);
+			if (cur_c == 0)
+			{
+				const SampleType  sum = _pat_filt (x, y);
+				if (sum <= min_v)
+				{
+					if (sum < min_v)
+					{
+						pos_arr.clear ();
+					}
+					min_v = sum;
 					pos_arr.push_back ({ x, y });
 				}
 			}
@@ -196,73 +310,148 @@ const VoidAndCluster::Coord &	VoidAndCluster::pick_one (std::vector <Coord> &pos
 
 
 
-std::unique_ptr <VoidAndCluster::Kernel>	VoidAndCluster::create_gauss_kernel (int w, int h, double sigma)
+template <typename VoidAndCluster::Monochrome::DataType V>
+void	VoidAndCluster::set_pix (PatState &state, Coord pos)
+{
+	assert (V != state._pat (pos._x, pos._y));
+
+	state._pat (pos._x, pos._y) = V;
+	if (V > 0)
+	{
+		apply_kernel (state._pat_filt, pos,
+			[] (SampleType &a, SampleType vk) { a += vk; }
+		);
+	}
+	else
+	{
+		apply_kernel (state._pat_filt, pos,
+			[] (SampleType &a, SampleType vk) { a -= vk; }
+		);
+	}
+}
+
+
+
+template <typename F>
+void	VoidAndCluster::apply_kernel (Filtered &pat_filt, Coord pos, F op) const
+{
+	const int      kw2 = (_kernel._w - 1) / 2;
+	const int      kh2 = (_kernel._h - 1) / 2;
+
+	op (pat_filt (pos._x, pos._y), _kernel._m (0, 0));
+	for (int j = 1; j <= kh2; ++j)
+	{
+		const auto     vx = _kernel._m (j, 0);
+		const auto     vy = _kernel._m (0, j);
+		op (pat_filt (pos._x + j, pos._y    ), vx);
+		op (pat_filt (pos._x - j, pos._y    ), vx);
+		op (pat_filt (pos._x    , pos._y + j), vy);
+		op (pat_filt (pos._x    , pos._y - j), vy);
+		for (int i = 1; i <= kw2; ++i)
+		{
+			const auto     vk = _kernel._m (i, j);
+			op (pat_filt (pos._x + i, pos._y + j), vk);
+			op (pat_filt (pos._x - i, pos._y + j), vk);
+			op (pat_filt (pos._x + i, pos._y - j), vk);
+			op (pat_filt (pos._x - i, pos._y - j), vk);
+		}
+	}
+}
+
+
+
+void	VoidAndCluster::create_kernel (int w, int h, double sigma)
 {
 	const auto     w2 = 1 << fstb::get_next_pow_2 (w);
 	const auto     h2 = 1 << fstb::get_next_pow_2 (h);
-	auto           ker_uptr = std::make_unique <Kernel> (w2, h2);
-	auto &         ker      = *ker_uptr;
+	_kernel._m = KernelData (w2, h2);
+	_kernel._w = w;
+	_kernel._h = h;
 
-	const int      kw2 = (w - 1) / 2;
-	const int      kh2 = (h - 1) / 2;
+	const int      kw2 = (_kernel._w - 1) / 2;
+	const int      kh2 = (_kernel._h - 1) / 2;
 	const auto     mul = -1.0 / (2 * sigma * sigma);
 	for (int j = 0; j <= kh2; ++j)
 	{
 		for (int i = 0; i <= kw2; ++i)
 		{
-			const auto     c = exp ((i * i + j * j) * mul);
-			ker ( i,  j) = c;
-			ker (-i,  j) = c;
-			ker ( i, -j) = c;
-			ker (-i, -j) = c;
+			const auto     cf = exp ((i * i + j * j) * mul);
+			const auto     ci = int64_t (cf * _kscale + 0.5);
+			_kernel._m ( i,  j) = ci;
+			_kernel._m (-i,  j) = ci;
+			_kernel._m ( i, -j) = ci;
+			_kernel._m (-i, -j) = ci;
 		}
 	}
-
-	return ker_uptr;
 }
 
 
 
-void	VoidAndCluster::generate_initial_mat (MatrixWrap <Rank> &m)
+void	VoidAndCluster::filter_pat (PatState &state)
 {
-	const double   thr = 0.1;
+	state._pat_filt.clear ();
 
-	const int      w = m.get_w ();
-	const int      h = m.get_h ();
-	MatrixWrap <double>  err_mat (w, h);
-	err_mat.clear ();
-	int            dir = 1;
-	for (int pass = 0; pass < 2; ++pass)
+	const int      w = state._pat.get_w ();
+	const int      h = state._pat.get_h ();
+
+	const int      kw2 = (_kernel._w - 1) / 2;
+	const int      kh2 = (_kernel._h - 1) / 2;
+
+	for (int y = 0; y < h; ++y)
 	{
-		for (int y = 0; y < h; ++y)
+		for (int x = 0; x < w; ++x)
 		{
-			const int      x_beg = (dir < 0) ? w - 1 : 0;
-			const int      x_end = (dir < 0) ?    -1 : w;
-			for (int x = x_beg; x != x_end; x += dir)
+#if 0
+			const auto     val = state._pat (x, y);
+			if (val != 0)
 			{
-				double         err = err_mat (x, y);
-				err_mat (x, y) = 0;
-				const double   val = thr + err;
-				const int      qnt = fstb::round_int (val);
-				assert (qnt >= 0 && qnt <= 1);
-				m (x, y) = Rank (qnt);
-				err = val - double (qnt);
-				// Filter-Lite error diffusion
-				const double   e2 = err * 0.5;
-				const double   e4 = err * 0.25;
-				err_mat (x + dir, y    ) += e2;
-				err_mat (x - dir, y + 1) += e4;
-				err_mat (x      , y + 1) += e4;
+				state._pat_filt (x, y) += _kernel._m (0, 0);
+				for (int j = 1; j <= kh2; ++j)
+				{
+					const auto     vx = _kernel._m (j, 0);
+					const auto     vy = _kernel._m (0, j);
+					state._pat (x + j, y    ) += vx;
+					state._pat (x - j, y    ) += vx;
+					state._pat (x    , y + j) += vy;
+					state._pat (x    , y - j) += vy;
+					for (int i = 1; i <= kw2; ++i)
+					{
+						const auto     vk = _kernel._m (i, j);
+						state._pat_filt (x + i, y + j) += vk;
+						state._pat_filt (x - i, y + j) += vk;
+						state._pat_filt (x + i, y - j) += vk;
+						state._pat_filt (x - i, y - j) += vk;
+					}
+				}
 			}
-
-			dir = -dir;
+#else
+			auto           sum = state._pat (x, y) * _kernel._m (0, 0);
+			for (int j = 1; j <= kh2; ++j)
+			{
+				const auto     vx = _kernel._m (j, 0);
+				const auto     vy = _kernel._m (0, j);
+				sum += state._pat (x + j, y    ) * vx;
+				sum += state._pat (x - j, y    ) * vx;
+				sum += state._pat (x    , y + j) * vy;
+				sum += state._pat (x    , y - j) * vy;
+				for (int i = 1; i <= kw2; ++i)
+				{
+					const auto     vk = _kernel._m (i, j);
+					sum += state._pat (x + i, y + j) * vk;
+					sum += state._pat (x - i, y + j) * vk;
+					sum += state._pat (x + i, y - j) * vk;
+					sum += state._pat (x - i, y - j) * vk;
+				}
+			}
+			state._pat_filt (x, y) = sum;
+#endif
 		}
 	}
 }
 
 
 
-int	VoidAndCluster::count_elt (const MatrixWrap <Rank> &m, int val)
+int	VoidAndCluster::count_elt (const Monochrome &m, int val)
 {
 	int            total = 0;
 	const int      w     = m.get_w ();
