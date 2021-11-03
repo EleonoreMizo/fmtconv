@@ -154,7 +154,7 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		dmode = fmtcl::Dither::DMode_ROUND;
 	}
 	if (   dmode <  0
-	    || dmode >= fmtcl::Dither::DMode_NBR_ELT)
+	    || (dmode & 0xFFFF) >= fmtcl::Dither::DMode_NBR_ELT)
 	{
 		throw_inval_arg ("invalid dmode.");
 	}

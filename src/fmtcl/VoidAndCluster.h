@@ -80,6 +80,7 @@ public:
 	               VoidAndCluster () = default;
 	virtual			~VoidAndCluster () {}
 
+	void           set_aztec_mode (bool flag);
 	void           create_matrix (MatrixWrap <Rank> &vnc);
 
 
@@ -156,6 +157,8 @@ private:
 	Kernel         _kernel;
 	PatState       _base;
 	PatState       _cur;
+
+	bool           _aztec_flag = false;
 
 
 

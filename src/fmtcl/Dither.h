@@ -74,7 +74,9 @@ public:
 		DMode_VOIDCLUST,  // 8
 		DMode_QUASIRND,   // 9
 
-		DMode_NBR_ELT
+		DMode_NBR_ELT,
+
+		DMode_VERY_LARGE = 0x12345678
 	};
 
 	explicit       Dither (
@@ -162,7 +164,7 @@ private:
 	void           build_dither_pat ();
 	void           build_dither_pat_round ();
 	void           build_dither_pat_bayer ();
-	void           build_dither_pat_void_and_cluster ();
+	void           build_dither_pat_void_and_cluster (bool aztec_flag);
 	void           expand_dither_pat (const PatData &small);
 	void           build_next_dither_pat ();
 	void           copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle) noexcept;
@@ -414,6 +416,7 @@ private:
 	bool           _range_def_flag = false;
 
 	int            _dmode    = DMode_FAST;
+	bool           _alt_flag = false;
 	int            _pat_size = 32;         // Must be a power of 2
 	double         _ampo     = 1;
 	double         _ampn     = 0;

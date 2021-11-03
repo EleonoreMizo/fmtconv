@@ -35,17 +35,19 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-// Enables a bug that has a very aesthetical side effect
-#undef fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
-
-
-
 namespace fmtcl
 {
 
 
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+void	VoidAndCluster::set_aztec_mode (bool flag)
+{
+	_aztec_flag = flag;
+}
 
 
 
@@ -75,7 +77,7 @@ void	VoidAndCluster::create_matrix (MatrixWrap <Rank> &vnc)
 		_cur.find_cluster (coord_arr);
 		const auto &   c = pick_one (coord_arr, uint32_t (rank));
 		set_pix <0> (_cur, c);
-		vnc (c._x, c._y) = Rank (rank);
+		vnc.at (c._x, c._y) = Rank (rank);
 	}
 
 	rank = rank_base;
@@ -85,7 +87,7 @@ void	VoidAndCluster::create_matrix (MatrixWrap <Rank> &vnc)
 		_cur.find_void (coord_arr);
 		const auto &   v = pick_one (coord_arr, uint32_t (rank));
 		set_pix <1> (_cur, v);
-		vnc (v._x, v._y) = Rank (rank);
+		vnc.at (v._x, v._y) = Rank (rank);
 		++ rank;
 	}
 }
@@ -137,7 +139,8 @@ void	VoidAndCluster::create_kernel (int w, int h, double sigma)
 	{
 		for (int i = 0; i <= kw2; ++i)
 		{
-			const auto     cf = exp ((i * i + j * j) * mul);
+			const auto     r2 = i * i + j * j;
+			const auto     cf = exp (r2 * mul);
 			const auto     ci = int64_t (cf * _kscale + 0.5);
 			_kernel._m ( i,  j) = ci;
 			_kernel._m (-i,  j) = ci;
@@ -171,7 +174,7 @@ void	VoidAndCluster::generate_initial_mat ()
 				const double   val = thr + err;
 				const int      qnt = fstb::round_int (val);
 				assert (qnt >= 0 && qnt <= 1);
-				_base._pat (x, y) = typename Monochrome::DataType (qnt);
+				_base._pat.at (x, y) = typename Monochrome::DataType (qnt);
 				err = val - double (qnt);
 				// Filter-Lite error diffusion
 				const double   e2 = err * 0.5;
@@ -228,20 +231,21 @@ void	VoidAndCluster::filter_pat (PatState &state)
 	{
 		for (int x = 0; x < w; ++x)
 		{
-			auto           sum = state._pat (x, y) * _kernel._m (0, 0);
+			auto           sum = state._pat (x, y) * _kernel._m.at (0, 0);
 			for (int j = 1; j <= kh2; ++j)
 			{
-#if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
-				const auto     vx = _kernel._m (j, 0);
-				const auto     vy = _kernel._m (0, j);
-				sum += state._pat (x + j, y    ) * vx;
-				sum += state._pat (x - j, y    ) * vx;
-				sum += state._pat (x    , y + j) * vy;
-				sum += state._pat (x    , y - j) * vy;
-#endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
+				if (! _aztec_flag)
+				{
+					const auto     vx = _kernel._m.at (j, 0);
+					const auto     vy = _kernel._m.at (0, j);
+					sum += state._pat (x + j, y    ) * vx;
+					sum += state._pat (x - j, y    ) * vx;
+					sum += state._pat (x    , y + j) * vy;
+					sum += state._pat (x    , y - j) * vy;
+				}
 				for (int i = 1; i <= kw2; ++i)
 				{
-					const auto     vk = _kernel._m (i, j);
+					const auto     vk = _kernel._m.at (i, j);
 					sum += state._pat (x + i, y + j) * vk;
 					sum += state._pat (x - i, y + j) * vk;
 					sum += state._pat (x + i, y - j) * vk;
@@ -353,20 +357,21 @@ void	VoidAndCluster::apply_kernel (PatState &state, Coord pos, F op) const
 	const int      kw2 = (_kernel._w - 1) / 2;
 	const int      kh2 = (_kernel._h - 1) / 2;
 
-	update_filtered (state, pos, op, _kernel._m (0, 0));
+	update_filtered (state, pos, op, _kernel._m.at (0, 0));
 	for (int j = 1; j <= kh2; ++j)
 	{
-#if ! defined (fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN)
-		const auto     vx = _kernel._m (j, 0);
-		const auto     vy = _kernel._m (0, j);
-		update_filtered (state, { pos._x + j, pos._y     }, op, vx);
-		update_filtered (state, { pos._x - j, pos._y     }, op, vx);
-		update_filtered (state, { pos._x    , pos._y + j }, op, vy);
-		update_filtered (state, { pos._x    , pos._y - j }, op, vy);
-#endif // fmtcl_VoidAndCluster_NICE_LOOKING_PATTERN
+		if (! _aztec_flag)
+		{
+			const auto     vx = _kernel._m.at (j, 0);
+			const auto     vy = _kernel._m.at (0, j);
+			update_filtered (state, { pos._x + j, pos._y     }, op, vx);
+			update_filtered (state, { pos._x - j, pos._y     }, op, vx);
+			update_filtered (state, { pos._x    , pos._y + j }, op, vy);
+			update_filtered (state, { pos._x    , pos._y - j }, op, vy);
+		}
 		for (int i = 1; i <= kw2; ++i)
 		{
-			const auto     vk = _kernel._m (i, j);
+			const auto     vk = _kernel._m.at (i, j);
 			update_filtered (state, { pos._x + i, pos._y + j }, op, vk);
 			update_filtered (state, { pos._x - i, pos._y + j }, op, vk);
 			update_filtered (state, { pos._x + i, pos._y - j }, op, vk);
@@ -407,7 +412,7 @@ int	VoidAndCluster::count_elt (const Monochrome &m, int val)
 	{
 		for (int x = 0; x < w; ++x)
 		{
-			const int      c = m (x, y);
+			const int      c = m.at (x, y);
 			if (c == val)
 			{
 				++ total;

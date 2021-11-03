@@ -126,7 +126,7 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 		dmode = fmtcl::Dither::DMode_ROUND;
 	}
 	if (   dmode <  0
-	    || dmode >= fmtcl::Dither::DMode_NBR_ELT)
+	    || (dmode & 0xFFFF) >= fmtcl::Dither::DMode_NBR_ELT)
 	{
 		env.ThrowError (fmtcavs_BITDEPTH ": invalid dmode.");
 	}

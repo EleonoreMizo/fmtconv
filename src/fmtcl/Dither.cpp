@@ -76,7 +76,8 @@ Dither::Dither (
 ,	_nbr_planes (nbr_planes)
 ,	_sse2_flag (sse2_flag)
 ,	_avx2_flag (avx2_flag)
-,	_dmode (dmode)
+,	_dmode (dmode & 0xFFFF)
+,	_alt_flag (dmode >= 0xFFFF)
 ,	_pat_size (pat_size)
 ,	_ampo (ampo)
 ,	_ampn (ampn)
@@ -108,8 +109,7 @@ Dither::Dither (
 	assert (color_fam < ColorFamily_NBR_ELT);
 	assert (nbr_planes > 0);
 	assert (nbr_planes <= _max_nbr_planes);
-	assert (dmode >= 0);
-	assert (dmode < DMode_NBR_ELT);
+	assert ((dmode & 0xFFFF) < DMode_NBR_ELT);
 	assert (pat_size >= 4);
 	assert (pat_size <= _pat_max_size);
 	assert (fstb::is_pow_2 (pat_size));
@@ -287,7 +287,7 @@ void	Dither::build_dither_pat ()
 		break;
 
 	case DMode_VOIDCLUST:
-		build_dither_pat_void_and_cluster ();
+		build_dither_pat_void_and_cluster (_alt_flag);
 		break;
 
 	case DMode_QUASIRND:
@@ -345,9 +345,10 @@ void	Dither::build_dither_pat_bayer ()
 
 
 
-void	Dither::build_dither_pat_void_and_cluster ()
+void	Dither::build_dither_pat_void_and_cluster (bool aztec_flag)
 {
 	VoidAndCluster   vc_gen;
+	vc_gen.set_aztec_mode (aztec_flag);
 	MatrixWrap <VoidAndCluster::Rank> pat_raw (_pat_size, _pat_size);
 	vc_gen.create_matrix (pat_raw);
 
