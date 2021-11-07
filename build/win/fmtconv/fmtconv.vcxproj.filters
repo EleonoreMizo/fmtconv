@@ -7,8 +7,68 @@
     <Filter Include="vsutl">
       <UniqueIdentifier>{a51f5b8a-dc58-499b-89f1-eaa79698ba55}</UniqueIdentifier>
     </Filter>
+    <Filter Include="avs">
+      <UniqueIdentifier>{6c93aa52-048b-4d91-804f-deae91f0a7b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fmtcavs">
+      <UniqueIdentifier>{7a1aeee0-aae6-4fff-ae20-09cb2f01a69f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="avsutl">
+      <UniqueIdentifier>{ccc042a6-d386-4b51-83db-1ebd9da95b72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\avs\alignment.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avs\capi.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avs\config.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avs\cpuid.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avs\filesystem.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avs\minmax.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avs\posix.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avs\types.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avs\win.h">
+      <Filter>avs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avsutl\PlaneProcessor.h">
+      <Filter>avsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avsutl\PlaneProcCbInterface.h">
+      <Filter>avsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avsutl\PlaneProcMode.h">
+      <Filter>avsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avsutl\TFlag.h">
+      <Filter>avsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avsutl\fnc.h">
+      <Filter>avsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avsutl\CsPlane.h">
+      <Filter>avsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avsutl\fnc.hpp">
+      <Filter>avsutl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\avsutl\VideoFilterBase.h">
+      <Filter>avsutl</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\fmtc\Bitdepth.h">
       <Filter>fmtc</Filter>
     </ClInclude>
@@ -26,6 +86,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\fmtc\version.h">
       <Filter>fmtc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Bitdepth.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\fnc.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\function_names.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\CpuOpt.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Matrix.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\FmtAvs.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\ProcAlpha.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Matrix2020CL.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Primaries.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Resample.h">
+      <Filter>fmtcavs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcavs\Transfer.h">
+      <Filter>fmtcavs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\vsutl\FilterBase.h">
       <Filter>vsutl</Filter>
@@ -60,6 +153,7 @@
     <ClInclude Include="..\..\..\src\vsutl\Redirect.hpp">
       <Filter>vsutl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\avisynth.h" />
     <ClInclude Include="..\..\..\src\VapourSynth.h" />
     <ClInclude Include="..\..\..\src\fmtc\Matrix2020CL.h">
       <Filter>fmtc</Filter>
@@ -88,32 +182,32 @@
     <ClInclude Include="..\..\..\src\vswrap.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\fmtc\Bitdepth.cpp">
-      <Filter>fmtc</Filter>
+    <ClCompile Include="..\..\..\src\avsutl\fnc_avsutl.cpp">
+      <Filter>avsutl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\fmtc\Matrix.cpp">
-      <Filter>fmtc</Filter>
+    <ClCompile Include="..\..\..\src\avsutl\CsPlane.cpp">
+      <Filter>avsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\avsutl\VideoFilterBase.cpp">
+      <Filter>avsutl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\fmtc\NativeToStack16.cpp">
-      <Filter>fmtc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\fmtc\Resample.cpp">
       <Filter>fmtc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\fmtc\Stack16ToNative.cpp">
       <Filter>fmtc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\fnc_fmtcavs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\FmtAvs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\ProcAlpha.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\vsutl\FilterBase.cpp">
       <Filter>vsutl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\vsutl\PlaneProcCbInterface.cpp">
-      <Filter>vsutl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\vsutl\PlaneProcessor.cpp">
-      <Filter>vsutl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\fmtc\Matrix2020CL.cpp">
-      <Filter>fmtc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\fmtc\Convert.cpp">
       <Filter>fmtc</Filter>
@@ -121,12 +215,7 @@
     <ClCompile Include="..\..\..\src\fmtc\ConvStep.cpp">
       <Filter>fmtc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\fmtc\Transfer.cpp">
-      <Filter>fmtc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\fmtc\Primaries.cpp">
-      <Filter>fmtc</Filter>
-    </ClCompile>
+    <ClCompile Include="..\..\..\src\main-avs.cpp" />
     <ClCompile Include="..\..\..\src\main-vs.cpp" />
     <ClCompile Include="..\..\..\src\vsutl\fnc_vsutl.cpp">
       <Filter>vsutl</Filter>
@@ -134,8 +223,59 @@
     <ClCompile Include="..\..\..\src\fmtc\fnc_fmtc.cpp">
       <Filter>fmtc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\fmtc\CpuOpt.cpp">
+    <ClCompile Include="..\..\..\src\fmtc\Bitdepth_vs.cpp">
       <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Bitdepth_avs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\CpuOpt_vs.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\CpuOpt_avs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Matrix_avs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Matrix2020CL_avs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Matrix2020CL_vs.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Matrix_vs.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Primaries_vs.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Primaries_avs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Resample_avs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcavs\Transfer_avs.cpp">
+      <Filter>fmtcavs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Transfer_vs.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtc\Resample_vs.cpp">
+      <Filter>fmtc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vsutl\PlaneProcCbInterface_vs.cpp">
+      <Filter>vsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vsutl\PlaneProcessor_vs.cpp">
+      <Filter>vsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\avsutl\PlaneProcCbInterface_avs.cpp">
+      <Filter>avsutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\avsutl\PlaneProcessor_avs.cpp">
+      <Filter>avsutl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

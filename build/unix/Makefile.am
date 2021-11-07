@@ -290,29 +290,29 @@ libfmtconv_la_SOURCES = $(commonsrc) \
         ../../src/types.h \
         ../../src/VapourSynth.h \
         ../../src/vswrap.h \
-        ../../src/fmtc/Bitdepth.cpp \
+        ../../src/fmtc/Bitdepth_vs.cpp \
         ../../src/fmtc/Bitdepth.h \
         ../../src/fmtc/Convert.cpp \
         ../../src/fmtc/Convert.h \
         ../../src/fmtc/ConvStep.cpp \
         ../../src/fmtc/ConvStep.h \
-        ../../src/fmtc/CpuOpt.cpp \
+        ../../src/fmtc/CpuOpt_vs.cpp \
         ../../src/fmtc/CpuOpt.h \
         ../../src/fmtc/fnc_fmtc.cpp \
         ../../src/fmtc/fnc.h \
-        ../../src/fmtc/Matrix2020CL.cpp \
+        ../../src/fmtc/Matrix2020CL_vs.cpp \
         ../../src/fmtc/Matrix2020CL.h \
-        ../../src/fmtc/Matrix.cpp \
+        ../../src/fmtc/Matrix_vs.cpp \
         ../../src/fmtc/Matrix.h \
         ../../src/fmtc/NativeToStack16.cpp \
         ../../src/fmtc/NativeToStack16.h \
-        ../../src/fmtc/Primaries.cpp \
+        ../../src/fmtc/Primaries_vs.cpp \
         ../../src/fmtc/Primaries.h \
-        ../../src/fmtc/Resample.cpp \
+        ../../src/fmtc/Resample_vs.cpp \
         ../../src/fmtc/Resample.h \
         ../../src/fmtc/Stack16ToNative.cpp \
         ../../src/fmtc/Stack16ToNative.h \
-        ../../src/fmtc/Transfer.cpp \
+        ../../src/fmtc/Transfer_vs.cpp \
         ../../src/fmtc/Transfer.h \
         ../../src/fmtc/version.h \
         ../../src/vsutl/FilterBase.cpp \
@@ -324,9 +324,9 @@ libfmtconv_la_SOURCES = $(commonsrc) \
         ../../src/vsutl/NodeRefSPtr.h \
         ../../src/vsutl/ObjRefSPtr.h \
         ../../src/vsutl/ObjRefSPtr.hpp \
-        ../../src/vsutl/PlaneProcCbInterface.cpp \
+        ../../src/vsutl/PlaneProcCbInterface_vs.cpp \
         ../../src/vsutl/PlaneProcCbInterface.h \
-        ../../src/vsutl/PlaneProcessor.cpp \
+        ../../src/vsutl/PlaneProcessor_vs.cpp \
         ../../src/vsutl/PlaneProcessor.h \
         ../../src/vsutl/PlaneProcMode.h \
         ../../src/vsutl/Redirect.h \

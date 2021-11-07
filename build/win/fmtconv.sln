@@ -16,11 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\unix\Makefile.am = ..\unix\Makefile.am
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fmtcavs", "fmtcavs\fmtcavs.vcxproj", "{D578C52A-7079-479B-A2AD-17C07E9EE505}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E3709730-4FD3-4771-844E-719AAC38AA6C} = {E3709730-4FD3-4771-844E-719AAC38AA6C}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{C78404DA-AE08-4BBE-BFCA-388AC3701AD9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E3709730-4FD3-4771-844E-719AAC38AA6C} = {E3709730-4FD3-4771-844E-719AAC38AA6C}
@@ -56,16 +51,6 @@ Global
 		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Release|Win32.Build.0 = Release|Win32
 		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Release|x64.ActiveCfg = Release|x64
 		{E3709730-4FD3-4771-844E-719AAC38AA6C}.Release|x64.Build.0 = Release|x64
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Debug|ARM.ActiveCfg = Debug|Win32
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Debug|Win32.Build.0 = Debug|Win32
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Debug|x64.ActiveCfg = Debug|x64
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Debug|x64.Build.0 = Debug|x64
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Release|ARM.ActiveCfg = Release|Win32
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Release|Win32.ActiveCfg = Release|Win32
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Release|Win32.Build.0 = Release|Win32
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Release|x64.ActiveCfg = Release|x64
-		{D578C52A-7079-479B-A2AD-17C07E9EE505}.Release|x64.Build.0 = Release|x64
 		{C78404DA-AE08-4BBE-BFCA-388AC3701AD9}.Debug|ARM.ActiveCfg = Debug|Win32
 		{C78404DA-AE08-4BBE-BFCA-388AC3701AD9}.Debug|Win32.ActiveCfg = Debug|Win32
 		{C78404DA-AE08-4BBE-BFCA-388AC3701AD9}.Debug|Win32.Build.0 = Debug|Win32

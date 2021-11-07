@@ -128,6 +128,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\avsutl\CsPlane.h" />
+    <ClInclude Include="..\..\..\src\avsutl\fnc.h" />
+    <ClInclude Include="..\..\..\src\avsutl\fnc.hpp" />
+    <ClInclude Include="..\..\..\src\avsutl\PlaneProcCbInterface.h" />
+    <ClInclude Include="..\..\..\src\avsutl\PlaneProcessor.h" />
+    <ClInclude Include="..\..\..\src\avsutl\PlaneProcMode.h" />
+    <ClInclude Include="..\..\..\src\avsutl\TFlag.h" />
+    <ClInclude Include="..\..\..\src\avsutl\VideoFilterBase.h" />
+    <ClInclude Include="..\..\..\src\avs\alignment.h" />
+    <ClInclude Include="..\..\..\src\avs\capi.h" />
+    <ClInclude Include="..\..\..\src\avs\config.h" />
+    <ClInclude Include="..\..\..\src\avs\cpuid.h" />
+    <ClInclude Include="..\..\..\src\avs\filesystem.h" />
+    <ClInclude Include="..\..\..\src\avs\minmax.h" />
+    <ClInclude Include="..\..\..\src\avs\posix.h" />
+    <ClInclude Include="..\..\..\src\avs\types.h" />
+    <ClInclude Include="..\..\..\src\avs\win.h" />
     <ClInclude Include="..\..\..\src\fmtc\Bitdepth.h" />
     <ClInclude Include="..\..\..\src\fmtc\Convert.h" />
     <ClInclude Include="..\..\..\src\fmtc\ConvStep.h" />
@@ -141,6 +158,17 @@
     <ClInclude Include="..\..\..\src\fmtc\Stack16ToNative.h" />
     <ClInclude Include="..\..\..\src\fmtc\Transfer.h" />
     <ClInclude Include="..\..\..\src\fmtc\version.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Bitdepth.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\CpuOpt.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\FmtAvs.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\fnc.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\function_names.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Matrix.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Matrix2020CL.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Primaries.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\ProcAlpha.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Resample.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Transfer.h" />
     <ClInclude Include="..\..\..\src\vsutl\FilterBase.h" />
     <ClInclude Include="..\..\..\src\vsutl\fnc.h" />
     <ClInclude Include="..\..\..\src\vsutl\FrameRefSPtr.h" />
@@ -153,26 +181,43 @@
     <ClInclude Include="..\..\..\src\vsutl\PlaneProcMode.h" />
     <ClInclude Include="..\..\..\src\vsutl\Redirect.h" />
     <ClInclude Include="..\..\..\src\vsutl\Redirect.hpp" />
+    <ClInclude Include="..\..\..\src\avisynth.h" />
     <ClInclude Include="..\..\..\src\VapourSynth.h" />
     <ClInclude Include="..\..\..\src\vswrap.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\fmtc\Bitdepth.cpp" />
+    <ClCompile Include="..\..\..\src\avsutl\CsPlane.cpp" />
+    <ClCompile Include="..\..\..\src\avsutl\fnc_avsutl.cpp" />
+    <ClCompile Include="..\..\..\src\avsutl\PlaneProcCbInterface_avs.cpp" />
+    <ClCompile Include="..\..\..\src\avsutl\PlaneProcessor_avs.cpp" />
+    <ClCompile Include="..\..\..\src\avsutl\VideoFilterBase.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Bitdepth_vs.cpp" />
     <ClCompile Include="..\..\..\src\fmtc\Convert.cpp" />
     <ClCompile Include="..\..\..\src\fmtc\ConvStep.cpp" />
-    <ClCompile Include="..\..\..\src\fmtc\CpuOpt.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\CpuOpt_vs.cpp" />
     <ClCompile Include="..\..\..\src\fmtc\fnc_fmtc.cpp" />
-    <ClCompile Include="..\..\..\src\fmtc\Matrix.cpp" />
-    <ClCompile Include="..\..\..\src\fmtc\Matrix2020CL.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Matrix_vs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Matrix2020CL_vs.cpp" />
     <ClCompile Include="..\..\..\src\fmtc\NativeToStack16.cpp" />
-    <ClCompile Include="..\..\..\src\fmtc\Primaries.cpp" />
-    <ClCompile Include="..\..\..\src\fmtc\Resample.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Primaries_vs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Resample_vs.cpp" />
     <ClCompile Include="..\..\..\src\fmtc\Stack16ToNative.cpp" />
-    <ClCompile Include="..\..\..\src\fmtc\Transfer.cpp" />
+    <ClCompile Include="..\..\..\src\fmtc\Transfer_vs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Bitdepth_avs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\CpuOpt_avs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\FmtAvs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\fnc_fmtcavs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Matrix_avs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Matrix2020CL_avs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Primaries_avs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\ProcAlpha.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Resample_avs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Transfer_avs.cpp" />
     <ClCompile Include="..\..\..\src\vsutl\FilterBase.cpp" />
     <ClCompile Include="..\..\..\src\vsutl\fnc_vsutl.cpp" />
-    <ClCompile Include="..\..\..\src\vsutl\PlaneProcCbInterface.cpp" />
-    <ClCompile Include="..\..\..\src\vsutl\PlaneProcessor.cpp" />
+    <ClCompile Include="..\..\..\src\vsutl\PlaneProcCbInterface_vs.cpp" />
+    <ClCompile Include="..\..\..\src\vsutl\PlaneProcessor_vs.cpp" />
+    <ClCompile Include="..\..\..\src\main-avs.cpp" />
     <ClCompile Include="..\..\..\src\main-vs.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
