@@ -23,6 +23,8 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include <string>
+
 
 
 class PrecalcVoidAndCluster
@@ -32,7 +34,24 @@ class PrecalcVoidAndCluster
 
 public:
 
-	static int     generate_mat (int size_l2);
+	static constexpr const char *
+	               _namespace_0 = "fmtcl";
+	static constexpr const char *
+	               _classname_0 = "VoidAndClusterPreCalc";
+
+	class HdrCode
+	{
+	public:
+		HdrCode &       operator += (const HdrCode &other);
+		std::string     _header;
+		std::string     _code;
+	};
+
+	static HdrCode  build_all ();
+
+	static HdrCode  print_beg ();
+	static HdrCode  generate_mat (int size_l2, bool alt_flag);
+	static HdrCode  print_end (); 
 
 
 
@@ -45,6 +64,9 @@ protected:
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 private:
+
+	static std::string
+	               print_var_name (int size_l2, bool alt_flag, bool header_flag);
 
 
 

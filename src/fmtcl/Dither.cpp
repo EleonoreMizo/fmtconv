@@ -32,7 +32,7 @@ http://www.wtfpl.net/ for more details.
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/ProxyRwSse2.h"
 #endif
-#include "fmtcl/VoidAndCluster.h"
+#include "fmtcl/VoidAndClusterPrecalc.h"
 #include "fstb/fnc.h"
 
 #include <algorithm>
@@ -115,6 +115,11 @@ Dither::Dither (
 	assert (fstb::is_pow_2 (pat_size));
 	assert (ampo >= 0);
 	assert (ampn >= 0);
+
+	if (_alt_flag)
+	{
+		_pat_size = std::min (_pat_size, 1 << 9);
+	}
 
 	// No dithering required
 	if (   (   SplFmt_is_int (src_fmt)
@@ -347,12 +352,70 @@ void	Dither::build_dither_pat_bayer ()
 
 void	Dither::build_dither_pat_void_and_cluster (bool aztec_flag)
 {
+	auto           pat_data = PatData { _pat_size, _pat_size };
+
+#if 1 // From precalculated tables
+
+	const std::array <const uint64_t *, 10+1> std_arr =
+	{
+		nullptr,
+		nullptr,
+		VoidAndClusterPrecalc::_pat_2_std.data (),
+		VoidAndClusterPrecalc::_pat_3_std.data (),
+		VoidAndClusterPrecalc::_pat_4_std.data (),
+		VoidAndClusterPrecalc::_pat_5_std.data (),
+		VoidAndClusterPrecalc::_pat_6_std.data (),
+		VoidAndClusterPrecalc::_pat_7_std.data (),
+		VoidAndClusterPrecalc::_pat_8_std.data (),
+		VoidAndClusterPrecalc::_pat_9_std.data (),
+		VoidAndClusterPrecalc::_pat_10_std.data ()
+	};
+	const std::array <const uint64_t *, 10+1> alt_arr =
+	{
+		nullptr,
+		nullptr,
+		VoidAndClusterPrecalc::_pat_2_alt.data (),
+		VoidAndClusterPrecalc::_pat_3_alt.data (),
+		VoidAndClusterPrecalc::_pat_4_alt.data (),
+		VoidAndClusterPrecalc::_pat_5_alt.data (),
+		VoidAndClusterPrecalc::_pat_6_alt.data (),
+		VoidAndClusterPrecalc::_pat_7_alt.data (),
+		VoidAndClusterPrecalc::_pat_8_alt.data (),
+		VoidAndClusterPrecalc::_pat_9_alt.data (),
+		nullptr
+	};
+	const auto     size_l2    = fstb::get_prev_pow_2 (_pat_size);
+	assert (size_l2 < int (std_arr.size ()));
+	const auto     src_ptr    =
+		(aztec_flag) ? alt_arr [size_l2] : std_arr [size_l2];
+	assert (src_ptr != nullptr);
+	constexpr int  block_size = 8;
+	int            pos_block  = 0;
+	int            pos_byte   = 0;
+	uint64_t       val        = 0;
+	for (int y = 0; y < _pat_size; ++y)
+	{
+		for (int x = 0; x < _pat_size; ++x)
+		{
+			if (pos_byte == 0)
+			{
+				val = src_ptr [pos_block];
+				++ pos_block;
+			}
+			pat_data (x, y) = PatDataType (
+				int ((val >> (pos_byte * 8)) & 0xFF) - 128
+			);
+			pos_byte = (pos_byte + 1) & (block_size - 1);
+		}
+	}
+
+#else // Direct generation
+
 	VoidAndCluster   vc_gen;
 	vc_gen.set_aztec_mode (aztec_flag);
 	MatrixWrap <VoidAndCluster::Rank> pat_raw (_pat_size, _pat_size);
 	vc_gen.create_matrix (pat_raw);
 
-	auto           pat_data = PatData { _pat_size, _pat_size };
 	const int      area = _pat_size * _pat_size;
 	for (int y = 0; y < _pat_size; ++y)
 	{
@@ -361,6 +424,8 @@ void	Dither::build_dither_pat_void_and_cluster (bool aztec_flag)
 			pat_data (x, y) = PatDataType (pat_raw (x, y) * 256 / area - 128);
 		}
 	}
+
+#endif
 
 	expand_dither_pat (pat_data);
 	build_next_dither_pat ();

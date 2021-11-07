@@ -172,8 +172,17 @@ int main (int argc, char *argv [])
 
 	try
 	{
-//		if (ret_val == 0) { ret_val = TestGammaY::perform_test (); }
-		if (ret_val == 0) { ret_val = PrecalcVoidAndCluster::generate_mat (6); }
+#if 0
+		// Void and cluster table generation
+		auto           files = PrecalcVoidAndCluster::build_all ();
+		printf ("%s\n%s\n", files._header.c_str (), files._code.c_str ());
+
+#else
+		// Standard tests
+		if (ret_val == 0) { ret_val = TestGammaY::perform_test (); }
+		if (ret_val == 0) { PrecalcVoidAndCluster::generate_mat (6, false); }
+
+#endif
 
 
 

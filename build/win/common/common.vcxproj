@@ -277,6 +277,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\Vec3.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Vec3.hpp" />
     <ClInclude Include="..\..\..\src\fmtcl\VoidAndCluster.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\VoidAndClusterPrecalc.h" />
     <ClInclude Include="..\..\..\src\fstb\AllocAlign.h" />
     <ClInclude Include="..\..\..\src\fstb\AllocAlign.hpp" />
     <ClInclude Include="..\..\..\src\fstb\ArrayAlign.h" />
@@ -374,6 +375,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\TransOpSLog3.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransUtil.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\VoidAndCluster.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\VoidAndClusterPrecalc.cpp" />
     <ClCompile Include="..\..\..\src\fstb\CpuId.cpp" />
     <ClCompile Include="..\..\..\src\fstb\fnc_fstb.cpp" />
     <ClCompile Include="..\..\..\src\fstb\ToolsAvx2.cpp">

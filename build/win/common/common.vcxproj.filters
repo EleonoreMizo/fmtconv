@@ -213,6 +213,9 @@
     <ClCompile Include="..\..\..\src\fmtcl\MatXyz2Lms.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\VoidAndClusterPrecalc.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\avstp.h" />
@@ -712,6 +715,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\fstb\Hash.hpp">
       <Filter>fstb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\VoidAndClusterPrecalc.h">
+      <Filter>fmtcl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

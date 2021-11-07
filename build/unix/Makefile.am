@@ -265,6 +265,8 @@ commonsrc = \
         ../../src/fmtcl/Vec3.hpp \
         ../../src/fmtcl/VoidAndCluster.cpp \
         ../../src/fmtcl/VoidAndCluster.h \
+        ../../src/fmtcl/VoidAndClusterPrecalc.cpp \
+        ../../src/fmtcl/VoidAndClusterPrecalc.h \
         ../../src/fstb/AllocAlign.h \
         ../../src/fstb/AllocAlign.hpp \
         ../../src/fstb/ArrayAlign.h \
