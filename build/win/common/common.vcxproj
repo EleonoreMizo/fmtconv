@@ -112,7 +112,7 @@
       <AdditionalIncludeDirectories>../../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level4</WarningLevel>
-      <DisableSpecificWarnings>4127</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4127;4505</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
