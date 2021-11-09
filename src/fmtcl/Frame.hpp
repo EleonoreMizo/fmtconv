@@ -90,7 +90,7 @@ template <typename T>
 constexpr bool	Frame <T>::is_valid (int nbr_planes, int h) const noexcept
 {
 	assert (nbr_planes > 0);
-	assert (nbr_planes <= this->size ());
+	assert (nbr_planes <= int (this->size ()));
 	assert (h > 0);
 
 	for (int p = 0; p < nbr_planes; ++p)
