@@ -68,7 +68,7 @@ It does:</p>
 <p>It supports:</p>
 <ul>
 <li>Pixel data types: 8-&ndash;12-, 14- and 16-bit integer, 32-bit float.</li>
-<li>Colorspaces: RGB, Y, YUV in 4:4:4, 4:2:2, 4:2:0, 4:1:1 and YCgCo with the same chroma subsampling factors.</li>
+<li>Colorspaces: RGB, Y, YUV, YCoCg, YDzDx and ICtCp in 4:4:4, 4:2:2, 4:2:0 and 4:1:1 chroma subsampling factors.</li>
 <li>Progressive and interlaced content.</li>
 </ul>
 
@@ -387,7 +387,7 @@ In 8 bits, pixel values scale from 0 to 255 in full range, and 16 to 235
 in TV-range (16 to 240 for the YUV chroma planes).
 This value has no meaning for float data.</p>
 <p>The default value depends on the colorspace.
-For example, full-range is assumed for RGB and YCgCo colorspaces.
+For example, full-range is assumed for RGB and YCoCg colorspaces.
 Others are assumed TV-range.
 These parameters are mainly intended to guide conversions between integer
 and floating-point data.
@@ -601,14 +601,14 @@ features.</p>
 
 <p>Colorspace conversion or simple cross-plane matrix.</p>
 
-<p>For Y’Cb’Cr’ and Y’Cg’Co’ colorspaces, 4:4:4 is required (no chroma subsampling).
+<p>For Y’Cb’Cr’ and Y’Co’Cg’ colorspaces, 4:4:4 is required (no chroma subsampling).
 To process a subsampled colorspace, you must convert it to 4:4:4 first.</p>
 
 <p>The output is not dithered, therefore you should output at a higher bitdepth
 than the input and dither afterward with <code>bitdepth</code> to avoid
 potential banding.</p>
 
-<p>When the destination color family (R’G’B’, Y’Cb’Cr’ or Y’Cg’Co’) is not
+<p>When the destination color family (R’G’B’, Y’Cb’Cr’ or Y’Co’Cg’) is not
 specified (via <var>col_fam</var> or <var>csp</var>), the function tries to
 deduce it from the matrix settings and the source color family.
 If it cannot be deduced, the color family remains unchanged.</p>
@@ -656,8 +656,8 @@ Possible values are:</p>
 <tr><td><b><code>"709"</code></b></td><td>ITU-R BT.709. For High Definition content.</td></tr>
 <tr><td><b><code>"2020"</code></b><br /><code>"2100"</code></b></td><td>ITU-R BT.2020 and ITU-R BT.2100, non constant luminance mode. For UHDTV content.</td></tr>
 <tr><td><b><code>"240"</code></b></td><td>SMPTE 240M</td></tr>
-<tr><td><b><code>"FCC"</code></b></td><td>FCC</td></tr>
-<tr><td><b><code>"YCgCo"</code></b></td><td>Y’Cg’Co’</td></tr>
+<tr><td><b><code>"FCC"</code></b></td><td>FCC Title 47</td></tr>
+<tr><td><b><code>"YCoCg"<br />"YCgCo"</code></b></td><td>Y’Co’Cg’</td></tr>
 <tr><td><b><code>"YDzDx"</code></b></td><td>Y’D’<sub>Z</sub>D’<sub>X</sub>, SMPTE ST 2085</td></tr>
 <tr><td><b><code>"RGB"</code></b></td><td>R’G’B’. Identity, no cross-plane calculations.</td></tr>
 </table>
@@ -690,7 +690,7 @@ In 8 bits, pixel values scale from 0 to 255 in full range, and 16 to 235
 in TV-range (16 to 240 for the YUV chroma planes).
 This value has no meaning for float data.</p>
 <p>The default value depends on the colorspace.
-For example, full-range is assumed for R’G’B’ and Y’Cg’Co’ colorspaces.
+For example, full-range is assumed for R’G’B’ and Y’Co’Cg’ colorspaces.
 Others are assumed TV-range.
 These parameters are mainly intended to guide conversions between integer
 and floating-point data.
@@ -1411,7 +1411,7 @@ same kind of content as the result from <code>BuildPixelType</code> or the
 <var>pixel_type</var> parameter from <code>BlankClip</code>.</p>
 
 <p class="var">css</p>
-<p>Destination chroma subsampling, for YUV (and YCgCo) colorspaces.
+<p>Destination chroma subsampling, for YUV (and YCoCg) colorspaces.
 Supersedes the chroma subsampling from <var>csp</var>.
 You can also specify the subsampling with the predefined values
 or with a two-digit string.
@@ -1452,7 +1452,7 @@ In 8 bits, pixel values scale from 0 to 255 in full range, and 16 to 235
 in TV-range (16 to 240 for the Y’Cb’Cr’ chroma planes).
 This value has no meaning for float data.</p>
 <p>The default value depends on the colorspace.
-For example, full-range is assumed for RGB and YCgCo colorspaces.
+For example, full-range is assumed for RGB and YCoCg colorspaces.
 Others are assumed TV-range.
 These parameters are mainly intended to guide conversions between integer
 and floating-point data.

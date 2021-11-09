@@ -9,7 +9,7 @@ It does:
 
 It supports:
 * Pixel data types: 8-–12-, 14- and 16-bit integer, 32-bit float.
-* Colorspaces: RGB, Y, YUV in 4:4:4, 4:2:2, 4:2:0, 4:1:1 and YCgCo with the same chroma subsampling factors.
+* Colorspaces: RGB, Y, YUV, YCoCg, YDzDx and ICtCp in 4:4:4, 4:2:2, 4:2:0 and 4:1:1 chroma subsampling factors.
 * Progressive and interlaced content.
 
 Fmtconv is focussed primarily on quality and exactness rather than execution speed.
