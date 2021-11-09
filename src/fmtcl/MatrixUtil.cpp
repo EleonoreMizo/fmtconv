@@ -185,57 +185,58 @@ int	MatrixUtil::make_mat_from_str (Mat4 &m, const std::string &mat, bool to_rgb_
 {
 	int            ret_val = 0;
 
-	if (mat.empty () || mat == "rgb")
+	auto           cs = find_cs_from_mat_str (mat, false);
+	switch (cs)
 	{
+	case ColorSpaceH265_RGB:
 		m[0][0] = 1; m[0][1] = 0; m[0][2] = 0;
 		m[1][0] = 0; m[1][1] = 1; m[1][2] = 0;
 		m[2][0] = 0; m[2][1] = 0; m[2][2] = 1;
 		m.clean3 (1);
-	}
-	else if (mat == "601")
-	{
-		make_mat_yuv (m, 0.299, 0.587, 0.114, to_rgb_flag);
-	}
-	else if (mat == "709")
-	{
+		break;
+	case ColorSpaceH265_BT709:
 		make_mat_yuv (m, 0.2126, 0.7152, 0.0722, to_rgb_flag);
-	}
-	else if (mat == "240")
-	{
-		make_mat_yuv (m, 0.212, 0.701, 0.087, to_rgb_flag);
-	}
-	else if (mat == "fcc")
-	{
+		break;
+	case ColorSpaceH265_FCC:
 		make_mat_yuv (m, 0.30, 0.59, 0.11, to_rgb_flag);
-	}
-	else if (mat == "ycgco" || mat == "ycocg")
-	{
+		break;
+	case ColorSpaceH265_BT470BG:
+	case ColorSpaceH265_SMPTE170M:
+		make_mat_yuv (m, 0.299, 0.587, 0.114, to_rgb_flag);
+		break;
+	case ColorSpaceH265_SMPTE240M:
+		make_mat_yuv (m, 0.212, 0.701, 0.087, to_rgb_flag);
+		break;
+	case ColorSpaceH265_YCGCO:
 		make_mat_ycgco (m, to_rgb_flag);
-	}
-	else if (mat == "2020")
-	{
+		break;
+	case ColorSpaceH265_BT2020NCL:
 		make_mat_yuv (m, 0.2627, 0.678, 0.0593, to_rgb_flag);
-	}
-	else if (mat == "ydzdx")
-	{
+		break;
+	case ColorSpaceH265_YDZDX:
 		make_mat_ydzdx (m, to_rgb_flag);
-	}
-	else if (mat == "lms")
-	{
+		break;
+	case ColorSpaceH265_LMS:
 		make_mat_lms (m, to_rgb_flag);
-	}
-	else if (mat == "ictcp_pq")
-	{
+		break;
+	case ColorSpaceH265_ICTCP_PQ:
 		make_mat_ictcp (m, false, to_rgb_flag);
-	}
-	else if (mat == "ictcp_hlg")
-	{
+		break;
+	case ColorSpaceH265_ICTCP_HLG:
 		make_mat_ictcp (m, true, to_rgb_flag);
-	}
-	else
-	{
+		break;
+
+	// Not implemented or invalid codes
+	case ColorSpaceH265_UNSPECIFIED:
+	case ColorSpaceH265_RESERVED:
+	case ColorSpaceH265_BT2020CL:
+	case ColorSpaceH265_ICTCP:
+	case ColorSpaceH265_CHRODERNCL:
+	case ColorSpaceH265_CHRODERCL:
+	default:
 		assert (false);
 		ret_val = -1;
+		break;
 	}
 
 	return ret_val;
