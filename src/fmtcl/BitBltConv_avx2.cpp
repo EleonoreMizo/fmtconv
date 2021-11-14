@@ -55,10 +55,9 @@ namespace fmtcl
 
 
 
-void	BitBltConv::bitblt_int_to_flt_avx2_switch (uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_int_to_flt_avx2_switch (uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	const uint8_t *                    src_i08_ptr (src_ptr);
-	const Proxy::PtrStack16Const::Type src_s16_ptr (src_ptr, src_lsb_ptr);
 	const Proxy::PtrInt16Const::Type   src_i16_ptr (
 		reinterpret_cast <const uint16_t *> (src_ptr)
 	);
@@ -75,13 +74,11 @@ void	BitBltConv::bitblt_int_to_flt_avx2_switch (uint8_t *dst_ptr, int dst_stride
 
 	switch ((scale_flag << 16) + (src_fmt << 8) + src_res)
 	{
-	fmtcl_BitBltConv_CASE (false, STACK16, 16, s16)
 	fmtcl_BitBltConv_CASE (false, INT16  , 16, i16)
 	fmtcl_BitBltConv_CASE (false, INT16  , 12, i16)
 	fmtcl_BitBltConv_CASE (false, INT16  , 10, i16)
 	fmtcl_BitBltConv_CASE (false, INT16  ,  9, i16)
 	fmtcl_BitBltConv_CASE (false, INT8   ,  8, i08)
-	fmtcl_BitBltConv_CASE (true , STACK16, 16, s16)
 	fmtcl_BitBltConv_CASE (true , INT16  , 16, i16)
 	fmtcl_BitBltConv_CASE (true , INT16  , 12, i16)
 	fmtcl_BitBltConv_CASE (true , INT16  , 10, i16)
@@ -100,11 +97,10 @@ void	BitBltConv::bitblt_int_to_flt_avx2_switch (uint8_t *dst_ptr, int dst_stride
 
 
 
-void	BitBltConv::bitblt_flt_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_flt_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	fstb::unused (dst_res);
 
-	const Proxy::PtrStack16::Type dst_s16_ptr (dst_ptr, dst_lsb_ptr);
 	const Proxy::PtrInt16::Type   dst_i16_ptr (
 		reinterpret_cast <uint16_t *> (dst_ptr)
 	);
@@ -121,9 +117,7 @@ void	BitBltConv::bitblt_flt_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_r
 
 	switch ((scale_flag << 4) + dst_fmt)
 	{
-	fmtcl_BitBltConv_CASE (false, STACK16, s16)
 	fmtcl_BitBltConv_CASE (false, INT16  , i16)
-	fmtcl_BitBltConv_CASE (true , STACK16, s16)
 	fmtcl_BitBltConv_CASE (true , INT16  , i16)
 	default:
 		assert (false);
@@ -138,16 +132,14 @@ void	BitBltConv::bitblt_flt_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_r
 
 
 
-void	BitBltConv::bitblt_int_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_int_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	fstb::unused (scale_info_ptr);
 
 	const uint8_t *                    src_i08_ptr (src_ptr);
-	const Proxy::PtrStack16Const::Type src_s16_ptr (src_ptr, src_lsb_ptr);
 	const Proxy::PtrInt16Const::Type   src_i16_ptr (
 		reinterpret_cast <const uint16_t *> (src_ptr)
 	);
-	const Proxy::PtrStack16::Type      dst_s16_ptr (dst_ptr, dst_lsb_ptr);
 	const Proxy::PtrInt16::Type        dst_i16_ptr (
 		reinterpret_cast <uint16_t *> (dst_ptr)
 	);
@@ -162,12 +154,6 @@ void	BitBltConv::bitblt_int_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_r
 
 	switch ((dst_fmt << 20) + (src_fmt << 16) + (dst_res << 8) + src_res)
 	{
-	fmtcl_BitBltConv_CASE (STACK16, INT16  , 16, 16, s16, i16)
-	fmtcl_BitBltConv_CASE (STACK16, INT16  , 16, 12, s16, i16)
-	fmtcl_BitBltConv_CASE (STACK16, INT16  , 16, 10, s16, i16)
-	fmtcl_BitBltConv_CASE (STACK16, INT16  , 16,  9, s16, i16)
-	fmtcl_BitBltConv_CASE (STACK16, INT8   , 16,  8, s16, i08)
-	fmtcl_BitBltConv_CASE (INT16  , STACK16, 16, 16, i16, s16)
 	fmtcl_BitBltConv_CASE (INT16  , INT16  , 16, 12, i16, i16)
 	fmtcl_BitBltConv_CASE (INT16  , INT16  , 16, 10, i16, i16)
 	fmtcl_BitBltConv_CASE (INT16  , INT16  , 16,  9, i16, i16)
@@ -200,7 +186,7 @@ void	BitBltConv::bitblt_int_to_flt_avx2 (uint8_t *dst_ptr, int dst_stride, typen
 	assert (SRC::PtrConst::check_ptr (src_ptr));
 	assert (w > 0);
 	assert (h > 0);
-	assert (! SF || scale_info_ptr != 0);
+	assert (! SF || scale_info_ptr != nullptr);
 
 	__m256         gain;
 	__m256         add_cst;
@@ -267,10 +253,10 @@ template <bool SF, class DST>
 void	BitBltConv::bitblt_flt_to_int_avx2 (typename DST::Ptr::Type dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	assert (DST::Ptr::check_ptr (dst_ptr));
-	assert (src_ptr != 0);
+	assert (src_ptr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
-	assert (! SF || scale_info_ptr != 0);
+	assert (! SF || scale_info_ptr != nullptr);
 
 	__m256         gain;
 	__m256         add_cst;

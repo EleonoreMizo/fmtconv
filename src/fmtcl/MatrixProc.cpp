@@ -433,12 +433,12 @@ void	MatrixProc::process_3_int_cpp (Frame <> dst, FrameRO <> src, int w, int h) 
 
 	for (int y = 0; y < h; ++y)
 	{
-		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
-		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
-		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
-		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr, dst [0]._stride, h);
-		DstPtr         dst_1_ptr = DST::Ptr::make_ptr (dst [1]._ptr, dst [1]._stride, h);
-		DstPtr         dst_2_ptr = DST::Ptr::make_ptr (dst [2]._ptr, dst [2]._stride, h);
+		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr);
+		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr);
+		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr);
+		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr);
+		DstPtr         dst_1_ptr = DST::Ptr::make_ptr (dst [1]._ptr);
+		DstPtr         dst_2_ptr = DST::Ptr::make_ptr (dst [2]._ptr);
 
 		for (int x = 0; x < w; ++x)
 		{
@@ -494,10 +494,10 @@ void	MatrixProc::process_1_int_cpp (Frame <> dst, FrameRO <> src, int w, int h) 
 
 	for (int y = 0; y < h; ++y)
 	{
-		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
-		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
-		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
-		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr, dst [0]._stride, h);
+		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr);
+		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr);
+		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr);
+		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr);
 
 		for (int x = 0; x < w; ++x)
 		{
@@ -644,14 +644,12 @@ void	MatrixProc::process_n_int_sse2 (Frame <> dst, FrameRO <> src, int w, int h)
 		// in the cache.
 		for (int plane_index = 0; plane_index < NP; ++ plane_index)
 		{
-			SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
-			SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
-			SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
+			SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr);
+			SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr);
+			SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr);
 
-			DstPtr         dst_ptr   = DST::Ptr::make_ptr (
-				dst [plane_index]._ptr, dst [plane_index]._stride, h
-			);
-			const int      cind    = plane_index * _mat_size;
+			DstPtr         dst_ptr   = DST::Ptr::make_ptr (dst [plane_index]._ptr);
+			const int      cind      = plane_index * _mat_size;
 
 			for (int x = 0; x < w; x += packsize)
 			{

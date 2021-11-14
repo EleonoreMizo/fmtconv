@@ -170,11 +170,8 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 	// Configures the plane processor
 	_plane_proc_uptr =
 		std::make_unique <avsutl::PlaneProcessor> (vi, *this, true);
-	_plane_proc_uptr->set_dst_clip_info (avsutl::PlaneProcessor::ClipType_NORMAL);
 	_plane_proc_uptr->set_clip_info (
-		avsutl::PlaneProcessor::ClipIdx_SRC1,
-		_clip_src_sptr,
-		avsutl::PlaneProcessor::ClipType_NORMAL
+		avsutl::PlaneProcessor::ClipIdx_SRC1, _clip_src_sptr
 	);
 	_plane_proc_uptr->set_proc_mode (
 		args [Param_PLANES], env, fmtcavs_RESAMPLE ", planes"
@@ -721,11 +718,7 @@ void	Resample::process_plane_proc (::PVideoFrame &dst_sptr, ::IScriptEnvironment
 			fmtcl::is_chroma_plane (_fmt_src.get_col_fam (), plane_index);
 
 		filter_ptr->process_plane (
-			data_dst_ptr, 0,
-			data_src_ptr, 0,
-			stride_dst,
-			stride_src,
-			chroma_flag
+			data_dst_ptr, data_src_ptr, stride_dst, stride_src, chroma_flag
 		);
 	}
 
@@ -789,8 +782,8 @@ void	Resample::process_plane_copy (::PVideoFrame &dst_sptr, ::IScriptEnvironment
 
 	fmtcl::BitBltConv blitter (_sse2_flag, _avx2_flag);
 	blitter.bitblt (
-		_dst_type, _dst_res, data_dst_ptr, nullptr, stride_dst,
-		_src_type, _src_res, data_src_ptr, nullptr, stride_src,
+		_dst_type, _dst_res, data_dst_ptr, stride_dst,
+		_src_type, _src_res, data_src_ptr, stride_src,
 		w, h, scale_info_ptr
 	);
 }

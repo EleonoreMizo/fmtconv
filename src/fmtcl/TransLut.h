@@ -149,12 +149,10 @@ private:
 
 	bool           _loglut_flag   = false;
 
-	// SplFmt_STACK16 not supported at the moment.
 	SplFmt         _src_fmt       = SplFmt_ILLEGAL;
 	int            _src_bits      = 0;
 	bool           _src_full_flag = false;
 
-	// SplFmt_STACK16 not supported at the moment.
 	SplFmt         _dst_fmt       = SplFmt_ILLEGAL;
 	int            _dst_bits      = 0;
 	bool           _dst_full_flag = false;

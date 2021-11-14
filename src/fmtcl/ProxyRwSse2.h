@@ -156,47 +156,6 @@ public:
 	};
 };
 
-template <>
-class ProxyRwSse2 <SplFmt_STACK16>
-{
-public:
-	typedef	Proxy::PtrStack16        Ptr;
-	typedef	Proxy::PtrStack16Const   PtrConst;
-	enum {         ALIGN_R =  1 };
-	enum {         ALIGN_W =  1 };
-	enum {         OFFSET  = -32768 };
-	static fstb_FORCEINLINE void
-	               read_flt (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero);
-	static fstb_FORCEINLINE void
-	               read_flt_partial (const PtrConst::Type &ptr, __m128 &src0, __m128 &src1, const __m128i &zero, int len);
-	static fstb_FORCEINLINE __m128i
-	               read_i16 (const PtrConst::Type &ptr, const __m128i &/*zero*/);
-	static fstb_FORCEINLINE __m128i
-	               read_i16_partial (const PtrConst::Type &ptr, const __m128i &/*zero*/, int len);
-	static fstb_FORCEINLINE void
-	               write_flt (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset);
-	static fstb_FORCEINLINE void
-	               write_flt_partial (const Ptr::Type &ptr, const __m128 &src0, const __m128 &src1, const __m128i &mask_lsb, const __m128i &sign_bit, const __m128 &offset, int len);
-	static fstb_FORCEINLINE void
-	               write_i16 (const Ptr::Type &ptr, const __m128i &src, const __m128i &mask_lsb);
-	static fstb_FORCEINLINE void
-	               write_i16_partial (const Ptr::Type &ptr, const __m128i &src, const __m128i &mask_lsb, int len);
-
-	template <bool CLIP_FLAG, bool SIGN_FLAG>
-	class S16
-	{
-	public:
-		static fstb_FORCEINLINE __m128i
-		               read (const PtrConst::Type &ptr, const __m128i &/*zero*/, const __m128i &sign_bit);
-		static fstb_FORCEINLINE __m128i
-		               read_partial (const PtrConst::Type &ptr, const __m128i &/*zero*/, const __m128i &sign_bit, int len);
-		static fstb_FORCEINLINE void
-		               write_clip (const Ptr::Type &ptr, const __m128i &src, const __m128i &mask_lsb, const __m128i &mi, const __m128i &ma, const __m128i &sign_bit);
-		static fstb_FORCEINLINE void
-		               write_clip_partial (const Ptr::Type &ptr, const __m128i &src, const __m128i &mask_lsb, const __m128i &mi, const __m128i &ma, const __m128i &sign_bit, int len);
-	};
-};
-
 
 
 }	// namespace fmtcl

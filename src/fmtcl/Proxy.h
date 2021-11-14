@@ -54,7 +54,7 @@ public:
 		typedef  T           DataType;
 		typedef  T *         Type;
 		static fstb_FORCEINLINE Type
-		               make_ptr (const uint8_t *ptr, int /*stride_bytes*/, int /*h*/);
+		               make_ptr (const uint8_t *ptr);
 		static fstb_FORCEINLINE void
 		               jump (Type &ptr, int stride);
 		static fstb_FORCEINLINE bool
@@ -63,34 +63,10 @@ public:
 		               copy (const Type &dst_ptr, const typename Ptr1 <const T>::Type &src_ptr, size_t nbr_elt);
 	};
 
-	template <class T>
-	class Ptr2
-	{
-	public:
-		typedef	T     DataType;
-		class Type
-		{
-		public:
-			explicit       Type (T *msb_ptr, T *lsb_ptr);
-			T *            _msb_ptr;
-			T *            _lsb_ptr;
-		};
-		static fstb_FORCEINLINE Type
-		               make_ptr (const uint8_t *ptr, int stride_bytes, int h);
-		static fstb_FORCEINLINE void
-		               jump (Type &ptr, int stride);
-		static fstb_FORCEINLINE bool
-		               check_ptr (const Type &ptr, int align = 1);
-		static fstb_FORCEINLINE void
-		               copy (const Type &dst_ptr, const typename Ptr2 <const T>::Type &src_ptr, size_t nbr_elt);
-	};
-
 	typedef	Ptr1 <float>            PtrFloat;
 	typedef	Ptr1 <const float>      PtrFloatConst;
 	typedef	Ptr1 <uint16_t>         PtrInt16;
 	typedef	Ptr1 <const uint16_t>   PtrInt16Const;
-	typedef	Ptr2 <uint8_t>          PtrStack16;
-	typedef	Ptr2 <const uint8_t>    PtrStack16Const;
 	typedef	Ptr1 <uint8_t>          PtrInt8;
 	typedef	Ptr1 <const uint8_t>    PtrInt8Const;
 

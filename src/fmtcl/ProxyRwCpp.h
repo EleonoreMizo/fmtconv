@@ -104,27 +104,6 @@ public:
 	               write (const Ptr::Type &ptr, const float &src0, const float &src1);
 };
 
-template <>
-class ProxyRwCpp <SplFmt_STACK16>
-{
-public:
-	typedef	Proxy::PtrStack16        Ptr;
-	typedef	Proxy::PtrStack16Const   PtrConst;
-	enum {         ALIGN_R =  1 };
-	enum {         ALIGN_W =  1 };
-	static fstb_FORCEINLINE int
-	               read (const PtrConst::Type &ptr);
-	template <int C>
-	static fstb_FORCEINLINE void
-	               write_clip (const Ptr::Type &ptr, int src);
-	static fstb_FORCEINLINE void
-	               write_no_clip (const Ptr::Type &ptr, int src);
-	static fstb_FORCEINLINE void
-	               read (const PtrConst::Type &ptr, float &src0, float &src1);
-	static fstb_FORCEINLINE void
-	               write (const Ptr::Type &ptr, const float &src0, const float &src1);
-};
-
 
 
 }	// namespace fmtcl

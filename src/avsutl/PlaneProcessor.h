@@ -63,19 +63,6 @@ public:
 		ClipIdx_NBR_ELT
 	};
 
-	enum ClipType
-	{
-		ClipType_UNKNOWN = -1,
-
-		ClipType_NORMAL = 0,
-		ClipType_STACKED_16,
-		ClipType_INTERLEAVED_16,
-		ClipType_MSB,
-		ClipType_LSB,
-
-		ClipType_NBR_ELT
-	};
-
 	enum FmtChkFlag
 	{
 		FmtChkFlag_CS_TYPE    = 1 <<  0, // RGB/YUV
@@ -102,8 +89,7 @@ public:
 	void           set_proc_mode (int plane_index, double mode);
 	double         get_proc_mode (int plane_index) const noexcept;
 
-	void           set_dst_clip_info (ClipType type);
-	void           set_clip_info (ClipIdx index, ::PClip clip_sptr, ClipType type);
+	void           set_clip_info (ClipIdx index, ::PClip clip_sptr);
 
 	int            get_nbr_planes () const;
 
@@ -113,7 +99,6 @@ public:
 	int            get_plane_id (int plane_index, ClipIdx index) const;
 	int            get_width (const ::PVideoFrame &frame_sptr, int plane_id, ClipIdx clip_idx) const;
 	int            get_height (const ::PVideoFrame &frame_sptr, int plane_id) const;
-	int            get_height16 (const ::PVideoFrame &frame_sptr, int plane_id) const;
 
 	// For manual operations
 	bool           is_manual () const;
@@ -126,12 +111,10 @@ public:
 	static int     get_nbr_planes (const ::VideoInfo &vi);
 	static int     get_bytes_per_component (const ::VideoInfo &vi);
 	static int     get_min_w (const ::VideoInfo &vi);
-	static int     get_min_h (const ::VideoInfo &vi, bool stack16_flag);
+	static int     get_min_h (const ::VideoInfo &vi);
 	static int     compute_plane_w (const ::VideoInfo &vi, int plane_index, int w);
 	static int     compute_plane_h (const ::VideoInfo &vi, int plane_index, int h);
 	static void    check_same_format (::IScriptEnvironment *env_ptr, const ::VideoInfo &vi, const ::PClip tst_sptr, const char *fnc_name_0, const char *arg_name_0, int flags = FmtChkFlag_ALL);
-	static bool    check_stack16_width (const ::VideoInfo &vi, int width = -1);
-	static bool    check_stack16_height (const ::VideoInfo &vi, int height = -1);
 
 
 
@@ -148,19 +131,11 @@ private:
 	class ClipInfo
 	{
 	public:
-		ClipType       _type = ClipType_UNKNOWN;
 		::PClip        _clip_sptr; // Not valid for the destination clip
 	};
 
-	void           fill (::PVideoFrame &dst_sptr, int n, int plane_index, ClipType type, float val);
-	void           fill_frame_part (::PVideoFrame &dst_sptr, int n, int plane_index, float val, bool stacked_flag, int part);
-	void           copy (::PVideoFrame &dst_sptr, int n, int plane_index, ClipType type_dst, ClipIdx src_idx, ::IScriptEnvironment &env);
-	void           copy_n_to_n (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env);
-	void           copy_8_to_stack16 (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env, int part);
-	void           copy_stack16_to_8 (::PVideoFrame &dst_sptr, ClipIdx src_idx, int n, int plane_index, ::IScriptEnvironment &env, int part);
-
-	static bool    have_same_height (ClipType t1, ClipType t2);
-	static bool    is_stacked (ClipType type);
+	void           fill (::PVideoFrame &dst_sptr, int n, int plane_index, float val);
+	void           copy (::PVideoFrame &dst_sptr, int n, int plane_index, ClipIdx src_idx, ::IScriptEnvironment &env);
 
 	const ::VideoInfo & // For the destination clip. May be changed during the filter setup.
 	               _vi;

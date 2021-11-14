@@ -57,13 +57,7 @@ bool	SplFmt_is_int (SplFmt fmt)
 
 int	SplFmt_get_unit_size (SplFmt fmt)
 {
-	assert (fmt >= 0);
-	assert (fmt < SplFmt_NBR_ELT);
-
-	static const int  size_arr [SplFmt_NBR_ELT] = { 4, 2, 1, 1 };
-	assert (size_arr [SplFmt_NBR_ELT - 1] > 0);
-
-	return (size_arr [fmt]);
+	return SplFmt_get_data_size (fmt);
 }
 
 int	SplFmt_get_data_size (SplFmt fmt)
@@ -71,7 +65,7 @@ int	SplFmt_get_data_size (SplFmt fmt)
 	assert (fmt >= 0);
 	assert (fmt < SplFmt_NBR_ELT);
 
-	static const int  size_arr [SplFmt_NBR_ELT] = { 4, 2, 2, 1 };
+	static const int  size_arr [SplFmt_NBR_ELT] = { 4, 2, 1 };
 	assert (size_arr [SplFmt_NBR_ELT - 1] > 0);
 
 	return (size_arr [fmt]);

@@ -72,7 +72,7 @@ public:
 	explicit       FilterResize (const ResampleSpecPlane &spec, ContFirInterface &kernel_fnc_h, ContFirInterface &kernel_fnc_v, bool norm_flag, double norm_val_h, double norm_val_v, double gain, SplFmt src_type, int src_res, SplFmt dst_type, int dst_res, bool int_flag, bool sse2_flag, bool avx2_flag);
 	virtual        ~FilterResize () {}
 
-	void           process_plane (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, const uint8_t *src_msb_ptr, const uint8_t *src_lsb_ptr, int stride_dst, int stride_src, bool chroma_flag);
+	void           process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, bool chroma_flag);
 
 
 
@@ -103,12 +103,9 @@ private:
 	{
 	public:
 		FilterResize * _this_ptr;
-		uint8_t *      _dst_msb_ptr;
-		uint8_t *      _dst_lsb_ptr;
+		uint8_t *      _dst_ptr;
 		const uint8_t *
-		               _src_msb_ptr;
-		const uint8_t *
-		               _src_lsb_ptr;
+		               _src_ptr;
 		int            _dst_bpp;        // Pointed bytes per pixel (1 for stack16)
 		int            _src_bpp;        // Pointed bytes per pixel (1 for stack16)
 		int            _stride_dst;     // Bytes
@@ -131,8 +128,8 @@ private:
 
 	typedef	conc::LockFreeCell <TaskRsz>	TaskRszCell;
 
-	void           process_plane_bypass (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, const uint8_t *src_msb_ptr, const uint8_t *src_lsb_ptr, int stride_dst, int stride_src, bool chroma_flag);
-	void           process_plane_normal (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, const uint8_t *src_msb_ptr, const uint8_t *src_lsb_ptr, int stride_dst, int stride_src);
+	void           process_plane_bypass (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, bool chroma_flag);
+	void           process_plane_normal (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src);
 	void           process_tile (TaskRszCell &tr_cell);
 	void           process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, int stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT]);
 

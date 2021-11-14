@@ -90,8 +90,8 @@ void	ProcAlpha::process_plane (::PVideoFrame &dst_sptr, ::PVideoFrame &src_sptr)
 
 			fmtcl::BitBltConv blitter (_sse2_flag, _avx2_flag);
 			blitter.bitblt (
-				_splfmt_dst, _dst_res, dst_ptr, nullptr, dst_stride,
-				_splfmt_src, _src_res, src_ptr, nullptr, src_stride,
+				_splfmt_dst, _dst_res, dst_ptr, dst_stride,
+				_splfmt_src, _src_res, src_ptr, src_stride,
 				_w, _h,
 				&_scale_info
 			);

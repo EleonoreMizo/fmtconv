@@ -28,28 +28,12 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 // Dst fmt, dst bits, src fmt, src bits
 #define fmtcl_Matrix2020CLProc_TO_YUV_SPAN_I(CI) \
 	CI (INT8   ,  8, INT16  , 16) \
-	CI (INT8   ,  8, STACK16, 16) \
-	                              \
 	CI (INT16  ,  9, INT16  , 16) \
-	CI (INT16  ,  9, STACK16, 16) \
-	                              \
 	CI (INT16  , 10, INT16  , 16) \
-	CI (INT16  , 10, STACK16, 16) \
-	                              \
 	CI (INT16  , 11, INT16  , 16) \
-	CI (INT16  , 11, STACK16, 16) \
-	                              \
 	CI (INT16  , 12, INT16  , 16) \
-	CI (INT16  , 12, STACK16, 16) \
-	                              \
 	CI (INT16  , 14, INT16  , 16) \
-	CI (INT16  , 14, STACK16, 16) \
-	                              \
-	CI (INT16  , 16, INT16  , 16) \
-	CI (INT16  , 16, STACK16, 16) \
-	                              \
-	CI (STACK16, 16, INT16  , 16) \
-	CI (STACK16, 16, STACK16, 16)
+	CI (INT16  , 16, INT16  , 16)
 
 
 
@@ -61,17 +45,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 	CI (INT16  , 16, INT16  , 11) \
 	CI (INT16  , 16, INT16  , 12) \
 	CI (INT16  , 16, INT16  , 14) \
-	CI (INT16  , 16, INT16  , 16) \
-	CI (INT16  , 16, STACK16, 16) \
-	                              \
-	CI (STACK16, 16, INT8   ,  8) \
-	CI (STACK16, 16, INT16  ,  9) \
-	CI (STACK16, 16, INT16  , 10) \
-	CI (STACK16, 16, INT16  , 11) \
-	CI (STACK16, 16, INT16  , 12) \
-	CI (STACK16, 16, INT16  , 14) \
-	CI (STACK16, 16, INT16  , 16) \
-	CI (STACK16, 16, STACK16, 16)
+	CI (INT16  , 16, INT16  , 16)
 
 
 

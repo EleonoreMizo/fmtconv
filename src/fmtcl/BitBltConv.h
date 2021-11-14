@@ -60,7 +60,7 @@ public:
 
 	BitBltConv &   operator = (const BitBltConv &other) = default;
 
-	void           bitblt (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr = 0);
+	void           bitblt (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr = 0);
 
 
 
@@ -74,18 +74,17 @@ protected:
 
 private:
 
-	void           bitblt_int_to_flt (uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
-	void           bitblt_flt_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
-	void           bitblt_int_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
+	void           bitblt_int_to_flt (uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
+	void           bitblt_flt_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
+	void           bitblt_int_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	void           bitblt_int_to_flt_avx2_switch (uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
-	void           bitblt_flt_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
-	void           bitblt_int_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
+	void           bitblt_int_to_flt_avx2_switch (uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
+	void           bitblt_flt_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
+	void           bitblt_int_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);
 #endif
 
-	static void    bitblt_same_fmt (fmtcl::SplFmt fmt, uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, const uint8_t *src_ptr, const uint8_t *src_lsb_ptr, int src_stride, int w, int h);
-	static void    bitblt_i08_to_s16 (uint8_t *dst_ptr, uint8_t *dst_lsb_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h);
+	static void    bitblt_same_fmt (fmtcl::SplFmt fmt, uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h);
 
 	template <bool SF, class SRC, int SBD>
 	static void    bitblt_int_to_flt_cpp (uint8_t *dst_ptr, int dst_stride, typename SRC::PtrConst::Type src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr);

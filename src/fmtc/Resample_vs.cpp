@@ -788,11 +788,7 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::V
 			vsutl::is_chroma_plane (*_vi_in.format, plane_index);
 
 		filter_ptr->process_plane (
-			data_dst_ptr, 0,
-			data_src_ptr, 0,
-			stride_dst,
-			stride_src,
-			chroma_flag
+			data_dst_ptr, data_src_ptr, stride_dst, stride_src, chroma_flag
 		);
 	}
 
@@ -851,8 +847,8 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, ::V
 
 	fmtcl::BitBltConv blitter (_sse2_flag, _avx2_flag);
 	blitter.bitblt (
-		_dst_type, _dst_res, data_dst_ptr, nullptr, stride_dst,
-		_src_type, _src_res, data_src_ptr, nullptr, stride_src,
+		_dst_type, _dst_res, data_dst_ptr, stride_dst,
+		_src_type, _src_res, data_src_ptr, stride_src,
 		w, h, scale_info_ptr
 	);
 

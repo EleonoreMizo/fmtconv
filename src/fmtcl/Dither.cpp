@@ -230,8 +230,8 @@ void	Dither::process_plane (uint8_t *dst_ptr, int dst_stride, const uint8_t *src
 	{
 		BitBltConv blitter (_sse2_flag, _avx2_flag);
 		blitter.bitblt (
-			_splfmt_dst, _dst_res, dst_ptr, nullptr, dst_stride,
-			_splfmt_src, _src_res, src_ptr, nullptr, src_stride,
+			_splfmt_dst, _dst_res, dst_ptr, dst_stride,
+			_splfmt_src, _src_res, src_ptr, src_stride,
 			w, h,
 			_scale_info_arr [plane_index]._ptr
 		);

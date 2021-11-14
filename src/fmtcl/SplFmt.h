@@ -40,7 +40,6 @@ enum SplFmt
 
 	SplFmt_FLOAT = 0,
 	SplFmt_INT16,
-	SplFmt_STACK16,
 	SplFmt_INT8,
 
 	SplFmt_NBR_ELT

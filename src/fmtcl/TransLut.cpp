@@ -226,11 +226,9 @@ TransLut::TransLut (const TransOpInterface &curve, bool log_flag, SplFmt src_fmt
 {
 	assert (src_fmt >= 0);
 	assert (src_fmt < SplFmt_NBR_ELT);
-	assert (src_fmt != SplFmt_STACK16);
 	assert (src_bits >= 8);
 	assert (dst_fmt >= 0);
 	assert (dst_fmt < SplFmt_NBR_ELT);
-	assert (dst_fmt != SplFmt_STACK16);
 	assert (dst_bits >= 8);
 
 	generate_lut (curve);

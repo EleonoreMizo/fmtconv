@@ -109,11 +109,8 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 	// Configures the plane processor
 	_plane_proc_uptr =
 		std::make_unique <avsutl::PlaneProcessor> (vi, *this, false);
-	_plane_proc_uptr->set_dst_clip_info (avsutl::PlaneProcessor::ClipType_NORMAL);
 	_plane_proc_uptr->set_clip_info (
-		avsutl::PlaneProcessor::ClipIdx_SRC1,
-		_clip_src_sptr,
-		avsutl::PlaneProcessor::ClipType_NORMAL
+		avsutl::PlaneProcessor::ClipIdx_SRC1, _clip_src_sptr
 	);
 	_plane_proc_uptr->set_proc_mode (args [Param_PLANES].AsString ("all"));
 

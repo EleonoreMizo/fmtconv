@@ -433,28 +433,22 @@ FilterResize::FilterResize (const ResampleSpecPlane &spec, ContFirInterface &ker
 
 
 
-void	FilterResize::process_plane (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, const uint8_t *src_msb_ptr, const uint8_t *src_lsb_ptr, int stride_dst, int stride_src, bool chroma_flag)
+void	FilterResize::process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, bool chroma_flag)
 {
-	assert (dst_msb_ptr != 0);
-	assert (src_msb_ptr != 0);
+	assert (dst_ptr != nullptr);
+	assert (src_ptr != nullptr);
 	assert (stride_dst > 0);
 	assert (stride_src > 0);
 
 	if (_nbr_passes <= 0)
 	{
 		process_plane_bypass (
-			dst_msb_ptr, dst_lsb_ptr,
-			src_msb_ptr, src_lsb_ptr,
-			stride_dst, stride_src, chroma_flag
+			dst_ptr, src_ptr, stride_dst, stride_src, chroma_flag
 		);
 	}
 	else
 	{
-		process_plane_normal (
-			dst_msb_ptr, dst_lsb_ptr,
-			src_msb_ptr, src_lsb_ptr,
-			stride_dst, stride_src
-		);
+		process_plane_normal (dst_ptr, src_ptr, stride_dst, stride_src);
 	}
 }
 
@@ -468,13 +462,13 @@ void	FilterResize::process_plane (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, co
 
 
 
-void	FilterResize::process_plane_bypass (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, const uint8_t *src_msb_ptr, const uint8_t *src_lsb_ptr, int stride_dst, int stride_src, bool chroma_flag)
+void	FilterResize::process_plane_bypass (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, bool chroma_flag)
 {
 	fstb::unused (chroma_flag);
 
 	assert (_nbr_passes <= 0);
-	assert (dst_msb_ptr != 0);
-	assert (src_msb_ptr != 0);
+	assert (dst_ptr != nullptr);
+	assert (src_ptr != nullptr);
 	assert (stride_dst > 0);
 	assert (stride_src > 0);
 
@@ -482,10 +476,9 @@ void	FilterResize::process_plane_bypass (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_
 	const int      offset_src =
 		  fstb::round_int (_win_pos [Dir_V]) * stride_src
 		+ fstb::round_int (_win_pos [Dir_H]) * nbr_bytes_src;
-	src_msb_ptr += offset_src;
-	src_lsb_ptr += offset_src;
+	src_ptr += offset_src;
 
-	BitBltConv::ScaleInfo * scale_info_ptr = 0;
+	BitBltConv::ScaleInfo * scale_info_ptr = nullptr;
 	BitBltConv::ScaleInfo   scale_info;
 	const bool     dst_flt_flag = (_dst_type == SplFmt_FLOAT);
 	const bool     src_flt_flag = (_src_type == SplFmt_FLOAT);
@@ -498,8 +491,8 @@ void	FilterResize::process_plane_bypass (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_
 	}
 
 	_blitter.bitblt (
-		_dst_type, _dst_res, dst_msb_ptr, dst_lsb_ptr, stride_dst,
-		_src_type, _src_res, src_msb_ptr, src_lsb_ptr, stride_src,
+		_dst_type, _dst_res, dst_ptr, stride_dst,
+		_src_type, _src_res, src_ptr, stride_src,
 		_dst_size [Dir_H],
 		_dst_size [Dir_V],
 		scale_info_ptr
@@ -508,27 +501,25 @@ void	FilterResize::process_plane_bypass (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_
 
 
 
-void	FilterResize::process_plane_normal (uint8_t *dst_msb_ptr, uint8_t *dst_lsb_ptr, const uint8_t *src_msb_ptr, const uint8_t *src_lsb_ptr, int stride_dst, int stride_src)
+void	FilterResize::process_plane_normal (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src)
 {
 	assert (_nbr_passes > 0);
-	assert (dst_msb_ptr != 0);
-	assert (src_msb_ptr != 0);
+	assert (dst_ptr != nullptr);
+	assert (src_ptr != nullptr);
 	assert (stride_dst > 0);
 	assert (stride_src > 0);
 
 	avstp_TaskDispatcher *	task_dispatcher_ptr = _avstp.create_dispatcher ();
 
 	TaskRszGlobal	trg;
-	trg._this_ptr       = this;
-	trg._dst_msb_ptr    = dst_msb_ptr;
-	trg._dst_lsb_ptr    = dst_lsb_ptr;
-	trg._src_msb_ptr    = src_msb_ptr;
-	trg._src_lsb_ptr    = src_lsb_ptr;
-	trg._dst_bpp        = fmtcl::SplFmt_get_unit_size (_dst_type);
-	trg._src_bpp        = fmtcl::SplFmt_get_unit_size (_src_type);
-	trg._stride_dst     = stride_dst;
-	trg._stride_src     = stride_src;
-	trg._offset_crop    =
+	trg._this_ptr    = this;
+	trg._dst_ptr     = dst_ptr;
+	trg._src_ptr     = src_ptr;
+	trg._dst_bpp     = fmtcl::SplFmt_get_unit_size (_dst_type);
+	trg._src_bpp     = fmtcl::SplFmt_get_unit_size (_src_type);
+	trg._stride_dst  = stride_dst;
+	trg._stride_src  = stride_src;
+	trg._offset_crop =
 		_crop_pos [Dir_V] * stride_src + _crop_pos [Dir_H] * trg._src_bpp;
 	trg._stride_dst_pix = stride_dst / trg._dst_bpp;
 	trg._stride_src_pix = stride_src / trg._src_bpp;
@@ -719,19 +710,17 @@ void	FilterResize::process_tile (TaskRszCell &tr_cell)
 
 void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, int stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT])
 {
-	Proxy::PtrStack16Const::Type	src_s16_ptr (0, 0);
-	const float *                 src_flt_ptr = 0;
-	const uint16_t *              src_i16_ptr = 0;
-	const uint8_t *               src_i08_ptr = 0;
-	int                           src_stride  = 0;  // Pixels
-	SplFmt                        src_fmt_loc = SplFmt_ILLEGAL;
-	int                           src_res_loc = 0;
+	const float *     src_flt_ptr = 0;
+	const uint16_t *  src_i16_ptr = 0;
+	const uint8_t *   src_i08_ptr = 0;
+	int               src_stride  = 0;  // Pixels
+	SplFmt            src_fmt_loc = SplFmt_ILLEGAL;
+	int               src_res_loc = 0;
 
-	Proxy::PtrStack16::Type       dst_s16_ptr (0, 0);
-	float *                       dst_flt_ptr = 0;
-	uint16_t *                    dst_i16_ptr = 0;
-	int                           dst_stride  = 0;  // Pixels
-	SplFmt                        dst_fmt_loc = SplFmt_ILLEGAL;
+	float *           dst_flt_ptr = 0;
+	uint16_t *        dst_i16_ptr = 0;
+	int               dst_stride  = 0;  // Pixels
+	SplFmt            dst_fmt_loc = SplFmt_ILLEGAL;
 
 	// Source is the input
 	if (pass == 0)
@@ -743,15 +732,11 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 			+ tr._src_beg [Dir_H] * trg._src_bpp;
 
 		// Source pointers
-		const uint8_t *  src_msb_ofs_ptr = trg._src_msb_ptr + offset_src;
+		const uint8_t *  src_ofs_ptr = trg._src_ptr + offset_src;
 
-		src_s16_ptr = Proxy::PtrStack16Const::Type (
-			src_msb_ofs_ptr,
-			trg._src_lsb_ptr + offset_src
-		);
-		src_flt_ptr = reinterpret_cast <const float *> (src_msb_ofs_ptr);
-		src_i16_ptr = reinterpret_cast <const uint16_t *> (src_msb_ofs_ptr);
-		src_i08_ptr = src_msb_ofs_ptr;
+		src_flt_ptr = reinterpret_cast <const float *> (src_ofs_ptr);
+		src_i16_ptr = reinterpret_cast <const uint16_t *> (src_ofs_ptr);
+		src_i08_ptr = src_ofs_ptr;
 		src_stride  = trg._stride_src_pix;
 		src_fmt_loc = _src_type;
 		src_res_loc = _src_res;
@@ -780,14 +765,10 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 				  tr._dst_beg [Dir_V] * trg._stride_dst
 				+ tr._dst_beg [Dir_H] * trg._dst_bpp;
 
-			uint8_t *      dst_msb_ofs_ptr = trg._dst_msb_ptr + offset_dst;
+			uint8_t *      dst_ofs_ptr = trg._dst_ptr + offset_dst;
 
-			dst_s16_ptr = Proxy::PtrStack16::Type (
-				dst_msb_ofs_ptr,
-				trg._dst_lsb_ptr + offset_dst
-			);
-			dst_flt_ptr = reinterpret_cast <float *> (dst_msb_ofs_ptr);
-			dst_i16_ptr = reinterpret_cast <uint16_t *> (dst_msb_ofs_ptr);
+			dst_flt_ptr = reinterpret_cast <float *> (dst_ofs_ptr);
+			dst_i16_ptr = reinterpret_cast <uint16_t *> (dst_ofs_ptr);
 			dst_stride  = trg._stride_dst_pix;
 			dst_fmt_loc = _dst_type;
 		}
@@ -839,14 +820,10 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 				  tr._dst_beg [Dir_V] * trg._stride_dst
 				+ tr._dst_beg [Dir_H] * trg._dst_bpp;
 
-			uint8_t *      dst_msb_ofs_ptr = trg._dst_msb_ptr + offset_dst;
+			uint8_t *      dst_ofs_ptr = trg._dst_ptr + offset_dst;
 
-			dst_s16_ptr = Proxy::PtrStack16::Type (
-				dst_msb_ofs_ptr,
-				trg._dst_lsb_ptr + offset_dst
-			);
-			dst_flt_ptr = reinterpret_cast <float *> (dst_msb_ofs_ptr);
-			dst_i16_ptr = reinterpret_cast <uint16_t *> (dst_msb_ofs_ptr);
+			dst_flt_ptr = reinterpret_cast <float *> (dst_ofs_ptr);
+			dst_i16_ptr = reinterpret_cast <uint16_t *> (dst_ofs_ptr);
 			dst_stride  = trg._stride_dst_pix;
 			dst_fmt_loc = _dst_type;
 		}
@@ -896,15 +873,7 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 		fmtc_FilterResize_PROC_I (INT16  , i16, INT16  , i16, 12, i16_i12)
 		fmtc_FilterResize_PROC_I (INT16  , i16, INT16  , i16, 10, i16_i10)
 		fmtc_FilterResize_PROC_I (INT16  , i16, INT16  , i16,  9, i16_i09)
-		fmtc_FilterResize_PROC_I (INT16  , i16, STACK16, s16, 16, i16_s16)
 		fmtc_FilterResize_PROC_I (INT16  , i16, INT8   , i08,  8, i16_i08)
-		fmtc_FilterResize_PROC_I (STACK16, s16, INT16  , i16, 16, s16_i16)
-		fmtc_FilterResize_PROC_I (STACK16, s16, INT16  , i16, 14, s16_i14)
-		fmtc_FilterResize_PROC_I (STACK16, s16, INT16  , i16, 12, s16_i12)
-		fmtc_FilterResize_PROC_I (STACK16, s16, INT16  , i16, 10, s16_i10)
-		fmtc_FilterResize_PROC_I (STACK16, s16, INT16  , i16,  9, s16_i09)
-		fmtc_FilterResize_PROC_I (STACK16, s16, STACK16, s16, 16, s16_s16)
-		fmtc_FilterResize_PROC_I (STACK16, s16, INT8   , i08,  8, s16_i08)
 		default:
 			assert (false);
 			throw std::logic_error ("Unexpected pixel format (int)");
@@ -916,16 +885,10 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 		{
 		fmtc_FilterResize_PROC_F (FLOAT  , flt, FLOAT  , flt)
 		fmtc_FilterResize_PROC_F (FLOAT  , flt, INT16  , i16)
-		fmtc_FilterResize_PROC_F (FLOAT  , flt, STACK16, s16)
 		fmtc_FilterResize_PROC_F (FLOAT  , flt, INT8   , i08)
 		fmtc_FilterResize_PROC_F (INT16  , i16, FLOAT  , flt)
 		fmtc_FilterResize_PROC_F (INT16  , i16, INT16  , i16)
-		fmtc_FilterResize_PROC_F (INT16  , i16, STACK16, s16)
 		fmtc_FilterResize_PROC_F (INT16  , i16, INT8   , i08)
-		fmtc_FilterResize_PROC_F (STACK16, s16, FLOAT  , flt)
-		fmtc_FilterResize_PROC_F (STACK16, s16, INT16  , i16)
-		fmtc_FilterResize_PROC_F (STACK16, s16, STACK16, s16)
-		fmtc_FilterResize_PROC_F (STACK16, s16, INT8   , i08)
 		default:
 			assert (false);
 			throw std::logic_error ("Unexpected pixel format (flt)");
@@ -969,9 +932,7 @@ void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGloba
 
 		if (_src_type == BUFT)
 		{
-			ptr_src    = reinterpret_cast <const T *> (
-				trg._src_msb_ptr + offset_src
-			);
+			ptr_src    = reinterpret_cast <const T *> (trg._src_ptr + offset_src);
 			stride_src = trg._stride_src_pix;
 		}
 	}
@@ -985,9 +946,7 @@ void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGloba
 
 		if (_dst_type == BUFT)
 		{
-			ptr_dst    = reinterpret_cast <      T *> (
-				trg._dst_msb_ptr + offset_dst
-			);
+			ptr_dst    = reinterpret_cast <      T *> (trg._dst_ptr + offset_dst);
 			stride_dst = trg._stride_dst_pix;
 		}
 	}
@@ -1002,11 +961,9 @@ void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGloba
 		_blitter.bitblt (
 			BUFT, sizeof (T) * CHAR_BIT,
 			rd.use_buf <uint8_t> (cur_buf),
-			0,
 			stride_src * sizeof (T),
 			_src_type, _src_res,
-			trg._src_msb_ptr + offset_src,
-			trg._src_lsb_ptr + offset_src,
+			trg._src_ptr + offset_src,
 			trg._stride_src,
 			cur_size [Dir_H], cur_size [Dir_V],
 			0
@@ -1032,12 +989,10 @@ void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGloba
 	{
 		_blitter.bitblt (
 			_dst_type, _dst_res,
-			trg._dst_msb_ptr + offset_dst,
-			trg._dst_lsb_ptr + offset_dst,
+			trg._dst_ptr + offset_dst,
 			trg._stride_dst,
 			BUFT, sizeof (T) * CHAR_BIT,
 			rd.use_buf <const uint8_t> (cur_buf),
-			0,
 			stride_buf [cur_buf] * sizeof (float),
 			tr._work_dst [Dir_H], tr._work_dst [Dir_V],
 			0
@@ -1051,11 +1006,11 @@ void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGloba
 template <typename T>
 void	FilterResize::transpose (T *dst_ptr, const T *src_ptr, int w, int h, int stride_dst, int stride_src)
 {
-	assert (src_ptr != 0);
+	assert (src_ptr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 	assert (stride_src > 0);
-	assert (dst_ptr != 0);
+	assert (dst_ptr != nullptr);
 	assert (stride_dst > 0);
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
@@ -1075,11 +1030,11 @@ void	FilterResize::transpose (T *dst_ptr, const T *src_ptr, int w, int h, int st
 template <typename T>
 void	FilterResize::transpose_cpp (T *dst_ptr, const T *src_ptr, int w, int h, int stride_dst, int stride_src)
 {
-	assert (src_ptr != 0);
+	assert (src_ptr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 	assert (stride_src > 0);
-	assert (dst_ptr != 0);
+	assert (dst_ptr != nullptr);
 	assert (stride_dst > 0);
 
 	for (int y = 0; y < h; ++y)
@@ -1102,11 +1057,11 @@ void	FilterResize::transpose_cpp (T *dst_ptr, const T *src_ptr, int w, int h, in
 
 void	FilterResize::transpose_sse2 (float *dst_ptr, const float *src_ptr, int w, int h, int stride_dst, int stride_src)
 {
-	assert (src_ptr != 0);
+	assert (src_ptr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 	assert (stride_src > 0);
-	assert (dst_ptr != 0);
+	assert (dst_ptr != nullptr);
 	assert (stride_dst > 0);
 
 	const int      w4 = w & -4;
@@ -1174,11 +1129,11 @@ void	FilterResize::transpose_sse2 (float *dst_ptr, const float *src_ptr, int w, 
 
 void	FilterResize::transpose_sse2 (uint16_t *dst_ptr, const uint16_t *src_ptr, int w, int h, int stride_dst, int stride_src)
 {
-	assert (src_ptr != 0);
+	assert (src_ptr != nullptr);
 	assert (w > 0);
 	assert (h > 0);
 	assert (stride_src > 0);
-	assert (dst_ptr != 0);
+	assert (dst_ptr != nullptr);
 	assert (stride_dst > 0);
 
 	const int      w8 = w & -8;

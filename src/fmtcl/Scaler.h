@@ -57,42 +57,28 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 \
 	MC (Float  , Int8   , FLOAT  , INT8   , f32_i08) \
 	MC (Float  , Int16  , FLOAT  , INT16  , f32_i16) \
-	MC (Float  , Stack16, FLOAT  , STACK16, f32_s16) \
 \
 	MC (Int16  , Float  , INT16  , FLOAT  , i16_f32) \
-	MC (Stack16, Float  , STACK16, FLOAT  , s16_f32) \
 \
 	MC (Int16  , Int16  , INT16  , INT16  , i16_i16) \
-	MC (Stack16, Int16  , STACK16, INT16  , s16_i16) \
-	MC (Int16  , Stack16, INT16  , STACK16, i16_s16) \
-	MC (Stack16, Stack16, STACK16, STACK16, s16_s16) \
 \
 	MC (Int16  , Int8   , INT16  , INT8   , i16_i08) \
-	MC (Stack16, Int8   , STACK16, INT8   , s16_i08)
 
 // Same, integer path. There is no conversion involving float.
 // Decreasing the bitdepth is technically possible just by
 // adding lines but avoided here too.
 #define fmtcl_Scaler_SPAN_I(MC) \
 	MC (Int16  , Int16  , INT16  , INT16  , 16, 16, i16_i16) \
-	MC (Stack16, Int16  , STACK16, INT16  , 16, 16, s16_i16) \
-	MC (Int16  , Stack16, INT16  , STACK16, 16, 16, i16_s16) \
-	MC (Stack16, Stack16, STACK16, STACK16, 16, 16, s16_s16) \
 \
 	MC (Int16  , Int16  , INT16  , INT16  , 16, 14, i16_i14) \
-	MC (Stack16, Int16  , STACK16, INT16  , 16, 14, s16_i14) \
 \
 	MC (Int16  , Int16  , INT16  , INT16  , 16, 12, i16_i12) \
-	MC (Stack16, Int16  , STACK16, INT16  , 16, 12, s16_i12) \
 \
 	MC (Int16  , Int16  , INT16  , INT16  , 16, 10, i16_i10) \
-	MC (Stack16, Int16  , STACK16, INT16  , 16, 10, s16_i10) \
 \
 	MC (Int16  , Int16  , INT16  , INT16  , 16,  9, i16_i09) \
-	MC (Stack16, Int16  , STACK16, INT16  , 16,  9, s16_i09) \
 \
 	MC (Int16  , Int8   , INT16  , INT8   , 16,  8, i16_i08) \
-	MC (Stack16, Int8   , STACK16, INT8   , 16,  8, s16_i08)
 
 
 

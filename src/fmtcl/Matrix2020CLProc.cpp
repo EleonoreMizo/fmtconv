@@ -409,12 +409,12 @@ void	Matrix2020CLProc::conv_rgb_2_ycbcr_cpp_int (Frame <> dst, FrameRO <> src, i
 
 	for (int y = 0; y < h; ++y)
 	{
-		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
-		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
-		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
-		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr, dst [0]._stride, h);
-		DstPtr         dst_1_ptr = DST::Ptr::make_ptr (dst [1]._ptr, dst [1]._stride, h);
-		DstPtr         dst_2_ptr = DST::Ptr::make_ptr (dst [2]._ptr, dst [2]._stride, h);
+		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr);
+		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr);
+		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr);
+		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr);
+		DstPtr         dst_1_ptr = DST::Ptr::make_ptr (dst [1]._ptr);
+		DstPtr         dst_2_ptr = DST::Ptr::make_ptr (dst [2]._ptr);
 
 		for (int x = 0; x < w; ++x)
 		{
@@ -531,12 +531,12 @@ void	Matrix2020CLProc::conv_ycbcr_2_rgb_cpp_int (Frame <> dst, FrameRO <> src, i
 
 	for (int y = 0; y < h; ++y)
 	{
-		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr, src [0]._stride, h);
-		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr, src [1]._stride, h);
-		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr, src [2]._stride, h);
-		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr, dst [0]._stride, h);
-		DstPtr         dst_1_ptr = DST::Ptr::make_ptr (dst [1]._ptr, dst [1]._stride, h);
-		DstPtr         dst_2_ptr = DST::Ptr::make_ptr (dst [2]._ptr, dst [2]._stride, h);
+		SrcPtr         src_0_ptr = SRC::PtrConst::make_ptr (src [0]._ptr);
+		SrcPtr         src_1_ptr = SRC::PtrConst::make_ptr (src [1]._ptr);
+		SrcPtr         src_2_ptr = SRC::PtrConst::make_ptr (src [2]._ptr);
+		DstPtr         dst_0_ptr = DST::Ptr::make_ptr (dst [0]._ptr);
+		DstPtr         dst_1_ptr = DST::Ptr::make_ptr (dst [1]._ptr);
+		DstPtr         dst_2_ptr = DST::Ptr::make_ptr (dst [2]._ptr);
 
 		for (int x = 0; x < w; ++x)
 		{
