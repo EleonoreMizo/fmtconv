@@ -65,7 +65,7 @@ double	TransOpPowOfs::do_convert (double x) const
 
 TransOpInterface::LinInfo	TransOpPowOfs::do_get_info () const
 {
-	const double   lin_max = gamma_to_lin (1);
+	const double   lin_max = std::max (gamma_to_lin (1), 1.0);
 
 	return { Type::UNDEF, Range::UNDEF, lin_max, 1.0, 0, 0 };
 }
