@@ -33,11 +33,14 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/TransOpFilmStream.h"
 #include "fmtcl/TransOpHlg.h"
 #include "fmtcl/TransOpLinPow.h"
+#include "fmtcl/TransOpLog3G10.h"
 #include "fmtcl/TransOpLogC.h"
 #include "fmtcl/TransOpLogTrunc.h"
 #include "fmtcl/TransOpPow.h"
+#include "fmtcl/TransOpPowOfs.h"
 #include "fmtcl/TransOpSLog.h"
 #include "fmtcl/TransOpSLog3.h"
+#include "fmtcl/TransOpDaVinci.h"
 #include "fmtcl/TransUtil.h"
 #include "fstb/fnc.h"
 
@@ -192,6 +195,26 @@ TransCurve	TransUtil::conv_string_to_curve (const std::string &str)
 	else if (str == "vlog")
 	{
 		c = TransCurve_VLOG;
+	}
+	else if (str == "davinci")
+	{
+		c = TransCurve_DAVINCI;
+	}
+	else if (str == "log3g10")
+	{
+		c = TransCurve_LOG3G10;
+	}
+	else if (str == "redlog")
+	{
+		c = TransCurve_REDLOG;
+	}
+	else if (str == "cineon" || str == "redlogfilm")
+	{
+		c = TransCurve_CINEON;
+	}
+	else if (str == "panalog")
+	{
+		c = TransCurve_PANALOG;
 	}
 	else
 	{
@@ -379,6 +402,21 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 		break;
 	case TransCurve_VLOG:
 		ptr = OpSPtr (new TransOpLogC (inv_flag, TransOpLogC::LType_VLOG));
+		break;
+	case TransCurve_DAVINCI:
+		ptr = OpSPtr (new TransOpDaVinci (inv_flag));
+		break;
+	case TransCurve_LOG3G10:
+		ptr = OpSPtr (new TransOpLog3G10 (inv_flag));
+		break;
+	case TransCurve_REDLOG:
+		ptr = OpSPtr (new TransOpPowOfs (inv_flag, 1023, 1023, 511,  0));
+		break;
+	case TransCurve_CINEON:
+		ptr = OpSPtr (new TransOpPowOfs (inv_flag, 1023,  685, 300, 95));
+		break;
+	case TransCurve_PANALOG:
+		ptr = OpSPtr (new TransOpPowOfs (inv_flag, 1023,  681, 444, 64));
 		break;
 	default:
 		assert (false);

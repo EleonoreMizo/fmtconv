@@ -239,6 +239,8 @@ commonsrc = \
         ../../src/fmtcl/TransOpCompose.hpp \
         ../../src/fmtcl/TransOpContrast.h \
         ../../src/fmtcl/TransOpContrast.hpp \
+        ../../src/fmtcl/TransOpDaVinci.cpp \
+        ../../src/fmtcl/TransOpDaVinci.h \
         ../../src/fmtcl/TransOpErimm.cpp \
         ../../src/fmtcl/TransOpErimm.h \
         ../../src/fmtcl/TransOpFilmStream.cpp \
@@ -249,12 +251,16 @@ commonsrc = \
         ../../src/fmtcl/TransOpInterface.h \
         ../../src/fmtcl/TransOpLinPow.cpp \
         ../../src/fmtcl/TransOpLinPow.h \
+        ../../src/fmtcl/TransOpLog3G10.cpp \
+        ../../src/fmtcl/TransOpLog3G10.h \
         ../../src/fmtcl/TransOpLogC.cpp \
         ../../src/fmtcl/TransOpLogC.h \
         ../../src/fmtcl/TransOpLogTrunc.cpp \
         ../../src/fmtcl/TransOpLogTrunc.h \
         ../../src/fmtcl/TransOpPow.cpp \
         ../../src/fmtcl/TransOpPow.h \
+        ../../src/fmtcl/TransOpPowOfs.cpp \
+        ../../src/fmtcl/TransOpPowOfs.h \
         ../../src/fmtcl/TransOpSLog.cpp \
         ../../src/fmtcl/TransOpSLog.h \
         ../../src/fmtcl/TransOpSLog3.cpp \

@@ -1766,6 +1766,11 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td></td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
 <tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>OETF</td><td></td><td>ERIMM</td></tr>
 <tr><td><b><code>&quot;vlog&quot;      </code></b></td><td>0&hellip;1</td><td></td><td></td><td>Panasonic V-Log</td></tr>
+<tr><td><b><code>&quot;davinci&quot;   </code></b></td><td>&minus;0.01&hellip;100</td><td>OETF</td><td></td><td>Blackmagic Design DaVinci Intermediate</td></tr>
+<tr><td><b><code>&quot;log3g10&quot;   </code></b></td><td>&minus;0.01&hellip;184.32</td><td></td><td>HDR</td><td>RED Log3G10</td></tr>
+<tr><td><b><code>&quot;redlog&quot;    </code></b></td><td>0&hellip;1</td><td></td><td></td><td>REDlog</td></tr>
+<tr><td><b><code>&quot;cineon&quot;    </code></b></td><td>&minus;0.006&hellip;13.522</td><td></td><td></td><td>Cineon and REDlogFilm</td></tr>
+<tr><td><b><code>&quot;panalog&quot;   </code></b></td><td>&minus;0.01&hellip;6.100</td><td></td><td></td><td>Panalog</td></tr>
 </table>
 
 <p class="var">cont</p>
@@ -1939,6 +1944,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>bitdepth</code>: faster void and cluster pattern generation. Larger patterns are allowed.</li>
 <li><code>primaries</code>: fixed Sony P22 primaries.</li>
+<li><code>transfer</code>: Added DaVinci Intermediate, RED Log3G10, REDlog, Cineon and Panalog.</li>
 <li>Vapoursynth and Avisynth+ plug-ins are now contained in the same binary file.</li>
 </ul>
 

@@ -81,6 +81,11 @@ enum TransCurve
 	TransCurve_SLOG2,       // Sony S-Log2
 	TransCurve_SLOG3,       // Sony S-Log3
 	TransCurve_VLOG,        // Panasonic VRICAM V-Log
+	TransCurve_DAVINCI,     // Blackmagic Design DaVinci Intermediate
+	TransCurve_LOG3G10,     // RED Log3G10
+	TransCurve_REDLOG,      // REDlog
+	TransCurve_CINEON,      // Cineon, REDlogFilm
+	TransCurve_PANALOG,     // Panalog
 
 	TransCurve_NBR_ELT_CUSTOM
 };	// enum TransCurve

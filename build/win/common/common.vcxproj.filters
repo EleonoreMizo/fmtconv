@@ -216,6 +216,15 @@
     <ClCompile Include="..\..\..\src\fmtcl\VoidAndClusterPrecalc.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpDaVinci.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpLog3G10.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpPowOfs.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\avstp.h" />
@@ -717,6 +726,15 @@
       <Filter>fstb</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\fmtcl\VoidAndClusterPrecalc.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpDaVinci.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpLog3G10.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpPowOfs.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
   </ItemGroup>
