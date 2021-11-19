@@ -90,7 +90,7 @@ ColorSpaceH265	MatrixUtil::find_cs_from_mat_str (const std::string &mat, bool al
 	{
 		cs = ColorSpaceH265_SMPTE240M;
 	}
-	else if (mat == "fcc")
+	else if (mat == "fcc" || mat == "470-525")
 	{
 		cs = ColorSpaceH265_FCC;
 	}

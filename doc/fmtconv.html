@@ -656,7 +656,7 @@ Possible values are:</p>
 <tr><td><b><code>"709"</code></b></td><td>ITU-R BT.709. For High Definition content.</td></tr>
 <tr><td><b><code>"2020"</code></b><br /><code>"2100"</code></b></td><td>ITU-R BT.2020 and ITU-R BT.2100, non constant luminance mode. For UHDTV content.</td></tr>
 <tr><td><b><code>"240"</code></b></td><td>SMPTE 240M</td></tr>
-<tr><td><b><code>"FCC"</code></b></td><td>FCC Title 47</td></tr>
+<tr><td><b><code>"FCC"<br />"470-525"</code></b></td><td>FCC Title 47</td></tr>
 <tr><td><b><code>"YCoCg"<br />"YCgCo"</code></b></td><td>Y’Co’Cg’</td></tr>
 <tr><td><b><code>"YDzDx"</code></b></td><td>Y’D’<sub>Z</sub>D’<sub>X</sub>, SMPTE ST 2085</td></tr>
 <tr><td><b><code>"RGB"</code></b></td><td>R’G’B’. Identity, no cross-plane calculations.</td></tr>
@@ -1953,6 +1953,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>bitdepth</code>: faster void and cluster pattern generation. Larger patterns are allowed.</li>
 <li><code>primaries</code>: fixed Sony P22 primaries.</li>
+<li><code>matrix</code>: Added an alias for &quot;fcc&quot;</li>
 <li><code>primaries</code>: New presets: Free Scale-gamut, DaVinci Wide Gamut, DRAGONcolor, DRAGONcolor2, REDcolor, REDcolor2, REDcolor3, REDcolor4 and REDWideGamutRGB.</li>
 <li><code>transfer</code>: Added DaVinci Intermediate, RED Log3G10, REDlog, Cineon and Panalog.</li>
 <li>Vapoursynth and Avisynth+ plug-ins are now contained in the same binary file.</li>
