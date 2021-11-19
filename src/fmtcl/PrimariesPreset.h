@@ -67,6 +67,15 @@ enum PrimariesPreset
 	PrimariesPreset_VGAMUT,
 	PrimariesPreset_P3D60,
 	PrimariesPreset_P22,
+	PrimariesPreset_FREESCALE,
+	PrimariesPreset_DAVINCI,
+	PrimariesPreset_DRAGONCOLOR,
+	PrimariesPreset_DRAGONCOLOR2,
+	PrimariesPreset_REDCOLOR,
+	PrimariesPreset_REDCOLOR2,
+	PrimariesPreset_REDCOLOR3,
+	PrimariesPreset_REDCOLOR4,
+	PrimariesPreset_REDWIDE,
 
 	PrimariesPreset_NBR_ELT_CUSTOM
 }; // enum PrimariesPreset

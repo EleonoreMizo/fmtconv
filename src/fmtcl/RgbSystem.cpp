@@ -146,6 +146,10 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_white   = { 0.31271, 0.32902 };
 		break;
 	case PrimariesPreset_ADOBE_RGB_WIDE:
+		/*** To do: check where these figures were collected. All tables found
+		on the web are based on the Wikipedia article, taking values from the
+		Danny Pascale paper: A Review of RGB Color Spaces. Some values (only 4
+		digits) are slightly different from the ones below. ***/
 		_rgb [0] = { 0.73469, 0.26531 };
 		_rgb [1] = { 0.11416, 0.82621 };
 		_rgb [2] = { 0.15664, 0.01770 };
@@ -223,6 +227,66 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_rgb [2] = { 0.155  , 0.070   };
 		_white   = { 0.28315, 0.29711 };
 		break;
+	case PrimariesPreset_FREESCALE:
+		_rgb [0] = { 0.7347 , 0.2653  };
+		_rgb [1] = { 0.140  , 0.860   };
+		_rgb [2] = { 0.100  ,-0.02985 };
+		_white   = { 0.31272, 0.32903 };
+		break;
+
+	// https://documents.blackmagicdesign.com/InformationNotes/DaVinci_Resolve_17_Wide_Gamut_Intermediate.pdf
+	case PrimariesPreset_DAVINCI:
+		_rgb [0] = { 0.8000 , 0.3130  };
+		_rgb [1] = { 0.1682 , 0.9877  };
+		_rgb [2] = { 0.0790 ,-0.1155  };
+		_white   = { 0.3127 , 0.3290  };
+		break;
+
+	// https://www.colour-science.org/posts/red-colourspaces-derivation/
+	case PrimariesPreset_DRAGONCOLOR:
+		_rgb [0] = { 0.75304, 0.32783 };
+		_rgb [1] = { 0.29957, 0.70070 };
+		_rgb [2] = { 0.07964,-0.05494 };
+		_white   = { 0.32168, 0.33767 };
+		break;
+	case PrimariesPreset_DRAGONCOLOR2:
+		_rgb [0] = { 0.75304, 0.32783 };
+		_rgb [1] = { 0.29957, 0.70070 };
+		_rgb [2] = { 0.14501, 0.05110 };
+		_white   = { 0.32168, 0.33767 };
+		break;
+	case PrimariesPreset_REDCOLOR:
+		_rgb [0] = { 0.69975, 0.32905 };
+		_rgb [1] = { 0.30426, 0.62364 };
+		_rgb [2] = { 0.13491, 0.03472 };
+		_white   = { 0.32168, 0.33767 };
+		break;
+	case PrimariesPreset_REDCOLOR2:
+		_rgb [0] = { 0.87868, 0.32496 };
+		_rgb [1] = { 0.30089, 0.67905 };
+		_rgb [2] = { 0.09540,-0.02938 };
+		_white   = { 0.32168, 0.33767 };
+		break;
+	case PrimariesPreset_REDCOLOR3:
+		_rgb [0] = { 0.70118, 0.32901 };
+		_rgb [1] = { 0.30060, 0.68379 };
+		_rgb [2] = { 0.10815,-0.00869 };
+		_white   = { 0.32168, 0.33767 };
+		break;
+	case PrimariesPreset_REDCOLOR4:
+		_rgb [0] = { 0.70118, 0.32901 };
+		_rgb [1] = { 0.30060, 0.68379 };
+		_rgb [2] = { 0.14533, 0.05162 };
+		_white   = { 0.32168, 0.33767 };
+		break;
+
+	// https://www.red.com/download/white-paper-on-redwidegamutrgb-and-log3g10
+	case PrimariesPreset_REDWIDE:
+		_rgb [0] = { 0.780308, 0.304253 };
+		_rgb [1] = { 0.121595, 1.493994 };
+		_rgb [2] = { 0.095612,-0.084589 };
+		_white   = { 0.3217  , 0.3290   };
+		break;
 	default:
 		assert (false);
 		found_flag = false;
@@ -249,7 +313,7 @@ bool	RgbSystem::is_ready () const
 			return false;
 		}
 	}
-	return (true);
+	return true;
 }
 
 

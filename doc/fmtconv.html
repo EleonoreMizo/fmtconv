@@ -1056,6 +1056,15 @@ Possible values are:</p>
 <tr><td><b><code>"alexa"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.6840,<br />0.2210,<br />0.0861,<br />0.3127</td><td>0.3130<br />0.8480<br />-0.1020<br />0.3290</td><td>Arri ALEXA</td></tr>
 <tr><td><b><code>"vgamut"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.730,<br />0.165,<br />0.100,<br />0.3127</td><td>0.280<br />0.840<br />-0.03<br />0.3290</td><td>Panasonic V-Gamut</td></tr>
 <tr><td><b><code>"p22"</code></b></td><td>R<br />G<br />B<br />W (D93)</td><td>0.625,<br />0.280,<br />0.155,<br />0.28315</td><td>0.340<br />0.595<br />0.070<br />0.29711</td><td>Sony P22</td></tr>
+<tr><td><b><code>&quot;fs&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.7347,<br />0.140,<br />0.100,<br />0.31272</td><td>0.2653<br />0.860<br />&minus;0.02985<br />0.32903</td><td>Free Scale-gamut</td></tr>
+<tr><td><b><code>&quot;davinci&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.8000,<br />0.1682,<br />0.0790,<br />0.3127</td><td>0.3130<br />0.9877<br />&minus;0.1155<br />0.3290</td><td>DaVinci wide gamut</td></tr>
+<tr><td><b><code>&quot;dragon&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.75304,<br />0.29957,<br />0.07964,<br />0.32168,</td><td>0.32783<br />0.70070<br />-0.05494<br />0.33767</td><td>DRAGONcolor</td></tr>
+<tr><td><b><code>&quot;dragon2&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.75304,<br />0.29957,<br />0.14501,<br />0.32168,</td><td>0.32783<br />0.70070<br />0.05110<br />0.33767</td><td>DRAGONcolor2</td></tr>
+<tr><td><b><code>&quot;red&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.69975,<br />0.30426,<br />0.13491,<br />0.32168,</td><td>0.32905<br />0.62364<br />0.03472<br />0.33767</td><td>REDcolor</td></tr>
+<tr><td><b><code>&quot;red2&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.87868,<br />0.30089,<br />0.09540,<br />0.32168,</td><td>0.32496<br />0.67905<br />&minus;0.02939<br />0.33767</td><td>REDcolor2</td></tr>
+<tr><td><b><code>&quot;red3&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.70118,<br />0.30060,<br />0.10815,<br />0.32168,</td><td>0.32901<br />0.68379<br />&minus;0.00869<br />0.33767</td><td>REDcolor3</td></tr>
+<tr><td><b><code>&quot;red4&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.70118,<br />0.30060,<br />0.14533,<br />0.32168,</td><td>0.32901<br />0.68379<br />0.05162<br />0.33767</td><td>REDcolor4</td></tr>
+<tr><td><b><code>&quot;redwide&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.780308,<br />0.121595,<br />0.095612,<br />0.3217,</td><td>0.304253<br />1.493994<br />&minus;0.084589<br />0.3290</td><td>REDWideGamutRGB</td></tr>
 </table>
 
 <p class="var">cpuopt</p>
@@ -1944,6 +1953,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>bitdepth</code>: faster void and cluster pattern generation. Larger patterns are allowed.</li>
 <li><code>primaries</code>: fixed Sony P22 primaries.</li>
+<li><code>primaries</code>: New presets: Free Scale-gamut, DaVinci Wide Gamut, DRAGONcolor, DRAGONcolor2, REDcolor, REDcolor2, REDcolor3, REDcolor4 and REDWideGamutRGB.</li>
 <li><code>transfer</code>: Added DaVinci Intermediate, RED Log3G10, REDlog, Cineon and Panalog.</li>
 <li>Vapoursynth and Avisynth+ plug-ins are now contained in the same binary file.</li>
 </ul>

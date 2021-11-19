@@ -282,6 +282,42 @@ PrimariesPreset	PrimUtil::conv_string_to_primaries (const std::string &str)
 	{
 		preset = PrimariesPreset_P22;
 	}
+	else if (   str == "fs")
+	{
+		preset = PrimariesPreset_FREESCALE;
+	}
+	else if (   str == "davinci")
+	{
+		preset = PrimariesPreset_DAVINCI;
+	}
+	else if (   str == "dragon")
+	{
+		preset = PrimariesPreset_DRAGONCOLOR;
+	}
+	else if (   str == "dragon2")
+	{
+		preset = PrimariesPreset_DRAGONCOLOR2;
+	}
+	else if (   str == "red")
+	{
+		preset = PrimariesPreset_REDCOLOR;
+	}
+	else if (   str == "red2")
+	{
+		preset = PrimariesPreset_REDCOLOR2;
+	}
+	else if (   str == "red3")
+	{
+		preset = PrimariesPreset_REDCOLOR3;
+	}
+	else if (   str == "red4")
+	{
+		preset = PrimariesPreset_REDCOLOR4;
+	}
+	else if (   str == "redwide")
+	{
+		preset = PrimariesPreset_REDWIDE;
+	}
 
 	return preset;
 }
