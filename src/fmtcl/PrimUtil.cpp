@@ -236,8 +236,7 @@ PrimariesPreset	PrimUtil::conv_string_to_primaries (const std::string &str)
 	{
 		preset = PrimariesPreset_CIEXYZ;
 	}
-	else if (   str == "p3d65"
-	         || str == "dcip3")
+	else if (   str == "p3d65")
 	{
 		preset = PrimariesPreset_P3D65;
 	}
