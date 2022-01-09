@@ -765,9 +765,9 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::V
 	const ::VSFrameRef & src = *src_sptr;
 
 	const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-	const int      stride_src   = _vsapi.getStride (&src, plane_index);
+	const auto     stride_src   = _vsapi.getStride (&src, plane_index);
 	uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
-	const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
+	const auto     stride_dst   = _vsapi.getStride (&dst, plane_index);
 
 	const fmtcl::InterlacingType  itl_s = fmtcl::InterlacingType_get (
 		frame_info._itl_s_flag, frame_info._top_s_flag
@@ -824,9 +824,9 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, ::V
 	const int      dst_h = _vsapi.getFrameHeight (&dst, plane_index);
 
 	const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-	const int      stride_src   = _vsapi.getStride (&src, plane_index);
+	const auto     stride_src   = _vsapi.getStride (&src, plane_index);
 	uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
-	const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
+	const auto     stride_dst   = _vsapi.getStride (&dst, plane_index);
 
 	const int      w = std::min (src_w, dst_w);
 	const int      h = std::min (src_h, dst_h);

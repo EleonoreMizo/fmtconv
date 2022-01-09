@@ -24,7 +24,6 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/fnc.h"
 
-#include <cstddef>
 #include <cstring>
 
 
@@ -45,7 +44,7 @@ typename Proxy::Ptr1 <T>::Type	Proxy::Ptr1 <T>::make_ptr (const uint8_t *ptr)
 }
 
 template <class T>
-void	Proxy::Ptr1 <T>::jump (Type &ptr, int stride)
+void	Proxy::Ptr1 <T>::jump (Type &ptr, ptrdiff_t stride)
 {
 	ptr += stride;
 }

@@ -194,7 +194,7 @@ int	Scaler::get_fir_len () const
 // src_ptr is the top-left corner of the full source frame
 // dst_ptr is the top-left corner of the destination tile
 #define fmtcl_Scaler_DEFINE_F(DT, ST, DE, SE, FN) \
-void	Scaler::process_plane_flt (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const	\
+void	Scaler::process_plane_flt (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const	\
 {	\
 	(this->*_process_plane_flt_##FN##_ptr) (	\
 		dst_ptr, src_ptr, dst_stride, src_stride, width, y_dst_beg, y_dst_end	\
@@ -202,7 +202,7 @@ void	Scaler::process_plane_flt (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Co
 }
 
 #define fmtcl_Scaler_DEFINE_I(DT, ST, DE, SE, DB, SB, FN) \
-void	Scaler::process_plane_int_##FN (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const	\
+void	Scaler::process_plane_int_##FN (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const	\
 {	\
 	(this->*_process_plane_int_##FN##_ptr) (	\
 		dst_ptr, src_ptr, dst_stride, src_stride, width, y_dst_beg, y_dst_end	\
@@ -325,7 +325,7 @@ int	Scaler::eval_lower_bound_of_src_tile_height (int tile_height_dst, int dst_he
 // DST and SRC are ProxyRwCpp classes
 // Stride offsets in pixels
 template <class DST, class SRC>
-void	Scaler::process_plane_flt_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
+void	Scaler::process_plane_flt_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const
 {
 	assert (DST::Ptr::check_ptr (dst_ptr));
 	assert (SRC::PtrConst::check_ptr (src_ptr));
@@ -391,7 +391,7 @@ void	Scaler::process_plane_flt_cpp (typename DST::Ptr::Type dst_ptr, typename SR
 
 
 template <class DST, int DB, class SRC, int SB>
-void	Scaler::process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
+void	Scaler::process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const
 {
 	assert (DST::Ptr::check_ptr (dst_ptr));
 	assert (SRC::PtrConst::check_ptr (src_ptr));
@@ -469,7 +469,7 @@ void	Scaler::process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SR
 
 
 template <class SRC, bool PF>
-static fstb_FORCEINLINE void	Scaler_process_vect_flt_sse2 (__m128 &sum0, __m128 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128 &add_cst, int len)
+static fstb_FORCEINLINE void	Scaler_process_vect_flt_sse2 (__m128 &sum0, __m128 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, ptrdiff_t src_stride, const __m128 &add_cst, int len)
 {
 	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
 	// and save the add in the write proxy.
@@ -498,7 +498,7 @@ static fstb_FORCEINLINE void	Scaler_process_vect_flt_sse2 (__m128 &sum0, __m128 
 // Stride offsets in pixels
 // Source pointer may be unaligned.
 template <class DST, class SRC>
-void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
+void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const
 {
 	assert (DST::Ptr::check_ptr (dst_ptr, DST::ALIGN_W));
 	assert (SRC::PtrConst::check_ptr (src_ptr, SRC::ALIGN_R));
@@ -588,7 +588,7 @@ void	Scaler::process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename S
 
 
 template <class DST, int DB, class SRC, int SB, bool PF>
-static fstb_FORCEINLINE __m128i	Scaler_process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, int src_stride, const __m128i &sign_bit, int len)
+static fstb_FORCEINLINE __m128i	Scaler_process_vect_int_sse2 (const __m128i &add_cst, int kernel_size, const __m128i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m128i &zero, ptrdiff_t src_stride, const __m128i &sign_bit, int len)
 {
 	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
 
@@ -658,7 +658,7 @@ static fstb_FORCEINLINE __m128i	Scaler_process_vect_int_sse2 (const __m128i &add
 
 
 template <class DST, int DB, class SRC, int SB>
-void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
+void	Scaler::process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const
 {
 	assert (_can_int_flag);
 	assert (DST::Ptr::check_ptr (dst_ptr, DST::ALIGN_W));

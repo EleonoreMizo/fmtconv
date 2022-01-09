@@ -104,7 +104,7 @@ protected:
 private:
 
 	template <class T>
-	void           fill_plane (void *ptr, T val, int stride, int w, int h);
+	void           fill_plane (void *ptr, T val, ptrdiff_t stride, int w, int h);
 
 
 	const ::VSAPI& _vsapi;

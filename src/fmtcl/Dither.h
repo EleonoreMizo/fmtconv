@@ -41,6 +41,8 @@ http://www.wtfpl.net/ for more details.
 #include <memory>
 #include <vector>
 
+#include <cstddef>
+
 
 
 namespace fmtcl
@@ -89,7 +91,7 @@ public:
 		bool sse2_flag, bool avx2_flag
 	);
 
-	void           process_plane (uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, int frame_index, int plane_index);
+	void           process_plane (uint8_t *dst_ptr, ptrdiff_t dst_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, int frame_index, int plane_index);
 
 
 
@@ -173,7 +175,7 @@ private:
 	void           init_fnc_quasirandom () noexcept;
 	void           init_fnc_errdiff () noexcept;
 
-	void           dither_plane (uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const BitBltConv::ScaleInfo &scale_info, int frame_index, int plane_index);
+	void           dither_plane (uint8_t *dst_ptr, ptrdiff_t dst_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, const BitBltConv::ScaleInfo &scale_info, int frame_index, int plane_index);
 
 	template <bool S_FLAG, bool TO_FLAG, bool TN_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
 	static void    process_seg_fast_int_int_cpp (uint8_t * fstb_RESTRICT dst_ptr, const uint8_t * fstb_RESTRICT src_ptr, int w, SegContext &/*ctx*/) noexcept;

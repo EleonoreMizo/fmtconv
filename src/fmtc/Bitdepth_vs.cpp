@@ -281,9 +281,9 @@ int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 		const int      h = _vsapi.getFrameHeight (&src, plane_index);
 
 		const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-		const int      stride_src   = _vsapi.getStride (&src, plane_index);
+		const auto     stride_src   = _vsapi.getStride (&src, plane_index);
 		uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
-		const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
+		const auto     stride_dst   = _vsapi.getStride (&dst, plane_index);
 
 		try
 		{

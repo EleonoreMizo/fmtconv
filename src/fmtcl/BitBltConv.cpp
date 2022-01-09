@@ -66,7 +66,7 @@ BitBltConv::BitBltConv (bool sse2_flag, bool avx2_flag)
 // Stride offsets in bytes
 // w and h in plane pixels
 // No bitdepth reduction (i.e. 10 to 8 forbidden), excepted float to 16-bit integers
-void	BitBltConv::bitblt (SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt (SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, ptrdiff_t dst_stride, SplFmt src_fmt, int src_res, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	assert (dst_fmt >= 0);
 	assert (dst_fmt < SplFmt_NBR_ELT);
@@ -180,7 +180,7 @@ void	BitBltConv::bitblt (SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_
 
 
 
-void	BitBltConv::bitblt_int_to_flt (uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_int_to_flt (uint8_t *dst_ptr, ptrdiff_t dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	const uint8_t *                    src_i08_ptr (src_ptr);
 	const Proxy::PtrInt16Const::Type   src_i16_ptr (
@@ -240,7 +240,7 @@ void	BitBltConv::bitblt_int_to_flt (uint8_t *dst_ptr, int dst_stride, fmtcl::Spl
 
 
 
-void	BitBltConv::bitblt_flt_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_flt_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, ptrdiff_t dst_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	fstb::unused (dst_res);
 
@@ -281,7 +281,7 @@ void	BitBltConv::bitblt_flt_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t 
 
 
 
-void	BitBltConv::bitblt_int_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_int_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, ptrdiff_t dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	fstb::unused (scale_info_ptr);
 
@@ -348,7 +348,7 @@ void	BitBltConv::bitblt_int_to_int (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t 
 
 
 
-void	BitBltConv::bitblt_same_fmt (SplFmt fmt, uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h)
+void	BitBltConv::bitblt_same_fmt (SplFmt fmt, uint8_t *dst_ptr, ptrdiff_t dst_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h)
 {
 	assert (fmt >= 0);
 	assert (fmt < SplFmt_NBR_ELT);
@@ -382,7 +382,7 @@ void	BitBltConv::bitblt_same_fmt (SplFmt fmt, uint8_t *dst_ptr, int dst_stride, 
 
 // Stride offsets are still in bytes
 template <bool SF, class SRC, int SBD>
-void	BitBltConv::bitblt_int_to_flt_cpp (uint8_t *dst_ptr, int dst_stride, typename SRC::PtrConst::Type src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_int_to_flt_cpp (uint8_t *dst_ptr, ptrdiff_t dst_stride, typename SRC::PtrConst::Type src_ptr, ptrdiff_t src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	assert (dst_ptr != 0);
 	assert (SRC::PtrConst::check_ptr (src_ptr));
@@ -426,7 +426,7 @@ void	BitBltConv::bitblt_int_to_flt_cpp (uint8_t *dst_ptr, int dst_stride, typena
 // Stride offsets are still in bytes
 // Destination pointer must be 16-byte aligned!
 template <bool SF, class SRC, int SBD>
-void	BitBltConv::bitblt_int_to_flt_sse2 (uint8_t *dst_ptr, int dst_stride, typename SRC::PtrConst::Type src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_int_to_flt_sse2 (uint8_t *dst_ptr, ptrdiff_t dst_stride, typename SRC::PtrConst::Type src_ptr, ptrdiff_t src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	assert (fstb::ToolsSse2::check_ptr_align (dst_ptr));
 	assert (SRC::PtrConst::check_ptr (src_ptr));
@@ -498,7 +498,7 @@ void	BitBltConv::bitblt_int_to_flt_sse2 (uint8_t *dst_ptr, int dst_stride, typen
 
 // Stride offsets are still in bytes
 template <bool SF, class DST>
-void	BitBltConv::bitblt_flt_to_int_cpp (typename DST::Ptr::Type dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_flt_to_int_cpp (typename DST::Ptr::Type dst_ptr, ptrdiff_t dst_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	assert (DST::Ptr::check_ptr (dst_ptr));
 	assert (src_ptr != nullptr);
@@ -541,7 +541,7 @@ void	BitBltConv::bitblt_flt_to_int_cpp (typename DST::Ptr::Type dst_ptr, int dst
 
 // Stride offsets are still in bytes
 template <bool SF, class DST>
-void	BitBltConv::bitblt_flt_to_int_sse2 (typename DST::Ptr::Type dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
+void	BitBltConv::bitblt_flt_to_int_sse2 (typename DST::Ptr::Type dst_ptr, ptrdiff_t dst_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, const ScaleInfo *scale_info_ptr)
 {
 	assert (DST::Ptr::check_ptr (dst_ptr));
 	assert (src_ptr != nullptr);
@@ -619,7 +619,7 @@ void	BitBltConv::bitblt_flt_to_int_sse2 (typename DST::Ptr::Type dst_ptr, int ds
 // Stride offsets are still in bytes
 // 8 <= SBD <= DBD <= 16
 template <class DST, class SRC, int DBD, int SBD>
-void	BitBltConv::bitblt_ixx_to_x16_cpp (typename DST::Ptr::Type dst_ptr, int dst_stride, typename SRC::PtrConst::Type src_ptr, int src_stride, int w, int h)
+void	BitBltConv::bitblt_ixx_to_x16_cpp (typename DST::Ptr::Type dst_ptr, ptrdiff_t dst_stride, typename SRC::PtrConst::Type src_ptr, ptrdiff_t src_stride, int w, int h)
 {
 	assert (DST::Ptr::check_ptr (dst_ptr));
 	assert (SRC::PtrConst::check_ptr (src_ptr));
@@ -662,7 +662,7 @@ void	BitBltConv::bitblt_ixx_to_x16_cpp (typename DST::Ptr::Type dst_ptr, int dst
 
 // Stride offsets are still in bytes
 template <class DST, class SRC, int DBD, int SBD>
-void	BitBltConv::bitblt_ixx_to_x16_sse2 (typename DST::Ptr::Type dst_ptr, int dst_stride, typename SRC::PtrConst::Type src_ptr, int src_stride, int w, int h)
+void	BitBltConv::bitblt_ixx_to_x16_sse2 (typename DST::Ptr::Type dst_ptr, ptrdiff_t dst_stride, typename SRC::PtrConst::Type src_ptr, ptrdiff_t src_stride, int w, int h)
 {
 	assert (DST::Ptr::check_ptr (dst_ptr));
 	assert (SRC::PtrConst::check_ptr (src_ptr));

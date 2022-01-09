@@ -341,9 +341,9 @@ void	PlaneProcessor::fill_plane (::VSFrameRef &dst, double val, int plane_index)
 
 	const int      dst_w = _vsapi.getFrameWidth (&dst, plane_index);
 	const int      dst_h = _vsapi.getFrameHeight (&dst, plane_index);
-	const int      dst_s = _vsapi.getStride (&dst, plane_index);
 	const ::VSFormat *   dst_fmt_ptr = _vsapi.getFrameFormat (&dst);
 	uint8_t *            dst_dta_ptr = _vsapi.getWritePtr (&dst, plane_index);
+	const auto     dst_s = _vsapi.getStride (&dst, plane_index);
 	const int      bps = dst_fmt_ptr->bytesPerSample;
 	const int      st  = dst_fmt_ptr->sampleType;
 
@@ -392,13 +392,13 @@ void	PlaneProcessor::copy_plane (::VSFrameRef &dst, const ::VSFrameRef &src, int
 
 	const int      dst_w = _vsapi.getFrameWidth (&dst, plane_index);
 	const int      dst_h = _vsapi.getFrameHeight (&dst, plane_index);
-	const int      dst_s = _vsapi.getStride (&dst, plane_index);
 	const ::VSFormat *   dst_fmt_ptr = _vsapi.getFrameFormat (&dst);
 	uint8_t *            dst_dta_ptr = _vsapi.getWritePtr (&dst, plane_index);
+	const auto     dst_s = _vsapi.getStride (&dst, plane_index);
 
 	const int      src_w = _vsapi.getFrameWidth (&src, plane_index);
 	const int      src_h = _vsapi.getFrameHeight (&src, plane_index);
-	const int      src_s = _vsapi.getStride (&src, plane_index);
+	const auto     src_s = _vsapi.getStride (&src, plane_index);
 	const uint8_t *      src_dta_ptr = _vsapi.getReadPtr (&src, plane_index);
 
 	const int      w   = std::min (dst_w, src_w);
@@ -433,7 +433,7 @@ void	PlaneProcessor::copy_plane (::VSFrameRef &dst, const ::VSFrameRef &src, int
 
 
 template <class T>
-void	PlaneProcessor::fill_plane (void *ptr, T val, int stride, int w, int h)
+void	PlaneProcessor::fill_plane (void *ptr, T val, ptrdiff_t stride, int w, int h)
 {
 	assert (ptr != nullptr);
 	assert (stride > 0);
@@ -448,7 +448,7 @@ void	PlaneProcessor::fill_plane (void *ptr, T val, int stride, int w, int h)
 	else
 	{
 		T *            data_ptr = reinterpret_cast <T *> (ptr);
-		const int      stride_pix = stride / sizeof (val);
+		const auto     stride_pix = stride / sizeof (val);
 		for (int y = 0; y < h; ++y)
 		{
 			if (sizeof (val) == 1)

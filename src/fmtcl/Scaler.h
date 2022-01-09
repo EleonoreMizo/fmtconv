@@ -35,6 +35,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include <vector>
 
+#include <cstddef>
 #include <cstdint>
 
 
@@ -113,10 +114,10 @@ public:
 	int            get_fir_len () const;
 
 #define fmtcl_Scaler_DECLARE_F(DT, ST, DE, SE, FN) \
-	void           process_plane_flt (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	void           process_plane_flt (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 #define fmtcl_Scaler_DECLARE_I(DT, ST, DE, SE, DB, SB, FN) \
-	void           process_plane_int_##FN (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	void           process_plane_int_##FN (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 	fmtcl_Scaler_SPAN_F (fmtcl_Scaler_DECLARE_F)
 	fmtcl_Scaler_SPAN_I (fmtcl_Scaler_DECLARE_I)
@@ -168,24 +169,24 @@ private:
 #endif
 
 	template <class DST, class SRC>
-	void           process_plane_flt_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	void           process_plane_flt_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 	template <class DST, int DB, class SRC, int SB>
-	void           process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	void           process_plane_int_cpp (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 
 	template <class DST, class SRC>
-	void           process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	void           process_plane_flt_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 	template <class DST, int DB, class SRC, int SB>
-	void           process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	void           process_plane_int_sse2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 	template <class DST, class SRC>
-	void           process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	void           process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 	template <class DST, int DB, class SRC, int SB>
-	void           process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	void           process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 #endif   // fstb_ARCHI_X86
 
@@ -217,11 +218,11 @@ private:
 
 #define fmtcl_Scaler_FNCPTR_F(DT, ST, DE, SE, FN) \
 	void (ThisType::* \
-	               _process_plane_flt_##FN##_ptr) (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	               _process_plane_flt_##FN##_ptr) (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 #define fmtcl_Scaler_FNCPTR_I(DT, ST, DE, SE, DB, SB, FN) \
 	void (ThisType::* \
-	               _process_plane_int_##FN##_ptr) (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const;
+	               _process_plane_int_##FN##_ptr) (Proxy::Ptr##DT::Type dst_ptr, Proxy::Ptr##ST##Const::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const;
 
 	fmtcl_Scaler_SPAN_F (fmtcl_Scaler_FNCPTR_F)
 	fmtcl_Scaler_SPAN_I (fmtcl_Scaler_FNCPTR_I)

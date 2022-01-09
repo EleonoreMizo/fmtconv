@@ -25,6 +25,7 @@ http://www.wtfpl.net/ for more details.
 
 #include <type_traits>
 
+#include <cstddef>
 #include <cstdint>
 
 
@@ -68,7 +69,7 @@ public:
 	inline void    step_line (int n) noexcept;
 
 	T *            _ptr    = nullptr;
-	int            _stride = 0;         // Always in bytes
+	ptrdiff_t      _stride = 0;         // Always in bytes
 
 
 

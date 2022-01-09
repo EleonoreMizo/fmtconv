@@ -123,11 +123,11 @@ const ::VSFrameRef *	NativeToStack16::get_frame (int n, int activation_reason, v
 			const int      ph = _vsapi.getFrameHeight (&src, plane_index);
 
 			const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-			const int      stride_src   = _vsapi.getStride (&src, plane_index);
+			const auto     stride_src   = _vsapi.getStride (&src, plane_index);
 			uint8_t *      data_dst_ptr = _vsapi.getWritePtr (dst_ptr, plane_index);
-			const int      stride_dst   = _vsapi.getStride (dst_ptr, plane_index);
+			const auto     stride_dst   = _vsapi.getStride (dst_ptr, plane_index);
 
-			const int      lsb_offset = stride_dst * ph;
+			const auto     lsb_offset = stride_dst * ph;
 
 			for (int y = 0; y < ph; ++y)
 			{

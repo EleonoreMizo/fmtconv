@@ -118,9 +118,9 @@ public:
 			// Luma
 			{
 				const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, 0);
-				const int      stride_src   = _vsapi.getStride (&src, 0);
+				const auto     stride_src   = _vsapi.getStride (&src, 0);
 				uint8_t *      data_dst_ptr = _vsapi.getWritePtr (dst_ptr, 0);
-				const int      stride_dst   = _vsapi.getStride (dst_ptr, 0);
+				const auto     stride_dst   = _vsapi.getStride (dst_ptr, 0);
 				const int      w = _vsapi.getFrameWidth (dst_ptr, 0);
 				const int      h = _vsapi.getFrameHeight (dst_ptr, 0);
 
@@ -159,7 +159,7 @@ public:
 			for (int plane = 1; plane < _vi_out.format->numPlanes; ++plane)
 			{
 				uint8_t *      data_dst_ptr = _vsapi.getWritePtr (dst_ptr, plane);
-				const int      stride_dst   = _vsapi.getStride (dst_ptr, plane);
+				const auto     stride_dst   = _vsapi.getStride (dst_ptr, plane);
 				const int      w = _vsapi.getFrameWidth (dst_ptr, plane);
 				const int      h = _vsapi.getFrameHeight (dst_ptr, plane);
 				if (_vi_out.format->bytesPerSample == 2)
