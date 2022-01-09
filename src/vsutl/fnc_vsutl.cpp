@@ -78,7 +78,7 @@ bool	is_constant_format (const ::VSVideoInfo &vi)
 
 bool	has_chroma (int cf)
 {
-	return (is_vs_yuv (cf) || cf == ::cmYCoCg);
+	return is_vs_yuv (cf);
 }
 
 
@@ -102,8 +102,7 @@ bool	is_chroma_plane (const ::VSFormat &fmt, int plane_index)
 
 bool	is_full_range_default (const ::VSFormat &fmt)
 {
-	return (   is_vs_rgb (fmt.colorFamily)
-	        || fmt.colorFamily == ::cmYCoCg);
+	return is_vs_rgb (fmt.colorFamily);
 }
 
 

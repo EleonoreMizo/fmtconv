@@ -238,7 +238,7 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 		if (_csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED)
 		{
 			const auto     final_cf =
-				fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, false);
+				fmtcl::MatrixUtil::find_cf_from_cs (_csp_out);
 			fmt_dst.set_col_fam (final_cf);
 		}
 	}

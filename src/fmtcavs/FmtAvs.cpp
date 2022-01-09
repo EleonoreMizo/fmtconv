@@ -411,7 +411,6 @@ void	FmtAvs::set_col_fam (fmtcl::ColorFamily col_fam) noexcept
 {
 	assert (col_fam >= 0);
 	assert (col_fam < fmtcl::ColorFamily_NBR_ELT);
-	assert (col_fam != fmtcl::ColorFamily_YCGCO);
 
 	_col_fam = col_fam;
 }

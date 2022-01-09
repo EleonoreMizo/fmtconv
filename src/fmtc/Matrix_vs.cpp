@@ -247,7 +247,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		if (_csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED)
 		{
 			const auto     final_cf =
-				fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, true);
+				fmtcl::MatrixUtil::find_cf_from_cs (_csp_out);
 			final_cm = fmtc::conv_fmtcl_colfam_to_vs (final_cf);
 		}
 
@@ -514,6 +514,7 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 	case fmtcl::ColorSpaceH265_BT470BG:
 	case fmtcl::ColorSpaceH265_SMPTE170M:
 	case fmtcl::ColorSpaceH265_SMPTE240M:
+	case fmtcl::ColorSpaceH265_YCGCO:
 	case fmtcl::ColorSpaceH265_BT2020NCL:
 	case fmtcl::ColorSpaceH265_BT2020CL:
 	case fmtcl::ColorSpaceH265_YDZDX:
@@ -523,10 +524,6 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 	case fmtcl::ColorSpaceH265_ICTCP_PQ:
 	case fmtcl::ColorSpaceH265_ICTCP_HLG:
 		alt_cf = ::cmYUV;
-		break;
-
-	case fmtcl::ColorSpaceH265_YCGCO:
-		alt_cf = ::cmYCoCg;
 		break;
 
 	case fmtcl::ColorSpaceH265_LMS:

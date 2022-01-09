@@ -41,7 +41,6 @@ enum ColorFamily
 	ColorFamily_GRAY = 0,
 	ColorFamily_RGB,
 	ColorFamily_YUV,
-	ColorFamily_YCGCO,
 
 	ColorFamily_NBR_ELT
 
