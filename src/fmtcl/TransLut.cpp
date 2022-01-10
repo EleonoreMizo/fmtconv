@@ -233,6 +233,9 @@ TransLut::TransLut (const TransOpInterface &curve, bool log_flag, SplFmt src_fmt
 
 	generate_lut (curve);
 	init_proc_fnc ();
+
+	// Mutes unused member variable warning for non-x86 architectures
+	fstb::unused (_sse2_flag, _avx2_flag);
 }
 
 
