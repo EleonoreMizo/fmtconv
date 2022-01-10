@@ -27,7 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 
 
@@ -60,10 +60,8 @@ protected:
 
 private:
 
-	static void VS_CC
-	               init_filter (::VSMap *in, ::VSMap *out, void **instanceData, ::VSNode *node, ::VSCore *core, const ::VSAPI *vsapi);
-	static const ::VSFrameRef * VS_CC
-	               get_frame (int n, int activationReason, void **instanceData, void **frameData, ::VSFrameContext *frameCtx, ::VSCore *core, const ::VSAPI *vsapi);
+	static const ::VSFrame * VS_CC
+	               get_frame (int n, int activationReason, void *instanceData, void **frameData, ::VSFrameContext *frameCtx, ::VSCore *core, const ::VSAPI *vsapi);
 	static void VS_CC
 	               free_filter (void *instanceData, ::VSCore *core, const ::VSAPI *vsapi);
 

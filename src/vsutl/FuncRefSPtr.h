@@ -28,7 +28,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "vsutl/ObjRefSPtr.h"
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 
 
@@ -40,18 +40,18 @@ namespace vsutl
 class FuncRefSPtr_FncWrapper
 {
 public:
-	static inline ::VSFuncRef * clone (const ::VSAPI &vsapi, ::VSFuncRef *func) VS_NOEXCEPT
+	static inline ::VSFunction * clone (const ::VSAPI &vsapi, ::VSFunction *func) VS_NOEXCEPT
 	{
-		return (*vsapi.cloneFuncRef) (func);
+		return (*vsapi.addFunctionRef) (func);
 	}
-	static inline void free (const ::VSAPI &vsapi, ::VSFuncRef *func) VS_NOEXCEPT
+	static inline void free (const ::VSAPI &vsapi, ::VSFunction *func) VS_NOEXCEPT
 	{
 		(*vsapi.freeFunc) (func);
 	}
 };
 
 typedef	ObjRefSPtr <
-	::VSFuncRef,
+	::VSFunction,
 	FuncRefSPtr_FncWrapper
 >	FuncRefSPtr;
 

@@ -45,34 +45,26 @@ namespace vsutl
 
 
 
-FilterBase::FilterBase (const ::VSAPI &vsapi, const char name_0 [], ::VSFilterMode filter_mode, int /* ::NodeFlags */ flags)
+FilterBase::FilterBase (const ::VSAPI &vsapi, const char name_0 [], ::VSFilterMode filter_mode)
 :	_vsapi (vsapi)
 ,	_filter_name (name_0)
 ,	_filter_mode (filter_mode)
-,	_filter_flags (flags)
 {
-	assert (name_0 != 0);
+	assert (name_0 != nullptr);
 }
 
 
 
 const std::string &	FilterBase::use_filter_name () const
 {
-	return (_filter_name);
+	return _filter_name;
 }
 
 
 
 ::VSFilterMode	FilterBase::get_filter_mode () const
 {
-	return (_filter_mode);
-}
-
-
-
-int	FilterBase::get_filter_flags () const
-{
-	return (_filter_flags);
+	return _filter_mode;
 }
 
 
@@ -102,7 +94,7 @@ bool	FilterBase::is_arg_defined (const ::VSMap &in, const char name_0 []) const
 {
 	assert (name_0 != 0);
 
-	const int      nbr_elt = _vsapi.propNumElements (&in, name_0);
+	const int      nbr_elt = _vsapi.mapNumElements (&in, name_0);
 
 	return (nbr_elt >= 0);
 }
@@ -123,7 +115,7 @@ int	FilterBase::get_arg_int (const ::VSMap &in, ::VSMap &out, const char name_0 
 	{
 		int            err = 0;
 		clip_neg_arg_pos (pos, in, name_0);
-		def_val = int (_vsapi.propGetInt (&in, name_0, pos, &err));
+		def_val = int (_vsapi.mapGetInt (&in, name_0, pos, &err));
 		test_arg_err (out, name_0, err);
 	}
 
@@ -146,7 +138,7 @@ double	FilterBase::get_arg_flt (const ::VSMap &in, ::VSMap &out, const char name
 	{
 		int            err = 0;
 		clip_neg_arg_pos (pos, in, name_0);
-		def_val = _vsapi.propGetFloat (&in, name_0, pos, &err);
+		def_val = _vsapi.mapGetFloat (&in, name_0, pos, &err);
 		test_arg_err (out, name_0, err);
 	}
 
@@ -169,7 +161,7 @@ std::string	FilterBase::get_arg_str (const ::VSMap &in, ::VSMap &out, const char
 	{
 		int            err = 0;
 		clip_neg_arg_pos (pos, in, name_0);
-		const char *   tmp_0_ptr = _vsapi.propGetData (&in, name_0, pos, &err);
+		const char *   tmp_0_ptr = _vsapi.mapGetData (&in, name_0, pos, &err);
 		test_arg_err (out, name_0, err);
 		assert (tmp_0_ptr != 0);
 		def_val = tmp_0_ptr;
@@ -185,7 +177,7 @@ std::vector <int>	FilterBase::get_arg_vint (const ::VSMap &in, ::VSMap &out, con
 	assert (name_0 != 0);
 
 	std::vector <int> vec;
-	const int      nbr_elt = _vsapi.propNumElements (&in, name_0);
+	const int      nbr_elt = _vsapi.mapNumElements (&in, name_0);
 	const bool     defined_flag = (nbr_elt >= 0);
 	if (defined_ptr != 0)
 	{
@@ -201,7 +193,7 @@ std::vector <int>	FilterBase::get_arg_vint (const ::VSMap &in, ::VSMap &out, con
 		int            err = 0;
 		for (int pos = 0; pos < nbr_elt; ++pos)
 		{
-			const int      elt = int (_vsapi.propGetInt (&in, name_0, pos, &err));
+			const int      elt = int (_vsapi.mapGetInt (&in, name_0, pos, &err));
 			test_arg_err (out, name_0, err);
 			vec.push_back (elt);
 		}
@@ -217,7 +209,7 @@ std::vector <double>	FilterBase::get_arg_vflt (const ::VSMap &in, ::VSMap &out, 
 	assert (name_0 != 0);
 
 	std::vector <double> vec;
-	const int      nbr_elt = _vsapi.propNumElements (&in, name_0);
+	const int      nbr_elt = _vsapi.mapNumElements (&in, name_0);
 	const bool     defined_flag = (nbr_elt >= 0);
 	if (defined_ptr != 0)
 	{
@@ -233,7 +225,7 @@ std::vector <double>	FilterBase::get_arg_vflt (const ::VSMap &in, ::VSMap &out, 
 		int            err = 0;
 		for (int pos = 0; pos < nbr_elt; ++pos)
 		{
-			const double   elt = _vsapi.propGetFloat (&in, name_0, pos, &err);
+			const double   elt = _vsapi.mapGetFloat (&in, name_0, pos, &err);
 			test_arg_err (out, name_0, err);
 			vec.push_back (elt);
 		}
@@ -249,7 +241,7 @@ std::vector <std::string>	FilterBase::get_arg_vstr (const ::VSMap &in, ::VSMap &
 	assert (name_0 != 0);
 
 	std::vector <std::string>  vec;
-	const int      nbr_elt = _vsapi.propNumElements (&in, name_0);
+	const int      nbr_elt = _vsapi.mapNumElements (&in, name_0);
 	const bool     defined_flag = (nbr_elt >= 0);
 	if (defined_ptr != 0)
 	{
@@ -265,7 +257,7 @@ std::vector <std::string>	FilterBase::get_arg_vstr (const ::VSMap &in, ::VSMap &
 		int            err = 0;
 		for (int pos = 0; pos < nbr_elt; ++pos)
 		{
-			const char *   tmp_0_ptr = _vsapi.propGetData (&in, name_0, pos, &err);
+			const char *   tmp_0_ptr = _vsapi.mapGetData (&in, name_0, pos, &err);
 			test_arg_err (out, name_0, err);
 			vec.push_back (tmp_0_ptr);
 		}
@@ -284,19 +276,11 @@ char	FilterBase::_filter_error_msg_0 [_max_error_buf_len] = "";
 
 
 
-// This is a simple wrapper around ::VSAPI::registerFormat(), so the plug-in
+// This is a simple wrapper around ::VSAPI::queryVideoFormat(), so the plug-in
 // emits and error message instead of crashing when inconsistent arguments
 // are passed to the function.
-const VSFormat *	FilterBase::register_format (int color_family, int sample_type, int bits_per_sample, int sub_sampling_w, int sub_sampling_h, ::VSCore &core) const
+bool	FilterBase::register_format (::VSVideoFormat &fmt, int color_family, int sample_type, int bits_per_sample, int sub_sampling_w, int sub_sampling_h, ::VSCore &core) const
 {
-	// Maps API V4 colorfamily values to API V3
-	switch (color_family)
-	{
-	case ::cfGray: color_family = ::cmGray; break;
-	case ::cfRGB:  color_family = ::cmRGB;	 break;
-	case ::cfYUV:  color_family = ::cmYUV;	 break;
-	}
-
 	// Copy of the beginning of VSCore::registerFormat()
 	if (   sub_sampling_h < 0 || sub_sampling_w < 0
 	    || sub_sampling_h > 4 || sub_sampling_w > 4)
@@ -325,19 +309,17 @@ const VSFormat *	FilterBase::register_format (int color_family, int sample_type,
 		throw_rt_err ("Only formats with 8-32 bits per sample are allowed");
 	}
 
-	if (color_family == ::cmCompat)
-	{
-		throw_rt_err ("No compatibility formats may be registered");
-	}
-
-	return (_vsapi.registerFormat (
+	const auto        qvf_ret = _vsapi.queryVideoFormat (
+		&fmt,
 		color_family,
 		sample_type,
 		bits_per_sample,
 		sub_sampling_w,
 		sub_sampling_h,
 		&core
-	));
+	);
+
+	return (qvf_ret != 0);
 }
 
 
@@ -353,7 +335,7 @@ void  FilterBase::clip_neg_arg_pos (int &pos, const ::VSMap &in, const char name
 	if (pos < 0)
 	{
 		pos = -pos;
-		const int      nbr_elt = _vsapi.propNumElements (&in, name_0);
+		const int      nbr_elt = _vsapi.mapNumElements (&in, name_0);
 		pos = std::max (std::min (pos, nbr_elt - 1), 0);
 	}
 }
@@ -373,7 +355,7 @@ void	FilterBase::test_arg_err (::VSMap &out, const char name_0 [], int err) cons
 			_filter_name.c_str (), name_0, err
 		);
 
-		_vsapi.setError (&out, _filter_error_msg_internal_0);
+		_vsapi.mapSetError (&out, _filter_error_msg_internal_0);
 
 		throw std::invalid_argument (_filter_error_msg_internal_0);
 	}

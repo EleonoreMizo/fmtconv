@@ -33,7 +33,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 struct VSCore;
 struct VSFrameContext;
-struct VSFrameRef;
+struct VSFrame;
 
 
 
@@ -51,7 +51,7 @@ public:
 
 	virtual        ~PlaneProcCbInterface () = default;
 
-	int            process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const NodeRefSPtr &src_node1_sptr, const NodeRefSPtr &src_node2_sptr, const NodeRefSPtr &src_node3_sptr);
+	int            process_plane (::VSFrame &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const NodeRefSPtr &src_node1_sptr, const NodeRefSPtr &src_node2_sptr, const NodeRefSPtr &src_node3_sptr);
 
 
 
@@ -59,7 +59,7 @@ public:
 
 protected:
 
-	virtual int    do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const NodeRefSPtr &src_node1_sptr, const NodeRefSPtr &src_node2_sptr, const NodeRefSPtr &src_node3_sptr) = 0;
+	virtual int    do_process_plane (::VSFrame &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const NodeRefSPtr &src_node1_sptr, const NodeRefSPtr &src_node2_sptr, const NodeRefSPtr &src_node3_sptr) = 0;
 
 
 

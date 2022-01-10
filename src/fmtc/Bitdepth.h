@@ -32,7 +32,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "vsutl/NodeRefSPtr.h"
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 #include <memory>
 
@@ -58,8 +58,11 @@ public:
 	virtual        ~Bitdepth () {}
 
 	// vsutl::FilterBase
-	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
-	virtual const ::VSFrameRef *
+	virtual ::VSVideoInfo
+	               get_video_info () const;
+	virtual std::vector <::VSFilterDependency>
+	               get_dependencies () const;
+	virtual const ::VSFrame *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core);
 
 
@@ -69,7 +72,7 @@ public:
 protected:
 
 	// vsutl::PlaneProcCbInterface
-	virtual int    do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr);
+	virtual int    do_process_plane (::VSFrame &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr);
 
 
 
@@ -77,8 +80,8 @@ protected:
 
 private:
 
-	const ::VSFormat &
-	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
+	::VSVideoFormat
+	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src) const;
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;

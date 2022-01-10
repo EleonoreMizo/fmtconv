@@ -49,8 +49,11 @@ public:
 	virtual        ~Stack16ToNative () {}
 
 	// vsutl::FilterBase
-	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
-	virtual const ::VSFrameRef *
+	virtual ::VSVideoInfo
+	               get_video_info () const;
+	virtual std::vector <::VSFilterDependency>
+	               get_dependencies () const;
+	virtual const ::VSFrame *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core);
 
 

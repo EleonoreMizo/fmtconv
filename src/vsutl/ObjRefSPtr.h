@@ -8,7 +8,7 @@ Smart pointer template class for the Vapoursynth object references.
 Template parameters:
 
 - T: The type of the object possibly with const, but without pointer
-	(currently ::VSNodeRef, const ::VSFrameRef or const ::VSFuncRef).
+	(currently ::VSNode, const ::VSFrame or const ::VSFunction).
 
 - FW: Wrapper class for clone and free functions. Requires:
 	static inline T * FW::clone (const ::VSAPI &, T *) VS_NOEXCEPT;
@@ -38,7 +38,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 
 

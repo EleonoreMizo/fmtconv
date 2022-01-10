@@ -38,7 +38,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "vsutl/NodeRefSPtr.h"
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 #include <array>
 #include <map>
@@ -65,8 +65,11 @@ public:
 	virtual        ~Resample () = default;
 
 	// vsutl::FilterBase
-	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
-	virtual const ::VSFrameRef *
+	virtual ::VSVideoInfo
+	               get_video_info () const;
+	virtual std::vector <::VSFilterDependency>
+	               get_dependencies () const;
+	virtual const ::VSFrame *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core);
 
 	static fmtcl::ChromaPlacement
@@ -80,7 +83,7 @@ public:
 protected:
 
 	// vsutl::PlaneProcCbInterface
-	virtual int    do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr);
+	virtual int    do_process_plane (::VSFrame &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr);
 
 
 
@@ -94,11 +97,11 @@ private:
 
 	typedef std::array <fmtcl::ResamplePlaneData, _max_nbr_planes> PlaneDataArray;
 
-	const ::VSFormat &
-	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
+	::VSVideoFormat
+	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src) const;
 	bool           cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const char name_0 [], int pos = 0) const;
-	int            process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr, const Ru::FrameInfo &frame_info);
-	int            process_plane_copy (::VSFrameRef &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr);
+	int            process_plane_proc (::VSFrame &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr, const Ru::FrameInfo &frame_info);
+	int            process_plane_copy (::VSFrame &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr);
 	fmtcl::FilterResize *
 	               create_or_access_plane_filter (int plane_index, fmtcl::InterlacingType itl_d, fmtcl::InterlacingType itl_s);
 	void           create_all_plane_specs ();

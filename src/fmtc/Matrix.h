@@ -35,7 +35,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/AllocAlign.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include <emmintrin.h>
@@ -67,8 +67,11 @@ public:
 	virtual        ~Matrix () = default;
 
 	// vsutl::FilterBase
-	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
-	virtual const ::VSFrameRef *
+	virtual ::VSVideoInfo
+	               get_video_info () const;
+	virtual std::vector <::VSFilterDependency>
+	               get_dependencies () const;
+	virtual const ::VSFrame *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core);
 
 	static fmtcl::ColorSpaceH265
@@ -96,11 +99,10 @@ private:
 		Dir_NBR_ELT
 	};
 
-	const ::VSFormat *
-	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src, int &plane_out, bool &force_col_fam_flag) const;
+	::VSVideoFormat
+	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src, int &plane_out, bool &force_col_fam_flag) const;
 
-	const ::VSFormat *
-	               find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, const ::VSFormat *fmt_dst_ptr, const ::VSFormat &fmt_src, ::VSCore &core);
+	void           find_dst_col_fam (::VSVideoFormat &fmt_dst, fmtcl::ColorSpaceH265 tmp_csp, const ::VSVideoFormat &fmt_src, ::VSCore &core);
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;

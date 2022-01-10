@@ -58,8 +58,11 @@ public:
 	virtual        ~Convert () {}
 
 	// vsutl::FilterBase
-	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
-	virtual const ::VSFrameRef *
+	virtual ::VSVideoInfo
+	               get_video_info () const;
+	virtual std::vector <::VSFilterDependency>
+	               get_dependencies () const;
+	virtual const ::VSFrame *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core);
 
 
@@ -76,14 +79,14 @@ private:
 
 	typedef	std::list <ConvStep>	StepList;
 
-	void           retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src);
+	void           retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src);
 	ConvStep::Range
-	               retrieve_range (const ::VSFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 []);
+	               retrieve_range (const ::VSVideoFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 []);
 	fmtcl::TransCurve
-						retrieve_tcurve (const ::VSFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 [], const char def_0 []);
+						retrieve_tcurve (const ::VSVideoFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 [], const char def_0 []);
 	void           find_conversion_steps (const ::VSMap &in, ::VSMap &out);
-	void           fill_conv_step_with_cs (ConvStep &step, const ::VSFormat &fmt);
-	bool           fill_conv_step_with_curve (ConvStep &step, const ::VSFormat &fmt, fmtcl::TransCurve tcurve, fmtcl::ColorSpaceH265 mat);
+	void           fill_conv_step_with_cs (ConvStep &step, const ::VSVideoFormat &fmt);
+	bool           fill_conv_step_with_curve (ConvStep &step, const ::VSVideoFormat &fmt, fmtcl::TransCurve tcurve, fmtcl::ColorSpaceH265 mat);
 	void           fill_conv_step_with_gcor (ConvStep &step, const ::VSMap &in, ::VSMap &out, const char arg_0 []);
 
 	vsutl::NodeRefSPtr

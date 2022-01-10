@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/version.h"
 #include "fstb/def.h"
 #include "vsutl/Redirect.h"
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 #include <algorithm>
 
@@ -58,8 +58,8 @@ class TmpHistLuma
 public:
 
 	TmpHistLuma (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi)
-	:	vsutl::FilterBase (vsapi, "histluma", ::fmParallel, 0)
-	,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
+	:	vsutl::FilterBase (vsapi, "histluma", ::fmParallel)
+	,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, 0), vsapi)
 	,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 	,	_vi_out (_vi_in)
 	,	_full_flag (get_arg_int (in, out, "full", 0) != 0)
@@ -71,32 +71,37 @@ public:
 		{
 			throw_inval_arg ("only constant formats are supported.");
 		}
-		const ::VSFormat &   fmt_src = *_vi_in.format;
+		const auto &   fmt_src = _vi_in.format;
 		if (   fmt_src.sampleType != ::stInteger
 		    || fmt_src.bitsPerSample > 16)
 		{
 			throw_inval_arg ("only integer input with 16 bits or less.");
 		}
-		if (_vsapi.getError (&out) != 0)
+		if (_vsapi.mapGetError (&out) != nullptr)
 		{
 			throw -1;
 		}
 	}
 
 	// vsutl::FilterBase
-	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+	::VSVideoInfo	get_video_info () const
 	{
-		fstb::unused (in, out, core);
-
-		_vsapi.setVideoInfo (&_vi_out, 1, &node);
+		return _vi_out;
 	}
 
-	virtual const ::VSFrameRef *	get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+	std::vector <::VSFilterDependency>	get_dependencies () const
+	{
+		return std::vector <::VSFilterDependency> {
+			{ &*_clip_src_sptr, ::rpStrictSpatial }
+		};
+	}
+
+	virtual const ::VSFrame *	get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 	{
 		fstb::unused (frame_data_ptr);
 
-		::VSFrameRef *    dst_ptr = 0;
-		::VSNodeRef &     node = *_clip_src_sptr;
+		::VSFrame *    dst_ptr = nullptr;
+		::VSNode &     node    = *_clip_src_sptr;
 
 		if (activation_reason == ::arInitial)
 		{
@@ -109,9 +114,11 @@ public:
 				_vsapi.getFrameFilter (n, &node, &frame_ctx),
 				_vsapi
 			);
-			const ::VSFrameRef & src = *src_sptr;
-			dst_ptr = _vsapi.newVideoFrame (_vi_out.format, _vi_out.width, _vi_out.height, &src, &core);
-			const int      bits = _vi_out.format->bitsPerSample;
+			const ::VSFrame & src = *src_sptr;
+			dst_ptr = _vsapi.newVideoFrame (
+				&_vi_out.format, _vi_out.width, _vi_out.height, &src, &core
+			);
+			const int      bits = _vi_out.format.bitsPerSample;
 
 			// Luma
 			{
@@ -154,13 +161,13 @@ public:
 			}
 
 			// Chroma
-			for (int plane = 1; plane < _vi_out.format->numPlanes; ++plane)
+			for (int plane = 1; plane < _vi_out.format.numPlanes; ++plane)
 			{
 				uint8_t *      data_dst_ptr = _vsapi.getWritePtr (dst_ptr, plane);
 				const auto     stride_dst   = _vsapi.getStride (dst_ptr, plane);
 				const int      w = _vsapi.getFrameWidth (dst_ptr, plane);
 				const int      h = _vsapi.getFrameHeight (dst_ptr, plane);
-				if (_vi_out.format->bytesPerSample == 2)
+				if (_vi_out.format.bytesPerSample == 2)
 				{
 					const uint16_t    fill_cst = uint16_t (1 << (bits - 1));
 					for (int y = 0; y < h; ++y)
@@ -180,7 +187,7 @@ public:
 			}
 		}
 
-		return (dst_ptr);
+		return dst_ptr;
 	}
 
 protected:
@@ -209,19 +216,20 @@ private:
 
 
 
-VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSRegisterFunction register_fnc, ::VSPlugin *plugin_ptr)
+VS_EXTERNAL_API (void) VapourSynthPluginInit2 (::VSPlugin *plugin_ptr, const ::VSPLUGINAPI *api_ptr)
 {
-	config_fnc (
+	api_ptr->configPlugin (
 		fmtc_PLUGIN_NAME,
 		fmtc_NAMESPACE,
-		"Format converter, " fmtc_VERSION,
+		"Format converter",
+		VS_MAKE_VERSION (fmtc_VERSION, 0),
 		VAPOURSYNTH_API_VERSION,
-		1,
+		0, // VSPluginConfigFlags
 		plugin_ptr
 	);
 
-	register_fnc ("resample",
-		"clip:clip;"
+	api_ptr->registerFunction ("resample",
+		"clip:vnode;"
 		"w:int:opt;"
 		"h:int:opt;"
 		"sx:float[]:opt;"
@@ -277,11 +285,12 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"tffd:int:opt;"
 		"flt:int:opt;"
 		"cpuopt:int:opt;"
-		, &vsutl::Redirect <fmtc::Resample>::create, 0, plugin_ptr
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::Resample>::create, nullptr, plugin_ptr
 	);
 
-	register_fnc ("matrix",
-		"clip:clip;"
+	api_ptr->registerFunction ("matrix",
+		"clip:vnode;"
 		"mat:data:opt;"     // Matrix for YUV <-> RGB conversions: "601", "709", "240", "FCC"
 		"mats:data:opt;"    // Source matrix for YUV
 		"matd:data:opt;"    // Destination matrix for YUV
@@ -294,20 +303,22 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"singleout:int:opt;"
 		"cpuopt:int:opt;"
 		"planes:float[]:opt;" // Masktools style
-		, &vsutl::Redirect <fmtc::Matrix>::create, 0, plugin_ptr
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::Matrix>::create, nullptr, plugin_ptr
 	);
 
-	register_fnc ("matrix2020cl",
-		"clip:clip;"
+	api_ptr->registerFunction ("matrix2020cl",
+		"clip:vnode;"
 		"full:int:opt;"
 		"csp:int:opt;"
 		"bits:int:opt;"
 		"cpuopt:int:opt;"
-		, &vsutl::Redirect <fmtc::Matrix2020CL>::create, 0, plugin_ptr
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::Matrix2020CL>::create, nullptr, plugin_ptr
 	);
 
-	register_fnc ("bitdepth",
-		"clip:clip;"
+	api_ptr->registerFunction ("bitdepth",
+		"clip:vnode;"
 		"csp:int:opt;"
 		"bits:int:opt;"
 		"flt:int:opt;"
@@ -324,11 +335,12 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"tpdfo:int:opt;"
 		"tpdfn:int:opt;"
 		"corplane:int:opt;"
-		, &vsutl::Redirect <fmtc::Bitdepth>::create, 0, plugin_ptr
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::Bitdepth>::create, nullptr, plugin_ptr
 	);
 
-	register_fnc ("transfer",
-		"clip:clip;"
+	api_ptr->registerFunction ("transfer",
+		"clip:vnode;"
 		"transs:data[]:opt;"
 		"transd:data[]:opt;"
 		"cont:float:opt;"
@@ -350,11 +362,12 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"match:int:opt;"
 		"gy:int:opt;"
 		"debug:int:opt;"
-		, &vsutl::Redirect <fmtc::Transfer>::create, 0, plugin_ptr
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::Transfer>::create, nullptr, plugin_ptr
 	);
 
-	register_fnc ("primaries",
-		"clip:clip;"
+	api_ptr->registerFunction ("primaries",
+		"clip:vnode;"
 		"rs:float[]:opt;"
 		"gs:float[]:opt;"
 		"bs:float[]:opt;"
@@ -366,12 +379,13 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"prims:data:opt;"
 		"primd:data:opt;"
 		"cpuopt:int:opt;"
-		, &vsutl::Redirect <fmtc::Primaries>::create, 0, plugin_ptr
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::Primaries>::create, nullptr, plugin_ptr
 	);
 
 #if 0
-	register_fnc ("convert",
-		"clip:clip;"
+	api_ptr->registerFunction ("convert",
+		"clip:vnode;"
 		"w:int:opt;"
 		"h:int:opt;"
 		"sx:float[]:opt;"
@@ -433,41 +447,31 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"gcor:float:opt;"
 		"cont:float:opt;"
 		"cpuopt:int:opt;"
-		, &vsutl::Redirect <fmtc::Convert>::create, 0, plugin_ptr
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::Convert>::create, nullptr, plugin_ptr
 	);
 #endif
 
-	register_fnc ("stack16tonative",
-		"clip:clip;"
-		, &vsutl::Redirect <fmtc::Stack16ToNative>::create, 0, plugin_ptr
+	api_ptr->registerFunction ("stack16tonative",
+		"clip:vnode;"
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::Stack16ToNative>::create, nullptr, plugin_ptr
 	);
 
-	register_fnc ("nativetostack16",
-		"clip:clip;"
-		, &vsutl::Redirect <fmtc::NativeToStack16>::create, 0, plugin_ptr
+	api_ptr->registerFunction ("nativetostack16",
+		"clip:vnode;"
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <fmtc::NativeToStack16>::create, nullptr, plugin_ptr
 	);
 
 //### TEMPORARY ##############################################################
 #if defined (main_HISTLUMA)
-	register_fnc ("histluma",
-		"clip:clip;"
+	api_ptr->registerFunction ("histluma",
+		"clip:vnode;"
 		"full:int:opt;"
 		"amp:int:opt;"
-		, &vsutl::Redirect <TmpHistLuma>::create, 0, plugin_ptr
-	);
-#endif
-#if defined (main_INT16TOFLOAT)
-	register_fnc ("int16tofloat",
-		"clip:clip;"
-		"full:int:opt;"
-		, &vsutl::Redirect <TmpInt16ToFloat>::create, 0, plugin_ptr
-	);
-#endif
-#if defined (main_FLOATTOINT16)
-	register_fnc ("floattoint16",
-		"clip:clip;"
-		"full:int:opt;"
-		, &vsutl::Redirect <TmpFloatToInt16>::create, 0, plugin_ptr
+	,	"clip:vnode;"
+	,	&vsutl::Redirect <TmpHistLuma>::create, nullptr, plugin_ptr
 	);
 #endif
 //### END OF TEMPORARY #######################################################

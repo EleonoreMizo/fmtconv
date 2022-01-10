@@ -294,8 +294,7 @@ commonsrc = \
 libfmtconv_la_SOURCES = $(commonsrc) \
         ../../src/main-vs.cpp \
         ../../src/types.h \
-        ../../src/VapourSynth.h \
-        ../../src/vswrap.h \
+        ../../src/VapourSynth4.h \
         ../../src/fmtc/Bitdepth_vs.cpp \
         ../../src/fmtc/Bitdepth.h \
         ../../src/fmtc/Convert.cpp \

@@ -52,8 +52,8 @@ namespace fmtc
 
 
 Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSCore &core, const ::VSAPI &vsapi)
-:	vsutl::FilterBase (vsapi, "transfer", ::fmParallel, 0)
-,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
+:	vsutl::FilterBase (vsapi, "transfer", ::fmParallel)
+,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 ,	_transs (get_arg_str (in, out, "transs", ""))
@@ -71,12 +71,12 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 	_avx2_flag = cpu_opt.has_avx2 ();
 
 	// Checks the input clip
-	if (_vi_in.format == 0)
+	if (! vsutl::is_constant_format (_vi_in))
 	{
 		throw_inval_arg ("only constant pixel formats are supported.");
 	}
 
-	const ::VSFormat &   fmt_src = *_vi_in.format;
+	const auto &   fmt_src = _vi_in.format;
 
 	if (   ! vsutl::is_vs_gray (fmt_src.colorFamily)
 	    && ! vsutl::is_vs_rgb ( fmt_src.colorFamily))
@@ -93,8 +93,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 	}
 
 	// Destination colorspace
-	const ::VSFormat& fmt_dst =
-		get_output_colorspace (in, out, core, fmt_src);
+	auto           fmt_dst = get_output_colorspace (in, out, core, fmt_src);
 
 	if (   (   fmt_dst.sampleType == ::stInteger
 	        && fmt_dst.bitsPerSample != 16)
@@ -105,7 +104,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 	}
 
 	// Output format is validated.
-	_vi_out.format = &fmt_dst;
+	_vi_out.format = fmt_dst;
 
 	// Other parameters
 	_curve_s = fmtcl::TransUtil::conv_string_to_curve (_transs);
@@ -226,9 +225,9 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 
 	// Finally...
 	const fmtcl::PicFmt  src_fmt =
-		conv_vsfmt_to_picfmt (*_vi_in.format , _full_range_src_flag);
+		conv_vsfmt_to_picfmt (_vi_in.format , _full_range_src_flag);
 	const fmtcl::PicFmt  dst_fmt =
-		conv_vsfmt_to_picfmt (*_vi_out.format, _full_range_dst_flag);
+		conv_vsfmt_to_picfmt (_vi_out.format, _full_range_dst_flag);
 	_model_uptr = std::make_unique <fmtcl::TransModel> (
 		dst_fmt, _curve_d, _logc_ei_d,
 		src_fmt, _curve_s, _logc_ei_s,
@@ -239,23 +238,30 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 
 
 
-void	Transfer::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+::VSVideoInfo	Transfer::get_video_info () const
 {
-	fstb::unused (in, out, core);
-
-	_vsapi.setVideoInfo (&_vi_out, 1, &node);
+	return _vi_out;
 }
 
 
 
-const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+std::vector <::VSFilterDependency>	Transfer::get_dependencies () const
+{
+	return std::vector <::VSFilterDependency> {
+		{ &*_clip_src_sptr, ::rpStrictSpatial }
+	};
+}
+
+
+
+const ::VSFrame *	Transfer::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	fstb::unused (frame_data_ptr);
 
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = 0;
-	::VSNodeRef &     node = *_clip_src_sptr;
+	::VSFrame *    dst_ptr = 0;
+	::VSNode &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -268,34 +274,34 @@ const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &
 			_vsapi.getFrameFilter (n, &node, &frame_ctx),
 			_vsapi
 		);
-		const ::VSFrameRef & src = *src_sptr;
+		const ::VSFrame & src = *src_sptr;
 
 		const int         w  =  _vsapi.getFrameWidth (&src, 0);
 		const int         h  =  _vsapi.getFrameHeight (&src, 0);
-		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
+		dst_ptr = _vsapi.newVideoFrame (&_vi_out.format, w, h, &src, &core);
 
 		const auto     pa { build_mat_proc (_vsapi, *dst_ptr, src) };
 		_model_uptr->process_frame (pa);
 
 		// Output frame properties
-		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+		::VSMap &      dst_prop = *(_vsapi.getFramePropertiesRW (dst_ptr));
 
 		const int      cr_val = (_full_range_dst_flag) ? 0 : 1;
-		_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
+		_vsapi.mapSetInt (&dst_prop, "_ColorRange", cr_val, ::maReplace);
 
 		int            transfer = fmtcl::TransCurve_UNSPECIFIED;
 		if (_curve_d >= 0 && _curve_d <= fmtcl::TransCurve_ISO_RANGE_LAST)
 		{
 			transfer = _curve_d;
 		}
-		_vsapi.propSetInt (&dst_prop, "_Transfer", transfer, ::paReplace);
+		_vsapi.mapSetInt (&dst_prop, "_Transfer", transfer, ::maReplace);
 
 		if (_dbg_flag)
 		{
 			const std::string &  txt = _model_uptr->get_debug_text ();
-			_vsapi.propSetData (
+			_vsapi.mapSetData (
 				&dst_prop, _dbg_name.c_str (),
-				txt.c_str (), int (txt.length () + 1), ::paReplace
+				txt.c_str (), int (txt.length () + 1), ::dtUtf8, ::maReplace
 			);
 		}
 	}
@@ -313,19 +319,19 @@ const ::VSFrameRef *	Transfer::get_frame (int n, int activation_reason, void * &
 
 
 
-const ::VSFormat &	Transfer::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const
+::VSVideoFormat	Transfer::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src) const
 {
-	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
+	auto           fmt_dst  = fmt_src;
 
 	const int      undef    = -666666666;
 	const int      dst_flt  = get_arg_int (in, out, "flt" , undef);
 	const int      dst_bits = get_arg_int (in, out, "bits", undef);
 
-	int            col_fam  = fmt_dst_ptr->colorFamily;
-	int            spl_type = fmt_dst_ptr->sampleType;
-	int            bits     = fmt_dst_ptr->bitsPerSample;
-	int            ssh      = fmt_dst_ptr->subSamplingW;
-	int            ssv      = fmt_dst_ptr->subSamplingH;
+	int            col_fam  = fmt_dst.colorFamily;
+	int            spl_type = fmt_dst.sampleType;
+	int            bits     = fmt_dst.bitsPerSample;
+	int            ssh      = fmt_dst.subSamplingW;
+	int            ssv      = fmt_dst.subSamplingH;
 
 	// Data type
 	if (dst_flt == 0)
@@ -368,29 +374,27 @@ const ::VSFormat &	Transfer::get_output_colorspace (const ::VSMap &in, ::VSMap &
 	}
 
 	// Combines the modified parameters and validates the format
+	bool           ok_flag = true;
 	try
 	{
-		fmt_dst_ptr = register_format (
-			col_fam,
-			spl_type,
-			bits,
-			ssh,
-			ssv,
+		ok_flag = register_format (
+			fmt_dst,
+			col_fam, spl_type, bits, ssh, ssv,
 			core
 		);
 	}
 	catch (...)
 	{
-		fmt_dst_ptr = 0;
+		ok_flag = false;
 	}
-	if (fmt_dst_ptr == 0)
+	if (! ok_flag)
 	{
 		throw_rt_err (
 			"couldn\'t get a pixel format identifier for the output clip."
 		);
 	}
 
-	return *fmt_dst_ptr;
+	return fmt_dst;
 }
 
 
