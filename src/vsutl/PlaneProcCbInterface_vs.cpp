@@ -39,7 +39,7 @@ namespace vsutl
 
 
 
-int	PlaneProcCbInterface::process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const NodeRefSPtr &src_node1_sptr, const NodeRefSPtr &src_node2_sptr, const NodeRefSPtr &src_node3_sptr)
+int	PlaneProcCbInterface::process_plane (::VSFrame &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const NodeRefSPtr &src_node1_sptr, const NodeRefSPtr &src_node2_sptr, const NodeRefSPtr &src_node3_sptr)
 {
 	assert (n >= 0);
 	assert (plane_index >= 0);

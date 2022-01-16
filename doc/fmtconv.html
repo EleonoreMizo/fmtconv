@@ -18,7 +18,7 @@
 <tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r28</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
-<tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a> or <a href="https://avs-plus.net/">Avisynth+ 3.7.0</a></td></tr>
+<tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth r55</a> or <a href="https://avs-plus.net/">Avisynth+ 3.7.0</a></td></tr>
 <tr><td class="n"><b>License:     </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.wtfpl.net/">WTFPL</a></td></tr>
 </table>
 
@@ -265,7 +265,7 @@ make install</pre>
 <tr>
 <td class="n"><pre class="proto">
 fmtc.bitdepth (
-	clip       : clip      ;
+	clip       : vnode     ;
 	csp        : int  : opt;
 	bits       : int  : opt;
 	flt        : int  : opt;
@@ -479,7 +479,7 @@ features.</p>
 <div style="width: 0; height: 0; visibility:hidden; display:none; overflow:hidden;">
 <pre class="proto">fmtc.convert (
 	# Input
-	clip       : clip        ;
+	clip       : vnode       ;
 
 	# Resizing/resampling
 	w          : int    : opt;
@@ -569,7 +569,7 @@ features.</p>
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.matrix (
-	clip     : clip        ;
+	clip     : vnode       ;
 	mat      : data   : opt;
 	mats     : data   : opt;
 	matd     : data   : opt;
@@ -846,7 +846,7 @@ data range, it lies slightly below.</p>
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.matrix2020cl (
-	clip    : clip      ;
+	clip    : vnode     ;
 	full    : int  : opt; (False)
 	csp     : int  : opt;
 	bits    : int  : opt;
@@ -947,7 +947,7 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.primaries (
-	clip  : clip        ;
+	clip  : vnode       ;
 	rs    : float[]: opt;
 	gs    : float[]: opt;
 	bs    : float[]: opt;
@@ -1082,7 +1082,7 @@ Possible values are:</p>
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.resample (
-	clip       : clip        ;
+	clip       : vnode       ;
 	w          : int    : opt;
 	h          : int    : opt;
 	sx         : float[]: opt; (0)
@@ -1622,7 +1622,7 @@ If it’s not the case, floating point operations are silently used as fallback.
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.transfer (
-	clip    : clip        ;
+	clip    : vnode       ;
 	transs  : data[] : opt;
 	transd  : data[] : opt;
 	cont    : float  : opt;
@@ -1948,6 +1948,11 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 
 <h2><a id="changelog"></a>V) Changelog</h2>
+
+<p><b>r29, 2022-xx-xx</b></p>
+<ul>
+<li>Vapoursynth: switched to API v4. Fmtconv now requires Vapoursynth r55 or later, API v3 is not supported anymore.</li>
+</ul>
 
 <p><b>r28, 2021-11-20</b></p>
 <ul>

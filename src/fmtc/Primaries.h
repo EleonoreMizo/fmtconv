@@ -54,8 +54,11 @@ public:
 	virtual        ~Primaries () = default;
 
 	// vsutl::FilterBase
-	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core);
-	virtual const ::VSFrameRef *
+	virtual ::VSVideoInfo
+	               get_video_info () const;
+	virtual std::vector <::VSFilterDependency>
+	               get_dependencies () const;
+	virtual const ::VSFrame *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core);
 
 
@@ -72,7 +75,7 @@ private:
 
 	static constexpr int _nbr_planes = fmtcl::RgbSystem::_nbr_planes;
 
-	void           check_colorspace (const ::VSFormat &fmt, const char *inout_0) const;
+	void           check_colorspace (const ::VSVideoFormat &fmt, const char *inout_0) const;
 
 	static void    init (fmtcl::RgbSystem &prim, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char *preset_0);
 	static void    init (fmtcl::RgbSystem &prim, const vsutl::FilterBase &filter, const ::VSMap &in, ::VSMap &out, const char r_0 [], const char g_0 [], const char b_0 [], const char w_0 []);

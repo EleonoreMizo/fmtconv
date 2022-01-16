@@ -50,8 +50,8 @@ namespace fmtc
 
 
 Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi)
-:	vsutl::FilterBase (vsapi, "primaries", ::fmParallel, 0)
-,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
+:	vsutl::FilterBase (vsapi, "primaries", ::fmParallel)
+,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 ,	_sse_flag (false)
@@ -76,21 +76,21 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 	));
 
 	// Checks the input clip
-	if (_vi_in.format == nullptr)
+	if (! vsutl::is_constant_format (_vi_in))
 	{
 		throw_inval_arg ("only constant pixel formats are supported.");
 	}
 
 	// Source colorspace
-	const ::VSFormat &   fmt_src = *_vi_in.format;
+	const auto &   fmt_src = _vi_in.format;
 	check_colorspace (fmt_src, "input");
 
 	// Destination colorspace (currently the same as the source)
-	const ::VSFormat &   fmt_dst = fmt_src;
+	auto           fmt_dst = fmt_src;
 	check_colorspace (fmt_dst, "output");
 
 	// Output format is validated.
-	_vi_out.format = &fmt_dst;
+	_vi_out.format = fmt_dst;
 
 	// Primaries
 	init (_prim_s, *this, in, out, "prims");
@@ -116,7 +116,7 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 		fmt_src, true
 	);
 
-	if (_vsapi.getError (&out) != nullptr)
+	if (_vsapi.mapGetError (&out) != nullptr)
 	{
 		throw -1;
 	}
@@ -124,22 +124,29 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 
 
 
-void	Primaries::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+::VSVideoInfo	Primaries::get_video_info () const
 {
-	fstb::unused (in, out, core);
-
-	_vsapi.setVideoInfo (&_vi_out, 1, &node);
+	return _vi_out;
 }
 
 
 
-const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+std::vector <::VSFilterDependency>	Primaries::get_dependencies () const
+{
+	return std::vector <::VSFilterDependency> {
+		{ &*_clip_src_sptr, ::rpStrictSpatial }
+	};
+}
+
+
+
+const ::VSFrame *	Primaries::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	fstb::unused (frame_data_ptr);
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = nullptr;
-	::VSNodeRef &     node    = *_clip_src_sptr;
+	::VSFrame *    dst_ptr = nullptr;
+	::VSNode &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -152,26 +159,26 @@ const ::VSFrameRef *	Primaries::get_frame (int n, int activation_reason, void * 
 			_vsapi.getFrameFilter (n, &node, &frame_ctx),
 			_vsapi
 		);
-		const ::VSFrameRef & src = *src_sptr;
+		const ::VSFrame & src = *src_sptr;
 
 		const int      w = _vsapi.getFrameWidth (&src, 0);
 		const int      h = _vsapi.getFrameHeight (&src, 0);
-		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
+		dst_ptr = _vsapi.newVideoFrame (&_vi_out.format, w, h, &src, &core);
 
 		const auto     pa { build_mat_proc (_vsapi, *dst_ptr, src) };
 		_proc_uptr->process (pa);
 
 		// Output properties
-		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+		::VSMap &      dst_prop = *(_vsapi.getFramePropertiesRW (dst_ptr));
 
 		const fmtcl::PrimariesPreset  preset_d = _prim_d._preset;
 		if (preset_d >= 0 && preset_d < fmtcl::PrimariesPreset_NBR_ELT)
 		{
-			_vsapi.propSetInt (&dst_prop, "_Primaries", int (preset_d), ::paReplace);
+			_vsapi.mapSetInt (&dst_prop, "_Primaries", int (preset_d), ::maReplace);
 		}
 		else
 		{
-			_vsapi.propDeleteKey (&dst_prop, "_Primaries");
+			_vsapi.mapDeleteKey (&dst_prop, "_Primaries");
 		}
 	}
 
@@ -192,7 +199,7 @@ constexpr int	Primaries::_nbr_planes;
 
 
 
-void	Primaries::check_colorspace (const ::VSFormat &fmt, const char *inout_0) const
+void	Primaries::check_colorspace (const ::VSVideoFormat &fmt, const char *inout_0) const
 {
 	assert (inout_0 != nullptr);
 

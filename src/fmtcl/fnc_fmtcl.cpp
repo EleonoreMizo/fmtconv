@@ -54,10 +54,6 @@ static void	override_fmt_with_csp (PicFmt &fmt, ColorSpaceH265 csp_out, int plan
 		{
 			fmt._col_fam = ColorFamily_RGB;
 		}
-		else if (csp_out == ColorSpaceH265_YCGCO)
-		{
-			fmt._col_fam = ColorFamily_YCGCO;
-		}
 		else
 		{
 			fmt._col_fam = ColorFamily_YUV;
@@ -145,8 +141,7 @@ bool	has_chroma (ColorFamily col_fam)
 	assert (col_fam >= 0);
 	assert (col_fam < ColorFamily_NBR_ELT);
 
-	return (   col_fam == ColorFamily_YUV
-	        || col_fam == ColorFamily_YCGCO);
+	return (col_fam == ColorFamily_YUV);
 }
 
 
@@ -167,8 +162,7 @@ bool	is_full_range_default (ColorFamily col_fam)
 	assert (col_fam >= 0);
 	assert (col_fam < ColorFamily_NBR_ELT);
 
-	return (   col_fam == ColorFamily_RGB
-	        || col_fam == ColorFamily_YCGCO);
+	return (col_fam == ColorFamily_RGB);
 }
 
 

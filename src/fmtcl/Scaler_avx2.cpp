@@ -78,7 +78,7 @@ void  Scaler::setup_avx2 ()
 
 
 template <class SRC, bool PF>
-static fstb_FORCEINLINE void	Scaler_process_vect_flt_avx2 (__m256 &sum0, __m256 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256 &add_cst, int len)
+static fstb_FORCEINLINE void	Scaler_process_vect_flt_avx2 (__m256 &sum0, __m256 &sum1, int kernel_size, const float *coef_base_ptr, typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, ptrdiff_t src_stride, const __m256 &add_cst, int len)
 {
 	// Possible optimization: initialize the sum with DST::OFFSET + _add_cst_flt
 	// and save the add in the write proxy.
@@ -106,7 +106,7 @@ static fstb_FORCEINLINE void	Scaler_process_vect_flt_avx2 (__m256 &sum0, __m256 
 // Stride offsets in pixels
 // Source pointer may be unaligned.
 template <class DST, class SRC>
-void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
+void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const
 {
 	assert (DST::Ptr::check_ptr (dst_ptr, DST::ALIGN_W));
 	assert (SRC::PtrConst::check_ptr (src_ptr, SRC::ALIGN_R));
@@ -198,7 +198,7 @@ void	Scaler::process_plane_flt_avx2 (typename DST::Ptr::Type dst_ptr, typename S
 
 
 template <class DST, int DB, class SRC, int SB, bool PF>
-static fstb_FORCEINLINE __m256i	Scaler_process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, int src_stride, const __m256i &sign_bit, int len)
+static fstb_FORCEINLINE __m256i	Scaler_process_vect_int_avx2 (const __m256i &add_cst, int kernel_size, const __m256i coef_base_ptr [], typename SRC::PtrConst::Type pix_ptr, const __m256i &zero, ptrdiff_t src_stride, const __m256i &sign_bit, int len)
 {
 	typedef typename SRC::template S16 <false, (SB == 16)> SrcS16R;
 
@@ -228,7 +228,7 @@ static fstb_FORCEINLINE __m256i	Scaler_process_vect_int_avx2 (const __m256i &add
 
 
 template <class DST, int DB, class SRC, int SB>
-void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, int dst_stride, int src_stride, int width, int y_dst_beg, int y_dst_end) const
+void	Scaler::process_plane_int_avx2 (typename DST::Ptr::Type dst_ptr, typename SRC::PtrConst::Type src_ptr, ptrdiff_t dst_stride, ptrdiff_t src_stride, int width, int y_dst_beg, int y_dst_end) const
 {
 	assert (_can_int_flag);
 	assert (DST::Ptr::check_ptr (dst_ptr, DST::ALIGN_W));

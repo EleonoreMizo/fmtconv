@@ -52,41 +52,41 @@ void VS_CC	Redirect <T>::create (const ::VSMap *in, ::VSMap *out, void *userData
 	try
 	{
 		plugin_uptr = std::make_unique <T> (*in, *out, userData, *core, *vsapi);
-	}
-	catch (const std::exception &e)
-	{
-		if (vsapi->getError (out) == nullptr)
-		{
-			vsapi->setError (out, e.what ());
-		}
-	}
-	catch (...)
-	{
-		if (vsapi->getError (out) == nullptr)
-		{
-			vsapi->setError (out, "Exception");
-		}
-	}
+		const auto     vi   = plugin_uptr->get_video_info ();
+		const auto     mode = plugin_uptr->get_filter_mode ();
+		const auto     deps = plugin_uptr->get_dependencies ();
 
-	if (plugin_uptr)
-	{
-		vsapi->createFilter (
-			in,
+		vsapi->createVideoFilter (
 			out,
 			plugin_uptr->use_filter_name ().c_str (),
-			&init_filter,
+			&vi,
 			&get_frame,
 			&free_filter,
-			plugin_uptr->get_filter_mode (),
-			plugin_uptr->get_filter_flags (),
+			mode,
+			deps.data (),
+			int (deps.size ()),
 			plugin_uptr.get (),
 			core
 		);
 	}
+	catch (const std::exception &e)
+	{
+		if (vsapi->mapGetError (out) == nullptr)
+		{
+			vsapi->mapSetError (out, e.what ());
+		}
+	}
+	catch (...)
+	{
+		if (vsapi->mapGetError (out) == nullptr)
+		{
+			vsapi->mapSetError (out, "Exception");
+		}
+	}
 
 	// If finally there isn't any error, we release the unique_ptr ownership
 	// so the object can live out of the function scope.
-	if (vsapi->getError (out) == nullptr)
+	if (vsapi->mapGetError (out) == nullptr)
 	{
 		plugin_uptr.release ();
 	}
@@ -103,37 +103,18 @@ void VS_CC	Redirect <T>::create (const ::VSMap *in, ::VSMap *out, void *userData
 
 
 template <class T>
-void VS_CC	Redirect <T>::init_filter (::VSMap *in, ::VSMap *out, void **instanceData, ::VSNode *node, ::VSCore *core, const ::VSAPI *vsapi)
-{
-	fstb::unused (vsapi);
-	assert (in != nullptr);
-	assert (out != nullptr);
-	assert (instanceData != nullptr);
-	assert (*instanceData != nullptr);
-	assert (node != nullptr);
-	assert (core != nullptr);
-	assert (vsapi != nullptr);
-
-	T *         plugin_ptr = reinterpret_cast <T *> (*instanceData);
-	plugin_ptr->init_filter (*in, *out, *node, *core);
-}
-
-
-
-template <class T>
-const ::VSFrameRef * VS_CC	Redirect <T>::get_frame (int n, int activationReason, void **instanceData, void **frameData, ::VSFrameContext *frameCtx, ::VSCore *core, const ::VSAPI *vsapi)
+const ::VSFrame * VS_CC	Redirect <T>::get_frame (int n, int activationReason, void *instanceData, void **frameData, ::VSFrameContext *frameCtx, ::VSCore *core, const ::VSAPI *vsapi)
 {
 	fstb::unused (vsapi);
 	assert (n >= 0);
 	assert (instanceData != nullptr);
-	assert (*instanceData != nullptr);
-	assert (frameData != nullptr);
-	assert (frameCtx != nullptr);
-	assert (core != nullptr);
-	assert (vsapi != nullptr);
+	assert (frameData    != nullptr);
+	assert (frameCtx     != nullptr);
+	assert (core         != nullptr);
+	assert (vsapi        != nullptr);
 
-	T *         plugin_ptr = reinterpret_cast <T *> (*instanceData);
-	const ::VSFrameRef *	frame_ref_ptr = plugin_ptr->get_frame (
+	T *         plugin_ptr = reinterpret_cast <T *> (instanceData);
+	const ::VSFrame *	frame_ptr = plugin_ptr->get_frame (
 		n,
 		activationReason,
 		*frameData,
@@ -141,7 +122,7 @@ const ::VSFrameRef * VS_CC	Redirect <T>::get_frame (int n, int activationReason,
 		*core
 	);
 
-	return frame_ref_ptr;
+	return frame_ptr;
 }
 
 

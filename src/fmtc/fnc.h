@@ -36,8 +36,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 struct VSAPI;
-struct VSFormat;
-struct VSFrameRef;
+struct VSVideoFormat;
+struct VSFrame;
 
 namespace fmtcl
 {
@@ -54,13 +54,13 @@ namespace fmtc
 
 
 
-fmtcl::PicFmt conv_vsfmt_to_picfmt (const ::VSFormat &fmt, bool full_flag);
-fmtcl::SplFmt conv_vsfmt_to_splfmt (const ::VSFormat &fmt);
-void conv_vsfmt_to_splfmt (fmtcl::SplFmt &type, int &bitdepth, const ::VSFormat &fmt);
-fmtcl::ColorFamily conv_vsfmt_to_colfam (const ::VSFormat &fmt);
+fmtcl::PicFmt conv_vsfmt_to_picfmt (const ::VSVideoFormat &fmt, bool full_flag);
+fmtcl::SplFmt conv_vsfmt_to_splfmt (const ::VSVideoFormat &fmt);
+void conv_vsfmt_to_splfmt (fmtcl::SplFmt &type, int &bitdepth, const ::VSVideoFormat &fmt);
+fmtcl::ColorFamily conv_vsfmt_to_colfam (const ::VSVideoFormat &fmt);
 int conv_fmtcl_colfam_to_vs (fmtcl::ColorFamily cf);
-void prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSFormat &fmt_dst, bool full_range_dst_flag, const ::VSFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out = fmtcl::ColorSpaceH265_UNSPECIFIED, int plane_out = -1);
-fmtcl::ProcComp3Arg build_mat_proc (const ::VSAPI &vsapi, ::VSFrameRef &dst, const ::VSFrameRef &src, bool single_plane_flag = false);
+void prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSVideoFormat &fmt_dst, bool full_range_dst_flag, const ::VSVideoFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out = fmtcl::ColorSpaceH265_UNSPECIFIED, int plane_out = -1);
+fmtcl::ProcComp3Arg build_mat_proc (const ::VSAPI &vsapi, ::VSFrame &dst, const ::VSFrame &src, bool single_plane_flag = false);
 
 
 

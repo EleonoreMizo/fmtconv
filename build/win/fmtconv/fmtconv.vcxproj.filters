@@ -179,7 +179,7 @@
     <ClInclude Include="..\..\..\src\fmtc\CpuOpt.h">
       <Filter>fmtc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\vswrap.h" />
+    <ClInclude Include="..\..\..\src\VapourSynth4.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\avsutl\fnc_avsutl.cpp">

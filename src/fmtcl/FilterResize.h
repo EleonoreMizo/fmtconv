@@ -40,6 +40,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include <vector>
 #include <memory>
 
+#include <cstddef>
 #include <cstdint>
 
 
@@ -72,7 +73,7 @@ public:
 	explicit       FilterResize (const ResampleSpecPlane &spec, ContFirInterface &kernel_fnc_h, ContFirInterface &kernel_fnc_v, bool norm_flag, double norm_val_h, double norm_val_v, double gain, SplFmt src_type, int src_res, SplFmt dst_type, int dst_res, bool int_flag, bool sse2_flag, bool avx2_flag);
 	virtual        ~FilterResize () {}
 
-	void           process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, bool chroma_flag);
+	void           process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, ptrdiff_t stride_dst, ptrdiff_t stride_src, bool chroma_flag);
 
 
 
@@ -108,11 +109,11 @@ private:
 		               _src_ptr;
 		int            _dst_bpp;        // Pointed bytes per pixel (1 for stack16)
 		int            _src_bpp;        // Pointed bytes per pixel (1 for stack16)
-		int            _stride_dst;     // Bytes
-		int            _stride_src;     // Bytes
-		int            _offset_crop;    // Bytes
-		int            _stride_dst_pix; // Pixels
-		int            _stride_src_pix; // Pixels
+		ptrdiff_t      _stride_dst;     // Bytes
+		ptrdiff_t      _stride_src;     // Bytes
+		ptrdiff_t      _offset_crop;    // Bytes
+		ptrdiff_t      _stride_dst_pix; // Pixels
+		ptrdiff_t      _stride_src_pix; // Pixels
 	};
 
 	class TaskRsz
@@ -128,23 +129,23 @@ private:
 
 	typedef	conc::LockFreeCell <TaskRsz>	TaskRszCell;
 
-	void           process_plane_bypass (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, bool chroma_flag);
-	void           process_plane_normal (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src);
+	void           process_plane_bypass (uint8_t *dst_ptr, const uint8_t *src_ptr, ptrdiff_t stride_dst, ptrdiff_t stride_src, bool chroma_flag);
+	void           process_plane_normal (uint8_t *dst_ptr, const uint8_t *src_ptr, ptrdiff_t stride_dst, ptrdiff_t stride_src);
 	void           process_tile (TaskRszCell &tr_cell);
-	void           process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, int stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT]);
+	void           process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, ptrdiff_t stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT]);
 
 	template <typename T, SplFmt BUFT>
-	void           process_tile_transpose (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, int stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT]);
+	void           process_tile_transpose (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, ptrdiff_t stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT]);
 
 	template <typename T>
-	void           transpose (T *dst_ptr, const T *src_ptr, int w, int h, int stride_dst, int stride_src);
+	void           transpose (T *dst_ptr, const T *src_ptr, int w, int h, ptrdiff_t stride_dst, ptrdiff_t stride_src);
 
 	template <typename T>
-	void           transpose_cpp (T *dst_ptr, const T *src_ptr, int w, int h, int stride_dst, int stride_src);
+	void           transpose_cpp (T *dst_ptr, const T *src_ptr, int w, int h, ptrdiff_t stride_dst, ptrdiff_t stride_src);
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	void           transpose_sse2 (float *dst_ptr, const float *src_ptr, int w, int h, int stride_dst, int stride_src);
-	void           transpose_sse2 (uint16_t *dst_ptr, const uint16_t *src_ptr, int w, int h, int stride_dst, int stride_src);
+	void           transpose_sse2 (float *dst_ptr, const float *src_ptr, int w, int h, ptrdiff_t stride_dst, ptrdiff_t stride_src);
+	void           transpose_sse2 (uint16_t *dst_ptr, const uint16_t *src_ptr, int w, int h, ptrdiff_t stride_dst, ptrdiff_t stride_src);
 #endif
 
 	bool           is_kernel_neutral (Dir di) const;

@@ -56,7 +56,7 @@ public:
 		static fstb_FORCEINLINE Type
 		               make_ptr (const uint8_t *ptr);
 		static fstb_FORCEINLINE void
-		               jump (Type &ptr, int stride);
+		               jump (Type &ptr, ptrdiff_t stride);
 		static fstb_FORCEINLINE bool
 		               check_ptr (const Type &ptr, int align = 1);
 		static fstb_FORCEINLINE void

@@ -58,8 +58,8 @@ static constexpr bool Resample_old_fieldbased_behaviour_flag =
 
 
 Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi)
-:	vsutl::FilterBase (vsapi, "resample", ::fmParallel, 0)
-,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
+:	vsutl::FilterBase (vsapi, "resample", ::fmParallel)
+,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 ,	_interlaced_src (static_cast <Ru::InterlacingParam> (
@@ -97,7 +97,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		throw_inval_arg ("only constant formats are supported.");
 	}
 
-	const ::VSFormat &   fmt_src = *_vi_in.format;
+	const auto &   fmt_src = _vi_in.format;
 
 	{
 		const int            st  = fmt_src.sampleType;
@@ -113,24 +113,20 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		{
 			throw_inval_arg ("input pixel bitdepth not supported.");
 		}
-		if (fmt_src.colorFamily == ::cmCompat)
-		{
-			throw_inval_arg ("\"compat\"colorspace not supported.");
-		}
 	}
 
 	_src_width  = _vi_in.width;
 	_src_height = _vi_in.height;
-	conv_vsfmt_to_splfmt (_src_type, _src_res, *_vi_in.format);
+	conv_vsfmt_to_splfmt (_src_type, _src_res, _vi_in.format);
 
 	// Destination colorspace
-	::VSFormat     fmt_def = fmt_src;
+	auto           fmt_def = fmt_src;
 	if (fmt_def.sampleType == ::stInteger && fmt_def.bitsPerSample < 16)
 	{
 		fmt_def.bitsPerSample = 16;
 	}
 
-	const ::VSFormat& fmt_dst = get_output_colorspace (in, out, core, fmt_def);
+	auto           fmt_dst = get_output_colorspace (in, out, core, fmt_def);
 
 	// Checks the provided format
 	const int      st  = fmt_dst.sampleType;
@@ -157,9 +153,11 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	}
 
 	// Done with the format
-	_vi_out.format = &fmt_dst;
+	_vi_out.format = fmt_dst;
 
-	conv_vsfmt_to_splfmt (_dst_type, _dst_res, *_vi_out.format);
+	_plane_processor.set_filter (in, out, _vi_out);
+
+	conv_vsfmt_to_splfmt (_dst_type, _dst_res, _vi_out.format);
 
 	if (   _interlaced_src < 0
 	    || _interlaced_src >= Ru::InterlacingParam_NBR_ELT)
@@ -199,7 +197,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		vsutl::compute_fmt_mac_cst (
 			plane_data._gain,
 			plane_data._add_cst,
-			*_vi_out.format, _full_range_out_flag,
+			_vi_out.format, _full_range_out_flag,
 			fmt_src, _full_range_in_flag,
 			plane_index
 		);
@@ -215,13 +213,13 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	}
 	if (scaleh > 0)
 	{
-		const int      cssh = 1 << _vi_out.format->subSamplingW;
+		const int      cssh = 1 << _vi_out.format.subSamplingW;
 		const int      wtmp = fstb::round_int (_vi_out.width  * scaleh / cssh);
 		_vi_out.width = std::max (wtmp, 1) * cssh;
 	}
 	if (scalev > 0)
 	{
-		const int      cssv = 1 << _vi_out.format->subSamplingH;
+		const int      cssv = 1 << _vi_out.format.subSamplingH;
 		const int      htmp = fstb::round_int (_vi_out.height * scalev / cssv);
 		_vi_out.height = std::max (htmp, 1) * cssv;
 	}
@@ -232,7 +230,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	{
 		throw_inval_arg ("w must be positive.");
 	}
-	else if ((_vi_out.width & ((1 << _vi_out.format->subSamplingW) - 1)) != 0)
+	else if ((_vi_out.width & ((1 << _vi_out.format.subSamplingW) - 1)) != 0)
 	{
 		throw_inval_arg (
 			"w is not compatible with the output chroma subsampling."
@@ -244,7 +242,7 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	{
 		throw_inval_arg ("h must be positive.");
 	}
-	else if ((_vi_out.height & ((1 << _vi_out.format->subSamplingH) - 1)) != 0)
+	else if ((_vi_out.height & ((1 << _vi_out.format.subSamplingH) - 1)) != 0)
 	{
 		throw_inval_arg (
 			"h is not compatible with the output chroma subsampling."
@@ -270,10 +268,10 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		get_arg_vflt (in, out, "impulsev", impulse);
 
 	// Per-plane parameters
-	const int      nbr_sx = _vsapi.propNumElements (&in, "sx");
-	const int      nbr_sy = _vsapi.propNumElements (&in, "sy");
-	const int      nbr_sw = _vsapi.propNumElements (&in, "sw");
-	const int      nbr_sh = _vsapi.propNumElements (&in, "sh");
+	const int      nbr_sx = _vsapi.mapNumElements (&in, "sx");
+	const int      nbr_sy = _vsapi.mapNumElements (&in, "sy");
+	const int      nbr_sw = _vsapi.mapNumElements (&in, "sw");
+	const int      nbr_sh = _vsapi.mapNumElements (&in, "sh");
 	for (int plane_index = 0; plane_index < fmt_src.numPlanes; ++plane_index)
 	{
 		auto &         plane_data = _plane_data_arr [plane_index];
@@ -442,22 +440,28 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 
 
-void	Resample::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+::VSVideoInfo	Resample::get_video_info () const
 {
-	fstb::unused (core);
-
-	_vsapi.setVideoInfo (&_vi_out, 1, &node);
-	_plane_processor.set_filter (in, out, _vi_out);
+	return _vi_out;
 }
 
 
 
-const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+std::vector <::VSFilterDependency>	Resample::get_dependencies () const
+{
+	return std::vector <::VSFilterDependency> {
+		{ &*_clip_src_sptr, ::rpStrictSpatial }
+	};
+}
+
+
+
+const ::VSFrame *	Resample::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = nullptr;
-	::VSNodeRef &     node    = *_clip_src_sptr;
+	::VSFrame *    dst_ptr = nullptr;
+	::VSNode &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -469,10 +473,10 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 			_vsapi.getFrameFilter (n, &node, &frame_ctx),
 			_vsapi
 		);
-		const ::VSFrameRef & src = *src_sptr;
+		const ::VSFrame & src = *src_sptr;
 
 		dst_ptr = _vsapi.newVideoFrame (
-			_vi_out.format,
+			&_vi_out.format,
 			_vi_out.width,
 			_vi_out.height,
 			&src,
@@ -481,19 +485,19 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 
 		Ru::FieldBased prop_fieldbased = Ru::FieldBased_INVALID;
 		Ru::Field      prop_field      = Ru::Field_INVALID;
-		const ::VSMap* src_prop_ptr    = _vsapi.getFramePropsRO (&src);
+		const ::VSMap* src_prop_ptr    = _vsapi.getFramePropertiesRO (&src);
 		if (src_prop_ptr != nullptr)
 		{
 			int            err      = 0;
 			int64_t        prop_val = -1;
-			prop_val = _vsapi.propGetInt (src_prop_ptr, "_FieldBased", 0, &err);
+			prop_val = _vsapi.mapGetInt (src_prop_ptr, "_FieldBased", 0, &err);
 			prop_fieldbased =
 				  (err      != 0) ? Ru::FieldBased_INVALID
 				: (prop_val == 0) ? Ru::FieldBased_FRAMES
 				: (prop_val == 1) ? Ru::FieldBased_BFF
 				: (prop_val == 2) ? Ru::FieldBased_TFF
 				:                   Ru::FieldBased_INVALID;
-			prop_val = _vsapi.propGetInt (src_prop_ptr, "_Field", 0, &err);
+			prop_val = _vsapi.mapGetInt (src_prop_ptr, "_Field", 0, &err);
 			prop_field =
 				  (err      != 0) ? Ru::Field_INVALID
 				: (prop_val == 0) ? Ru::Field_BOT
@@ -525,19 +529,19 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 		        || _cplace_d_set_flag
 		        || _interlaced_dst != Ru::InterlacingParam_AUTO))
 		{
-			::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+			::VSMap &      dst_prop = *(_vsapi.getFramePropertiesRW (dst_ptr));
 			if (_range_set_out_flag)
 			{
 				const int      cr_val = (_full_range_out_flag) ? 0 : 1;
-				_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
+				_vsapi.mapSetInt (&dst_prop, "_ColorRange", cr_val, ::maReplace);
 			}
 			if (_cplace_d_set_flag)
 			{
 				int            cl_val = -1; // Unknown or cannot be expressed
 				if (   _cplace_d == fmtcl::ChromaPlacement_MPEG2
 				    || (   _cplace_d == fmtcl::ChromaPlacement_DV
-				        && _vi_out.format->subSamplingW == 2
-				        && _vi_out.format->subSamplingH == 0))
+				        && _vi_out.format.subSamplingW == 2
+				        && _vi_out.format.subSamplingH == 0))
 				{
 					cl_val = 0; // Left
 				}
@@ -552,7 +556,7 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 
 				if (cl_val >= 0)
 				{
-					_vsapi.propSetInt (&dst_prop, "_ChromaLocation", cl_val, ::paReplace);
+					_vsapi.mapSetInt (&dst_prop, "_ChromaLocation", cl_val, ::maReplace);
 				}
 			}
 			if (_interlaced_dst != Ru::InterlacingParam_AUTO)
@@ -561,29 +565,29 @@ const ::VSFrameRef *	Resample::get_frame (int n, int activation_reason, void * &
 				{
 					if (Resample_old_fieldbased_behaviour_flag)
 					{
-						_vsapi.propSetInt (&dst_prop, "_FieldBased", 1, ::paReplace);
+						_vsapi.mapSetInt (&dst_prop, "_FieldBased", 1, ::maReplace);
 					}
 					if (_field_order_dst != Ru::FieldOrder_AUTO)
 					{
 						if (! Resample_old_fieldbased_behaviour_flag)
 						{
-							_vsapi.propSetInt (
+							_vsapi.mapSetInt (
 								&dst_prop, "_FieldBased",
 								(_field_order_dst == Ru::FieldOrder_BFF) ? 1 : 2,
-								::paReplace
+								::maReplace
 							);
 						}
-						_vsapi.propSetInt (
+						_vsapi.mapSetInt (
 							&dst_prop, "_Field",
 							(frame_info._top_d_flag) ? 1 : 0,
-							::paReplace
+							::maReplace
 						);
 					}
 				}
 				else
 				{
-					_vsapi.propSetInt (&dst_prop, "_FieldBased", 0, ::paReplace);
-					_vsapi.propDeleteKey (&dst_prop, "_Field");
+					_vsapi.mapSetInt (&dst_prop, "_FieldBased", 0, ::maReplace);
+					_vsapi.mapDeleteKey (&dst_prop, "_Field");
 				}
 			}
 		}
@@ -628,7 +632,7 @@ void	Resample::conv_str_to_chroma_subspl (const vsutl::FilterBase &flt, int &ssh
 
 
 
-int	Resample::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
+int	Resample::do_process_plane (::VSFrame &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
 {
 	fstb::unused (core, src_node2_sptr, src_node3_sptr);
 	assert (src_node1_sptr.get () != nullptr);
@@ -676,26 +680,27 @@ constexpr int	Resample::_max_nbr_planes;
 
 
 
-const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const
+::VSVideoFormat	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src) const
 {
-	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
+	auto           fmt_dst = fmt_src;
 
 	// Full colorspace
 	int            csp_dst = get_arg_int (in, out, "csp", ::pfNone);
 	if (csp_dst != ::pfNone)
 	{
-		fmt_dst_ptr = _vsapi.getFormatPreset (csp_dst, &core);
-		if (fmt_dst_ptr == nullptr)
+		const auto     gvfbi_ret =
+			_vsapi.getVideoFormatByID (&fmt_dst, csp_dst, &core);
+		if (gvfbi_ret == 0)
 		{
 			throw_inval_arg ("unknown output colorspace.");
 		}
 	}
 
-	int            col_fam  = fmt_dst_ptr->colorFamily;
-	int            spl_type = fmt_dst_ptr->sampleType;
-	int            bits     = fmt_dst_ptr->bitsPerSample;
-	int            ssh      = fmt_dst_ptr->subSamplingW;
-	int            ssv      = fmt_dst_ptr->subSamplingH;
+	int            col_fam  = fmt_dst.colorFamily;
+	int            spl_type = fmt_dst.sampleType;
+	int            bits     = fmt_dst.bitsPerSample;
+	int            ssh      = fmt_dst.subSamplingW;
+	int            ssv      = fmt_dst.subSamplingH;
 
 	// Chroma subsampling
 	std::string    css (get_arg_str (in, out, "css", ""));
@@ -712,29 +717,27 @@ const ::VSFormat &	Resample::get_output_colorspace (const ::VSMap &in, ::VSMap &
 	}
 
 	// Combines the modified parameters and validates the format
+	bool           ok_flag = true;
 	try
 	{
-		fmt_dst_ptr = register_format (
-			col_fam,
-			spl_type,
-			bits,
-			ssh,
-			ssv,
+		ok_flag = register_format (
+			fmt_dst,
+			col_fam, spl_type, bits, ssh, ssv,
 			core
 		);
 	}
 	catch (...)
 	{
-		fmt_dst_ptr = nullptr;
+		ok_flag = false;
 	}
-	if (fmt_dst_ptr == nullptr)
+	if (! ok_flag)
 	{
 		throw_rt_err (
 			"couldn\'t get a pixel format identifier for the output clip."
 		);
 	}
 
-	return *fmt_dst_ptr;
+	return fmt_dst;
 }
 
 
@@ -754,7 +757,7 @@ bool	Resample::cumulate_flag (bool flag, const ::VSMap &in, ::VSMap &out, const 
 
 
 
-int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr, const Ru::FrameInfo &frame_info)
+int	Resample::process_plane_proc (::VSFrame &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr, const Ru::FrameInfo &frame_info)
 {
 	int            ret_val = 0;
 
@@ -762,12 +765,12 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::V
 		_vsapi.getFrameFilter (n, src_node1_sptr.get (), &frame_ctx),
 		_vsapi
 	);
-	const ::VSFrameRef & src = *src_sptr;
+	const ::VSFrame & src = *src_sptr;
 
 	const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-	const int      stride_src   = _vsapi.getStride (&src, plane_index);
+	const auto     stride_src   = _vsapi.getStride (&src, plane_index);
 	uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
-	const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
+	const auto     stride_dst   = _vsapi.getStride (&dst, plane_index);
 
 	const fmtcl::InterlacingType  itl_s = fmtcl::InterlacingType_get (
 		frame_info._itl_s_flag, frame_info._top_s_flag
@@ -785,7 +788,7 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::V
 		);
 
 		const bool     chroma_flag =
-			vsutl::is_chroma_plane (*_vi_in.format, plane_index);
+			vsutl::is_chroma_plane (_vi_in.format, plane_index);
 
 		filter_ptr->process_plane (
 			data_dst_ptr, data_src_ptr, stride_dst, stride_src, chroma_flag
@@ -808,7 +811,7 @@ int	Resample::process_plane_proc (::VSFrameRef &dst, int n, int plane_index, ::V
 
 
 
-int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr)
+int	Resample::process_plane_copy (::VSFrame &dst, int n, int plane_index, ::VSFrameContext &frame_ctx, const vsutl::NodeRefSPtr &src_node1_sptr)
 {
 	int            ret_val = 0;
 
@@ -816,7 +819,7 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, ::V
 		_vsapi.getFrameFilter (n, src_node1_sptr.get (), &frame_ctx),
 		_vsapi
 	);
-	const ::VSFrameRef & src = *src_sptr;
+	const ::VSFrame & src = *src_sptr;
 
 	const int      src_w = _vsapi.getFrameWidth (&src, plane_index);
 	const int      src_h = _vsapi.getFrameHeight (&src, plane_index);
@@ -824,9 +827,9 @@ int	Resample::process_plane_copy (::VSFrameRef &dst, int n, int plane_index, ::V
 	const int      dst_h = _vsapi.getFrameHeight (&dst, plane_index);
 
 	const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-	const int      stride_src   = _vsapi.getStride (&src, plane_index);
+	const auto     stride_src   = _vsapi.getStride (&src, plane_index);
 	uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
-	const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
+	const auto     stride_dst   = _vsapi.getStride (&dst, plane_index);
 
 	const int      w = std::min (src_w, dst_w);
 	const int      h = std::min (src_h, dst_h);
@@ -892,13 +895,13 @@ fmtcl::FilterResize *	Resample::create_or_access_plane_filter (int plane_index, 
 
 void	Resample::create_all_plane_specs ()
 {
-	const fmtcl::ColorFamily src_cf = fmtc::conv_vsfmt_to_colfam (*_vi_in.format);
-	const fmtcl::ColorFamily dst_cf = fmtc::conv_vsfmt_to_colfam (*_vi_out.format);
-	const int      src_ss_h   = _vi_in.format->subSamplingW;
-	const int      src_ss_v   = _vi_in.format->subSamplingH;
-	const int      dst_ss_h   = _vi_out.format->subSamplingW;
-	const int      dst_ss_v   = _vi_out.format->subSamplingH;
-	const int      nbr_planes = _vi_in.format->numPlanes;
+	const fmtcl::ColorFamily src_cf = fmtc::conv_vsfmt_to_colfam (_vi_in.format);
+	const fmtcl::ColorFamily dst_cf = fmtc::conv_vsfmt_to_colfam (_vi_out.format);
+	const int      src_ss_h   = _vi_in.format.subSamplingW;
+	const int      src_ss_v   = _vi_in.format.subSamplingH;
+	const int      dst_ss_h   = _vi_out.format.subSamplingW;
+	const int      dst_ss_v   = _vi_out.format.subSamplingH;
+	const int      nbr_planes = _vi_in.format.numPlanes;
 	for (int plane_index = 0; plane_index < nbr_planes; ++plane_index)
 	{
 		auto &         plane_data = _plane_data_arr [plane_index];

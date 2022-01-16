@@ -27,7 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 #include <string>
 
@@ -44,14 +44,14 @@ bool     is_vs_same_colfam (int lhs, int rhs);
 
 bool     is_constant_format (const ::VSVideoInfo &vi);
 bool     has_chroma (int cf);
-bool     has_chroma (const ::VSFormat &fmt);
-bool     is_chroma_plane (const ::VSFormat &fmt, int plane_index);
-bool     is_full_range_default (const ::VSFormat &fmt);
-double   compute_pix_scale (const ::VSFormat &fmt, int plane_index, bool full_flag);
-double   get_pix_min (const ::VSFormat &fmt, int plane_index, bool full_flag);
-void     compute_fmt_mac_cst (double &gain, double &add_cst, const ::VSFormat &fmt_dst, bool full_dst_flag, const ::VSFormat &fmt_src, bool full_src_flag, int plane_index);
-int      compute_plane_width (const ::VSFormat &fmt, int plane_index, int base_w);
-int      compute_plane_height (const ::VSFormat &fmt, int plane_index, int base_h);
+bool     has_chroma (const ::VSVideoFormat &fmt);
+bool     is_chroma_plane (const ::VSVideoFormat &fmt, int plane_index);
+bool     is_full_range_default (const ::VSVideoFormat &fmt);
+double   compute_pix_scale (const ::VSVideoFormat &fmt, int plane_index, bool full_flag);
+double   get_pix_min (const ::VSVideoFormat &fmt, int plane_index, bool full_flag);
+void     compute_fmt_mac_cst (double &gain, double &add_cst, const ::VSVideoFormat &fmt_dst, bool full_dst_flag, const ::VSVideoFormat &fmt_src, bool full_src_flag, int plane_index);
+int      compute_plane_width (const ::VSVideoFormat &fmt, int plane_index, int base_w);
+int      compute_plane_height (const ::VSVideoFormat &fmt, int plane_index, int base_h);
 
 
 

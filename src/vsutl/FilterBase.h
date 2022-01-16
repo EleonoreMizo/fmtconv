@@ -27,7 +27,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 #include <string>
 #include <vector>
@@ -49,13 +49,12 @@ public:
 	static const size_t
 	               _max_error_buf_len = 4096;
 
-	explicit       FilterBase (const ::VSAPI &vsapi, const char name_0 [], ::VSFilterMode filter_mode, int /* ::NodeFlags */ flags);
+	explicit       FilterBase (const ::VSAPI &vsapi, const char name_0 [], ::VSFilterMode filter_mode);
 	virtual        ~FilterBase () = default;
 
 	const std::string &
 	               use_filter_name () const;
 	::VSFilterMode get_filter_mode () const;
-	int            get_filter_flags () const;
 
 	bool           is_arg_defined (const ::VSMap &in, const char name_0 []) const;
 
@@ -75,8 +74,11 @@ public:
 	void           throw_logic_err (const char msg_0 []) const;
 
 	// Override this
-	virtual void   init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core) = 0;
-	virtual const ::VSFrameRef *
+	virtual ::VSVideoInfo
+	               get_video_info () const = 0;
+	virtual std::vector <::VSFilterDependency>
+	               get_dependencies () const = 0;
+	virtual const ::VSFrame *
 	               get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core) = 0;
 
 	static char    _filter_error_msg_0 [_max_error_buf_len];
@@ -87,15 +89,13 @@ public:
 
 protected:
 
-	const VSFormat *
-	               register_format (int color_family, int sample_type, int bits_per_sample, int sub_sampling_w, int sub_sampling_h, ::VSCore &core) const;
+	bool           register_format (::VSVideoFormat &fmt, int color_family, int sample_type, int bits_per_sample, int sub_sampling_w, int sub_sampling_h, ::VSCore &core) const;
 
 	const ::VSAPI& _vsapi;
 	const std::string
 	               _filter_name;
 	const ::VSFilterMode
 	               _filter_mode;
-	const int      _filter_flags;		// Combination of ::NodeFlags
 
 
 

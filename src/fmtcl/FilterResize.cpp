@@ -433,7 +433,7 @@ FilterResize::FilterResize (const ResampleSpecPlane &spec, ContFirInterface &ker
 
 
 
-void	FilterResize::process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, bool chroma_flag)
+void	FilterResize::process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, ptrdiff_t stride_dst, ptrdiff_t stride_src, bool chroma_flag)
 {
 	assert (dst_ptr != nullptr);
 	assert (src_ptr != nullptr);
@@ -462,7 +462,7 @@ void	FilterResize::process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int 
 
 
 
-void	FilterResize::process_plane_bypass (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, bool chroma_flag)
+void	FilterResize::process_plane_bypass (uint8_t *dst_ptr, const uint8_t *src_ptr, ptrdiff_t stride_dst, ptrdiff_t stride_src, bool chroma_flag)
 {
 	fstb::unused (chroma_flag);
 
@@ -473,7 +473,7 @@ void	FilterResize::process_plane_bypass (uint8_t *dst_ptr, const uint8_t *src_pt
 	assert (stride_src > 0);
 
 	const int      nbr_bytes_src = fmtcl::SplFmt_get_unit_size (_src_type);
-	const int      offset_src =
+	const auto     offset_src =
 		  fstb::round_int (_win_pos [Dir_V]) * stride_src
 		+ fstb::round_int (_win_pos [Dir_H]) * nbr_bytes_src;
 	src_ptr += offset_src;
@@ -501,7 +501,7 @@ void	FilterResize::process_plane_bypass (uint8_t *dst_ptr, const uint8_t *src_pt
 
 
 
-void	FilterResize::process_plane_normal (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src)
+void	FilterResize::process_plane_normal (uint8_t *dst_ptr, const uint8_t *src_ptr, ptrdiff_t stride_dst, ptrdiff_t stride_src)
 {
 	assert (_nbr_passes > 0);
 	assert (dst_ptr != nullptr);
@@ -650,7 +650,7 @@ void	FilterResize::process_tile (TaskRszCell &tr_cell)
 	}
 
 	int            cur_buf        = 0;
-	int            stride_buf [2] = { 0, 0 }; // In pixels
+	ptrdiff_t      stride_buf [2] = { 0, 0 }; // In pixels
 	Dir            cur_dir        = Dir_V;
 
 	// Size of the current tile in the tile's coordinates,
@@ -708,18 +708,18 @@ void	FilterResize::process_tile (TaskRszCell &tr_cell)
 
 
 
-void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, int stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT])
+void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, ptrdiff_t stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT])
 {
 	const float *     src_flt_ptr = 0;
 	const uint16_t *  src_i16_ptr = 0;
 	const uint8_t *   src_i08_ptr = 0;
-	int               src_stride  = 0;  // Pixels
+	ptrdiff_t         src_stride  = 0;  // Pixels
 	SplFmt            src_fmt_loc = SplFmt_ILLEGAL;
 	int               src_res_loc = 0;
 
 	float *           dst_flt_ptr = 0;
 	uint16_t *        dst_i16_ptr = 0;
-	int               dst_stride  = 0;  // Pixels
+	ptrdiff_t         dst_stride  = 0;  // Pixels
 	SplFmt            dst_fmt_loc = SplFmt_ILLEGAL;
 
 	// Source is the input
@@ -727,7 +727,7 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 	{
 		assert (cur_dir == Dir_V);
 
-		const int		offset_src =
+		const auto     offset_src =
 				trg._offset_crop
 			+ tr._src_beg [Dir_H] * trg._src_bpp;
 
@@ -761,7 +761,7 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 		{
 			assert (! _buffer_flag);
 
-			const int		offset_dst =
+			const auto     offset_dst =
 				  tr._dst_beg [Dir_V] * trg._stride_dst
 				+ tr._dst_beg [Dir_H] * trg._dst_bpp;
 
@@ -779,7 +779,7 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 	{
 		assert (_buffer_flag);
 
-		const int		offset_src = -tr._src_beg [cur_dir] * stride_buf [cur_buf];
+		const auto     offset_src = -tr._src_beg [cur_dir] * stride_buf [cur_buf];
 		src_flt_ptr = rd.use_buf <const float> (cur_buf) + offset_src;
 		src_i16_ptr = rd.use_buf <uint16_t   > (cur_buf) + offset_src;
 		src_stride  = stride_buf [cur_buf];
@@ -816,7 +816,7 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 		{
 			assert (cur_dir == Dir_V);
 
-			const int		offset_dst =
+			const auto     offset_dst =
 				  tr._dst_beg [Dir_V] * trg._stride_dst
 				+ tr._dst_beg [Dir_H] * trg._dst_bpp;
 
@@ -903,20 +903,20 @@ void	FilterResize::process_tile_resize (const TaskRsz &tr, const TaskRszGlobal& 
 
 
 template <typename T, SplFmt BUFT>
-void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, int stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT])
+void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGlobal& trg, ResizeData &rd, ptrdiff_t stride_buf [2], const int pass, Dir &cur_dir, int &cur_buf, int cur_size [Dir_NBR_ELT])
 {
 	stride_buf [1 - cur_buf] =
 		(cur_size [Dir_V] + Scaler::SRC_ALIGN - 1) & -Scaler::SRC_ALIGN;
 	assert (cur_size [Dir_H] * stride_buf [1 - cur_buf] <= _buf_size);
 
 	const T *       ptr_src      = rd.use_buf <T> (    cur_buf);
-	int             stride_src   = stride_buf [    cur_buf]; // Pixels
-	int             offset_src   = 0;
+	ptrdiff_t       stride_src   = stride_buf [    cur_buf]; // Pixels
+	ptrdiff_t       offset_src   = 0;
 	const bool      src_buf_flag = has_buf_src (pass);
 
 	T *             ptr_dst      = rd.use_buf <T> (1 - cur_buf);
-	int             stride_dst   = stride_buf [1 - cur_buf]; // Pixels
-	int             offset_dst   = 0;
+	ptrdiff_t       stride_dst   = stride_buf [1 - cur_buf]; // Pixels
+	ptrdiff_t       offset_dst   = 0;
 	const bool      dst_buf_flag = has_buf_dst (pass);
 
 	// If the source or destination are not one of the buffers,
@@ -1004,7 +1004,7 @@ void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGloba
 
 // w and h are related to the source.
 template <typename T>
-void	FilterResize::transpose (T *dst_ptr, const T *src_ptr, int w, int h, int stride_dst, int stride_src)
+void	FilterResize::transpose (T *dst_ptr, const T *src_ptr, int w, int h, ptrdiff_t stride_dst, ptrdiff_t stride_src)
 {
 	assert (src_ptr != nullptr);
 	assert (w > 0);
@@ -1028,7 +1028,7 @@ void	FilterResize::transpose (T *dst_ptr, const T *src_ptr, int w, int h, int st
 
 
 template <typename T>
-void	FilterResize::transpose_cpp (T *dst_ptr, const T *src_ptr, int w, int h, int stride_dst, int stride_src)
+void	FilterResize::transpose_cpp (T *dst_ptr, const T *src_ptr, int w, int h, ptrdiff_t stride_dst, ptrdiff_t stride_src)
 {
 	assert (src_ptr != nullptr);
 	assert (w > 0);
@@ -1055,7 +1055,7 @@ void	FilterResize::transpose_cpp (T *dst_ptr, const T *src_ptr, int w, int h, in
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 
-void	FilterResize::transpose_sse2 (float *dst_ptr, const float *src_ptr, int w, int h, int stride_dst, int stride_src)
+void	FilterResize::transpose_sse2 (float *dst_ptr, const float *src_ptr, int w, int h, ptrdiff_t stride_dst, ptrdiff_t stride_src)
 {
 	assert (src_ptr != nullptr);
 	assert (w > 0);
@@ -1127,7 +1127,7 @@ void	FilterResize::transpose_sse2 (float *dst_ptr, const float *src_ptr, int w, 
 
 
 
-void	FilterResize::transpose_sse2 (uint16_t *dst_ptr, const uint16_t *src_ptr, int w, int h, int stride_dst, int stride_src)
+void	FilterResize::transpose_sse2 (uint16_t *dst_ptr, const uint16_t *src_ptr, int w, int h, ptrdiff_t stride_dst, ptrdiff_t stride_src)
 {
 	assert (src_ptr != nullptr);
 	assert (w > 0);

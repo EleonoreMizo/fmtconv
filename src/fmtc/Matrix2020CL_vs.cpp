@@ -50,8 +50,8 @@ namespace fmtc
 
 
 Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi)
-:	vsutl::FilterBase (vsapi, "matrix2020cl", ::fmParallel, 0)
-,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
+:	vsutl::FilterBase (vsapi, "matrix2020cl", ::fmParallel)
+,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 ,	_range_set_flag (false)
@@ -70,12 +70,12 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	);
 
 	// Checks the input clip
-	if (_vi_in.format == 0)
+	if (! vsutl::is_constant_format (_vi_in))
 	{
 		throw_inval_arg ("only constant pixel formats are supported.");
 	}
 
-	const ::VSFormat &   fmt_src = *_vi_in.format;
+	const auto &   fmt_src = _vi_in.format;
 
 	if (fmt_src.subSamplingW != 0 || fmt_src.subSamplingH != 0)
 	{
@@ -108,7 +108,7 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	}
 
 	// Destination colorspace
-	const ::VSFormat& fmt_dst = get_output_colorspace (in, out, core, fmt_src);
+	const auto     fmt_dst = get_output_colorspace (in, out, core, fmt_src);
 
 	if (   ! vsutl::is_vs_rgb (fmt_dst.colorFamily)
 	    && ! vsutl::is_vs_yuv (fmt_dst.colorFamily))
@@ -150,11 +150,11 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	}
 
 	// Output format is validated.
-	_vi_out.format = &fmt_dst;
+	_vi_out.format = fmt_dst;
 	_to_yuv_flag   = vsutl::is_vs_yuv (fmt_dst.colorFamily);
 
 	// Range
-	const ::VSFormat &   fmt_yuv = (_to_yuv_flag) ? fmt_dst : fmt_src;
+	const auto &   fmt_yuv = (_to_yuv_flag) ? fmt_dst : fmt_src;
 	_full_range_flag = (get_arg_int (
 		in, out, "full" ,
 		vsutl::is_full_range_default (fmt_yuv) ? 1 : 0,
@@ -186,23 +186,30 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 
 
 
-void	Matrix2020CL::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+::VSVideoInfo	Matrix2020CL::get_video_info () const
 {
-	fstb::unused (in, out, core);
-
-	_vsapi.setVideoInfo (&_vi_out, 1, &node);
+	return _vi_out;
 }
 
 
 
-const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+std::vector <::VSFilterDependency>	Matrix2020CL::get_dependencies () const
+{
+	return std::vector <::VSFilterDependency> {
+		{ &*_clip_src_sptr, ::rpStrictSpatial }
+	};
+}
+
+
+
+const ::VSFrame *	Matrix2020CL::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	fstb::unused (frame_data_ptr);
 
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = 0;
-	::VSNodeRef &     node = *_clip_src_sptr;
+	::VSFrame *    dst_ptr = 0;
+	::VSNode &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -215,35 +222,35 @@ const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void
 			_vsapi.getFrameFilter (n, &node, &frame_ctx),
 			_vsapi
 		);
-		const ::VSFrameRef & src = *src_sptr;
+		const ::VSFrame & src = *src_sptr;
 
 		const int      w = _vsapi.getFrameWidth (&src, 0);
 		const int      h = _vsapi.getFrameHeight (&src, 0);
-		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
+		dst_ptr = _vsapi.newVideoFrame (&_vi_out.format, w, h, &src, &core);
 
 		const auto     pa { build_mat_proc (_vsapi, *dst_ptr, src) };
 		_proc_uptr->process (pa);
 
 		// Output frame properties
-		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+		::VSMap &      dst_prop = *(_vsapi.getFramePropertiesRW (dst_ptr));
 
 		const fmtcl::ColorSpaceH265   cs_out =
 			  (_to_yuv_flag)
 			? fmtcl::ColorSpaceH265_BT2020CL
 			: fmtcl::ColorSpaceH265_RGB;
-		_vsapi.propSetInt (&dst_prop, "_ColorSpace", cs_out, ::paReplace);
-		_vsapi.propSetInt (&dst_prop, "_Matrix", cs_out, ::paReplace);
+		_vsapi.mapSetInt (&dst_prop, "_ColorSpace", cs_out, ::maReplace);
+		_vsapi.mapSetInt (&dst_prop, "_Matrix"    , cs_out, ::maReplace);
 
 		const auto     curve =
-			  (! _to_yuv_flag) ?                      fmtcl::TransCurve_LINEAR
-			: (_vi_out.format->bitsPerSample <= 10) ? fmtcl::TransCurve_2020_10
-			:                                         fmtcl::TransCurve_2020_12;
-		_vsapi.propSetInt (&dst_prop, "_Transfer", int (curve), ::paReplace);
+			  (! _to_yuv_flag) ?                     fmtcl::TransCurve_LINEAR
+			: (_vi_out.format.bitsPerSample <= 10) ? fmtcl::TransCurve_2020_10
+			:                                        fmtcl::TransCurve_2020_12;
+		_vsapi.mapSetInt (&dst_prop, "_Transfer", int (curve), ::maReplace);
 
 		if (! _to_yuv_flag || _range_set_flag)
 		{
 			const int      cr_val = (! _to_yuv_flag || _full_range_flag) ? 0 : 1;
-			_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
+			_vsapi.mapSetInt (&dst_prop, "_ColorRange", cr_val, ::maReplace);
 		}
 	}
 
@@ -265,21 +272,21 @@ constexpr int	Matrix2020CL::_rgb_int_bits;
 
 
 
-const ::VSFormat &	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const
+::VSVideoFormat	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src) const
 {
-	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
-	int            col_fam  = fmt_dst_ptr->colorFamily;
-	int            bits     = fmt_dst_ptr->bitsPerSample;
-	int            spl_type = fmt_dst_ptr->sampleType;
+	auto           fmt_dst  = fmt_src;
+	int            col_fam  = fmt_dst.colorFamily;
+	int            bits     = fmt_dst.bitsPerSample;
+	int            spl_type = fmt_dst.sampleType;
 
 	// Automatic default conversion
 	if (vsutl::is_vs_rgb (col_fam))
 	{
-		col_fam = ::cmYUV;
+		col_fam = ::cfYUV;
 	}
 	else
 	{
-		col_fam = ::cmRGB;
+		col_fam = ::cfRGB;
 		if (spl_type == ::stInteger)
 		{
 			bits = _rgb_int_bits;
@@ -290,31 +297,30 @@ const ::VSFormat &	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSM
 	int            csp_dst = get_arg_int (in, out, "csp", ::pfNone);
 	if (csp_dst != ::pfNone)
 	{
-		fmt_dst_ptr = _vsapi.getFormatPreset (csp_dst, &core);
-		if (fmt_dst_ptr == 0)
+		const auto     gvfbi_ret =
+			_vsapi.getVideoFormatByID (&fmt_dst, csp_dst, &core);
+		if (gvfbi_ret == 0)
 		{
 			throw_inval_arg ("unknown output colorspace.");
 		}
-		col_fam  = fmt_dst_ptr->colorFamily;
-		bits     = fmt_dst_ptr->bitsPerSample;
-		spl_type = fmt_dst_ptr->sampleType;
+		col_fam  = fmt_dst.colorFamily;
+		bits     = fmt_dst.bitsPerSample;
+		spl_type = fmt_dst.sampleType;
 	}
 
-	int            ssh = fmt_dst_ptr->subSamplingW;
-	int            ssv = fmt_dst_ptr->subSamplingH;
+	int            ssh = fmt_dst.subSamplingW;
+	int            ssv = fmt_dst.subSamplingH;
 
 	// Destination bit depth
 	bits = get_arg_int (in, out, "bits", bits);
 
 	// Combines the modified parameters and validates the format
+	bool           ok_flag = true;
 	try
 	{
-		fmt_dst_ptr = register_format (
-			col_fam,
-			spl_type,
-			bits,
-			ssh,
-			ssv,
+		ok_flag = register_format (
+			fmt_dst,
+			col_fam, spl_type, bits, ssh, ssv,
 			core
 		);
 	}
@@ -324,17 +330,17 @@ const ::VSFormat &	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSM
 	}
 	catch (...)
 	{
-		fmt_dst_ptr = 0;
+		ok_flag = false;
 	}
 
-	if (fmt_dst_ptr == 0)
+	if (! ok_flag)
 	{
 		throw_rt_err (
 			"couldn\'t get a pixel format identifier for the output clip."
 		);
 	}
 
-	return *fmt_dst_ptr;
+	return fmt_dst;
 }
 
 

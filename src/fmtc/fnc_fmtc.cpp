@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/MatrixProc.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/fnc.h"
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 #include <algorithm>
 
@@ -50,7 +50,7 @@ namespace fmtc
 
 
 
-fmtcl::PicFmt	conv_vsfmt_to_picfmt (const ::VSFormat &fmt, bool full_flag)
+fmtcl::PicFmt	conv_vsfmt_to_picfmt (const ::VSVideoFormat &fmt, bool full_flag)
 {
 	fmtcl::PicFmt  pic_fmt;
 	pic_fmt._sf        = conv_vsfmt_to_splfmt (fmt);
@@ -63,7 +63,7 @@ fmtcl::PicFmt	conv_vsfmt_to_picfmt (const ::VSFormat &fmt, bool full_flag)
 
 
 
-fmtcl::SplFmt	conv_vsfmt_to_splfmt (const ::VSFormat &fmt)
+fmtcl::SplFmt	conv_vsfmt_to_splfmt (const ::VSVideoFormat &fmt)
 {
 	fmtcl::SplFmt  splfmt = fmtcl::SplFmt_ILLEGAL;
 
@@ -88,7 +88,7 @@ fmtcl::SplFmt	conv_vsfmt_to_splfmt (const ::VSFormat &fmt)
 
 
 
-void	conv_vsfmt_to_splfmt (fmtcl::SplFmt &type, int &bitdepth, const ::VSFormat &fmt)
+void	conv_vsfmt_to_splfmt (fmtcl::SplFmt &type, int &bitdepth, const ::VSVideoFormat &fmt)
 {
 	type     = conv_vsfmt_to_splfmt (fmt);
 	bitdepth = fmt.bitsPerSample;
@@ -96,26 +96,20 @@ void	conv_vsfmt_to_splfmt (fmtcl::SplFmt &type, int &bitdepth, const ::VSFormat 
 
 
 
-fmtcl::ColorFamily	conv_vsfmt_to_colfam (const ::VSFormat &fmt)
+fmtcl::ColorFamily	conv_vsfmt_to_colfam (const ::VSVideoFormat &fmt)
 {
 	auto          col_fam = fmtcl::ColorFamily_INVALID;
 
 	switch (fmt.colorFamily)
 	{
 	case cfGray:
-	case cmGray:
 		col_fam = fmtcl::ColorFamily_GRAY;
 		break;
 	case cfRGB:
-	case cmRGB:
 		col_fam = fmtcl::ColorFamily_RGB;
 		break;
 	case cfYUV:
-	case cmYUV:
 		col_fam = fmtcl::ColorFamily_YUV;
-		break;
-	case cmYCoCg:
-		col_fam = fmtcl::ColorFamily_YCGCO;
 		break;
 	default:
 		assert (false);
@@ -135,10 +129,9 @@ int	conv_fmtcl_colfam_to_vs (fmtcl::ColorFamily cf)
 	int            vs_cf = ::cfUndefined;
 	switch (cf)
 	{
-	case fmtcl::ColorFamily_GRAY:  vs_cf = ::cmGray;  break;
-	case fmtcl::ColorFamily_RGB:   vs_cf = ::cmRGB;   break;
-	case fmtcl::ColorFamily_YCGCO: vs_cf = ::cmYCoCg; break;
-	case fmtcl::ColorFamily_YUV:   vs_cf = ::cmYUV;   break;
+	case fmtcl::ColorFamily_GRAY: vs_cf = ::cfGray; break;
+	case fmtcl::ColorFamily_RGB:  vs_cf = ::cfRGB;  break;
+	case fmtcl::ColorFamily_YUV:  vs_cf = ::cfYUV;  break;
 	default:
 		assert (false);
 		break;
@@ -149,7 +142,7 @@ int	conv_fmtcl_colfam_to_vs (fmtcl::ColorFamily cf)
 
 
 
-void	prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSFormat &fmt_dst, bool full_range_dst_flag, const ::VSFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out, int plane_out)
+void	prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSVideoFormat &fmt_dst, bool full_range_dst_flag, const ::VSVideoFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out, int plane_out)
 {
 	const fmtcl::PicFmt  fmt_src_fmtcl =
 		conv_vsfmt_to_picfmt (fmt_src, full_range_src_flag);
@@ -192,7 +185,7 @@ void	prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &ma
 
 
 
-fmtcl::ProcComp3Arg	build_mat_proc (const ::VSAPI &vsapi, ::VSFrameRef &dst, const ::VSFrameRef &src, bool single_plane_flag)
+fmtcl::ProcComp3Arg	build_mat_proc (const ::VSAPI &vsapi, ::VSFrame &dst, const ::VSFrame &src, bool single_plane_flag)
 {
 	fmtcl::ProcComp3Arg  pa;
 
@@ -201,7 +194,7 @@ fmtcl::ProcComp3Arg	build_mat_proc (const ::VSAPI &vsapi, ::VSFrameRef &dst, con
 
 	const int      nbr_active_planes = std::min <int> (
 		fmtcl::ProcComp3Arg::_nbr_planes,
-		vsapi.getFrameFormat (&src)->numPlanes
+		vsapi.getVideoFrameFormat (&src)->numPlanes
 	);
 	assert (nbr_active_planes == 1 || nbr_active_planes == 3);
 

@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
 #include "vsutl/PlaneProcMode.h"
-#include "vswrap.h"
+#include "VapourSynth4.h"
 
 #include <algorithm>
 
@@ -80,17 +80,17 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 
 	_vi_out     = vi_out;
 
-	_nbr_planes = vi_out.format->numPlanes;
+	_nbr_planes = vi_out.format.numPlanes;
 	assert (_nbr_planes <= MAX_NBR_PLANES);
-	const bool     int_flag = (vi_out.format->sampleType == ::stInteger);
+	const bool     int_flag = (vi_out.format.sampleType == ::stInteger);
 	double         max_val = 0;
 	if (int_flag)
 	{
-		max_val = double ((uint64_t (1)) << (vi_out.format->bitsPerSample - 4)) * 16;
+		max_val = double ((uint64_t (1)) << (vi_out.format.bitsPerSample - 4)) * 16;
 	}
 
 	const int      nbr_def_planes = std::max (_nbr_planes, max_def_planes);
-	const int      nbr_elt        = _vsapi.propNumElements (&in, prop_name_0);
+	const int      nbr_elt        = _vsapi.mapNumElements (&in, prop_name_0);
 	const bool     arg_def_flag   = (nbr_elt >= 0);
 
 	// Default
@@ -117,11 +117,11 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 		{
 			// Property could be declared as float or int
 			double         plane_content =
-				_vsapi.propGetFloat (&in, prop_name_0, index, &err);
+				_vsapi.mapGetFloat (&in, prop_name_0, index, &err);
 			if (err == ::peType)
 			{
 				plane_content = double (
-					_vsapi.propGetInt (&in, prop_name_0, index, &err)
+					_vsapi.mapGetInt (&in, prop_name_0, index, &err)
 				);
 			}
 
@@ -132,7 +132,7 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 					+ ": cannot read the \""
 					+ prop_name_0
 					+ "\" parameter.";
-				_vsapi.setError (&out, err_msg.c_str ());
+				_vsapi.mapSetError (&out, err_msg.c_str ());
 				ok_flag = false;
 			}
 
@@ -146,7 +146,7 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 					{
 						const std::string err_msg =
 							_filter_name + ": plane index out of range.";
-						_vsapi.setError (&out, err_msg.c_str ());
+						_vsapi.mapSetError (&out, err_msg.c_str ());
 						ok_flag = false;
 					}
 					else if (   fstb::round_int (_proc_mode_arr [plane_index])
@@ -154,7 +154,7 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 					{
 						const std::string err_msg =
 							_filter_name + ": plane specified twice.";
-						_vsapi.setError (&out, err_msg.c_str ());
+						_vsapi.mapSetError (&out, err_msg.c_str ());
 						ok_flag = false;
 					}
 					else
@@ -171,7 +171,7 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 					{
 						const std::string err_msg =
 							_filter_name + ": too many specified plane filters.";
-						_vsapi.setError (&out, err_msg.c_str ());
+						_vsapi.mapSetError (&out, err_msg.c_str ());
 						ok_flag = false;
 					}
 					else if (   plane_content >= double (PlaneProcMode_NBR_ELT)
@@ -179,7 +179,7 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 					{
 						const std::string err_msg =
 							_filter_name + ": invalid plane filter.";
-						_vsapi.setError (&out, err_msg.c_str ());
+						_vsapi.mapSetError (&out, err_msg.c_str ());
 						ok_flag = false;
 					}
 					else
@@ -205,22 +205,22 @@ void	PlaneProcessor::set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVide
 
 // To be called in arInitial mode, but not in manual mode
 // Returns 0 if input frames are needed.
-const ::VSFrameRef *	PlaneProcessor::try_initial (::VSCore &core)
+const ::VSFrame *	PlaneProcessor::try_initial (::VSCore &core)
 {
 	assert (! _manual_flag);
 
-	const ::VSFrameRef * dst_ptr = 0;
+	const ::VSFrame * dst_ptr = nullptr;
 
 	if (! _input_flag)
 	{
-		if (_blank_frame_sptr.get () == 0)
+		if (_blank_frame_sptr.get () == nullptr)
 		{
 			_blank_frame_sptr = FrameRefSPtr (
 				_vsapi.newVideoFrame (
-					_vi_out.format,
+					&_vi_out.format,
 					_vi_out.width,
 					_vi_out.height,
-					0,
+					nullptr,
 					&core
 				),
 				_vsapi
@@ -232,7 +232,7 @@ const ::VSFrameRef *	PlaneProcessor::try_initial (::VSCore &core)
 				if (val < double (PlaneProcMode_COPY1))
 				{
 					fill_plane (
-						const_cast < ::VSFrameRef &> (*_blank_frame_sptr),
+						const_cast < ::VSFrame &> (*_blank_frame_sptr),
 						-val,
 						plane_index
 					);
@@ -243,14 +243,14 @@ const ::VSFrameRef *	PlaneProcessor::try_initial (::VSCore &core)
 		dst_ptr = _blank_frame_sptr.dup ();
 	}
 
-	return (dst_ptr);
+	return dst_ptr;
 }
 
 
 
 // To be called in arAllFramesReady mode
 // In manual mode, all planes are called for processing.
-int	PlaneProcessor::process_frame (::VSFrameRef &dst, int n, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, NodeRefSPtr src_node1_sptr, NodeRefSPtr src_node2_sptr, NodeRefSPtr src_node3_sptr)
+int	PlaneProcessor::process_frame (::VSFrame &dst, int n, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, NodeRefSPtr src_node1_sptr, NodeRefSPtr src_node2_sptr, NodeRefSPtr src_node3_sptr)
 {
 	assert (n >= 0);
 	assert (_input_flag);
@@ -300,14 +300,14 @@ int	PlaneProcessor::process_frame (::VSFrameRef &dst, int n, void *frame_data_pt
 		}
 	}
 
-	return (ret_val);
+	return ret_val;
 }
 
 
 
 bool	PlaneProcessor::is_manual () const
 {
-	return (_manual_flag);
+	return _manual_flag;
 }
 
 
@@ -317,9 +317,9 @@ PlaneProcMode	PlaneProcessor::get_mode (int plane_index) const
 	assert (plane_index >= 0);
 	assert (plane_index < _nbr_planes);
 
-	return (static_cast <PlaneProcMode> (
+	return static_cast <PlaneProcMode> (
 		int (_proc_mode_arr [plane_index] + 0.5)
-	));
+	);
 }
 
 
@@ -329,21 +329,21 @@ double	PlaneProcessor::get_mode_val (int plane_index) const
 	assert (plane_index >= 0);
 	assert (plane_index < _nbr_planes);
 
-	return (_proc_mode_arr [plane_index]);
+	return _proc_mode_arr [plane_index];
 }
 
 
 
-void	PlaneProcessor::fill_plane (::VSFrameRef &dst, double val, int plane_index)
+void	PlaneProcessor::fill_plane (::VSFrame &dst, double val, int plane_index)
 {
 	assert (plane_index >= 0);
 	assert (plane_index < _nbr_planes);
 
 	const int      dst_w = _vsapi.getFrameWidth (&dst, plane_index);
 	const int      dst_h = _vsapi.getFrameHeight (&dst, plane_index);
-	const int      dst_s = _vsapi.getStride (&dst, plane_index);
-	const ::VSFormat *   dst_fmt_ptr = _vsapi.getFrameFormat (&dst);
-	uint8_t *            dst_dta_ptr = _vsapi.getWritePtr (&dst, plane_index);
+	const auto     dst_s = _vsapi.getStride (&dst, plane_index);
+	const auto *   dst_fmt_ptr = _vsapi.getVideoFrameFormat (&dst);
+	uint8_t *      dst_dta_ptr = _vsapi.getWritePtr (&dst, plane_index);
 	const int      bps = dst_fmt_ptr->bytesPerSample;
 	const int      st  = dst_fmt_ptr->sampleType;
 
@@ -385,20 +385,20 @@ void	PlaneProcessor::fill_plane (::VSFrameRef &dst, double val, int plane_index)
 
 
 
-void	PlaneProcessor::copy_plane (::VSFrameRef &dst, const ::VSFrameRef &src, int plane_index)
+void	PlaneProcessor::copy_plane (::VSFrame &dst, const ::VSFrame &src, int plane_index)
 {
 	assert (plane_index >= 0);
 	assert (plane_index < _nbr_planes);
 
 	const int      dst_w = _vsapi.getFrameWidth (&dst, plane_index);
 	const int      dst_h = _vsapi.getFrameHeight (&dst, plane_index);
-	const int      dst_s = _vsapi.getStride (&dst, plane_index);
-	const ::VSFormat *   dst_fmt_ptr = _vsapi.getFrameFormat (&dst);
-	uint8_t *            dst_dta_ptr = _vsapi.getWritePtr (&dst, plane_index);
+	const auto     dst_s = _vsapi.getStride (&dst, plane_index);
+	const auto *   dst_fmt_ptr = _vsapi.getVideoFrameFormat (&dst);
+	uint8_t *      dst_dta_ptr = _vsapi.getWritePtr (&dst, plane_index);
 
 	const int      src_w = _vsapi.getFrameWidth (&src, plane_index);
 	const int      src_h = _vsapi.getFrameHeight (&src, plane_index);
-	const int      src_s = _vsapi.getStride (&src, plane_index);
+	const auto     src_s = _vsapi.getStride (&src, plane_index);
 	const uint8_t *      src_dta_ptr = _vsapi.getReadPtr (&src, plane_index);
 
 	const int      w   = std::min (dst_w, src_w);
@@ -433,7 +433,7 @@ void	PlaneProcessor::copy_plane (::VSFrameRef &dst, const ::VSFrameRef &src, int
 
 
 template <class T>
-void	PlaneProcessor::fill_plane (void *ptr, T val, int stride, int w, int h)
+void	PlaneProcessor::fill_plane (void *ptr, T val, ptrdiff_t stride, int w, int h)
 {
 	assert (ptr != nullptr);
 	assert (stride > 0);
@@ -448,7 +448,7 @@ void	PlaneProcessor::fill_plane (void *ptr, T val, int stride, int w, int h)
 	else
 	{
 		T *            data_ptr = reinterpret_cast <T *> (ptr);
-		const int      stride_pix = stride / sizeof (val);
+		const auto     stride_pix = stride / sizeof (val);
 		for (int y = 0; y < h; ++y)
 		{
 			if (sizeof (val) == 1)

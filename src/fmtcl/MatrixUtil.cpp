@@ -53,10 +53,6 @@ void	MatrixUtil::select_def_mat (std::string &mat, ColorFamily col_fam)
 			mat = "601";
 			break;
 
-		case	ColorFamily_YCGCO:
-			mat = "ycgco";
-			break;
-
 		case	ColorFamily_GRAY: // Should not happen actually
 		case	ColorFamily_RGB:
 		default:
@@ -135,9 +131,7 @@ ColorSpaceH265	MatrixUtil::find_cs_from_mat_str (const std::string &mat, bool al
 
 
 
-// ycgco_flag indicates that YCgCo should be treated as a separate colorspace
-// (not YUV)
-ColorFamily	MatrixUtil::find_cf_from_cs (ColorSpaceH265 cs, bool ycgco_flag)
+ColorFamily	MatrixUtil::find_cf_from_cs (ColorSpaceH265 cs)
 {
 	assert (cs >= 0);
 	assert (cs < ColorSpaceH265_NBR_ELT);
@@ -151,15 +145,12 @@ ColorFamily	MatrixUtil::find_cf_from_cs (ColorSpaceH265 cs, bool ycgco_flag)
 		cf = ColorFamily_RGB;
 		break;
 
-	case ColorSpaceH265_YCGCO:
-		cf = (ycgco_flag) ? ColorFamily_YCGCO: ColorFamily_YUV;
-		break;
-
 	case ColorSpaceH265_BT709:
 	case ColorSpaceH265_FCC:
 	case ColorSpaceH265_BT470BG:
 	case ColorSpaceH265_SMPTE170M:
 	case ColorSpaceH265_SMPTE240M:
+	case ColorSpaceH265_YCGCO:
 	case ColorSpaceH265_BT2020NCL:
 	case ColorSpaceH265_BT2020CL:
 	case ColorSpaceH265_YDZDX:

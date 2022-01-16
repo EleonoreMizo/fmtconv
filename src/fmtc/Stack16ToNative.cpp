@@ -26,6 +26,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fmtc/Stack16ToNative.h"
 #include "fstb/def.h"
+#include "vsutl/fnc.h"
 #include "vsutl/FrameRefSPtr.h"
 
 #include <stdexcept>
@@ -45,24 +46,23 @@ namespace fmtc
 
 
 Stack16ToNative::Stack16ToNative (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi)
-:	vsutl::FilterBase (vsapi, "stack16tonative", ::fmParallel, 0)
-,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
+:	vsutl::FilterBase (vsapi, "stack16tonative", ::fmParallel)
+,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 {
 	fstb::unused (out, user_data_ptr);
 
 	// Checks the input clip
-	if (_vi_in.format == 0)
+	if (! vsutl::is_constant_format (_vi_in))
 	{
 		throw_inval_arg ("only constant pixel formats are supported.");
 	}
 
 	// Source colorspace
-	const ::VSFormat &   fmt_src = *_vi_in.format;
+	const auto &   fmt_src = _vi_in.format;
 	if (   fmt_src.sampleType     != ::stInteger
-	    || fmt_src.bytesPerSample != 1
-	    || fmt_src.colorFamily    == ::cmCompat)
+	    || fmt_src.bytesPerSample != 1)
 	{
 		throw_inval_arg ("pixel format not supported.");
 	}
@@ -75,35 +75,46 @@ Stack16ToNative::Stack16ToNative (const ::VSMap &in, ::VSMap &out, void *user_da
 	}
 
 	// Output format
-	_vi_out.format = register_format (
+	if (! register_format (
+		_vi_out.format,
 		fmt_src.colorFamily,
 		fmt_src.sampleType,
 		16,
 		fmt_src.subSamplingW,
 		fmt_src.subSamplingH,
 		core
-	);
+	))
+	{
+		throw_inval_arg ("cannot set the output format.");
+	}
 	_vi_out.height /= 2;	// Works also with height == 0
 }
 
 
 
-void	Stack16ToNative::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+::VSVideoInfo	Stack16ToNative::get_video_info () const
 {
-	fstb::unused (in, out, core);
-
-	_vsapi.setVideoInfo (&_vi_out, 1, &node);
+	return _vi_out;
 }
 
 
 
-const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+std::vector <::VSFilterDependency>	Stack16ToNative::get_dependencies () const
+{
+	return std::vector <::VSFilterDependency> {
+		{ &*_clip_src_sptr, ::rpStrictSpatial }
+	};
+}
+
+
+
+const ::VSFrame *	Stack16ToNative::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	fstb::unused (frame_data_ptr);
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = 0;
-	::VSNodeRef &     node = *_clip_src_sptr;
+	::VSFrame *    dst_ptr = nullptr;
+	::VSNode &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -116,12 +127,12 @@ const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, v
 			_vsapi.getFrameFilter (n, &node, &frame_ctx),
 			_vsapi
 		);
-		const ::VSFrameRef & src = *src_sptr;
+		const ::VSFrame & src = *src_sptr;
 
 		const int      w = _vsapi.getFrameWidth (&src, 0);
 		const int      h = _vsapi.getFrameHeight (&src, 0);
 
-		const int      two_chroma_rows = 2 << _vi_in.format->subSamplingH;
+		const int      two_chroma_rows = 2 << _vi_in.format.subSamplingH;
 		if ((h & (two_chroma_rows - 1)) != 0)
 		{
 			_vsapi.setFilterError (
@@ -132,9 +143,9 @@ const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, v
 
 		else
 		{
-			dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h >> 1, &src, &core);
+			dst_ptr = _vsapi.newVideoFrame (&_vi_out.format, w, h >> 1, &src, &core);
 
-			const int      nbr_planes = _vi_out.format->numPlanes;
+			const int      nbr_planes = _vi_out.format.numPlanes;
 			for (int plane_index = 0; plane_index < nbr_planes; ++plane_index)
 			{
 				const int      pw = _vsapi.getFrameWidth (&src, plane_index);
@@ -142,11 +153,11 @@ const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, v
 				const int      hh = ph >> 1;
 
 				const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-				const int      stride_src   = _vsapi.getStride (&src, plane_index);
+				const auto     stride_src   = _vsapi.getStride (&src, plane_index);
 				uint8_t *      data_dst_ptr = _vsapi.getWritePtr (dst_ptr, plane_index);
-				const int      stride_dst   = _vsapi.getStride (dst_ptr, plane_index);
+				const auto     stride_dst   = _vsapi.getStride (dst_ptr, plane_index);
 
-				const int      lsb_offset = stride_src * hh;
+				const auto     lsb_offset = stride_src * hh;
 
 				for (int y = 0; y < hh; ++y)
 				{
@@ -165,7 +176,7 @@ const ::VSFrameRef *	Stack16ToNative::get_frame (int n, int activation_reason, v
 		}
 	}
 
-	return (dst_ptr);
+	return dst_ptr;
 }
 
 

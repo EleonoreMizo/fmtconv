@@ -51,7 +51,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 struct VSAPI;
 struct VSCore;
 struct VSFrameContext;
-struct VSFrameRef;
+struct VSFrame;
 struct VSMap;
 struct VSVideoInfo;
 
@@ -79,17 +79,17 @@ public:
 
 	void           set_filter (const ::VSMap &in, ::VSMap &out, const ::VSVideoInfo &vi_out, bool simple_flag = false, int max_def_planes = MAX_NBR_PLANES, const char *prop_name_0 = "planes", const char *clip_name_0 = "clip");
 
-	const ::VSFrameRef *
+	const ::VSFrame *
 	               try_initial (::VSCore &core);
-	int            process_frame (::VSFrameRef &dst, int n, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, NodeRefSPtr src_node1_sptr = vsutl::NodeRefSPtr (), NodeRefSPtr src_node2_sptr = vsutl::NodeRefSPtr (), NodeRefSPtr src_node3_sptr = vsutl::NodeRefSPtr ());
+	int            process_frame (::VSFrame &dst, int n, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, NodeRefSPtr src_node1_sptr = vsutl::NodeRefSPtr (), NodeRefSPtr src_node2_sptr = vsutl::NodeRefSPtr (), NodeRefSPtr src_node3_sptr = vsutl::NodeRefSPtr ());
 
 	// For manual operations
 	bool           is_manual () const;
 	PlaneProcMode  get_mode (int plane_index) const;
 	double         get_mode_val (int plane_index) const;
 
-	void           fill_plane (::VSFrameRef &dst, double val, int plane_index);
-	void           copy_plane (::VSFrameRef &dst, const ::VSFrameRef &src, int plane_index);
+	void           fill_plane (::VSFrame &dst, double val, int plane_index);
+	void           copy_plane (::VSFrame &dst, const ::VSFrame &src, int plane_index);
 
 
 
@@ -104,7 +104,7 @@ protected:
 private:
 
 	template <class T>
-	void           fill_plane (void *ptr, T val, int stride, int w, int h);
+	void           fill_plane (void *ptr, T val, ptrdiff_t stride, int w, int h);
 
 
 	const ::VSAPI& _vsapi;

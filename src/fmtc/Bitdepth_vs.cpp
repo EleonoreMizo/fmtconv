@@ -48,8 +48,8 @@ namespace fmtc
 
 
 Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi)
-:	vsutl::FilterBase (vsapi, "bitdepth", ::fmParallel, 0)
-,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, nullptr), vsapi)
+:	vsutl::FilterBase (vsapi, "bitdepth", ::fmParallel)
+,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, nullptr), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 #if defined (_MSC_VER)
@@ -68,18 +68,18 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	const bool     avx2_flag = cpu_opt.has_avx2 ();
 
 	// Checks the input clip
-	if (_vi_in.format == nullptr)
+	if (! vsutl::is_constant_format (_vi_in))
 	{
 		throw_inval_arg ("only constant pixel formats are supported.");
 	}
 
 	// Source colorspace
-	const ::VSFormat &   fmt_src = *_vi_in.format;
+	const auto &   fmt_src = _vi_in.format;
 
 	{
-		const int            st  = fmt_src.sampleType;
-		const int            bps = fmt_src.bytesPerSample;
-		const int            res = fmt_src.bitsPerSample;
+		const int      st  = fmt_src.sampleType;
+		const int      bps = fmt_src.bytesPerSample;
+		const int      res = fmt_src.bitsPerSample;
 		if (! (   (st == ::stInteger && bps == 1 &&     res ==  8 )
 		       || (st == ::stInteger && bps == 2 && (   (   res >=  9
 		                                                 && res <= 12)
@@ -89,17 +89,13 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		{
 			throw_inval_arg ("input pixel bitdepth not supported.");
 		}
-		if (fmt_src.colorFamily == ::cmCompat)
-		{
-			throw_inval_arg ("\"compat\" colorspace not supported.");
-		}
 	}
 
 	const auto     splfmt_src = conv_vsfmt_to_splfmt (fmt_src);
 	const auto     col_fam    = conv_vsfmt_to_colfam (fmt_src);
 
 	// Destination colorspace
-	const ::VSFormat& fmt_dst = get_output_colorspace (in, out, core, fmt_src);
+	const auto     fmt_dst = get_output_colorspace (in, out, core, fmt_src);
 
 	if (   fmt_dst.colorFamily  != fmt_src.colorFamily
 	    || fmt_dst.subSamplingW != fmt_src.subSamplingW
@@ -127,8 +123,10 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 	}
 
 	// Format is validated
-	_vi_out.format = &fmt_dst;
+	_vi_out.format = fmt_dst;
 	const auto     splfmt_dst = conv_vsfmt_to_splfmt (fmt_dst);
+
+	_plane_processor.set_filter (in, out, _vi_out, true);
 
 	const int      w = _vi_in.width; // May be <= 0
 
@@ -198,22 +196,28 @@ Bitdepth::Bitdepth (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 
 
 
-void	Bitdepth::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+::VSVideoInfo	Bitdepth::get_video_info () const
 {
-	fstb::unused (core);
-
-	_vsapi.setVideoInfo (&_vi_out, 1, &node);
-	_plane_processor.set_filter (in, out, _vi_out, true);
+	return _vi_out;
 }
 
 
 
-const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+std::vector <::VSFilterDependency>	Bitdepth::get_dependencies () const
+{
+	return std::vector <::VSFilterDependency> {
+		{ &*_clip_src_sptr, ::rpStrictSpatial }
+	};
+}
+
+
+
+const ::VSFrame *	Bitdepth::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = nullptr;
-	::VSNodeRef &     node    = *_clip_src_sptr;
+	::VSFrame *    dst_ptr = nullptr;
+	::VSNode &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -226,11 +230,11 @@ const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &
 			_vsapi.getFrameFilter (n, &node, &frame_ctx),
 			_vsapi
 		);
-		const ::VSFrameRef & src = *src_sptr;
+		const ::VSFrame & src = *src_sptr;
 
 		const int      w = _vsapi.getFrameWidth (&src, 0);
 		const int      h = _vsapi.getFrameHeight (&src, 0);
-		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
+		dst_ptr = _vsapi.newVideoFrame (&_vi_out.format, w, h, &src, &core);
 
 		const int      ret_val = _plane_processor.process_frame (
 			*dst_ptr, n, frame_data_ptr, frame_ctx, core, _clip_src_sptr
@@ -242,11 +246,11 @@ const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &
 		}
 
 		// Output frame properties
-		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+		::VSMap &      dst_prop = *(_vsapi.getFramePropertiesRW (dst_ptr));
 		if (_range_def_flag)
 		{
 			const int      cr_val = (_full_range_out_flag) ? 0 : 1;
-			_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
+			_vsapi.mapSetInt (&dst_prop, "_ColorRange", cr_val, ::maReplace);
 		}
 	}
 
@@ -259,7 +263,7 @@ const ::VSFrameRef *	Bitdepth::get_frame (int n, int activation_reason, void * &
 
 
 
-int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
+int	Bitdepth::do_process_plane (::VSFrame &dst, int n, int plane_index, void *frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core, const vsutl::NodeRefSPtr &src_node1_sptr, const vsutl::NodeRefSPtr &src_node2_sptr, const vsutl::NodeRefSPtr &src_node3_sptr)
 {
 	fstb::unused (frame_data_ptr, core, src_node2_sptr, src_node3_sptr);
 	assert (src_node1_sptr.get () != nullptr);
@@ -275,15 +279,15 @@ int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 			_vsapi.getFrameFilter (n, src_node1_sptr.get (), &frame_ctx),
 			_vsapi
 		);
-		const ::VSFrameRef & src = *src_sptr;
+		const ::VSFrame & src = *src_sptr;
 
 		const int      w = _vsapi.getFrameWidth (&src, plane_index);
 		const int      h = _vsapi.getFrameHeight (&src, plane_index);
 
 		const uint8_t* data_src_ptr = _vsapi.getReadPtr (&src, plane_index);
-		const int      stride_src   = _vsapi.getStride (&src, plane_index);
+		const auto     stride_src   = _vsapi.getStride (&src, plane_index);
 		uint8_t *      data_dst_ptr = _vsapi.getWritePtr (&dst, plane_index);
-		const int      stride_dst   = _vsapi.getStride (&dst, plane_index);
+		const auto     stride_dst   = _vsapi.getStride (&dst, plane_index);
 
 		try
 		{
@@ -315,9 +319,9 @@ int	Bitdepth::do_process_plane (::VSFrameRef &dst, int n, int plane_index, void 
 
 
 
-const ::VSFormat &	Bitdepth::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const
+::VSVideoFormat	Bitdepth::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src) const
 {
-	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
+	auto           fmt_dst  = fmt_src;
 
 	const int      undef    = -666666666;
 	const int      dst_csp  = get_arg_int (in, out, "csp" , undef);
@@ -334,8 +338,9 @@ const ::VSFormat &	Bitdepth::get_output_colorspace (const ::VSMap &in, ::VSMap &
 	// Full colorspace
 	if (dst_csp != undef)
 	{
-		fmt_dst_ptr = _vsapi.getFormatPreset (dst_csp, &core);
-		if (fmt_dst_ptr == nullptr)
+		const auto     gvfbi_ret =
+			_vsapi.getVideoFormatByID (&fmt_dst, dst_csp, &core);
+		if (gvfbi_ret == 0)
 		{
 			throw_inval_arg ("unknown output colorspace.");
 		}
@@ -343,11 +348,11 @@ const ::VSFormat &	Bitdepth::get_output_colorspace (const ::VSMap &in, ::VSMap &
 
 	else
 	{
-		int            col_fam  = fmt_dst_ptr->colorFamily;
-		int            spl_type = fmt_dst_ptr->sampleType;
-		int            bits     = fmt_dst_ptr->bitsPerSample;
-		int            ssh      = fmt_dst_ptr->subSamplingW;
-		int            ssv      = fmt_dst_ptr->subSamplingH;
+		int            col_fam  = fmt_dst.colorFamily;
+		int            spl_type = fmt_dst.sampleType;
+		int            bits     = fmt_dst.bitsPerSample;
+		int            ssh      = fmt_dst.subSamplingW;
+		int            ssv      = fmt_dst.subSamplingH;
 
 		// Data type
 		if (dst_flt == 0)
@@ -381,22 +386,20 @@ const ::VSFormat &	Bitdepth::get_output_colorspace (const ::VSMap &in, ::VSMap &
 		}
 
 		// Combines the modified parameters and validates the format
+		bool        ok_flag = true;
 		try
 		{
-			fmt_dst_ptr = register_format (
-				col_fam,
-				spl_type,
-				bits,
-				ssh,
-				ssv,
+			ok_flag = register_format (
+				fmt_dst,
+				col_fam, spl_type, bits, ssh, ssv,
 				core
 			);
 		}
 		catch (...)
 		{
-			fmt_dst_ptr = nullptr;
+			ok_flag = false;
 		}
-		if (fmt_dst_ptr == nullptr)
+		if (! ok_flag)
 		{
 			throw_rt_err (
 				"couldn\'t get a pixel format identifier for the output clip."
@@ -404,7 +407,7 @@ const ::VSFormat &	Bitdepth::get_output_colorspace (const ::VSMap &in, ::VSMap &
 		}
 	}
 
-	return *fmt_dst_ptr;
+	return fmt_dst;
 }
 
 

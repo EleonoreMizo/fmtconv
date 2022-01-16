@@ -169,6 +169,7 @@
     <ClInclude Include="..\..\..\src\fmtcavs\ProcAlpha.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\Resample.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\Transfer.h" />
+    <ClInclude Include="..\..\..\src\VapourSynth4.h" />
     <ClInclude Include="..\..\..\src\vsutl\FilterBase.h" />
     <ClInclude Include="..\..\..\src\vsutl\fnc.h" />
     <ClInclude Include="..\..\..\src\vsutl\FrameRefSPtr.h" />
@@ -183,7 +184,6 @@
     <ClInclude Include="..\..\..\src\vsutl\Redirect.hpp" />
     <ClInclude Include="..\..\..\src\avisynth.h" />
     <ClInclude Include="..\..\..\src\VapourSynth.h" />
-    <ClInclude Include="..\..\..\src\vswrap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\avsutl\CsPlane.cpp" />

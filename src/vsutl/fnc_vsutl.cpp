@@ -39,21 +39,21 @@ namespace vsutl
 
 bool	is_vs_gray (int cf)
 {
-	return (cf == ::cfGray || cf == ::cmGray);
+	return (cf == ::cfGray);
 }
 
 
 
 bool	is_vs_rgb (int cf)
 {
-	return (cf == ::cfRGB || cf == ::cmRGB);
+	return (cf == ::cfRGB);
 }
 
 
 
 bool	is_vs_yuv (int cf)
 {
-	return (cf == ::cfYUV || cf == ::cmYUV);
+	return (cf == ::cfYUV);
 }
 
 
@@ -71,26 +71,26 @@ bool	is_vs_same_colfam (int lhs, int rhs)
 
 bool	is_constant_format (const ::VSVideoInfo &vi)
 {
-	return (vi.height > 0 && vi.width > 0 && vi.format != 0);
+	return (vi.height > 0 && vi.width > 0 && vi.format.colorFamily != ::cfUndefined);
 }
 
 
 
 bool	has_chroma (int cf)
 {
-	return (is_vs_yuv (cf) || cf == ::cmYCoCg);
+	return is_vs_yuv (cf);
 }
 
 
 
-bool	has_chroma (const ::VSFormat &fmt)
+bool	has_chroma (const ::VSVideoFormat &fmt)
 {
 	return has_chroma (fmt.colorFamily);
 }
 
 
 
-bool	is_chroma_plane (const ::VSFormat &fmt, int plane_index)
+bool	is_chroma_plane (const ::VSVideoFormat &fmt, int plane_index)
 {
 	assert (plane_index >= 0);
 	assert (plane_index < fmt.numPlanes);
@@ -100,15 +100,14 @@ bool	is_chroma_plane (const ::VSFormat &fmt, int plane_index)
 
 
 
-bool	is_full_range_default (const ::VSFormat &fmt)
+bool	is_full_range_default (const ::VSVideoFormat &fmt)
 {
-	return (   is_vs_rgb (fmt.colorFamily)
-	        || fmt.colorFamily == ::cmYCoCg);
+	return is_vs_rgb (fmt.colorFamily);
 }
 
 
 
-double	compute_pix_scale (const ::VSFormat &fmt, int plane_index, bool full_flag)
+double	compute_pix_scale (const ::VSVideoFormat &fmt, int plane_index, bool full_flag)
 {
 	assert (plane_index >= 0);
 	assert (plane_index < fmt.numPlanes);
@@ -137,7 +136,7 @@ double	compute_pix_scale (const ::VSFormat &fmt, int plane_index, bool full_flag
 
 
 
-double	get_pix_min (const ::VSFormat &fmt, int plane_index, bool full_flag)
+double	get_pix_min (const ::VSVideoFormat &fmt, int plane_index, bool full_flag)
 {
 	assert (plane_index >= 0);
 	assert (plane_index < fmt.numPlanes);
@@ -169,7 +168,7 @@ double	get_pix_min (const ::VSFormat &fmt, int plane_index, bool full_flag)
 
 
 
-void	compute_fmt_mac_cst (double &gain, double &add_cst, const ::VSFormat &fmt_dst, bool full_dst_flag, const ::VSFormat &fmt_src, bool full_src_flag, int plane_index)
+void	compute_fmt_mac_cst (double &gain, double &add_cst, const ::VSVideoFormat &fmt_dst, bool full_dst_flag, const ::VSVideoFormat &fmt_src, bool full_src_flag, int plane_index)
 {
 	assert (plane_index >= 0);
 	assert (plane_index < fmt_dst.numPlanes);
@@ -189,7 +188,7 @@ void	compute_fmt_mac_cst (double &gain, double &add_cst, const ::VSFormat &fmt_d
 
 
 
-int	compute_plane_width (const ::VSFormat &fmt, int plane_index, int base_w)
+int	compute_plane_width (const ::VSVideoFormat &fmt, int plane_index, int base_w)
 {
 	assert (plane_index >= 0);
 	assert (plane_index < fmt.numPlanes);
@@ -206,7 +205,7 @@ int	compute_plane_width (const ::VSFormat &fmt, int plane_index, int base_w)
 
 
 
-int	compute_plane_height (const ::VSFormat &fmt, int plane_index, int base_h)
+int	compute_plane_height (const ::VSVideoFormat &fmt, int plane_index, int base_h)
 {
 	assert (plane_index >= 0);
 	assert (plane_index < fmt.numPlanes);

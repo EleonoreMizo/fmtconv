@@ -54,8 +54,8 @@ namespace fmtc
 
 
 Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSCore &core, const ::VSAPI &vsapi)
-:	vsutl::FilterBase (vsapi, "matrix", ::fmParallel, 0)
-,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
+:	vsutl::FilterBase (vsapi, "matrix", ::fmParallel)
+,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
 ,	_sse_flag (false)
@@ -82,12 +82,12 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	);
 
 	// Checks the input clip
-	if (_vi_in.format == 0)
+	if (! vsutl::is_constant_format (_vi_in))
 	{
 		throw_inval_arg ("only constant pixel formats are supported.");
 	}
 
-	const ::VSFormat &   fmt_src = *_vi_in.format;
+	const auto &   fmt_src = _vi_in.format;
 
 	if (fmt_src.subSamplingW != 0 || fmt_src.subSamplingH != 0)
 	{
@@ -117,13 +117,13 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 
 	// Destination colorspace
 	bool           force_col_fam_flag;
-	const ::VSFormat *   fmt_dst_ptr = get_output_colorspace (
+	auto           fmt_dst = get_output_colorspace (
 		in, out, core, fmt_src, _plane_out, force_col_fam_flag
 	);
 
 	// Preliminary matrix test: deduces the target color family if unspecified
 	if (   ! force_col_fam_flag
-	    && fmt_dst_ptr->colorFamily != ::cmGray)
+	    && fmt_dst.colorFamily != ::cfGray)
 	{
 		int               def_count = 0;
 		def_count += is_arg_defined (in, "mat" ) ? 1 : 0;
@@ -139,7 +139,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 			fmtcl::ColorSpaceH265   tmp_csp =
 				find_cs_from_mat_str (*this, tmp_mat, false);
 
-			fmt_dst_ptr = find_dst_col_fam (tmp_csp, fmt_dst_ptr, fmt_src, core);
+			find_dst_col_fam (fmt_dst, tmp_csp, fmt_src, core);
 		}
 	}
 
@@ -151,8 +151,8 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	std::string    mat (get_arg_str (in, out, "mat", ""));
 	const bool     mats_default_flag = vsutl::is_vs_yuv ( fmt_src.colorFamily);
 	const bool     matd_default_flag =
-		(         vsutl::is_vs_yuv ( fmt_dst_ptr->colorFamily)
-		 || (     vsutl::is_vs_gray (fmt_dst_ptr->colorFamily)
+		(         vsutl::is_vs_yuv ( fmt_dst.colorFamily)
+		 || (     vsutl::is_vs_gray (fmt_dst.colorFamily)
 		     && ! vsutl::is_vs_yuv ( fmt_src.colorFamily     )));
 	std::string    mats ((mats_default_flag) ? mat : "");
 	std::string    matd ((matd_default_flag) ? mat : "");
@@ -163,7 +163,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		fstb::conv_to_lower_case (mats);
 		fstb::conv_to_lower_case (matd);
 		const auto     col_fam_src = fmtc::conv_vsfmt_to_colfam (fmt_src);
-		const auto     col_fam_dst = fmtc::conv_vsfmt_to_colfam (*fmt_dst_ptr);
+		const auto     col_fam_dst = fmtc::conv_vsfmt_to_colfam (fmt_dst);
 		fmtcl::MatrixUtil::select_def_mat (mats, col_fam_src);
 		fmtcl::MatrixUtil::select_def_mat (matd, col_fam_dst);
 
@@ -185,7 +185,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	}
 
 	// Custom coefficients
-	const int      nbr_coef = _vsapi.propNumElements (&in, "coef");
+	const int      nbr_coef = _vsapi.mapNumElements (&in, "coef");
 	const bool     custom_mat_flag = (nbr_coef > 0);
 	if (custom_mat_flag)
 	{
@@ -201,11 +201,11 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 				_mat_main [y] [x] = (x == y) ? 1 : 0;
 
 				if (   (x < fmt_src.numPlanes || x == _nbr_planes)
-				    &&  y < fmt_dst_ptr->numPlanes)
+				    &&  y < fmt_dst.numPlanes)
 				{
 					int            err = 0;
 					const int      index = y * (fmt_src.numPlanes + 1) + x;
-					const double   c = _vsapi.propGetFloat (&in, "coef", index, &err);
+					const double   c = _vsapi.mapGetFloat (&in, "coef", index, &err);
 					if (err != 0)
 					{
 						throw_rt_err ("error while reading the matrix coefficients.");
@@ -243,23 +243,24 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	// Sets the output colorspace accordingly
 	if (_plane_out < 0)
 	{
-		auto          final_cm = fmt_dst_ptr->colorFamily;
+		auto          final_cm = fmt_dst.colorFamily;
 		if (_csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED)
 		{
 			const auto     final_cf =
-				fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, true);
+				fmtcl::MatrixUtil::find_cf_from_cs (_csp_out);
 			final_cm = fmtc::conv_fmtcl_colfam_to_vs (final_cf);
 		}
 
-		fmt_dst_ptr = register_format (
+		const bool    ok_flag = register_format (
+			fmt_dst,
 			final_cm,
-			fmt_dst_ptr->sampleType,
-			fmt_dst_ptr->bitsPerSample,
-			fmt_dst_ptr->subSamplingW,
-			fmt_dst_ptr->subSamplingH,
+			fmt_dst.sampleType,
+			fmt_dst.bitsPerSample,
+			fmt_dst.subSamplingW,
+			fmt_dst.subSamplingH,
 			core
 		);
-		if (fmt_dst_ptr == nullptr)
+		if (! ok_flag)
 		{
 			throw_rt_err (
 				"couldn\'t get a pixel format identifier for the output clip."
@@ -268,27 +269,26 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	}
 
 	// Checks the output colorspace
-	if (   ! vsutl::is_vs_gray (fmt_dst_ptr->colorFamily)
-	    && ! vsutl::is_vs_rgb ( fmt_dst_ptr->colorFamily)
-	    && ! vsutl::is_vs_yuv ( fmt_dst_ptr->colorFamily)
-	    && ::cmYCoCg != fmt_dst_ptr->colorFamily)
+	if (   ! vsutl::is_vs_gray (fmt_dst.colorFamily)
+	    && ! vsutl::is_vs_rgb ( fmt_dst.colorFamily)
+	    && ! vsutl::is_vs_yuv ( fmt_dst.colorFamily))
 	{
 		throw_inval_arg ("unsupported color family for output.");
 	}
-	if (   (   fmt_dst_ptr->sampleType == ::stInteger
-	        && (   fmt_dst_ptr->bitsPerSample <  8
-	            || fmt_dst_ptr->bitsPerSample > 12)
-	        && fmt_dst_ptr->bitsPerSample != 14
-	        && fmt_dst_ptr->bitsPerSample != 16)
-	    || (   fmt_dst_ptr->sampleType == ::stFloat
-	        && fmt_dst_ptr->bitsPerSample != 32))
+	if (   (   fmt_dst.sampleType == ::stInteger
+	        && (   fmt_dst.bitsPerSample <  8
+	            || fmt_dst.bitsPerSample > 12)
+	        && fmt_dst.bitsPerSample != 14
+	        && fmt_dst.bitsPerSample != 16)
+	    || (   fmt_dst.sampleType == ::stFloat
+	        && fmt_dst.bitsPerSample != 32))
 	{
 		throw_inval_arg ("output bitdepth not supported.");
 	}
-	if (   fmt_dst_ptr->sampleType    != fmt_src.sampleType
-	    || fmt_dst_ptr->bitsPerSample <  fmt_src.bitsPerSample
-	    || fmt_dst_ptr->subSamplingW  != fmt_src.subSamplingW
-	    || fmt_dst_ptr->subSamplingH  != fmt_src.subSamplingH)
+	if (   fmt_dst.sampleType    != fmt_src.sampleType
+	    || fmt_dst.bitsPerSample <  fmt_src.bitsPerSample
+	    || fmt_dst.subSamplingW  != fmt_src.subSamplingW
+	    || fmt_dst.subSamplingH  != fmt_src.subSamplingH)
 	{
 		throw_inval_arg (
 			"specified output colorspace is not compatible with the input."
@@ -296,7 +296,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	}
 
 	// Destination colorspace is validated
-	_vi_out.format = fmt_dst_ptr;
+	_vi_out.format = fmt_dst;
 
 	// Range
 	_full_range_src_flag = (get_arg_int (
@@ -306,18 +306,18 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	) != 0);
 	_full_range_dst_flag = (get_arg_int (
 		in, out, "fulld",
-		vsutl::is_full_range_default (*fmt_dst_ptr) ? 1 : 0,
+		vsutl::is_full_range_default (fmt_dst) ? 1 : 0,
 		0, &_range_set_dst_flag
 	) != 0);
 
 	prepare_matrix_coef (
 		*this, *_proc_uptr, _mat_main,
-		*fmt_dst_ptr, _full_range_dst_flag,
-		fmt_src     , _full_range_src_flag,
+		fmt_dst, _full_range_dst_flag,
+		fmt_src, _full_range_src_flag,
 		_csp_out, _plane_out
 	);
 
-	if (_vsapi.getError (&out) != 0)
+	if (_vsapi.mapGetError (&out) != nullptr)
 	{
 		throw -1;
 	}
@@ -325,23 +325,30 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 
 
 
-void	Matrix::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+::VSVideoInfo	Matrix::get_video_info () const
 {
-	fstb::unused (in, out, core);
-
-	_vsapi.setVideoInfo (&_vi_out, 1, &node);
+	return _vi_out;
 }
 
 
 
-const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+std::vector <::VSFilterDependency>	Matrix::get_dependencies () const
+{
+	return std::vector <::VSFilterDependency> {
+		{ &*_clip_src_sptr, ::rpStrictSpatial }
+	};
+}
+
+
+
+const ::VSFrame *	Matrix::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	fstb::unused (frame_data_ptr);
 
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = 0;
-	::VSNodeRef &     node = *_clip_src_sptr;
+	::VSFrame *    dst_ptr = 0;
+	::VSNode &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -354,11 +361,11 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 			_vsapi.getFrameFilter (n, &node, &frame_ctx),
 			_vsapi
 		);
-		const ::VSFrameRef & src = *src_sptr;
+		const ::VSFrame & src = *src_sptr;
 
 		const int      w = _vsapi.getFrameWidth (&src, 0);
 		const int      h = _vsapi.getFrameHeight (&src, 0);
-		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
+		dst_ptr = _vsapi.newVideoFrame (&_vi_out.format, w, h, &src, &core);
 
 		const auto     pa { build_mat_proc (
 			_vsapi, *dst_ptr, src, (_plane_out >= 0)
@@ -366,24 +373,24 @@ const ::VSFrameRef *	Matrix::get_frame (int n, int activation_reason, void * &fr
 		_proc_uptr->process (pa);
 
 		// Output frame properties
-		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
+		::VSMap &      dst_prop = *(_vsapi.getFramePropertiesRW (dst_ptr));
 
 		if (_range_set_dst_flag)
 		{
 			const int      cr_val = (_full_range_dst_flag) ? 0 : 1;
-			_vsapi.propSetInt (&dst_prop, "_ColorRange", cr_val, ::paReplace);
+			_vsapi.mapSetInt (&dst_prop, "_ColorRange", cr_val, ::maReplace);
 		}
 
 		if (   _csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED
 		    && _csp_out <= fmtcl::ColorSpaceH265_ISO_RANGE_LAST)
 		{
-			_vsapi.propSetInt (&dst_prop, "_Matrix"    , int (_csp_out), ::paReplace);
-			_vsapi.propSetInt (&dst_prop, "_ColorSpace", int (_csp_out), ::paReplace);
+			_vsapi.mapSetInt (&dst_prop, "_Matrix"    , int (_csp_out), ::maReplace);
+			_vsapi.mapSetInt (&dst_prop, "_ColorSpace", int (_csp_out), ::maReplace);
 		}
 		else
 		{
-			_vsapi.propDeleteKey (&dst_prop, "_Matrix");
-			_vsapi.propDeleteKey (&dst_prop, "_ColorSpace");
+			_vsapi.mapDeleteKey (&dst_prop, "_Matrix");
+			_vsapi.mapDeleteKey (&dst_prop, "_ColorSpace");
 		}
 	}
 
@@ -420,23 +427,21 @@ constexpr int	Matrix::_nbr_planes;
 
 
 
-const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src, int &plane_out, bool &force_col_fam_flag) const
+::VSVideoFormat	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src, int &plane_out, bool &force_col_fam_flag) const
 {
 	force_col_fam_flag = false;
 
-	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
+	auto           fmt_dst = fmt_src;
 
 	// Full colorspace
 	int            csp_dst = get_arg_int (in, out, "csp", ::pfNone);
 	if (csp_dst != ::pfNone)
 	{
-		fmt_dst_ptr = _vsapi.getFormatPreset (csp_dst, &core);
-		if (fmt_dst_ptr == nullptr)
+		const auto     gvfbi_ret =
+			_vsapi.getVideoFormatByID (&fmt_dst, csp_dst, &core);
+		if (gvfbi_ret == 0)
 		{
 			throw_inval_arg ("unknown output colorspace.");
-			// The following return statement is never reached, it just prevents
-			// false positive when compiling with -Wnull-dereference
-			return &fmt_src;
 		}
 		else
 		{
@@ -444,11 +449,11 @@ const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &ou
 		}
 	}
 
-	int            col_fam  = fmt_dst_ptr->colorFamily;
-	int            spl_type = fmt_dst_ptr->sampleType;
-	int            bits     = fmt_dst_ptr->bitsPerSample;
-	int            ssh      = fmt_dst_ptr->subSamplingW;
-	int            ssv      = fmt_dst_ptr->subSamplingH;
+	int            col_fam  = fmt_dst.colorFamily;
+	int            spl_type = fmt_dst.sampleType;
+	int            bits     = fmt_dst.bitsPerSample;
+	int            ssh      = fmt_dst.subSamplingW;
+	int            ssv      = fmt_dst.subSamplingH;
 
 	// Color family
 	if (is_arg_defined (in, "col_fam"))
@@ -459,7 +464,7 @@ const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &ou
 
 	if (plane_out >= 0)
 	{
-		col_fam = ::cmGray;
+		col_fam = ::cfGray;
 	}
 	else if (vsutl::is_vs_gray (col_fam))
 	{
@@ -470,14 +475,12 @@ const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &ou
 	bits = get_arg_int (in, out, "bits", bits);
 
 	// Combines the modified parameters and validates the format
+	bool           ok_flag = true;
 	try
 	{
-		fmt_dst_ptr = register_format (
-			col_fam,
-			spl_type,
-			bits,
-			ssh,
-			ssv,
+		ok_flag = register_format (
+			fmt_dst,
+			col_fam, spl_type, bits, ssh, ssv,
 			core
 		);
 	}
@@ -487,22 +490,22 @@ const ::VSFormat *	Matrix::get_output_colorspace (const ::VSMap &in, ::VSMap &ou
 	}
 	catch (...)
 	{
-		fmt_dst_ptr = nullptr;
+		ok_flag = false;
 	}
 
-	if (fmt_dst_ptr == nullptr)
+	if (! ok_flag)
 	{
 		throw_rt_err (
-			"couldn\'t get a pixel format identifier for the output clip."
+			"couldn\'t get a pixel format identifier for the output clip [1]."
 		);
 	}
 
-	return fmt_dst_ptr;
+	return fmt_dst;
 }
 
 
 
-const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, const ::VSFormat *fmt_dst_ptr, const ::VSFormat &fmt_src, ::VSCore &core)
+void	Matrix::find_dst_col_fam (::VSVideoFormat &fmt_dst, fmtcl::ColorSpaceH265 tmp_csp, const ::VSVideoFormat &fmt_src, ::VSCore &core)
 {
 	int               alt_cf = -1;
 
@@ -514,6 +517,7 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 	case fmtcl::ColorSpaceH265_BT470BG:
 	case fmtcl::ColorSpaceH265_SMPTE170M:
 	case fmtcl::ColorSpaceH265_SMPTE240M:
+	case fmtcl::ColorSpaceH265_YCGCO:
 	case fmtcl::ColorSpaceH265_BT2020NCL:
 	case fmtcl::ColorSpaceH265_BT2020CL:
 	case fmtcl::ColorSpaceH265_YDZDX:
@@ -522,15 +526,11 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 	case fmtcl::ColorSpaceH265_ICTCP:
 	case fmtcl::ColorSpaceH265_ICTCP_PQ:
 	case fmtcl::ColorSpaceH265_ICTCP_HLG:
-		alt_cf = ::cmYUV;
-		break;
-
-	case fmtcl::ColorSpaceH265_YCGCO:
-		alt_cf = ::cmYCoCg;
+		alt_cf = ::cfYUV;
 		break;
 
 	case fmtcl::ColorSpaceH265_LMS:
-		alt_cf = ::cmRGB;
+		alt_cf = ::cfRGB;
 		break;
 
 	default:
@@ -540,28 +540,26 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 
 	if (alt_cf >= 0)
 	{
-		int            col_fam  = fmt_dst_ptr->colorFamily;
-		int            spl_type = fmt_dst_ptr->sampleType;
-		int            bits     = fmt_dst_ptr->bitsPerSample;
-		int            ssh      = fmt_dst_ptr->subSamplingW;
-		int            ssv      = fmt_dst_ptr->subSamplingH;
+		int            col_fam  = fmt_dst.colorFamily;
+		int            spl_type = fmt_dst.sampleType;
+		int            bits     = fmt_dst.bitsPerSample;
+		int            ssh      = fmt_dst.subSamplingW;
+		int            ssv      = fmt_dst.subSamplingH;
 		if (vsutl::is_vs_rgb (fmt_src.colorFamily))
 		{
 			col_fam = alt_cf;
 		}
 		else if (fmt_src.colorFamily == alt_cf)
 		{
-			col_fam = ::cmRGB;
+			col_fam = ::cfRGB;
 		}
 
+		bool           ok_flag = true;
 		try
 		{
-			fmt_dst_ptr = register_format (
-				col_fam,
-				spl_type,
-				bits,
-				ssh,
-				ssv,
+			ok_flag = register_format (
+				fmt_dst,
+				col_fam, spl_type, bits, ssh, ssv,
 				core
 			);
 		}
@@ -571,11 +569,15 @@ const ::VSFormat *	Matrix::find_dst_col_fam (fmtcl::ColorSpaceH265 tmp_csp, cons
 		}
 		catch (...)
 		{
-			fmt_dst_ptr = 0;
+			ok_flag = false;
+		}
+		if (! ok_flag)
+		{
+			throw_rt_err (
+				"couldn\'t get a pixel format identifier for the output clip [2]."
+			);
 		}
 	}
-
-	return fmt_dst_ptr;
 }
 
 

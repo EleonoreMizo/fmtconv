@@ -52,11 +52,11 @@ namespace fmtc
 
 
 Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore &core, const ::VSAPI &vsapi)
-:	vsutl::FilterBase (vsapi, "convert", ::fmParallel, 0)
-,	_clip_src_sptr (vsapi.propGetNode (&in, "clip", 0, 0), vsapi)
+:	vsutl::FilterBase (vsapi, "convert", ::fmParallel)
+,	_clip_src_sptr (vsapi.mapGetNode (&in, "clip", 0, 0), vsapi)
 ,	_vi_in (*_vsapi.getVideoInfo (_clip_src_sptr.get ()))
 ,	_vi_out (_vi_in)
-,	_fmtc (*(vsapi.getPluginById (fmtc_PLUGIN_NAME, &core)))
+,	_fmtc (*(vsapi.getPluginByID (fmtc_PLUGIN_NAME, &core)))
 ,	_step_list ()
 ,	_col_fam (-1)
 ,	_mats (fmtcl::ColorSpaceH265_UNSPECIFIED)
@@ -72,9 +72,9 @@ Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore
 {
 	fstb::unused (user_data_ptr);
 
-	const ::VSFormat &   fmt_src = *(_vi_in.format);
+	const auto &   fmt_src = _vi_in.format;
 	retrieve_output_colorspace (in, out, core, fmt_src);
-	const ::VSFormat &   fmt_dst = *(_vi_out.format);
+	const auto &   fmt_dst = _vi_out.format;
 
 	// Range
 	_fulls = retrieve_range (fmt_src, in, out, "fulls");
@@ -130,23 +130,30 @@ Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore
 
 
 
-void	Convert::init_filter (::VSMap &in, ::VSMap &out, ::VSNode &node, ::VSCore &core)
+::VSVideoInfo	Convert::get_video_info () const
 {
-	fstb::unused (in, out, core);
-
-	_vsapi.setVideoInfo (&_vi_out, 1, &node);
+	return _vi_out;
 }
 
 
 
-const ::VSFrameRef *	Convert::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
+std::vector <::VSFilterDependency>	Convert::get_dependencies () const
+{
+	return std::vector <::VSFilterDependency> {
+		{ &*_clip_src_sptr, ::rpStrictSpatial }
+	};
+}
+
+
+
+const ::VSFrame *	Convert::get_frame (int n, int activation_reason, void * &frame_data_ptr, ::VSFrameContext &frame_ctx, ::VSCore &core)
 {
 	fstb::unused (frame_data_ptr, core);
 
 	assert (n >= 0);
 
-	::VSFrameRef *    dst_ptr = 0;
-	::VSNodeRef &     node = *_clip_src_sptr;
+	::VSFrame *    dst_ptr = nullptr;
+	::VSNode &     node    = *_clip_src_sptr;
 
 	if (activation_reason == ::arInitial)
 	{
@@ -159,7 +166,7 @@ const ::VSFrameRef *	Convert::get_frame (int n, int activation_reason, void * &f
 
 	}
 
-	return (dst_ptr);
+	return dst_ptr;
 }
 
 
@@ -172,26 +179,27 @@ const ::VSFrameRef *	Convert::get_frame (int n, int activation_reason, void * &f
 
 
 
-void	Convert::retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src)
+void	Convert::retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSVideoFormat &fmt_src)
 {
-	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
+	auto           fmt_dst = fmt_src;
 
 	// Full colorspace
 	int            csp_dst = get_arg_int (in, out, "csp", ::pfNone);
 	if (csp_dst != ::pfNone)
 	{
-		fmt_dst_ptr = _vsapi.getFormatPreset (csp_dst, &core);
-		if (fmt_dst_ptr == 0)
+		const auto     gvfbi_ret =
+			_vsapi.getVideoFormatByID (&fmt_dst, csp_dst, &core);
+		if (gvfbi_ret == 0)
 		{
 			throw_inval_arg ("unknown output colorspace.");
 		}
 	}
 
-	int            col_fam  = fmt_dst_ptr->colorFamily;
-	int            spl_type = fmt_dst_ptr->sampleType;
-	int            bits     = fmt_dst_ptr->bitsPerSample;
-	int            ssh      = fmt_dst_ptr->subSamplingW;
-	int            ssv      = fmt_dst_ptr->subSamplingH;
+	int            col_fam  = fmt_dst.colorFamily;
+	int            spl_type = fmt_dst.sampleType;
+	int            bits     = fmt_dst.bitsPerSample;
+	int            ssh      = fmt_dst.subSamplingW;
+	int            ssv      = fmt_dst.subSamplingH;
 
 	// Color family
 	_col_fam = get_arg_int (in, out, "col_fam", col_fam);
@@ -245,14 +253,12 @@ void	Convert::retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSC
 	}
 
 	// Combines the modified parameters and validates the format
+	bool           ok_flag = true;
 	try
 	{
-		fmt_dst_ptr = register_format (
-			_col_fam,
-			spl_type,
-			bits,
-			ssh,
-			ssv,
+		ok_flag = register_format (
+			fmt_dst,
+			_col_fam, spl_type, bits, ssh, ssv,
 			core
 		);
 	}
@@ -262,22 +268,22 @@ void	Convert::retrieve_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSC
 	}
 	catch (...)
 	{
-		fmt_dst_ptr = 0;
+		ok_flag = false;
 	}
 
-	if (fmt_dst_ptr == 0)
+	if (! ok_flag)
 	{
 		throw_rt_err (
 			"couldn\'t get a pixel format identifier for the output clip."
 		);
 	}
 
-	_vi_out.format = fmt_dst_ptr;
+	_vi_out.format = fmt_dst;
 }
 
 
 
-ConvStep::Range	Convert::retrieve_range (const ::VSFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 [])
+ConvStep::Range	Convert::retrieve_range (const ::VSVideoFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 [])
 {
 	assert (arg_0 != 0);
 
@@ -297,7 +303,7 @@ ConvStep::Range	Convert::retrieve_range (const ::VSFormat &fmt, const ::VSMap &i
 
 
 
-fmtcl::TransCurve	Convert::retrieve_tcurve (const ::VSFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 [], const char def_0 [])
+fmtcl::TransCurve	Convert::retrieve_tcurve (const ::VSVideoFormat &fmt, const ::VSMap &in, ::VSMap &out, const char arg_0 [], const char def_0 [])
 {
 	fstb::unused (fmt);
 
@@ -393,8 +399,8 @@ void	Convert::find_conversion_steps (const ::VSMap &in, ::VSMap &out)
 	ConvStep &     end = _step_list.back ();
 
 	// Colorspace information
-	fill_conv_step_with_cs (beg, *_vi_in.format);
-	fill_conv_step_with_cs (end, *_vi_out.format);
+	fill_conv_step_with_cs (beg, _vi_in.format);
+	fill_conv_step_with_cs (end, _vi_out.format);
 
 	// Range
 	beg._range = _fulls;
@@ -406,9 +412,9 @@ void	Convert::find_conversion_steps (const ::VSMap &in, ::VSMap &out)
 
 	// Transfer curve
 	const bool     transs_flag =
-		fill_conv_step_with_curve (beg, *_vi_in.format , _transs, _mats);
+		fill_conv_step_with_curve (beg, _vi_in.format , _transs, _mats);
 	const bool     transd_flag =
-		fill_conv_step_with_curve (end, *_vi_out.format, _transd, _matd);
+		fill_conv_step_with_curve (end, _vi_out.format, _transd, _matd);
 
 	// If one is undefined, copy it from the other side
 	if (   beg._tcurve == fmtcl::TransCurve_UNDEF
@@ -471,7 +477,7 @@ void	Convert::find_conversion_steps (const ::VSMap &in, ::VSMap &out)
 			_step_list.insert (++ _step_list.begin (), end);
 		ConvStep &     lin = *lin_it;
 
-		lin._col_fam      = ::cmRGB;
+		lin._col_fam      = ::cfRGB;
 		lin._css_h        = 0;
 		lin._css_v        = 0;
 		lin._tcurve       = fmtcl::TransCurve_LINEAR;
@@ -492,7 +498,7 @@ void	Convert::find_conversion_steps (const ::VSMap &in, ::VSMap &out)
 
 
 // Set here: _col_fam, _css_h, _css_v, _sample_type, _bitdepth
-void	Convert::fill_conv_step_with_cs (ConvStep &step, const ::VSFormat &fmt)
+void	Convert::fill_conv_step_with_cs (ConvStep &step, const ::VSVideoFormat &fmt)
 {
 	step._col_fam = fmt.colorFamily;
 	if (vsutl::has_chroma (fmt))
@@ -508,7 +514,7 @@ void	Convert::fill_conv_step_with_cs (ConvStep &step, const ::VSFormat &fmt)
 
 
 // Returns true if explicitely specified
-bool	Convert::fill_conv_step_with_curve (ConvStep &step, const ::VSFormat &fmt, fmtcl::TransCurve tcurve, fmtcl::ColorSpaceH265 mat)
+bool	Convert::fill_conv_step_with_curve (ConvStep &step, const ::VSVideoFormat &fmt, fmtcl::TransCurve tcurve, fmtcl::ColorSpaceH265 mat)
 {
 	bool           curve_flag = (tcurve != fmtcl::TransCurve_UNDEF);
 	step._tcurve = tcurve;

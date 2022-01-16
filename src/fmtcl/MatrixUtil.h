@@ -48,7 +48,7 @@ public:
 	static ColorSpaceH265
 	               find_cs_from_mat_str (const std::string &mat, bool allow_2020cl_flag);
 	static ColorFamily
-	               find_cf_from_cs (ColorSpaceH265 cs, bool ycgco_flag);
+	               find_cf_from_cs (ColorSpaceH265 cs);
 
 	static int     make_mat_from_str (Mat4 &m, const std::string &mat, bool to_rgb_flag);
 	static void    make_mat_yuv (Mat4 &m, double kr, double kg, double kb, bool to_rgb_flag);
