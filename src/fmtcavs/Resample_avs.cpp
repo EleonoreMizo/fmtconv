@@ -241,7 +241,7 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 	_cplace_s = conv_str_to_chroma_placement (
 		env, args [Param_CPLACES].AsString (cplace_str.c_str ())
 	);
-	_cplace_d_set_flag =  args [Param_CPLACES].Defined ();
+	_cplace_d_set_flag =  args [Param_CPLACED].Defined ();
 	_cplace_d = conv_str_to_chroma_placement (
 		env, args [Param_CPLACED].AsString (cplace_str.c_str ())
 	);
