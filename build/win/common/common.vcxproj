@@ -274,6 +274,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\TransOpLogTrunc.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpPow.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpPowOfs.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpSigmoid.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpSLog.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpSLog3.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransUtil.h" />
@@ -377,6 +378,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\TransOpLogTrunc.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpPow.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpPowOfs.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpSigmoid.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpSLog.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpSLog3.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransUtil.cpp" />

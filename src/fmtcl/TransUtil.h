@@ -50,7 +50,7 @@ public:
 	               gen_degub_prop_name (int dbg);
 	static TransCurve
 	               conv_string_to_curve (const std::string &str);
-	static OpSPtr  conv_curve_to_op (TransCurve c, bool inv_flag, TransOpLogC::ExpIdx logc_ei);
+	static OpSPtr  conv_curve_to_op (TransCurve c, bool inv_flag, TransOpLogC::ExpIdx logc_ei, double sig_curve, double sig_thr);
 	static double  compute_hlg_gamma (double lw, double lamb);
 
 

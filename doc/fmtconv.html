@@ -1644,6 +1644,9 @@ If it’s not the case, floating point operations are silently used as fallback.
 	match   : int    : opt; (1)
 	gy      : int    : opt;
 	debug   : int    : opt; (0)
+	sig_c   : float  : opt; (6.5)
+	sig_t   : float  : opt; (0.5)
+
 )</pre></td>
 <td class="n"><pre class="proto">fmtc_transfer (
 	clip   c,
@@ -1667,7 +1670,9 @@ If it’s not the case, floating point operations are silently used as fallback.
 	float  ambient (undefined),
 	int    match (1),
 	bool   gy (undefined),
-	int    debug (0)
+	int    debug (0),
+	float  sig_c (6.5),
+	float  sig_t (0.5)
 )</pre></td>
 </tr>
 </table>
@@ -1711,12 +1716,12 @@ frame properties.</p>
 supported too, but the channel is left untouched.<p>
 
 <figure>
-<img src="transfer-diag-display.svg" alt="Processing diagram for the display-referred mode" />
+<img src="transfer-diag-display.svg" alt="Processing diagram for the display-referred mode" width="726" />
 <figcaption>Processing diagram for the display-referred mode.</figcaption>
 </figure>
 
 <figure>
-<img src="transfer-diag-scene.svg" alt="Processing diagram for the scene-referred mode" />
+<img src="transfer-diag-scene.svg" alt="Processing diagram for the scene-referred mode" width="726" />
 <figcaption>Processing diagram for the scene-referred mode</figcaption>
 </figure>
 
@@ -1780,6 +1785,7 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;redlog&quot;    </code></b></td><td>0&hellip;1</td><td></td><td></td><td>REDlog</td></tr>
 <tr><td><b><code>&quot;cineon&quot;    </code></b></td><td>&minus;0.006&hellip;13.522</td><td></td><td></td><td>Cineon and REDlogFilm</td></tr>
 <tr><td><b><code>&quot;panalog&quot;   </code></b></td><td>&minus;0.01&hellip;6.100</td><td></td><td></td><td>Panalog</td></tr>
+<tr><td><b><code>&quot;sigmoid&quot;   </code></b></td><td>Unspecified</td><td></td><td></td><td>Sigmoid curve applied on linear data</td></tr>
 </table>
 
 <p class="var">cont</p>
@@ -1910,6 +1916,20 @@ The name of the property is <code>"FmtcTransferDbg"</code> followed with the
 parameter value, so multiple calls to <code>transfer</code> can be checked
 simultaneously.</p>
 
+<p class="var">sig_c</p>
+<p>Curvature value for the sigmoid curve, in range 0.1–10.
+You can use the <code>"sigmoid"</code> curve instead of the
+<code>"linear"</code> one to prevent exagerated ringing when resizing in
+linear light.
+This is not a real transfer function but it fits well here in a workflow.
+The higher the curvature value, the more non-linear the function.
+The sigmoid curve with its parameters can be visualised
+<a href="https://www.desmos.com/calculator/7ypvqplvyl">here</a>.</p>
+
+<p class="var">sig_t</p>
+<p>Inflection point for the sigmoid curve, in range 0–1.
+The closer to 1, the more the curve looks like a standard power curve.</p>
+
 
 
 <h3><a id="stack16tonative"></a>stack16tonative, nativetostack16</h3>
@@ -1954,6 +1974,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li>Vapoursynth: switched to API v4. Fmtconv now requires Vapoursynth r55 or later, API v3 is not supported anymore.</li>
 <li><code>resample</code>: Fixed degnerated cases with <var>invks</var> causing a crash. Thanks to Dogway for the report.</li>
 <li><code>resample</code>/Avisynth+: fixed frame property writing when only <var>cplaced</var> is defined, thanks to Dogway for the report.</li>
+<li><code>transfer</code>: Added sigmoid curve as a transfer function.</li>
 </ul>
 
 <p><b>r28, 2021-11-20</b></p>

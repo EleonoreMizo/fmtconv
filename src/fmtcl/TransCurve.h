@@ -86,6 +86,7 @@ enum TransCurve
 	TransCurve_REDLOG,      // REDlog
 	TransCurve_CINEON,      // Cineon, REDlogFilm
 	TransCurve_PANALOG,     // Panalog
+	TransCurve_SIGMOID,
 
 	TransCurve_NBR_ELT_CUSTOM
 };	// enum TransCurve

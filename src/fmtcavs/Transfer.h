@@ -71,6 +71,8 @@ public:
 		Param_MATCH,
 		Param_GY, // 20
 		Param_DEBUG,
+		Param_SIG_C,
+		Param_SIG_T,
 
 		Param_NBR_ELT,
 	};

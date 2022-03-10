@@ -33,6 +33,7 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/TransOpLinPow.h"
 #include "fmtcl/TransOpLogC.h"
 #include "fmtcl/TransOpPow.h"
+#include "fmtcl/TransOpSigmoid.h"
 #include "fstb/fnc.h"
 
 #include <cassert>
@@ -54,7 +55,7 @@ constexpr double	TransModel::_min_luminance;
 
 
 
-TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx logc_ei_d, PicFmt src_fmt, TransCurve curve_s, TransOpLogC::ExpIdx logc_ei_s, double contrast, double gcor, double lb, double lws, double lwd, double lamb, bool scene_flag, LumMatch match, GyProc gy_proc, bool sse2_flag, bool avx2_flag)
+TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx logc_ei_d, PicFmt src_fmt, TransCurve curve_s, TransOpLogC::ExpIdx logc_ei_s, double contrast, double gcor, double lb, double lws, double lwd, double lamb, bool scene_flag, LumMatch match, GyProc gy_proc, double sig_curve, double sig_thr, bool sse2_flag, bool avx2_flag)
 {
 	assert (dst_fmt.is_valid ());
 	assert (TransCurve_is_valid (curve_d));
@@ -80,8 +81,12 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	char           txt_0 [127+1];
 
 	// Creates the requested transfer curves
-	OpSPtr         op_s = TransUtil::conv_curve_to_op (curve_s, true , logc_ei_s);
-	OpSPtr         op_d = TransUtil::conv_curve_to_op (curve_d, false, logc_ei_d);
+	OpSPtr         op_s = TransUtil::conv_curve_to_op (
+		curve_s, true , logc_ei_s, sig_curve, sig_thr
+	);
+	OpSPtr         op_d = TransUtil::conv_curve_to_op (
+		curve_d, false, logc_ei_d, sig_curve, sig_thr
+	);
 
 	const auto     s_info = op_s->get_info ();
 	const auto     d_info = op_d->get_info ();
@@ -92,6 +97,7 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	bool           large_range_d_flag = false;
 
 	if (   curve_s == TransCurve_LINEAR
+	    || curve_s == TransCurve_SIGMOID
 	    || curve_s == TransCurve_ACESCC)
 	{
 		large_range_s_flag = true;
@@ -100,7 +106,8 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 	// HDR curves may have a huge linear range
 	// Also, other curves with extended range
 	if (   d_info._range == TransOpInterface::Range::HDR
-	    || (curve_d == TransCurve_LINEAR && large_range_s_flag)
+	    || (curve_d == TransCurve_LINEAR  && large_range_s_flag)
+	    || (curve_d == TransCurve_SIGMOID && large_range_s_flag)
 	    || curve_d == TransCurve_SLOG
 	    || curve_d == TransCurve_SLOG2
 	    || curve_d == TransCurve_SLOG3
@@ -322,8 +329,9 @@ TransModel::TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx 
 			b =                 EOTF^-1 (Lb)
 			a = (EOTF^-1 (Lw) - EOTF^-1 (Lb)) / Vmax
 		*/
-		auto           eotf_inv =
-			TransUtil::conv_curve_to_op (curve_s, false, logc_ei_s);
+		auto           eotf_inv = TransUtil::conv_curve_to_op (
+			curve_s, false, logc_ei_s, sig_curve, sig_thr
+		);
 		const double   lwg  = (*eotf_inv) (lws / lum_scale);
 		const double   lbg  = (*eotf_inv) (lb  / lum_scale);
 		const double   vmax =  lwg;

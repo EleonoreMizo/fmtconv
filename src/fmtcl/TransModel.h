@@ -67,7 +67,7 @@ public:
 		ON
 	};
 
-	explicit       TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx logc_ei_d, PicFmt src_fmt, TransCurve curve_s, TransOpLogC::ExpIdx logc_ei_s, double contrast, double gcor, double lb, double lws, double lwd, double lamb, bool scene_flag, LumMatch match, GyProc gy_proc, bool sse2_flag, bool avx2_flag);
+	explicit       TransModel (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx logc_ei_d, PicFmt src_fmt, TransCurve curve_s, TransOpLogC::ExpIdx logc_ei_s, double contrast, double gcor, double lb, double lws, double lwd, double lamb, bool scene_flag, LumMatch match, GyProc gy_proc, double sig_curve, double sig_thr, bool sse2_flag, bool avx2_flag);
 
 	const std::string &
 	               get_debug_text () const noexcept;

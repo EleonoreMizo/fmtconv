@@ -223,6 +223,22 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 		_dbg_name = fmtcl::TransUtil::gen_degub_prop_name (dbg);
 	}
 
+	const bool     sig_flag = (get_arg_int (in, out, "sigmoid", 0) != 0);
+	const auto     sig_c    = get_arg_flt (in, out, "sig_c", 6.5);
+	const auto     sig_t    = get_arg_flt (in, out, "sig_t", 0.5);
+	if (   _curve_s == fmtcl::TransCurve_SIGMOID
+	    || _curve_d == fmtcl::TransCurve_SIGMOID)
+	{
+		if (sig_c <= 0 || sig_c > 10)
+		{
+			throw_inval_arg ("sig_c must be in range [0.1 ; 10].");
+		}
+		if (sig_t < 0 || sig_t > 1)
+		{
+			throw_inval_arg ("sig_t must be in range [0 ; 1].");
+		}
+	}
+
 	// Finally...
 	const fmtcl::PicFmt  src_fmt =
 		conv_vsfmt_to_picfmt (_vi_in.format , _full_range_src_flag);
@@ -232,6 +248,7 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 		dst_fmt, _curve_d, _logc_ei_d,
 		src_fmt, _curve_s, _logc_ei_s,
 		_contrast, _gcor, lb, lws, lwd, lamb, scene_flag, match, gy_proc,
+		sig_c, sig_t,
 		_sse2_flag, _avx2_flag
 	);
 }

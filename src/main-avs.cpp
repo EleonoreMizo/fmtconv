@@ -86,7 +86,7 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 		"[fulld]b"    "[logceis]i"  "[logceid]i" "[cpuopt]i" //  8
 		"[blacklvl]f" "[sceneref]b" "[lb]f"      "[lw]f"     // 12
 		"[lws]f"      "[lwd]f"      "[ambient]f" "[match]i"  // 16
-		"[gy]b"       "[debug]i"                             // 20
+		"[gy]b"       "[debug]i"    "[sig_c]f"   "[sig_t]f"  // 20
 		, &main_avs_create <fmtcavs::Transfer>, nullptr
 	);
 

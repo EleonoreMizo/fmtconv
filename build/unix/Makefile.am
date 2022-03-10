@@ -261,6 +261,8 @@ commonsrc = \
         ../../src/fmtcl/TransOpPow.h \
         ../../src/fmtcl/TransOpPowOfs.cpp \
         ../../src/fmtcl/TransOpPowOfs.h \
+        ../../src/fmtcl/TransOpSigmoid.cpp \
+        ../../src/fmtcl/TransOpSigmoid.h \
         ../../src/fmtcl/TransOpSLog.cpp \
         ../../src/fmtcl/TransOpSLog.h \
         ../../src/fmtcl/TransOpSLog3.cpp \

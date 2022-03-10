@@ -225,6 +225,9 @@
     <ClCompile Include="..\..\..\src\fmtcl\TransOpPowOfs.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpSigmoid.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\avstp.h" />
@@ -735,6 +738,9 @@
       <Filter>fmtcl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\fmtcl\TransOpPowOfs.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpSigmoid.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
   </ItemGroup>

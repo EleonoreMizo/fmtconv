@@ -123,6 +123,8 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 		  (! gydef_flag) ? fmtcl::TransModel::GyProc::UNDEF
 		: gy_flag        ? fmtcl::TransModel::GyProc::ON
 		:                  fmtcl::TransModel::GyProc::OFF;
+	const double   sig_c      = args [Param_SIG_C   ].AsFloat (6.5f);
+	const double   sig_t      = args [Param_SIG_T   ].AsFloat (0.5f);
 
 	fstb::conv_to_lower_case (transs);
 	fstb::conv_to_lower_case (transd);
@@ -217,6 +219,18 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 		_dbg_name = fmtcl::TransUtil::gen_degub_prop_name (dbg);
 	}
 
+	if (   _curve_s == fmtcl::TransCurve_SIGMOID
+	    || _curve_d == fmtcl::TransCurve_SIGMOID)
+	{
+		if (sig_c <= 0 || sig_c > 10)
+		{
+			env.ThrowError (fmtcavs_TRANSFER ": sig_c must be in range [0.1 ; 10].");
+		}
+		if (sig_t < 0 || sig_t > 1)
+		{
+			env.ThrowError (fmtcavs_TRANSFER ": sig_t must be in range [0 ; 1].");
+		}
+	}
 
 	// Finally...
 	const fmtcl::PicFmt  src_picfmt =
@@ -227,6 +241,7 @@ Transfer::Transfer (::IScriptEnvironment &env, const ::AVSValue &args)
 		dst_picfmt, _curve_d, logc_ei_d,
 		src_picfmt, _curve_s, logc_ei_s,
 		contrast, gcor, lb, lws, lwd, lamb, scene_flag, match, gy_proc,
+		sig_c, sig_t,
 		sse2_flag, avx2_flag
 	);
 }

@@ -29,6 +29,7 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/TransOpAcesCc.h"
 #include "fmtcl/TransOpBypass.h"
 #include "fmtcl/TransOpCanonLog.h"
+#include "fmtcl/TransOpDaVinci.h"
 #include "fmtcl/TransOpErimm.h"
 #include "fmtcl/TransOpFilmStream.h"
 #include "fmtcl/TransOpHlg.h"
@@ -38,9 +39,9 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/TransOpLogTrunc.h"
 #include "fmtcl/TransOpPow.h"
 #include "fmtcl/TransOpPowOfs.h"
+#include "fmtcl/TransOpSigmoid.h"
 #include "fmtcl/TransOpSLog.h"
 #include "fmtcl/TransOpSLog3.h"
-#include "fmtcl/TransOpDaVinci.h"
 #include "fmtcl/TransUtil.h"
 #include "fstb/fnc.h"
 
@@ -216,6 +217,10 @@ TransCurve	TransUtil::conv_string_to_curve (const std::string &str)
 	{
 		c = TransCurve_PANALOG;
 	}
+	else if (str == "sigmoid")
+	{
+		c = TransCurve_SIGMOID;
+	}
 	else
 	{
 		assert (false);
@@ -226,7 +231,7 @@ TransCurve	TransUtil::conv_string_to_curve (const std::string &str)
 
 
 
-TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, TransOpLogC::ExpIdx logc_ei)
+TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, TransOpLogC::ExpIdx logc_ei, double sig_curve, double sig_thr)
 {
 	assert (c >= 0);
 	assert (logc_ei >= 0);
@@ -417,6 +422,9 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 		break;
 	case TransCurve_PANALOG:
 		ptr = OpSPtr (new TransOpPowOfs (inv_flag, 1023,  681, 444, 64));
+		break;
+	case TransCurve_SIGMOID:
+		ptr = OpSPtr (new TransOpSigmoid (inv_flag, sig_curve, sig_thr));
 		break;
 	default:
 		assert (false);
