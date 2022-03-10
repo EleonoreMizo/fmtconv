@@ -794,6 +794,9 @@ void	Scaler::build_scale_data ()
 
 	_fir_len = bi._fir_len;
 
+	class ValPos { public: int _val; int _idx; };
+	std::vector <ValPos> coef_rank;
+
 	std::vector <double>	coef_tmp;
 	const int      last_line = _src_height - 1;
 
@@ -913,15 +916,52 @@ void	Scaler::build_scale_data ()
 			{
 				const int		unit  = (dif > 0) ? 1 : -1;
 				const int      count = std::abs (dif);
-				assert (count <= nbr_coef);
-				for (int i = 0; i < count; ++i)
+
+				// Sorts coefficients by magnitude, so we'll fix the biggest ones
+				// first
+				coef_rank.clear ();
+				for (int k = 0; k < nbr_coef; ++k)
 				{
-					const int      k = ((i & 1) == 0)
-						?                (i >> 1)
-						: nbr_coef - 1 - (i >> 1);
-					const int      index = info._coef_index + k;
-					const int      fixed = _coef_int_arr.get_coef (index) + unit;
-					_coef_int_arr.set_coef (index, fixed);
+					const int      idx = info._coef_index + k;
+					coef_rank.emplace_back (ValPos {
+						std::abs (_coef_int_arr.get_coef (idx)), idx
+					});
+				}
+				std::sort (
+					coef_rank.begin (), coef_rank.end (),
+					[] (const ValPos &lhs, const ValPos &rhs)
+					{
+						return (lhs._val < rhs._val);
+					}
+				);
+
+				// Small fixes
+				if (count <= nbr_coef)
+				{
+					for (int i = 0; i < count; ++i)
+					{
+						const int      index = coef_rank [i]._idx;
+						const int      fixed = _coef_int_arr.get_coef (index) + unit;
+						_coef_int_arr.set_coef (index, fixed);
+					}
+				}
+
+				// Here the average fixing offset per coefficient is > 1, occuring
+				// in degenerated cases when coefficients are too large and are
+				// saturated during conversion to integer.
+				else
+				{
+					int            rem = count;
+					for (int i = 0; i < nbr_coef && rem > 0; ++i)
+					{
+						const int      index = coef_rank [i]._idx;
+						const int      old   = _coef_int_arr.get_coef (index);
+						int            fixed = old + rem * unit;
+						fixed = fstb::limit <int> (fixed, INT16_MIN, INT16_MAX);
+						rem  -= std::abs (fixed - old);
+						_coef_int_arr.set_coef (index, fixed);
+					}
+					assert (rem == 0);
 				}
 			}
 		}
@@ -975,9 +1015,9 @@ void	Scaler::push_back_int_coef (double coef)
 {
 	const double   cintsc   = double ((uint64_t (1)) << SHIFT_INT);
 	double         coef_mul = coef * cintsc;
-	coef_mul = fstb::limit (coef_mul, double (-0x8000), double (0x7FFF));
+	coef_mul = fstb::limit (coef_mul, double (INT16_MIN), double (INT16_MAX));
 	const int      coef_int = fstb::round_int (coef_mul);
-	assert (coef_int >= -0x8000 && coef_int <= 0x7FFF);
+	assert (coef_int >= INT16_MIN && coef_int <= INT16_MAX);
 
 	const size_t   ci_pos   = _coef_int_arr.get_size ();
 	_coef_int_arr.resize (int (ci_pos + 1));
