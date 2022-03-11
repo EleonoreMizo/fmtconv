@@ -223,9 +223,8 @@ Transfer::Transfer (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, :
 		_dbg_name = fmtcl::TransUtil::gen_degub_prop_name (dbg);
 	}
 
-	const bool     sig_flag = (get_arg_int (in, out, "sigmoid", 0) != 0);
-	const auto     sig_c    = get_arg_flt (in, out, "sig_c", 6.5);
-	const auto     sig_t    = get_arg_flt (in, out, "sig_t", 0.5);
+	const auto     sig_c = get_arg_flt (in, out, "sig_c", 6.5);
+	const auto     sig_t = get_arg_flt (in, out, "sig_t", 0.5);
 	if (   _curve_s == fmtcl::TransCurve_SIGMOID
 	    || _curve_d == fmtcl::TransCurve_SIGMOID)
 	{
