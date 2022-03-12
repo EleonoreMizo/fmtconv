@@ -30,6 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 
 #include "fmtcl/Cst.h"
+#include "fmtcl/fnc.h"
 #include "fmtcl/TransLut.h"
 #include "fmtcl/TransOpInterface.h"
 #include "fstb/fnc.h"
@@ -39,6 +40,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #endif
 
 #include <algorithm>
+#include <memory>
 
 #include <cassert>
 #include <cmath>
@@ -48,6 +50,41 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 namespace fmtcl
 {
+
+
+
+class TransLut_PostScaleInt final
+:	public TransOpInterface
+{
+public:
+	explicit       TransLut_PostScaleInt (const TransOpInterface &op, double mul, double add, int res) noexcept;
+protected:
+	double         do_convert (double x) const override;
+private:
+	const TransOpInterface &
+		            _op;
+	double         _mul     = 1;
+	double         _add     = 0;
+	double         _max_val = double (UINT16_MAX);
+};
+
+TransLut_PostScaleInt::TransLut_PostScaleInt (const TransOpInterface &op, double mul, double add, int res) noexcept
+:	_op (op)
+,	_mul (mul)
+,	_add (add)
+,	_max_val (double ((1ULL << res) - 1))
+{
+	assert (mul != 0);
+	assert (res >= 8);
+	assert (res <= 32);
+}
+
+double	TransLut_PostScaleInt::do_convert (double x) const
+{
+	return fstb::limit (_op (x) * _mul + _add, 0.0, _max_val);
+}
+
+
 
 
 
@@ -186,6 +223,25 @@ static fstb_FORCEINLINE void	TransLut_store_sse2 (T *dst_ptr, __m128 val) noexce
 	);
 }
 
+static fstb_FORCEINLINE void	TransLut_store_sse2 (uint16_t *dst_ptr, __m128 val) noexcept
+{
+	const auto     val_i32   = _mm_cvtps_epi32 (val);
+	const auto     val_u16_l = _mm_shufflelo_epi16 (val_i32, (0<<0) | (2<<2));
+	const auto     val_u16_h = _mm_srli_si128 (
+		_mm_shufflehi_epi16 (val_i32, (0<<0) | (2<<2)), 8
+	);
+	const auto     val_u16   = _mm_unpacklo_epi32 (val_u16_l, val_u16_h);
+	_mm_storeu_si64 (dst_ptr, val_u16);
+}
+
+static fstb_FORCEINLINE void	TransLut_store_sse2 (uint8_t *dst_ptr, __m128 val) noexcept
+{
+	const auto     val_i32 = _mm_cvtps_epi32 (val);
+	const auto     val_i16 = _mm_packs_epi32 (val_i32, val_i32);
+	const auto     val_u8  = _mm_packus_epi16 (val_i16, val_i16);
+	_mm_storeu_si32 (dst_ptr, val_u8);
+}
+
 static fstb_FORCEINLINE void	TransLut_store_sse2 (float *dst_ptr, __m128 val) noexcept
 {
 	_mm_store_ps (dst_ptr, val);
@@ -215,12 +271,8 @@ constexpr int	TransLut::LOGLUT_SIZE;
 
 TransLut::TransLut (const TransOpInterface &curve, bool log_flag, SplFmt src_fmt, int src_bits, bool src_full_flag, SplFmt dst_fmt, int dst_bits, bool dst_full_flag, bool sse2_flag, bool avx2_flag)
 :	_loglut_flag (log_flag)
-,	_src_fmt (src_fmt)
-,	_src_bits (src_bits)
-,	_src_full_flag (src_full_flag)
-,	_dst_fmt (dst_fmt)
-,	_dst_bits (dst_bits)
-,	_dst_full_flag (dst_full_flag)
+,	_fmt_s ({ src_fmt, src_bits, ColorFamily_RGB, src_full_flag })
+,	_fmt_d ({ dst_fmt, dst_bits, ColorFamily_RGB, dst_full_flag })
 ,	_sse2_flag (sse2_flag)
 ,	_avx2_flag (avx2_flag)
 {
@@ -423,9 +475,23 @@ bool	TransLut::is_loglut_req (const TransOpInterface &curve)
 
 
 
+template <class T>
+T	TransLut::Convert <T>::cast (float val) noexcept
+{
+	return T (fstb::conv_int_fast (val));
+}
+
+template <>
+float	TransLut::Convert <float>::cast (float val) noexcept
+{
+	return val;
+}
+
+
+
 void	TransLut::generate_lut (const TransOpInterface &curve)
 {
-	if (_src_fmt == SplFmt_FLOAT)
+	if (_fmt_s._sf == SplFmt_FLOAT)
 	{
 		// When the source is float, the LUT output is always float
 		// so we can interpolate it easily and obtain the exact values.
@@ -433,17 +499,24 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		// values as a second step.
 		_lut.set_type <float> ();
 
+		// When the target data type is integer, scales the result
+		const double   mul = compute_pix_scale (_fmt_d, 0);
+		const double   add = get_pix_min (_fmt_d, 0);
+		TransLut_PostScaleInt   scaler_int { curve, mul, add, _fmt_d._res };
+		const TransOpInterface* curve_final_ptr =
+			(_fmt_d._sf == SplFmt_FLOAT) ? &curve : &scaler_int;
+
 		if (_loglut_flag)
 		{
 			_lut.resize (LOGLUT_SIZE);
 			MapperLog   mapper;
-			generate_lut_flt <float> (curve, mapper);
+			generate_lut_flt <float> (*curve_final_ptr, mapper);
 		}
 		else
 		{
 			_lut.resize (LINLUT_SIZE_F);
 			MapperLin   mapper (LINLUT_SIZE_F, LINLUT_MIN_F, LINLUT_MAX_F);
-			generate_lut_flt <float> (curve, mapper);
+			generate_lut_flt <float> (*curve_final_ptr, mapper);
 		}
 	}
 
@@ -451,8 +524,8 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 	{
 		_loglut_flag = false;
 
-		int            range = 1 << _src_bits;
-		if (_src_fmt == SplFmt_INT8)
+		int            range = 1 << _fmt_s._res;
+		if (_fmt_s._sf == SplFmt_INT8)
 		{
 			_lut.resize (1 << 8);
 		}
@@ -460,14 +533,16 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		{
 			_lut.resize (1 << 16);
 		}
-		const int      sb16  = (_src_full_flag) ? 0      : Cst::_rtv_lum_blk << 8;
-		const int      sw16  = (_src_full_flag) ? 0xFFFF : Cst::_rtv_lum_wht << 8;
-		int            sbn   = sb16 >> (16 - _src_bits);
-		int            swn   = sw16 >> (16 - _src_bits);
+		constexpr auto b16f  = Cst::_rtv_lum_blk << 8;
+		constexpr auto w16f  = Cst::_rtv_lum_wht << 8;
+		const int      sb16  = (_fmt_s._full_flag) ? 0          : b16f;
+		const int      sw16  = (_fmt_s._full_flag) ? UINT16_MAX : w16f;
+		const int      sbn   = sb16 >> (16 - _fmt_s._res);
+		const int      swn   = sw16 >> (16 - _fmt_s._res);
 		const int      sdif  = swn - sbn;
 		const double   r_beg = double (0         - sbn) / sdif;
 		const double   r_lst = double (range - 1 - sbn) / sdif;
-		if (_dst_fmt == SplFmt_FLOAT)
+		if (_fmt_d._sf == SplFmt_FLOAT)
 		{
 			_lut.set_type <float> ();
 			MapperLin      mapper (range, r_beg, r_lst);
@@ -475,13 +550,9 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		}
 		else
 		{
-			const int      db16 = (_dst_full_flag) ? 0      : Cst::_rtv_lum_blk << 8;
-			const int      dw16 = (_dst_full_flag) ? 0xFFFF : Cst::_rtv_lum_wht << 8;
-			int            dbn  = db16 >> (16 - _dst_bits);
-			int            dwn  = dw16 >> (16 - _dst_bits);
-			const double   mul  = dwn - dbn;
-			const double   add  = dbn;
-			if (_dst_bits > 8)
+			const double   mul  = compute_pix_scale (_fmt_d, 0);
+			const double   add  = get_pix_min (_fmt_d, 0);
+			if (_fmt_d._res > 8)
 			{
 				_lut.set_type <uint16_t> ();
 				generate_lut_int <uint16_t> (
@@ -505,12 +576,12 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 template <class T>
 void	TransLut::generate_lut_int (const TransOpInterface &curve, int lut_size, double range_beg, double range_lst, double mul, double add)
 {
-	assert (_dst_fmt != SplFmt_FLOAT);
+	assert (_fmt_d._sf != SplFmt_FLOAT);
 	assert (lut_size > 1);
 	assert (range_beg < range_lst);
 
 	const double   scale   = (range_lst - range_beg) / (lut_size - 1);
-	const int      max_val = (1 << _dst_bits) - 1;
+	const int      max_val = (1 << _fmt_d._res) - 1;
 	for (int pos = 0; pos < lut_size; ++pos)
 	{
 		const double   x = range_beg + pos * scale;
@@ -538,17 +609,17 @@ void	TransLut::generate_lut_flt (const TransOpInterface &curve, const M &mapper)
 
 void	TransLut::init_proc_fnc ()
 {
-	assert (! _loglut_flag || _src_fmt == SplFmt_FLOAT);
+	assert (! _loglut_flag || _fmt_s._sf == SplFmt_FLOAT);
 
 	const int      s =
-		  (_loglut_flag            ) ? 0
-		: (_src_fmt == SplFmt_FLOAT) ? 1
-		: (_src_bits > 8           ) ? 2
-		:                              3;
+		  (_loglut_flag              ) ? 0
+		: (_fmt_s._sf == SplFmt_FLOAT) ? 1
+		: (_fmt_s._res > 8           ) ? 2
+		:                                3;
 	const int      d =
-		  (_dst_fmt == SplFmt_FLOAT) ? 0
-		: (_dst_bits > 8           ) ? 1
-		:                              2;
+		  (_fmt_d._sf == SplFmt_FLOAT) ? 0
+		: (_fmt_d._res > 8           ) ? 1
+		:                                2;
 
 	const int      selector = d * 4 + s;
 
@@ -583,7 +654,7 @@ void	TransLut::init_proc_fnc ()
 
 void	TransLut::init_proc_fnc_sse2 (int selector)
 {
-	if (_sse2_flag && _src_fmt == SplFmt_FLOAT)
+	if (_sse2_flag && _fmt_s._sf == SplFmt_FLOAT)
 	{
 		switch (selector)
 		{
@@ -714,20 +785,6 @@ void	TransLut::process_plane_flt_any_sse2 (Plane <> dst, PlaneRO <> src, int w, 
 
 
 #endif
-
-
-
-template <class T>
-T	TransLut::Convert <T>::cast (float val) noexcept
-{
-	return T (fstb::conv_int_fast (val));
-}
-
-template <>
-float	TransLut::Convert <float>::cast (float val) noexcept
-{
-	return val;
-}
 
 
 

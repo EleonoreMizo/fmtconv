@@ -30,6 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 
 #include "fmtcl/ArrayMultiType.h"
+#include "fmtcl/PicFmt.h"
 #include "fmtcl/Plane.h"
 #include "fmtcl/PlaneRO.h"
 #include "fmtcl/SplFmt.h"
@@ -149,13 +150,8 @@ private:
 
 	bool           _loglut_flag   = false;
 
-	SplFmt         _src_fmt       = SplFmt_ILLEGAL;
-	int            _src_bits      = 0;
-	bool           _src_full_flag = false;
-
-	SplFmt         _dst_fmt       = SplFmt_ILLEGAL;
-	int            _dst_bits      = 0;
-	bool           _dst_full_flag = false;
+	PicFmt         _fmt_s;
+	PicFmt         _fmt_d;
 
 	bool           _sse2_flag     = false;
 	bool           _avx2_flag     = false;

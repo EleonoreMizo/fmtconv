@@ -185,6 +185,32 @@ static fstb_FORCEINLINE void	TransLut_store_avx2 (T *dst_ptr, __m256 val) noexce
 	);
 }
 
+static fstb_FORCEINLINE void	TransLut_store_avx2 (uint16_t *dst_ptr, __m256 val) noexcept
+{
+	const auto     val_i32   = _mm256_cvtps_epi32 (val);
+	const auto     val_u16_l = _mm256_shufflelo_epi16 (val_i32, (0<<0) | (2<<2));
+	const auto     val_u16_h = _mm256_srli_si256 (
+		_mm256_shufflehi_epi16 (val_i32, (0<<0) | (2<<2)), 8
+	);
+	const auto     val_u16   = _mm256_permute4x64_epi64 (
+		_mm256_unpacklo_epi32 (val_u16_l, val_u16_h), (0<<0) | (2<<2)
+	);
+	_mm_storeu_si128 (
+		reinterpret_cast <__m128i *> (dst_ptr),
+		_mm256_extracti128_si256 (val_u16, 0)
+	);
+}
+
+static fstb_FORCEINLINE void	TransLut_store_avx2 (uint8_t *dst_ptr, __m256 val) noexcept
+{
+	const auto     val_i32 = _mm256_cvtps_epi32 (val);
+	const auto     val_i16 = _mm256_packs_epi32 (val_i32, val_i32);
+	const auto     val_u8  = _mm256_permute4x64_epi64 (
+		_mm256_packus_epi16 (val_i16, val_i16), (0<<0) | (2<<2)
+	);
+	_mm_storeu_si64 (dst_ptr, _mm256_extracti128_si256 (val_u8, 0));
+}
+
 static fstb_FORCEINLINE void	TransLut_store_avx2 (float *dst_ptr, __m256 val) noexcept
 {
 	_mm256_store_ps (dst_ptr, val);
