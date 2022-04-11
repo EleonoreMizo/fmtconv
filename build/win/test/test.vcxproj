@@ -111,7 +111,7 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <AdditionalIncludeDirectories>../../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level4</WarningLevel>
       <DisableSpecificWarnings>4127;4505</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -132,11 +132,13 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\test\PrecalcVoidAndCluster.h" />
     <ClInclude Include="..\..\..\src\test\TestGammaY.h" />
+    <ClInclude Include="..\..\..\src\test\GenTestPat.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\test\main.cpp" />
     <ClCompile Include="..\..\..\src\test\PrecalcVoidAndCluster.cpp" />
     <ClCompile Include="..\..\..\src\test\TestGammaY.cpp" />
+    <ClCompile Include="..\..\..\src\test\GenTestPat.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

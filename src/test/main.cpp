@@ -24,6 +24,7 @@ http://www.wtfpl.net/ for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fstb/def.h"
+#include "test/GenTestPat.h"
 #include "test/PrecalcVoidAndCluster.h"
 #include "test/TestGammaY.h"
 
@@ -176,6 +177,11 @@ int main (int argc, char *argv [])
 		// Void and cluster table generation
 		auto           files = PrecalcVoidAndCluster::build_all ();
 		printf ("%s\n%s\n", files._header.c_str (), files._code.c_str ());
+
+#elif 1
+
+		// Test patterns
+		if (ret_val == 0) { ret_val = GenTestPat::generate_patterns (); }
 
 #else
 		// Standard tests
