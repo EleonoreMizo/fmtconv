@@ -239,7 +239,17 @@ static fstb_FORCEINLINE void	TransLut_store_sse2 (uint8_t *dst_ptr, __m128 val) 
 	const auto     val_i32 = _mm_cvtps_epi32 (val);
 	const auto     val_i16 = _mm_packs_epi32 (val_i32, val_i32);
 	const auto     val_u8  = _mm_packus_epi16 (val_i16, val_i16);
+#if 0
 	_mm_storeu_si32 (dst_ptr, val_u8);
+#else
+	// _mm_storeu_si32() lacks support on some compilers, or is declared in
+	// <immintrin.h> instead of <emmintrin.h>, so we use _mm_store_ss() as a
+	// more portable substitute.
+	_mm_store_ss (
+		reinterpret_cast <float *> (dst_ptr),
+		_mm_castsi128_ps (val_u8)
+	);
+#endif
 }
 
 static fstb_FORCEINLINE void	TransLut_store_sse2 (float *dst_ptr, __m128 val) noexcept
