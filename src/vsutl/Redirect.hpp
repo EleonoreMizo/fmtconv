@@ -24,6 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/def.h"
 
+#include <memory>
 #include <stdexcept>
 
 #include <cassert>
