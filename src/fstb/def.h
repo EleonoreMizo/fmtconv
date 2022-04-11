@@ -37,7 +37,7 @@ namespace fstb
 #define fstb_ARCHI_X86	(1)
 #define fstb_ARCHI_ARM	(2)
 
-#if defined (__i386__) || defined (_M_IX86) || defined (_X86_) || defined (_M_X64) || defined (__x86_64__) || defined (__INTEL__)
+#if defined (__i386__) || defined (_M_IX86) || defined (_X86_) || defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__) || defined (__amd64__) || defined (__amd64) || defined (__INTEL__)
 	#define fstb_ARCHI	fstb_ARCHI_X86
 #elif defined (__arm__) || defined (__arm) || defined (__arm64__) || defined (__arm64) || defined (_M_ARM) || defined (__aarch64__)
 	#define fstb_ARCHI	fstb_ARCHI_ARM
@@ -195,12 +195,11 @@ namespace fstb
 #if fstb_ARCHI == fstb_ARCHI_ARM
 
 	#if defined (__ARM_NEON_FP)
-		#define fstb_HAS_SIMD      (1)
-		#if (fstb_WORD_SIZE == 64)
-			#define fstb_SIMD128_ALIGN (16)
-		#else
-			#define fstb_SIMD128_ALIGN (8)
+		#if fstb_ENDIAN == fstb_ENDIAN_BIG
+			#error ARM SIMD is supported only on little endian architectures
 		#endif
+		#define fstb_HAS_SIMD      (1)
+		#define fstb_SIMD128_ALIGN (16)
 	#endif
 
 #elif fstb_ARCHI == fstb_ARCHI_X86
@@ -222,6 +221,14 @@ namespace fstb
 	#endif
 
 #endif // fstb_ARCHI
+
+// Undefine for testing
+//#undef fstb_HAS_SIMD
+
+#if ! defined (fstb_SIMD128_ALIGN)
+	// Keeps the alignment defined in any case.
+	#define fstb_SIMD128_ALIGN (16)
+#endif
 
 
 
