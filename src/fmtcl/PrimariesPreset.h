@@ -76,6 +76,8 @@ enum PrimariesPreset
 	PrimariesPreset_REDCOLOR3,
 	PrimariesPreset_REDCOLOR4,
 	PrimariesPreset_REDWIDE,
+	PrimariesPreset_P3P,
+	PrimariesPreset_CINEGAM,
 
 	PrimariesPreset_NBR_ELT_CUSTOM
 }; // enum PrimariesPreset

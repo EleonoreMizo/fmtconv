@@ -317,6 +317,14 @@ PrimariesPreset	PrimUtil::conv_string_to_primaries (const std::string &str)
 	{
 		preset = PrimariesPreset_REDWIDE;
 	}
+	else if (   str == "p3p")
+	{
+		preset = PrimariesPreset_P3P;
+	}
+	else if (   str == "cinegam")
+	{
+		preset = PrimariesPreset_CINEGAM;
+	}
 
 	return preset;
 }

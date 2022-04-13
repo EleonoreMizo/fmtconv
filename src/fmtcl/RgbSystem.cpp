@@ -287,6 +287,21 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_rgb [2] = { 0.095612,-0.084589 };
 		_white   = { 0.3217  , 0.3290   };
 		break;
+
+	// https://en.wikipedia.org/wiki/DCI-P3#DCI-P3+_and_Cinema_Gamut
+	case PrimariesPreset_P3P:
+		_rgb [0] = { 0.740 , 0.270  };
+		_rgb [1] = { 0.220 , 0.780  };
+		_rgb [2] = { 0.090 ,-0.090  };
+		_white   = { 0.314 , 0.351  };
+		break;
+	case PrimariesPreset_CINEGAM:
+		_rgb [0] = { 0.740 , 0.270  };
+		_rgb [1] = { 0.170 , 1.140  };
+		_rgb [2] = { 0.080 ,-0.100  };
+		_white   = { 0.3127, 0.329  };
+		break;
+
 	default:
 		assert (false);
 		found_flag = false;
