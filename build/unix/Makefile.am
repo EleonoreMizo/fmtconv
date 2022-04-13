@@ -230,6 +230,8 @@ commonsrc = \
         ../../src/fmtcl/TransOp2084.h \
         ../../src/fmtcl/TransOpAcesCc.cpp \
         ../../src/fmtcl/TransOpAcesCc.h \
+        ../../src/fmtcl/TransOpAcesCct.cpp \
+        ../../src/fmtcl/TransOpAcesCct.h \
         ../../src/fmtcl/TransOpAffine.cpp \
         ../../src/fmtcl/TransOpAffine.h \
         ../../src/fmtcl/TransOpBypass.h \

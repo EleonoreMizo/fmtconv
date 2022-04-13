@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-        TransOpAcesCc.cpp
-        Author: Laurent de Soras, 2016
+        TransOpAcesCct.cpp
+        Author: Laurent de Soras, 2022
 
 --- Legal stuff ---
 
@@ -15,16 +15,9 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
-#if defined (_MSC_VER)
-	#pragma warning (1 : 4130 4223 4705 4706)
-	#pragma warning (4 : 4355 4786 4800)
-#endif
-
-
-
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/TransOpAcesCc.h"
+#include "fmtcl/TransOpAcesCct.h"
 
 #include <cmath>
 
@@ -39,7 +32,7 @@ namespace fmtcl
 
 
 
-TransOpAcesCc::TransOpAcesCc (bool inv_flag)
+TransOpAcesCct::TransOpAcesCct (bool inv_flag)
 :	_inv_flag (inv_flag)
 {
 	// Nothing
@@ -51,44 +44,39 @@ TransOpAcesCc::TransOpAcesCc (bool inv_flag)
 
 
 
-double	TransOpAcesCc::do_convert (double x) const
+double	TransOpAcesCct::do_convert (double x) const
 {
+	constexpr auto a0  =  0.0792055341958355;
+	constexpr auto a1  = 10.5402377416545;
+	constexpr auto thr =  0.0078125;
+	constexpr auto b0  =  9.72;
+	constexpr auto b1  = 17.52;
+
+
 	double         y = x;
 
 	if (_inv_flag)
 	{
-		x *= 17.52;
-		x -= 9.72;
-		if (x <= 15)
+		if (x <= thr * a1 + a0)
 		{
-			y = exp2 (x + 1) - 1.0 / (1 << 15);
-		}
-		else if (x <= log2 (_max_val))
-		{
-			y = exp2 (x    );
+			y = (x - a0) / a1;
 		}
 		else
 		{
-			y = _max_val;
+			y = exp2 (x * b1 - b0);
 		}
 	}
 
 	else
 	{
-		if (x < 0)
+		if (x <= thr)
 		{
-			y = -16;
-		}
-		else if (x < 1.0 / (1 << 15))
-		{
-			y = log2 (1.0 / (1 << 15) + x) - 1;
+			y = x * a1 + a0;
 		}
 		else
 		{
-			y = log2 (                  x);
+			y = (log2 (x) + b0) / b1;
 		}
-		y += 9.72;
-		y /= 17.52;
 	}
 
 	return y;
@@ -96,7 +84,7 @@ double	TransOpAcesCc::do_convert (double x) const
 
 
 
-TransOpInterface::LinInfo	TransOpAcesCc::do_get_info () const
+TransOpInterface::LinInfo	TransOpAcesCct::do_get_info () const
 {
 	return { Type::OETF, Range::UNDEF, _max_val, 1.0, 0.0, 0.0 };
 }
@@ -107,7 +95,7 @@ TransOpInterface::LinInfo	TransOpAcesCc::do_get_info () const
 
 
 
-constexpr double	TransOpAcesCc::_max_val;
+constexpr double	TransOpAcesCct::_max_val;
 
 
 

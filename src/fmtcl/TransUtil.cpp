@@ -27,6 +27,7 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/TransCst.h"
 #include "fmtcl/TransOp2084.h"
 #include "fmtcl/TransOpAcesCc.h"
+#include "fmtcl/TransOpAcesCct.h"
 #include "fmtcl/TransOpBypass.h"
 #include "fmtcl/TransOpCanonLog.h"
 #include "fmtcl/TransOpDaVinci.h"
@@ -220,6 +221,10 @@ TransCurve	TransUtil::conv_string_to_curve (const std::string &str)
 	else if (str == "sigmoid")
 	{
 		c = TransCurve_SIGMOID;
+	}
+	else if (str == "acescct")
+	{
+		c = TransCurve_ACESCCT;
 	}
 	else
 	{
@@ -425,6 +430,9 @@ TransUtil::OpSPtr	TransUtil::conv_curve_to_op (TransCurve c, bool inv_flag, Tran
 		break;
 	case TransCurve_SIGMOID:
 		ptr = OpSPtr (new TransOpSigmoid (inv_flag, sig_curve, sig_thr));
+		break;
+	case TransCurve_ACESCCT:
+		ptr = OpSPtr (new TransOpAcesCct (inv_flag));
 		break;
 	default:
 		assert (false);

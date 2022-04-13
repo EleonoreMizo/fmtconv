@@ -1760,11 +1760,11 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;log316&quot;    </code></b></td><td>0&hellip;1</td><td></td><td></td><td>Logarithmic transfer characteristic (100&radic;10:1 range)</td></tr>
 <tr><td><b><code>&quot;61966-2-4&quot; </code></b></td><td>Unspecified</td><td>OETF</td><td>SDR</td><td>IEC 61966-2-4, xvYCC. Same as BT.709, but with an extended range, including negative values.</td></tr>
 <tr><td><b><code>&quot;1361&quot;      </code></b></td><td>&minus;0.25&hellip;1.33</td><td></td><td></td><td>ITU-R BT.1361 extended colour gamut system</td></tr>
-<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>IEC 61966-2-1, sRGB or sYCC</td></tr>
+<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>IEC 61966-2-1, sRGB or sYCC<br />Apple Display P3</td></tr>
 <tr><td><b><code>&quot;2020_10&quot;   </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ITU-R BT.2020 for 10-bit system</td></tr>
 <tr><td><b><code>&quot;2020_12&quot;<br />&quot;2020&quot;</code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ITU-R BT.2020 for 12-bit system</td></tr>
 <tr><td><b><code>&quot;pq&quot;<br />&quot;2084&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>HDR</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>. Reference white is 203 cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;428&quot;<br />&quot;428-1&quot;</code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>SMPTE ST 428-1<br />Linear 48&nbsp;/&nbsp;52.37 corresponds to a reference display luminance level of 48&nbsp;cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;428&quot;<br />&quot;428-1&quot;</code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>SMPTE ST 428-1, DCI-P3 (with XYZ values)<br />Linear 48&nbsp;/&nbsp;52.37 corresponds to a reference display luminance level of 48&nbsp;cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>HDR</td><td>ITU-R BT.2100 HLG (hybrid log-gamma), ARIB STD-B67<br />Reference white is at 75&nbsp;% of the coding range, giving 203&nbsp;cd/m<sup>2</sup> when peak white is set to 1000&nbsp;cd/m<sup>2</sup>. Set <var>lw</var> to specify explicitely the peak white luminance.</td></tr>
 <tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>ITU-R BT.1886. Intended to mimicing a CRT display curve. Peak white is 100 cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>ITU-R BT.1886, alternative approximation</td></tr>
@@ -1777,7 +1777,8 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>OETF</td><td></td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
 <tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>Adobe RGB (1998 and Wide Gamut).<br />Reference white is 160&nbsp;cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ProPhoto, ROMM.<br />Reference white is 142&nbsp;cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td></td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
+<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td>OETF</td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
+<tr><td><b><code>&quot;acescct&quot;   </code></b></td><td>&minus;65504&hellip;65504</td><td>OETF</td><td></td><td>ACEScct. Values are actually bounded to the ACES 16-bit float range.</td></tr>
 <tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>OETF</td><td></td><td>ERIMM</td></tr>
 <tr><td><b><code>&quot;vlog&quot;      </code></b></td><td>0&hellip;1</td><td></td><td></td><td>Panasonic V-Log</td></tr>
 <tr><td><b><code>&quot;davinci&quot;   </code></b></td><td>&minus;0.01&hellip;100</td><td>OETF</td><td></td><td>Blackmagic Design DaVinci Intermediate</td></tr>
@@ -1968,6 +1969,11 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 
 <h2><a id="changelog"></a>V) Changelog</h2>
+
+<p><b>r30, 2022-xx-xx</b></p>
+<ul>
+<li><code>transfer</code>: Added ACEScct transfer function.</li>
+</ul>
 
 <p><b>r29, 2022-04-11</b></p>
 <ul>

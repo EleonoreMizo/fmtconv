@@ -256,6 +256,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\TransModel.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOp2084.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpAcesCc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpAcesCct.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpAffine.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpBypass.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpCanonLog.h" />
@@ -365,6 +366,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\TransModel.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOp2084.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpAcesCc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpAcesCct.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpAffine.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpCanonLog.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpDaVinci.cpp" />
