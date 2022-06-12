@@ -74,7 +74,7 @@ void	AvstpFinder::publish_lib (::HMODULE hinst)
 
 			// Stores the path into the file
 			bool           done_flag = false;
-			const int      filesize = sizeof (dll_path_0);
+			const auto     filesize = int (sizeof (dll_path_0));
 			::HANDLE       file_hnd = 0;
 			if (mutex_hnd != 0)
 			{
@@ -151,7 +151,7 @@ void	AvstpFinder::publish_lib (::HMODULE hinst)
 			if (file_hnd != 0)
 			{
 				wchar_t        dll_path_0 [BUFFER_LEN] = { L'\0' };
-				const int      filesize = sizeof (dll_path_0);
+				const auto     filesize = int (sizeof (dll_path_0));
 				void *         buf_ptr = ::MapViewOfFile (
 					file_hnd,
 					FILE_MAP_READ,
@@ -243,7 +243,7 @@ void	AvstpFinder::compose_mapped_filename (wchar_t mf_name_0 [], wchar_t mu_name
 	}
 
 	const ::DWORD  proc_id = ::GetCurrentProcessId ();
-	for (int i = sizeof (proc_id) * 2 - 1; i >= 0; --i)
+	for (int i = int (sizeof (proc_id)) * 2 - 1; i >= 0; --i)
 	{
 		const int		h = (proc_id >> (i * 4)) & 15;
 		const wchar_t	c = wchar_t ((h < 10) ? h + L'0' : h - 10 + L'A');

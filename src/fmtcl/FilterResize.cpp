@@ -959,7 +959,7 @@ void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGloba
 		assert (cur_size [Dir_V] * stride_src <= _buf_size);
 
 		_blitter.bitblt (
-			BUFT, sizeof (T) * CHAR_BIT,
+			BUFT, int (sizeof (T) * CHAR_BIT),
 			rd.use_buf <uint8_t> (cur_buf),
 			stride_src * sizeof (T),
 			_src_type, _src_res,
@@ -991,7 +991,7 @@ void	FilterResize::process_tile_transpose (const TaskRsz &tr, const TaskRszGloba
 			_dst_type, _dst_res,
 			trg._dst_ptr + offset_dst,
 			trg._stride_dst,
-			BUFT, sizeof (T) * CHAR_BIT,
+			BUFT, int (sizeof (T) * CHAR_BIT),
 			rd.use_buf <const uint8_t> (cur_buf),
 			stride_buf [cur_buf] * sizeof (float),
 			tr._work_dst [Dir_H], tr._work_dst [Dir_V],

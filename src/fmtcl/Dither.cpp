@@ -934,7 +934,7 @@ void	Dither::dither_plane (uint8_t *dst_ptr, ptrdiff_t dst_stride, const uint8_t
 				"cannot allocate memory for temporary buffer."
 			);
 		}
-		ed_buf_ptr->clear ((sc_flag) ? sizeof (float) : sizeof (int16_t));
+		ed_buf_ptr->clear (int ((sc_flag) ? sizeof (float) : sizeof (int16_t)));
 	}
 
 	switch (_dmode)

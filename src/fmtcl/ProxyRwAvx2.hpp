@@ -202,7 +202,7 @@ void	ProxyRwAvx2 <SplFmt_INT16>::read_flt (const PtrConst::Type &ptr, __m256 &sr
 void	ProxyRwAvx2 <SplFmt_INT16>::read_flt_partial (const PtrConst::Type &ptr, __m256 &src0, __m256 &src1, const __m256i &/*zero*/, int len)
 {
 	const __m256i  src =
-		fstb::ToolsAvx2::load_si256_partial (ptr, len * sizeof (uint16_t));
+		fstb::ToolsAvx2::load_si256_partial (ptr, len * int (sizeof (uint16_t)));
 	finish_read_flt (src0, src1, src);
 }
 
@@ -213,7 +213,7 @@ __m256i	ProxyRwAvx2 <SplFmt_INT16>::read_i16 (const PtrConst::Type &ptr, const _
 
 __m256i	ProxyRwAvx2 <SplFmt_INT16>::read_i16_partial (const PtrConst::Type &ptr, const __m256i &/*zero*/, int len)
 {
-	return (fstb::ToolsAvx2::load_si256_partial (ptr, len * sizeof (uint16_t)));
+	return (fstb::ToolsAvx2::load_si256_partial (ptr, len * int (sizeof (uint16_t))));
 }
 
 //	const __m256i	mask_lsb = _mm256_set1_epi16 (0x00FF);
@@ -228,7 +228,7 @@ void	ProxyRwAvx2 <SplFmt_INT16>::write_flt (const Ptr::Type &ptr, const __m256 &
 void	ProxyRwAvx2 <SplFmt_INT16>::write_flt_partial (const Ptr::Type &ptr, const __m256 &src0, const __m256 &src1, const __m256i &/*mask_lsb*/, const __m256i &sign_bit, const __m256 &offset, int len)
 {
 	const __m256i  val = prepare_write_flt (src0, src1, sign_bit, offset);
-	fstb::ToolsAvx2::store_si256_partial (ptr, val, len * sizeof (uint16_t));
+	fstb::ToolsAvx2::store_si256_partial (ptr, val, len * int (sizeof (uint16_t)));
 }
 
 void	ProxyRwAvx2 <SplFmt_INT16>::finish_read_flt (__m256 &src0, __m256 &src1, const __m256i &src)
@@ -272,7 +272,7 @@ void	ProxyRwAvx2 <SplFmt_INT16>::write_i16 (const Ptr::Type &ptr, const __m256i 
 
 void	ProxyRwAvx2 <SplFmt_INT16>::write_i16_partial (const Ptr::Type &ptr, const __m256i &src, const __m256i &/*mask_lsb*/, int len)
 {
-	fstb::ToolsAvx2::store_si256_partial (ptr, src, len * sizeof (uint16_t));
+	fstb::ToolsAvx2::store_si256_partial (ptr, src, len * int (sizeof (uint16_t)));
 }
 
 
@@ -294,7 +294,7 @@ template <bool CLIP_FLAG, bool SIGN_FLAG>
 __m256i	ProxyRwAvx2 <SplFmt_INT16>::S16 <CLIP_FLAG, SIGN_FLAG>::read_partial (const PtrConst::Type &ptr, const __m256i &/*zero*/, const __m256i &sign_bit, int len)
 {
 	__m256i        val =
-		fstb::ToolsAvx2::load_si256_partial (ptr, len * sizeof (uint16_t));
+		fstb::ToolsAvx2::load_si256_partial (ptr, len * int (sizeof (uint16_t)));
 	if (SIGN_FLAG)
 	{
 		val = _mm256_xor_si256 (val, sign_bit);
@@ -314,7 +314,7 @@ template <bool CLIP_FLAG, bool SIGN_FLAG>
 void	ProxyRwAvx2 <SplFmt_INT16>::S16 <CLIP_FLAG, SIGN_FLAG>::write_clip_partial (const Ptr::Type &ptr, const __m256i &src, const __m256i &/*mask_lsb*/, const __m256i &mi, const __m256i &ma, const __m256i &sign_bit, int len)
 {
 	const __m256i  val = prepare_write_clip (src, mi, ma, sign_bit);
-	fstb::ToolsAvx2::store_si256_partial (ptr, val, len * sizeof (uint16_t));
+	fstb::ToolsAvx2::store_si256_partial (ptr, val, len * int (sizeof (uint16_t)));
 }
 
 template <bool CLIP_FLAG, bool SIGN_FLAG>

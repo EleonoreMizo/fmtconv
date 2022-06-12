@@ -160,9 +160,12 @@ int	GenTestPat::generate_patterns ()
 	tiff_header._filed_arr [Entry_BITS_PER_SAMPLE]._count = nbr_comp;
 	tiff_header._filed_arr [Entry_BITS_PER_SAMPLE]._val   =
 		(nbr_comp > 2) ? offsetof (TiffHeader, _spp_arr) : pack_s (res, res);
-	tiff_header._filed_arr [Entry_STRIP_OFFSETS]._val = sizeof (TiffHeader);
-	tiff_header._filed_arr [Entry_SAMPLES_PER_PIXEL]._val = pack_s (uint16_t (nbr_comp));
-	tiff_header._filed_arr [Entry_STRIP_BYTE_COUNTS]._val = sizeof (Pix) * pic_w * pic_h;
+	tiff_header._filed_arr [Entry_STRIP_OFFSETS]._val =
+		uint32_t (sizeof (TiffHeader));
+	tiff_header._filed_arr [Entry_SAMPLES_PER_PIXEL]._val =
+		pack_s (uint16_t (nbr_comp));
+	tiff_header._filed_arr [Entry_STRIP_BYTE_COUNTS]._val =
+		uint32_t (sizeof (Pix)) * pic_w * pic_h;
 
 	char           txt_0 [255+1];
 	fstb::snprintf4all (txt_0, sizeof (txt_0),

@@ -52,7 +52,7 @@ template <class T>
 T &	ArrayMultiType::use (int pos)
 {
 	assert (_data_len > 0);
-	assert (sizeof (T) == _data_len);
+	assert (int (sizeof (T)) == _data_len);
 	assert (pos >= 0);
 	assert (pos < int (_length));
 
@@ -65,7 +65,7 @@ template <class T>
 const T &	ArrayMultiType::use (int pos) const
 {
 	assert (_data_len > 0);
-	assert (sizeof (T) == _data_len);
+	assert (int (sizeof (T)) == _data_len);
 	assert (pos >= 0);
 	assert (pos < int (_length));
 

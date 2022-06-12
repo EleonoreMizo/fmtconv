@@ -48,8 +48,8 @@ class CoefArrInt
 
 public:
 
-	static const int  VECT_LEN_SSE2 = 16 / sizeof (int16_t);
-	static const int  VECT_LEN_AVX2 = 32 / sizeof (int16_t);
+	static const int  VECT_LEN_SSE2 = 16 / int (sizeof (int16_t));
+	static const int  VECT_LEN_AVX2 = 32 / int (sizeof (int16_t));
 
 	typedef std::array <int16_t, VECT_LEN_SSE2>  VectSse2i16;
 	typedef std::array <int16_t, VECT_LEN_AVX2>  VectAvx2i16;
