@@ -15,7 +15,6 @@ AC_PROG_CC
 AC_CANONICAL_HOST
 
 AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [Compilation options required for debugging. [default=no]]))
-AC_ARG_ENABLE([clang], AS_HELP_STRING([--enable-clang], [Use Clang as compiler along with libc++. [default=no]]))
 
 
 
@@ -53,12 +52,9 @@ AS_IF(
 )
 
 AS_IF(
-    [test "x$enable_clang" = "xyes"],
+    [test "x$CXX" = "xclang++"],
     [
         CLG="true"
-        CXX="clang++"
-        CC="clang"
-        LD="clang++"
         MFLAGS="$MFLAGS -fexperimental-new-pass-manager -mllvm -inline-threshold=1000"
         COMPWARNFLAGS=""
         AC_MSG_NOTICE([Using clang as compiler.])

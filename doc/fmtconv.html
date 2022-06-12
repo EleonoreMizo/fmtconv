@@ -251,7 +251,8 @@ make install</pre>
 <p>You can add some options to the <code>configure</code> command:</p>
 <ul>
 <li><code>--enable-debug</code> to activate debugging code</li>
-<li><code>--enable-clang</code> to use Clang instead of the default compiler which is usually GCC</li>
+<li><code>CXX='clang++' CC='clang'</code> to use Clang instead of the default
+compiler which is usually GCC</li>
 </ul>
 <p>Only the Vapoursynth plug-in can be built in the GNU-based environment.</p>
 
@@ -1976,6 +1977,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <ul>
 <li><code>transfer</code>: Added ACEScct transfer function.</li>
 <li><code>primaries</code>: Added DCI P3+ and Cinema Gamut presets.</li>
+<li>Changed the <code>configure</<code> options to compile with Clang.</li>
 </ul>
 
 <p><b>r29, 2022-04-11</b></p>
