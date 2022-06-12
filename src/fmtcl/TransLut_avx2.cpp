@@ -208,7 +208,17 @@ static fstb_FORCEINLINE void	TransLut_store_avx2 (uint8_t *dst_ptr, __m256 val) 
 	const auto     val_u8  = _mm256_permute4x64_epi64 (
 		_mm256_packus_epi16 (val_i16, val_i16), (0<<0) | (2<<2)
 	);
+#if 0
 	_mm_storeu_si64 (dst_ptr, _mm256_extracti128_si256 (val_u8, 0));
+#else
+	// _mm_storeu_si64() lacks support on some compilers, or is declared in
+	// <immintrin.h> instead of <emmintrin.h>, so we use _mm_store_sd() as a
+	// more portable substitute.
+	_mm_store_sd (
+		reinterpret_cast <double *> (dst_ptr),
+		_mm_castsi128_pd (_mm256_extracti128_si256 (val_u8, 0))
+	);
+#endif
 }
 
 static fstb_FORCEINLINE void	TransLut_store_avx2 (float *dst_ptr, __m256 val) noexcept

@@ -231,7 +231,15 @@ static fstb_FORCEINLINE void	TransLut_store_sse2 (uint16_t *dst_ptr, __m128 val)
 		_mm_shufflehi_epi16 (val_i32, (0<<0) | (2<<2)), 8
 	);
 	const auto     val_u16   = _mm_unpacklo_epi32 (val_u16_l, val_u16_h);
+#if 0
 	_mm_storeu_si64 (dst_ptr, val_u16);
+#else
+	// Same thing, see below
+	_mm_store_sd (
+		reinterpret_cast <double *> (dst_ptr),
+		_mm_castsi128_pd (val_u16)
+	);
+#endif
 }
 
 static fstb_FORCEINLINE void	TransLut_store_sse2 (uint8_t *dst_ptr, __m128 val) noexcept
