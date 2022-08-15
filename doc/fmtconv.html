@@ -129,7 +129,7 @@ c.set_output ()</pre>
 <p>Bobbing an interlaced stream (here, Top Field First):</p>
 
 <pre class="src">c = c.std.SeparateFields (tff=True)
-c = c.fmtc.resample (scalev=2, kernel="cubic", interlaced=True, interlacedd=False)</pre>
+c = c.fmtc.resample (scalev=2, kernel="cubic", interlaced=1, interlacedd=0)</pre>
 
 <p>Converting a progressive stream from YUV 4:2:2 to 4:2:0 and back to 8 bits:</p>
 
@@ -140,7 +140,7 @@ c = c.fmtc.bitdepth (bits=8)</pre>
 
 <pre class="src">tff = True
 c = c.std.SeparateFields (tff=tff)
-c = c.fmtc.resample (css="420", interlaced=True)
+c = c.fmtc.resample (css="420", interlaced=1)
 c = c.fmtc.bitdepth (bits=8)
 c = c.std.DoubleWeave (tff=tff)
 c = c.std.SelectEvery (cycle=2, offsets=0)</pre>
@@ -623,7 +623,7 @@ For meaningful results, convert to R’G’B’ then to linear RGB and use
 </code>primaries</code> to perform the intermediary conversion.</p>
 
 <p>The <code>_ColorRange</code> frame property is set if the <var>fulld</var>
-parameter has been explicitely defined.
+parameter has been explicitely defined or if a preset is used.
 If the destination colorspace is a standardized one (as deduced from the
 specified matrix), the <code>_Matrix</code> and <code>_ColorSpace</code>
 properties are set, otherwise they are deleted from the frame.</p>
@@ -1975,9 +1975,11 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <p><b>r30, 2022-xx-xx</b></p>
 <ul>
+<li><code>matrix</code>: The <code>_ColorRange</code> frame property is now set when a matrix preset is used.</li>
 <li><code>transfer</code>: Added ACEScct transfer function.</li>
 <li><code>primaries</code>: Added DCI P3+ and Cinema Gamut presets.</li>
 <li>Changed the <code>configure</<code> options to compile with Clang.</li>
+<li>Updated datatypes in the examples.</li>
 </ul>
 
 <p><b>r29, 2022-04-11</b></p>
