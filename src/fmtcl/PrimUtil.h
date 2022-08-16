@@ -44,7 +44,7 @@ public:
 
 	static constexpr int _nbr_planes = RgbSystem::_nbr_planes;
 
-	static Mat3    compute_conversion_matrix (const RgbSystem &prim_s, const RgbSystem &prim_d);
+	static Mat3    compute_conversion_matrix (const RgbSystem &prim_s, const RgbSystem &prim_d, bool conv_flag);
 	static Mat3    compute_rgb2xyz (const RgbSystem &prim);
 	static Mat3    compute_chroma_adapt (const RgbSystem &prim_s, const RgbSystem &prim_d);
 	static Vec3    conv_xy_to_xyz (const RgbSystem::Vec2 &xy);

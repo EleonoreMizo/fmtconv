@@ -380,6 +380,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit2 (::VSPlugin *plugin_ptr, const ::V
 		"wd:float[]:opt;"
 		"prims:data:opt;"
 		"primd:data:opt;"
+		"wconv:int:opt;"
 		"cpuopt:int:opt;"
 	,	"clip:vnode;"
 	,	&vsutl::Redirect <fmtc::Primaries>::create, nullptr, plugin_ptr

@@ -62,6 +62,7 @@ public:
 		Param_WD,
 		Param_PRIMS,
 		Param_PRIMD,
+		Param_WCONV,
 		Param_CPUOPT,
 
 		Param_NBR_ELT

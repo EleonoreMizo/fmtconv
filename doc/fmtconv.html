@@ -959,6 +959,7 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 	wd    : float[]: opt;
 	prims : data   : opt;
 	primd : data   : opt;
+	wconv : int    : opt; (False)
 	cpuopt: int    : opt; (-1)
 )</pre></td>
 <td class="n"><pre class="proto">fmtc_primaries (
@@ -973,6 +974,7 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 	arrayf wd (undefined),
 	string prims (undefined),
 	string primd (undefined),
+	bool   wconv (False),
 	int    cpuopt (-1)
 )</pre></td>
 </tr>
@@ -1069,6 +1071,21 @@ Possible values are:</p>
 <tr><td><b><code>&quot;red4&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.70118,<br />0.30060,<br />0.14533,<br />0.32168,</td><td>0.32901<br />0.68379<br />0.05162<br />0.33767</td><td>REDcolor4</td></tr>
 <tr><td><b><code>&quot;redwide&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.780308,<br />0.121595,<br />0.095612,<br />0.3217,</td><td>0.304253<br />1.493994<br />&minus;0.084589<br />0.3290</td><td>REDWideGamutRGB</td></tr>
 </table>
+
+<p class="var">wconv</p>
+<p>Indicates we want a full conversion for the white point.</p>
+<p>If set to <code>False</code>, chromatic adaptation will be used, so the
+white will stay white on the destination illuminant and colors will be adapted
+to implement a real illuminant change.
+This is generally what you want when converting between gamuts: the eye adapts
+to the new white and colors should be matched accordingly.</p>
+<p>If set to <code>True</code>, the chromatic adaptation is bypassed.
+The white from the source colorspace will appear with a tint if the target
+colorspace has a different white point.
+Use this if you want to emulate what a picture displayed with a monitor using
+the source illuminant looks like on a display using the target illuminant.
+This is also what you want when converting to and from XYZ for further
+operations in this colorspace.</p>
 
 <p class="var">cpuopt</p>
 <p>Limits the CPU instruction set.
@@ -1978,7 +1995,8 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>matrix</code>: The <code>_ColorRange</code> frame property is now set when a matrix preset is used.</li>
 <li><code>transfer</code>: Added ACEScct transfer function.</li>
 <li><code>primaries</code>: Added DCI P3+ and Cinema Gamut presets.</li>
-<li>Changed the <code>configure</<code> options to compile with Clang.</li>
+<li><code>primaries</code>: Added <var>wconv</var> parameter for full conversion.</li>
+<li>Changed the <code>configure</code> options to compile with Clang.</li>
 <li>Updated datatypes in the examples.</li>
 </ul>
 

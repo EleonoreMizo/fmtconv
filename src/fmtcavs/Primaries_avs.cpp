@@ -110,8 +110,10 @@ Primaries::Primaries (::IScriptEnvironment &env, const ::AVSValue &args)
 	init (_prim_d, env, args, Param_RD, Param_GD, Param_BD, Param_WD);
 	assert (_prim_d.is_ready ());
 
+	const auto     conv_flag = args [Param_WCONV].AsBool (false);
+
 	const fmtcl::Mat3 mat_conv =
-		fmtcl::PrimUtil::compute_conversion_matrix (_prim_s, _prim_d);
+		fmtcl::PrimUtil::compute_conversion_matrix (_prim_s, _prim_d, conv_flag);
 	_mat_main.insert3 (mat_conv);
 	_mat_main.clean3 (1);
 

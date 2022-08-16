@@ -45,13 +45,20 @@ constexpr int	PrimUtil::_nbr_planes;
 
 
 
-Mat3	PrimUtil::compute_conversion_matrix (const RgbSystem &prim_s, const RgbSystem &prim_d)
+// conv_flag indicates we want a full conversion, not a chromatic adatpation
+Mat3	PrimUtil::compute_conversion_matrix (const RgbSystem &prim_s, const RgbSystem &prim_d, bool conv_flag)
 {
 	assert (prim_s.is_ready ());
 	assert (prim_d.is_ready ());
 
 	const Mat3     rgb2xyz = compute_rgb2xyz (prim_s);
 	const Mat3     xyz2rgb = compute_rgb2xyz (prim_d).invert ();
+
+	if (conv_flag)
+	{
+		return xyz2rgb * rgb2xyz;
+	}
+
 	const Mat3     adapt   = compute_chroma_adapt (prim_s, prim_d);
 
 	return xyz2rgb * adapt * rgb2xyz;

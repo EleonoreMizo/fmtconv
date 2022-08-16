@@ -60,7 +60,8 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 	env_ptr->AddFunction (fmtcavs_PRIMARIES,
 		"c"      "[rs].+"   "[gs].+"   "[bs].+"    // 0
 		"[ws].+" "[rd].+"   "[gd].+"   "[bd].+"    // 4
-		"[wd].+" "[prims]s" "[primd]s" "[cpuopt]i" // 8
+		"[wd].+" "[prims]s" "[primd]s" "[wconv]b"  // 8
+		"[cpuopt]i"                                // 12
 		, &main_avs_create <fmtcavs::Primaries>, nullptr
 	);
 	env_ptr->AddFunction (fmtcavs_RESAMPLE,

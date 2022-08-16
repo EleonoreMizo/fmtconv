@@ -105,8 +105,10 @@ Primaries::Primaries (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VS
 	init (_prim_d, *this, in, out, "rd", "gd", "bd", "wd");
 	assert (_prim_d.is_ready ());
 
+	const auto     conv_flag = (get_arg_int (in, out, "wconv", 0) != 0);
+
 	const fmtcl::Mat3 mat_conv =
-		fmtcl::PrimUtil::compute_conversion_matrix (_prim_s, _prim_d);
+		fmtcl::PrimUtil::compute_conversion_matrix (_prim_s, _prim_d, conv_flag);
 	_mat_main.insert3 (mat_conv);
 	_mat_main.clean3 (1);
 
