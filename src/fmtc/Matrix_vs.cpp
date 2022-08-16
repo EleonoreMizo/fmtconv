@@ -146,6 +146,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 	const int      nbr_expected_coef = _nbr_planes * (_nbr_planes + 1);
 
 	bool           mat_init_flag = false;
+	bool           preset_flag   = false;
 
 	// Matrix presets
 	std::string    mat (get_arg_str (in, out, "mat", ""));
@@ -182,6 +183,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		_mat_main = m2d * m2s;
 
 		mat_init_flag = true;
+		preset_flag   = true;
 	}
 
 	// Custom coefficients
@@ -309,6 +311,7 @@ Matrix::Matrix (const ::VSMap &in, ::VSMap &out, void * /*user_data_ptr*/, ::VSC
 		vsutl::is_full_range_default (fmt_dst) ? 1 : 0,
 		0, &_range_set_dst_flag
 	) != 0);
+	_range_set_dst_flag |= preset_flag;
 
 	prepare_matrix_coef (
 		*this, *_proc_uptr, _mat_main,

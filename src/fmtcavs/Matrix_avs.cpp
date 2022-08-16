@@ -129,6 +129,7 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 	const int      nbr_expected_coef = _nbr_planes_proc * (_nbr_planes_proc + 1);
 
 	bool           mat_init_flag = false;
+	bool           preset_flag   = false;
 	fmtcl::Mat4    mat_main; // Main matrix, float input, float output
 
 	// Matrix presets
@@ -169,6 +170,7 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 
 		mat_main      = m2d * m2s;
 		mat_init_flag = true;
+		preset_flag   = true;
 	}
 
 	// Alpha plane processing, if any
@@ -267,7 +269,7 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 	_fulld_flag     = args [Param_FULLD].AsBool (
 		fmtcl::is_full_range_default (fmt_dst.get_col_fam ())
 	);
-	_range_def_flag = args [Param_FULLD].Defined ();
+	_range_def_flag = (args [Param_FULLD].Defined () || preset_flag);
 
 	prepare_matrix_coef (
 		env, *_proc_uptr, mat_main,
