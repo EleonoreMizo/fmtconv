@@ -302,6 +302,12 @@
     <ClInclude Include="..\..\..\src\avstp.h" />
     <ClInclude Include="..\..\..\src\AvstpFinder.h" />
     <ClInclude Include="..\..\..\src\AvstpWrapper.h" />
+    <ClInclude Include="..\..\..\src\fstb\Vf32.h" />
+    <ClInclude Include="..\..\..\src\fstb\Vf32.hpp" />
+    <ClInclude Include="..\..\..\src\fstb\Vs32.h" />
+    <ClInclude Include="..\..\..\src\fstb\Vs32.hpp" />
+    <ClInclude Include="..\..\..\src\fstb\Vu32.h" />
+    <ClInclude Include="..\..\..\src\fstb\Vu32.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\fmtcl\ArrayMultiType.cpp" />

@@ -291,6 +291,12 @@ commonsrc = \
         ../../src/fstb/Hash.hpp \
         ../../src/fstb/SingleObj.h \
         ../../src/fstb/SingleObj.hpp \
+        ../../src/fstb/Vf32.h \
+        ../../src/fstb/Vf32.hpp \
+        ../../src/fstb/Vs32.h \
+        ../../src/fstb/Vs32.hpp \
+        ../../src/fstb/Vu32.h \
+        ../../src/fstb/Vu32.hpp \
         ../../src/avstp.h \
         ../../src/AvstpWrapper.cpp \
         ../../src/AvstpWrapper.h

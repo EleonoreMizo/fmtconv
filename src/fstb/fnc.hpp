@@ -565,6 +565,32 @@ constexpr bool	is_eq_rel (T v1, T v2, T tol) noexcept
 
 
 
+// Equality test with a tolerance in ULP.
+// Numbers of opposite sign (excepted 0) are always evaluated as different.
+// https://en.wikipedia.org/wiki/Unit_in_the_last_place
+constexpr bool	is_eq_ulp (float v1, float v2, int32_t tol) noexcept
+{
+	assert (tol >= 0);
+
+	if ((v1 < 0) != (v2 < 0))
+	{
+		return (v1 == v2);
+	}
+
+	union Combo
+	{
+		float          _f;
+		int32_t        _i;
+	};
+	const Combo    c1 { v1 };
+	const Combo    c2 { v2 };
+	const auto     dif = std::abs (c2._i - c1._i);
+
+	return (dif <= tol);
+}
+
+
+
 /*
 ==============================================================================
 Name: get_prev_pow2
@@ -1000,6 +1026,7 @@ constexpr T	lerp (T v0, T v1, T p) noexcept
 // f(x) = ((r3 + r1) / 2 - r2) * x^2 + ((r3 - r1) / 2) * x + r2
 // The points must not be aligned so the extremum exists.
 // It is not necessariy located between -1 and 1.
+// The value at this point is y = r2 + 0.25 * x * (r3 - r1)
 template <class T>
 constexpr T	find_extremum_pos_parabolic (T r1, T r2, T r3) noexcept
 {
