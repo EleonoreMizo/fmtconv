@@ -1,7 +1,8 @@
-
+#if defined (_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #define NOGDI
+#endif
 
 #include "avsutl/fnc.h"
 #include "fmtcavs/Bitdepth.h"
@@ -13,13 +14,24 @@
 #include "fmtcavs/Transfer.h"
 #include "fstb/def.h"
 
+#if defined (_WIN32)
 #include <windows.h>
+#else
+#include "avs/posix.h"
+#endif
 #include "avisynth.h"
 
 #if defined (_MSC_VER) && ! defined (NDEBUG) && defined (_DEBUG)
 	#include	<crtdbg.h>
 #endif
 
+#if defined (_WIN32)
+	#define AVS_EXPORT __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+	#define AVS_EXPORT __attribute__((visibility("default")))
+#else
+	#define AVS_EXPORT
+#endif
 
 
 template <class T>
@@ -34,7 +46,7 @@ template <class T>
 
 const ::AVS_Linkage *	AVS_linkage = nullptr;
 
-extern "C" __declspec (dllexport)
+extern "C" AVS_EXPORT
 const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const ::AVS_Linkage * const vectors_ptr)
 {
 	AVS_linkage = vectors_ptr;
@@ -95,7 +107,7 @@ const char * __stdcall	AvisynthPluginInit3 (::IScriptEnvironment *env_ptr, const
 }
 
 
-
+#if defined (_WIN32)
 static void	main_avs_dll_load (::HINSTANCE hinst)
 {
 	fstb::unused (hinst);
@@ -157,3 +169,4 @@ BOOL WINAPI DllMain (::HINSTANCE hinst, ::DWORD reason, ::LPVOID reserved_ptr)
 
 	return TRUE;
 }
+#endif
