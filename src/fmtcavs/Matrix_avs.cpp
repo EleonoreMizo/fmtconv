@@ -73,7 +73,6 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 	{
 		env.ThrowError (fmtcavs_MATRIX ": input must be 4:4:4.");
 	}
-	const int      nbr_planes_src = _vi_src.NumComponents ();
 	if (fmt_src.get_nbr_comp_non_alpha () != _nbr_planes_proc)
 	{
 		env.ThrowError (
