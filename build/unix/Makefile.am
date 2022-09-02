@@ -302,9 +302,20 @@ commonsrc = \
         ../../src/AvstpWrapper.h
 
 libfmtconv_la_SOURCES = $(commonsrc) \
+        ../../src/avisynth.h \
+        ../../src/main-avs.cpp \
         ../../src/main-vs.cpp \
         ../../src/types.h \
         ../../src/VapourSynth4.h \
+        ../../src/avs/alignment.h \
+        ../../src/avs/capi.h \
+        ../../src/avs/config.h \
+        ../../src/avs/cpuid.h \
+        ../../src/avs/filesystem.h \
+        ../../src/avs/minmax.h \
+        ../../src/avs/posix.h \
+        ../../src/avs/types.h \
+        ../../src/avs/win.h \
         ../../src/fmtc/Bitdepth_vs.cpp \
         ../../src/fmtc/Bitdepth.h \
         ../../src/fmtc/Convert.cpp \
@@ -330,6 +341,40 @@ libfmtconv_la_SOURCES = $(commonsrc) \
         ../../src/fmtc/Transfer_vs.cpp \
         ../../src/fmtc/Transfer.h \
         ../../src/fmtc/version.h \
+        ../../src/fmtcavs/Bitdepth_avs.cpp \
+        ../../src/fmtcavs/Bitdepth.h \
+        ../../src/fmtcavs/CpuOpt_avs.cpp \
+        ../../src/fmtcavs/CpuOpt.h \
+        ../../src/fmtcavs/FmtAvs.cpp \
+        ../../src/fmtcavs/FmtAvs.h \
+        ../../src/fmtcavs/fnc_fmtcavs.cpp \
+        ../../src/fmtcavs/fnc.h \
+        ../../src/fmtcavs/function_names.h \
+        ../../src/fmtcavs/Matrix2020CL_avs.cpp \
+        ../../src/fmtcavs/Matrix2020CL.h \
+        ../../src/fmtcavs/Matrix_avs.cpp \
+        ../../src/fmtcavs/Matrix.h \
+        ../../src/fmtcavs/Primaries_avs.cpp \
+        ../../src/fmtcavs/Primaries.h \
+        ../../src/fmtcavs/ProcAlpha.cpp \
+        ../../src/fmtcavs/ProcAlpha.h \
+        ../../src/fmtcavs/Resample_avs.cpp \
+        ../../src/fmtcavs/Resample.h \
+        ../../src/fmtcavs/Transfer_avs.cpp \
+        ../../src/fmtcavs/Transfer.h \
+        ../../src/avsutl/CsPlane.cpp \
+        ../../src/avsutl/CsPlane.h \
+        ../../src/avsutl/fnc_avsutl.cpp \
+        ../../src/avsutl/fnc.h \
+        ../../src/avsutl/fnc.hpp \
+        ../../src/avsutl/PlaneProcCbInterface_avs.cpp \
+        ../../src/avsutl/PlaneProcCbInterface.h \
+        ../../src/avsutl/PlaneProcessor_avs.cpp \
+        ../../src/avsutl/PlaneProcessor.h \
+        ../../src/avsutl/PlaneProcMode.h \
+        ../../src/avsutl/TFlag.h \
+        ../../src/avsutl/VideoFilterBase.cpp \
+        ../../src/avsutl/VideoFilterBase.h \
         ../../src/vsutl/FilterBase.cpp \
         ../../src/vsutl/FilterBase.h \
         ../../src/vsutl/fnc_vsutl.cpp \
