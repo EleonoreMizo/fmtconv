@@ -1889,9 +1889,15 @@ The EOTF (source) function uses <var>lb</var> as brightness setting.</p>
 <p>Indicate the peak white levels in cd/m<sup>2</sup>.
 <var>lws</var> is for the source transfer function, and <var>lwd</var>
 for the destination one.
-These parameters are taken into account when display-referred transfer
-functions are used.
-Minimum <var>lw</var> value is 0.1&nbsp;cd/m<sup>2</sup>.
+These parameters are taken into account to scale the luminance when the
+following conditions are met:</p>
+<ul>
+<li>display-referred transfer functions are used,
+<li><var>match</var> is set to 2 (display luminance matching) and</li>
+<li>the EOTF shouldn’t specify any scale for the luminance (the cd/m² value
+for F’&nbsp;= 1.0).</li>
+</ul>
+<p>Minimum <var>lw</var> value is 0.1&nbsp;cd/m<sup>2</sup>.
 System gamma may be changed according to the <var>lw</var> parameter.
 Unless specified, HDR functions use a peak white of 1000&nbsp;cd/m<sup>2</sup>.
 Similarly, SDR and other functions use 100&nbsp;cd/m<sup>2</sup> by default.
