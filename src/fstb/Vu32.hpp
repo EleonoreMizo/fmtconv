@@ -960,7 +960,7 @@ Vu32 operator == (const Vu32 &lhs, const Vu32 &rhs) noexcept
 Vu32 operator != (const Vu32 &lhs, const Vu32 &rhs) noexcept
 {
 #if ! defined (fstb_HAS_SIMD)
-	return Vs32 {
+	return Vu32 {
 		(lhs._x [0] != rhs._x [0]) ? uint32_t (-1) : 0,
 		(lhs._x [1] != rhs._x [1]) ? uint32_t (-1) : 0,
 		(lhs._x [2] != rhs._x [2]) ? uint32_t (-1) : 0,
