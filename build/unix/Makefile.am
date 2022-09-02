@@ -302,10 +302,20 @@ commonsrc = \
         ../../src/AvstpWrapper.h
 
 libfmtconv_la_SOURCES = $(commonsrc) \
+        ../../src/avisynth.h \
         ../../src/main-avs.cpp \
         ../../src/main-vs.cpp \
         ../../src/types.h \
         ../../src/VapourSynth4.h \
+        ../../src/avs/alignment.h \
+        ../../src/avs/capi.h \
+        ../../src/avs/config.h \
+        ../../src/avs/cpuid.h \
+        ../../src/avs/filesystem.h \
+        ../../src/avs/minmax.h \
+        ../../src/avs/posix.h \
+        ../../src/avs/types.h \
+        ../../src/avs/win.h \
         ../../src/fmtc/Bitdepth_vs.cpp \
         ../../src/fmtc/Bitdepth.h \
         ../../src/fmtc/Convert.cpp \
