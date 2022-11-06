@@ -154,10 +154,15 @@ void	BitBltConv::bitblt_int_to_int_avx2_switch (fmtcl::SplFmt dst_fmt, int dst_r
 
 	switch ((dst_fmt << 20) + (src_fmt << 16) + (dst_res << 8) + src_res)
 	{
+	fmtcl_BitBltConv_CASE (INT16  , INT16  , 16, 14, i16, i16)
 	fmtcl_BitBltConv_CASE (INT16  , INT16  , 16, 12, i16, i16)
 	fmtcl_BitBltConv_CASE (INT16  , INT16  , 16, 10, i16, i16)
 	fmtcl_BitBltConv_CASE (INT16  , INT16  , 16,  9, i16, i16)
 	fmtcl_BitBltConv_CASE (INT16  , INT8   , 16,  8, i16, i08)
+	fmtcl_BitBltConv_CASE (INT16  , INT16  , 14, 12, i16, i16)
+	fmtcl_BitBltConv_CASE (INT16  , INT16  , 14, 10, i16, i16)
+	fmtcl_BitBltConv_CASE (INT16  , INT16  , 14,  9, i16, i16)
+	fmtcl_BitBltConv_CASE (INT16  , INT8   , 14,  8, i16, i08)
 	fmtcl_BitBltConv_CASE (INT16  , INT16  , 12, 10, i16, i16)
 	fmtcl_BitBltConv_CASE (INT16  , INT16  , 12,  9, i16, i16)
 	fmtcl_BitBltConv_CASE (INT16  , INT8   , 12,  8, i16, i08)
