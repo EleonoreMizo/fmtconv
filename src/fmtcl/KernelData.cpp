@@ -45,6 +45,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 #include "fstb/fnc.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 #include <cassert>
@@ -288,6 +289,7 @@ void	KernelData::invert_kernel (int taps)
 	assert (ovr_f * support >= taps);
 	int            len     = fstb::ceil_int (ovr_s * ovr_f * support) * 2;
 	len = 1 << (fstb::get_prev_pow_2 (len - 1) + 1); // Next power of 2
+	len = std::max (len, 1); // Shouldn't happen but GCC emits a warning later
 	const int      h_len   = len / 2;
 
 	std::vector <double> x (len);
