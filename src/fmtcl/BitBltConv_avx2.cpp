@@ -75,11 +75,13 @@ void	BitBltConv::bitblt_int_to_flt_avx2_switch (uint8_t *dst_ptr, ptrdiff_t dst_
 	switch ((scale_flag << 16) + (src_fmt << 8) + src_res)
 	{
 	fmtcl_BitBltConv_CASE (false, INT16  , 16, i16)
+	fmtcl_BitBltConv_CASE (false, INT16  , 14, i16)
 	fmtcl_BitBltConv_CASE (false, INT16  , 12, i16)
 	fmtcl_BitBltConv_CASE (false, INT16  , 10, i16)
 	fmtcl_BitBltConv_CASE (false, INT16  ,  9, i16)
 	fmtcl_BitBltConv_CASE (false, INT8   ,  8, i08)
 	fmtcl_BitBltConv_CASE (true , INT16  , 16, i16)
+	fmtcl_BitBltConv_CASE (true , INT16  , 14, i16)
 	fmtcl_BitBltConv_CASE (true , INT16  , 12, i16)
 	fmtcl_BitBltConv_CASE (true , INT16  , 10, i16)
 	fmtcl_BitBltConv_CASE (true , INT16  ,  9, i16)
