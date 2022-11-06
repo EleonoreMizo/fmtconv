@@ -595,7 +595,7 @@ const ::VSFrame *	Resample::get_frame (int n, int activation_reason, void * &fra
 		if (ret_val != 0)
 		{
 			_vsapi.freeFrame (dst_ptr);
-			dst_ptr = 0;
+			dst_ptr = nullptr;
 		}
 	}
 
@@ -647,7 +647,7 @@ int	Resample::do_process_plane (::VSFrame &dst, int n, int plane_index, void *fr
 	{
 		const Ru::FrameInfo &   frame_info =
 			*reinterpret_cast <const Ru::FrameInfo *> (frame_data_ptr);
-		process_plane_proc (
+		ret_val = process_plane_proc (
 			dst, n, plane_index, frame_ctx, src_node1_sptr, frame_info
 		);
 	}
@@ -655,7 +655,7 @@ int	Resample::do_process_plane (::VSFrame &dst, int n, int plane_index, void *fr
 	// Copy (and convert)
 	else if (proc_mode == vsutl::PlaneProcMode_COPY1)
 	{
-		process_plane_copy (
+		ret_val = process_plane_copy (
 			dst, n, plane_index, frame_ctx, src_node1_sptr
 		);
 	}
