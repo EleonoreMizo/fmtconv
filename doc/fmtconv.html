@@ -1999,6 +1999,7 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <p><b>r31, 202x-xx-xx</b></p>
 <ul>
 <li><code>resample</code>: fixed 14 to 16 bit AVX2 conversion path, thanks to NSQY for the report.</li>
+<li>Program path without x86 SIMD: fixed wrong conversions affecting a lot of functions (noticed on ARM/Apple). Thanks to SaltyChiang for the fix.</li>
 </ul>
 
 <p><b>r30, 2022-08-29</b></p>
