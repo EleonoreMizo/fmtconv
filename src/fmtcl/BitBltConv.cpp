@@ -409,7 +409,7 @@ void	BitBltConv::bitblt_int_to_flt_cpp (uint8_t *dst_ptr, ptrdiff_t dst_stride, 
 			{
 				val = val * gain + add_cst;
 			}
-			dst_flt_ptr [x] = float (val) * gain + add_cst;
+			dst_flt_ptr [x] = val;
 
 			SRC::PtrConst::jump (cur_src_ptr, 1);
 		}
