@@ -2,8 +2,8 @@
 
 **This page is now dead, there will not be any update anymore.**
 
-**The new page is hosted here: https://gitlab.com/eleonoremizo1/fmtconv/**  
-**Git repository address: https://gitlab.com/eleonoremizo1/fmtconv.git**
+**The new page is hosted here: https://gitlab.com/EleonoreMizo/fmtconv/**  
+**Git repository address: https://gitlab.com/EleonoreMizo/fmtconv.git**
 
 Please update your bookmarks! Repository is kept here for consistency with other projects but probably not indefinitely.
 
